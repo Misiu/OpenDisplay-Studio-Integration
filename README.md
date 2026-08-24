@@ -7,14 +7,28 @@ documents can be exposed as dynamic image Media Sources.
 [![Open this integration in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Misiu&repository=OpenDisplay-Studio-Integration&category=integration)
 [![Add OpenDisplay Studio to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=opendisplay_studio)
 
-The POC exposes:
+Stage 2 exposes ten dynamic Media Sources, including:
 
 - `media-source://opendisplay_studio/test`
 - `media-source://opendisplay_studio/dashboard`
+- `media-source://opendisplay_studio/trmnl_typography`
+- `media-source://opendisplay_studio/trmnl_table`
+- `media-source://opendisplay_studio/trmnl_liquid`
+- `media-source://opendisplay_studio/trmnl_palette_bw`
+- `media-source://opendisplay_studio/trmnl_palette_bwr`
+- `media-source://opendisplay_studio/trmnl_palette_bwry`
+- `media-source://opendisplay_studio/trmnl_small`
+- `media-source://opendisplay_studio/trmnl_large`
 
 Every resolution renders fresh HTML through the separate OpenDisplay Studio
 Renderer App and exposes the PNG through a short-lived, unguessable Home
-Assistant URL. The test screen includes the current Home Assistant-local time.
+Assistant URL. The integration generates all final HTML, including Liquid
+processing and dynamic Home Assistant-local timestamps. The Renderer App only
+accepts final HTML and dimensions.
+
+The catalog covers 296 x 128, 800 x 480, and 1200 x 825, plus BW, BWR, and
+BWRY Framework modes. See [Stage 2 compatibility](STAGE2_COMPATIBILITY.md) for
+the exact Liquid/TRMNL subset and known gaps.
 
 ## Home Assistant OS / Supervised installation
 
@@ -55,7 +69,8 @@ token. No LAN port configuration is shown on HA OS/Supervised.
 At every config-entry setup, a managed Renderer is checked through
 `AddonManager`. A missing App is scheduled for installation, a stopped App is
 scheduled to start, and Home Assistant retries the entry. A running App must
-also pass `/health` with API version 1.
+also pass `/health` with API version 1 and report its pinned TRMNL Framework
+version.
 
 The entry stores whether OpenDisplay Studio installed the Renderer. Removing
 the integration only stops, backs up, and uninstalls a Renderer it created;

@@ -12,6 +12,7 @@ from custom_components.opendisplay_studio.media_source import (
     OpenDisplayStudioMediaSource,
 )
 from custom_components.opendisplay_studio.renderer import RenderResult
+from custom_components.opendisplay_studio.screens import SCREENS
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"dynamic"
 
@@ -46,14 +47,16 @@ async def test_resolve_renders_and_publishes_temporary_png(hass) -> None:
     token = media.url.rsplit("/", 1)[-1].removesuffix(".png")
     assert hass.data[DOMAIN].cache.get(token) == PNG
     call = client.async_render.await_args.kwargs
-    assert call["width"] == 800
-    assert call["height"] == 480
+    assert call["width"] == SCREENS["test"].width
+    assert call["height"] == SCREENS["test"].height
     assert "OpenDisplay Studio" in call["html"]
 
 
-async def test_browse_exposes_exactly_two_playable_images(hass) -> None:
+async def test_browse_exposes_stage_two_playable_images(hass) -> None:
     source = OpenDisplayStudioMediaSource(hass)
     media = await source.async_browse_media(MediaSourceItem(hass, DOMAIN, "", None))
 
-    assert [child.title for child in media.children] == ["Test screen", "Dashboard"]
+    assert [child.title for child in media.children] == [
+        screen.title for screen in SCREENS.values()
+    ]
     assert all(child.can_play for child in media.children)

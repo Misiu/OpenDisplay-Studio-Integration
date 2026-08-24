@@ -15,7 +15,14 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
     app = web.Application()
 
     async def health(_request):
-        return web.json_response({"status": "ok", "version": "0.1.0", "apiVersion": 1})
+        return web.json_response(
+            {
+                "status": "ok",
+                "version": "0.2.0",
+                "apiVersion": 1,
+                "trmnlFrameworkVersion": "3.2.0",
+            }
+        )
 
     async def render(request):
         assert request.headers["Authorization"] == "Bearer secret"
@@ -43,8 +50,9 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         client = RendererClient(session, str(server.make_url("/")), "secret")
         assert await client.async_health() == {
             "status": "ok",
-            "version": "0.1.0",
+            "version": "0.2.0",
             "apiVersion": 1,
+            "trmnlFrameworkVersion": "3.2.0",
         }
         result = await client.async_render(
             html="<div>test</div>", width=800, height=480
@@ -63,7 +71,14 @@ async def test_health_rejects_incompatible_api(aiohttp_server, socket_enabled) -
     app = web.Application()
 
     async def incompatible_health(_request):
-        return web.json_response({"status": "ok", "version": "9.0.0", "apiVersion": 9})
+        return web.json_response(
+            {
+                "status": "ok",
+                "version": "9.0.0",
+                "apiVersion": 9,
+                "trmnlFrameworkVersion": "3.2.0",
+            }
+        )
 
     app.router.add_get("/health", incompatible_health)
     server = await aiohttp_server(app)

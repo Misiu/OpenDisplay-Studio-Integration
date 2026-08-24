@@ -19,6 +19,7 @@ class RendererHealth(TypedDict):
     status: str
     version: str
     apiVersion: int
+    trmnlFrameworkVersion: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,11 +90,13 @@ class RendererClient:
         status = payload.get("status")
         version = payload.get("version")
         api_version = payload.get("apiVersion")
+        framework_version = payload.get("trmnlFrameworkVersion")
         if (
             status != "ok"
             or not isinstance(version, str)
             or not isinstance(api_version, int)
             or isinstance(api_version, bool)
+            or not isinstance(framework_version, str)
         ):
             raise RendererResponseError("Renderer health fields are invalid")
         if api_version != API_VERSION:
@@ -105,6 +108,7 @@ class RendererClient:
             status=status,
             version=version,
             apiVersion=api_version,
+            trmnlFrameworkVersion=framework_version,
         )
 
     async def async_render(self, *, html: str, width: int, height: int) -> RenderResult:

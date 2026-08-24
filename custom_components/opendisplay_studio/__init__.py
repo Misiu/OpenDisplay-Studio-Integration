@@ -99,9 +99,10 @@ async def async_setup_entry(
         height=entry.data.get("height", DEFAULT_HEIGHT),
     )
     LOGGER.info(
-        "Renderer available version=%s apiVersion=%d",
+        "Renderer available version=%s apiVersion=%d trmnlFrameworkVersion=%s",
         health["version"],
         health["apiVersion"],
+        health["trmnlFrameworkVersion"],
     )
     return True
 

@@ -21,6 +21,7 @@ from homeassistant.core import HomeAssistant
 
 from . import OpenDisplayStudioConfigEntry
 from .const import DOMAIN, LOGGER
+from .liquid_renderer import TemplateRenderError
 from .renderer import RendererError
 from .screens import SCREENS
 
@@ -46,32 +47,36 @@ class OpenDisplayStudioMediaSource(MediaSource):
         if item.identifier not in SCREENS:
             raise Unresolvable("Unknown OpenDisplay Studio screen")
         entry = self._loaded_entry()
-        _, builder = SCREENS[item.identifier]
+        screen = SCREENS[item.identifier]
         try:
+            built = screen.builder()
             result = await entry.runtime_data.client.async_render(
-                html=builder(),
-                width=entry.runtime_data.width,
-                height=entry.runtime_data.height,
+                html=built.html,
+                width=screen.width,
+                height=screen.height,
             )
-        except RendererError as err:
+        except (RendererError, TemplateRenderError) as err:
+            LOGGER.error("Could not render %s: %s", item.identifier, err)
             raise Unresolvable(
                 translation_domain=DOMAIN,
                 translation_key="render_failed",
             ) from err
 
         LOGGER.info(
-            "Rendered %s at %dx%d; timings=%s",
+            "Rendered %s at %dx%d; liquid=%.2f ms renderer=%s pipeline=%.2f ms",
             item.identifier,
-            entry.runtime_data.width,
-            entry.runtime_data.height,
+            screen.width,
+            screen.height,
+            built.liquid_ms,
             result.timings,
+            built.liquid_ms + result.timings.get("total", 0.0),
         )
         token = self.hass.data[DOMAIN].cache.put(result.png)
         return PlayMedia(f"/api/opendisplay_studio/render/{token}.png", "image/png")
 
     @override
     async def async_browse_media(self, item: MediaSourceItem) -> BrowseMediaSource:
-        """Return exactly the two POC documents."""
+        """Return the Stage 2 POC documents."""
         if item.identifier:
             raise BrowseError("Unknown OpenDisplay Studio directory")
         return BrowseMediaSource(
@@ -93,7 +98,8 @@ class OpenDisplayStudioMediaSource(MediaSource):
                     can_play=True,
                     can_expand=False,
                 )
-                for identifier, (title, _) in SCREENS.items()
+                for identifier, screen in SCREENS.items()
+                for title in (screen.title,)
             ],
         )
 
