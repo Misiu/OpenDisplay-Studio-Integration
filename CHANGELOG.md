@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1
+
+- Stop bundling and registering a private WebAwesome copy in the Home Assistant
+  panel; use the host-provided `ha-button` component like the Matter and ZHA
+  panels do.
+- Add a release regression check that rejects bundled `wa-*` and `ha-*`
+  component registrations.
+- Validate the integration test suite against Home Assistant 2026.8.2.
+
 ## 0.3.0
 
 - Move the accepted ODX designer into an admin-only Home Assistant panel.

@@ -1481,7 +1481,7 @@ export const appStyles = css`
       flex-direction: column;
     }
 
-    .welcome-actions wa-button {
+    .welcome-actions ha-button {
       width: 100%;
     }
 

@@ -9,9 +9,6 @@ import {
   mdiRenameOutline,
   mdiTuneVariant,
 } from '@mdi/js'
-import '@home-assistant/webawesome/dist/components/button/button.js'
-import '@home-assistant/webawesome/dist/styles/webawesome.css'
-import '@home-assistant/webawesome/dist/styles/themes/default.css'
 import { appStyles } from './app-styles'
 import {
   DISPLAY_PROFILES,
@@ -590,7 +587,7 @@ export class OdxApp extends LitElement {
           <strong>${this.displayName(this.project)}</strong>
           <span>${pixels.width}×${pixels.height} · ${PALETTE_LABELS[this.project.palette]} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
-        <wa-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${renderButtonIcon(mdiTuneVariant)} Edit device & layout</wa-button>
+        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${renderButtonIcon(mdiTuneVariant)} Edit device & layout</ha-button>
       </div>
     `
   }
@@ -775,7 +772,7 @@ export class OdxApp extends LitElement {
           `)}
         </div>
         ${definition
-          ? html`<div class="option-form">${definition.options.map((option) => this.renderOption(option))}</div><div class="danger-zone"><wa-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${renderButtonIcon(mdiDeleteOutline)} Remove widget</wa-button></div>`
+          ? html`<div class="option-form">${definition.options.map((option) => this.renderOption(option))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${renderButtonIcon(mdiDeleteOutline)} Remove widget</ha-button></div>`
           : html`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
       </aside>
     `
@@ -809,7 +806,7 @@ export class OdxApp extends LitElement {
       <dialog id="rename-dialog"><div class="dialog-body">
         <h2>Rename display</h2><p>Use a name that describes where this display will be installed.</p>
         <div class="field"><label class="field-label" for="display-name">Display name</label><input id="display-name" type="text" .value=${this.renameDraft} @input=${(event: Event) => { this.renameDraft = (event.currentTarget as HTMLInputElement).value }} @keydown=${(event: KeyboardEvent) => { if (event.key === 'Enter') this.saveProjectName() }} /></div>
-        <div class="dialog-actions"><wa-button appearance="outlined" @click=${() => this.renameDialog?.close()}>Cancel</wa-button><wa-button variant="brand" @click=${this.saveProjectName}>Save name</wa-button></div>
+        <div class="dialog-actions"><ha-button appearance="outlined" @click=${() => this.renameDialog?.close()}>Cancel</ha-button><ha-button variant="brand" @click=${this.saveProjectName}>Save name</ha-button></div>
       </div></dialog>
     `
   }
@@ -820,7 +817,7 @@ export class OdxApp extends LitElement {
         <header class="topbar welcome-topbar">
           <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
           <span class="welcome-topline">Device-accurate e-paper composition</span>
-          <wa-button size="s" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} New display</wa-button>
+          <ha-button size="s" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} New display</ha-button>
         </header>
         <div class="workspace welcome-workspace">
           <aside class="project-rail empty-rail" aria-label="Saved displays">
@@ -834,7 +831,7 @@ export class OdxApp extends LitElement {
               <h1>Design an e-paper screen that fits the device.</h1>
               <p>Choose a verified display, compose its native-pixel layout, then add widgets and export the exact screen as PNG or JPG.</p>
               <div class="welcome-actions">
-                <wa-button size="l" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} Create your first display</wa-button>
+                <ha-button size="l" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} Create your first display</ha-button>
               </div>
               <dl class="welcome-facts">
                 <div><dt>1</dt><dd><strong>Select hardware</strong><span>Model, palette and orientation</span></dd></div>
@@ -862,7 +859,7 @@ export class OdxApp extends LitElement {
 
   render(): TemplateResult {
     if (this.loading) return html`<div class="loading-state"><ha-circular-progress active></ha-circular-progress><p>Loading OpenDisplay Studio…</p></div>`
-    if (this.loadError) return html`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><wa-button @click=${this.loadProjects}>Retry</wa-button></div>`
+    if (this.loadError) return html`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><ha-button @click=${this.loadProjects}>Retry</ha-button></div>`
     if (this.store.projects.length === 0) return this.renderWelcome()
     return html`
       <div class="app-shell">
@@ -878,11 +875,11 @@ export class OdxApp extends LitElement {
           </div>
           <div class="top-actions">
             ${this.editorMode === 'layout'
-              ? html`<wa-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</wa-button><wa-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${renderButtonIcon(mdiCheck)} Apply layout</wa-button>`
+              ? html`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${renderButtonIcon(mdiCheck)} Apply layout</ha-button>`
               : html`
-                  <wa-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${renderButtonIcon(mdiRenameOutline)} Rename</wa-button>
-                  <wa-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${renderButtonIcon(mdiContentCopy)} Duplicate</wa-button>
-                  <wa-button size="s" variant=${this.project.status === 'ready' ? 'neutral' : 'brand'} @click=${() => this.setProjectStatus(this.project.status === 'ready' ? 'draft' : 'ready')}>${this.project.status === 'ready' ? 'Move to Draft' : 'Mark Ready'}</wa-button>
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${renderButtonIcon(mdiRenameOutline)} Rename</ha-button>
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${renderButtonIcon(mdiContentCopy)} Duplicate</ha-button>
+                  <ha-button size="s" variant=${this.project.status === 'ready' ? 'neutral' : 'brand'} @click=${() => this.setProjectStatus(this.project.status === 'ready' ? 'draft' : 'ready')}>${this.project.status === 'ready' ? 'Move to Draft' : 'Mark Ready'}</ha-button>
                 `}
           </div>
         </header>

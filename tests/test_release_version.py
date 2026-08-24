@@ -1,6 +1,7 @@
 """Tests for release/manifest version synchronization."""
 
 import json
+from pathlib import Path
 
 import pytest
 
@@ -22,4 +23,27 @@ def test_release_rejects_mismatch(tmp_path) -> None:
 
 
 def test_panel_build_version_matches_release() -> None:
-    assert INTEGRATION_VERSION == "0.3.0"
+    assert INTEGRATION_VERSION == "0.3.1"
+
+
+def test_panel_does_not_bundle_home_assistant_component_implementations() -> None:
+    root = Path(__file__).parents[1]
+    package = json.loads(
+        (root / "frontend-src" / "package.json").read_text(encoding="utf-8")
+    )
+    package_lock = (root / "frontend-src" / "package-lock.json").read_text(
+        encoding="utf-8"
+    )
+    bundle = (
+        root
+        / "custom_components"
+        / "opendisplay_studio"
+        / "frontend"
+        / "opendisplay-studio.js"
+    ).read_text(encoding="utf-8")
+    assert "@home-assistant/webawesome" not in package.get("dependencies", {})
+    assert "@home-assistant/webawesome" not in package_lock
+    assert "node_modules/@home-assistant/webawesome" not in bundle
+    assert "wa-icon" not in bundle
+    assert 'customElements.define("wa-' not in bundle
+    assert 'customElements.define("ha-' not in bundle

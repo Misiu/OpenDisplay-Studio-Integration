@@ -65,13 +65,22 @@ whole screen, invokes Home Assistant-aware providers, renders Liquid fragments,
 and composes a single TRMNL document. The Renderer App contract remains
 `HTML + width + height -> PNG` and contains no project or HA concepts.
 
-Panel registration follows the current Core Dynalite pattern: local static
-files, WebSocket commands, and an admin-only custom panel. Persistence uses
+Backend panel registration follows the current Core Dynalite pattern: local
+static files, WebSocket commands, and an admin-only custom panel. Studio is not
+a standalone frontend, so its component model follows the Matter and ZHA
+panels: markup uses Home Assistant's host-provided `ha-button`, `ha-form`,
+`ha-alert`, and progress components. The Studio bundle must never package or
+register its own `wa-*` or `ha-*` implementations. This keeps it in the HA
+custom-panel realm so native selectors remain available and prevents duplicate
+custom-element registrations. Persistence uses
 `homeassistant.helpers.storage.Store` with atomic writes.
 
 References:
 
 - [Dynalite panel](https://github.com/home-assistant/core/blob/dev/homeassistant/components/dynalite/panel.py)
+- [Matter panel](https://github.com/home-assistant/frontend/blob/dev/src/panels/config/integrations/integration-panels/matter/matter-config-dashboard.ts)
+- [ZHA panel](https://github.com/home-assistant/frontend/blob/dev/src/panels/config/integrations/integration-panels/zha/zha-config-dashboard.ts)
+- [Home Assistant button](https://github.com/home-assistant/frontend/blob/dev/src/components/ha-button.ts)
 - [Store helper](https://github.com/home-assistant/core/blob/dev/homeassistant/helpers/storage.py)
 - [WebSocket decorators](https://github.com/home-assistant/core/blob/dev/homeassistant/components/websocket_api/decorators.py)
 - [Calendar integration](https://github.com/home-assistant/core/tree/dev/homeassistant/components/calendar)
