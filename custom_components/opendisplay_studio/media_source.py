@@ -20,10 +20,10 @@ from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 
 from . import OpenDisplayStudioConfigEntry
+from .composer import ProjectComposeError, async_compose_project
 from .const import DOMAIN, LOGGER
 from .liquid_renderer import TemplateRenderError
 from .renderer import RendererError
-from .screens import SCREENS
 
 
 async def async_get_media_source(hass: HomeAssistant) -> OpenDisplayStudioMediaSource:
@@ -44,18 +44,18 @@ class OpenDisplayStudioMediaSource(MediaSource):
     @override
     async def async_resolve_media(self, item: MediaSourceItem) -> PlayMedia:
         """Render the selected document and expose its temporary PNG URL."""
-        if item.identifier not in SCREENS:
-            raise Unresolvable("Unknown OpenDisplay Studio screen")
+        project = self.hass.data[DOMAIN].projects.get(item.identifier)
+        if project is None or project["status"] != "ready":
+            raise Unresolvable("Unknown or Draft OpenDisplay Studio project")
         entry = self._loaded_entry()
-        screen = SCREENS[item.identifier]
         try:
-            built = screen.builder()
+            built = await async_compose_project(self.hass, project)
             result = await entry.runtime_data.client.async_render(
                 html=built.html,
-                width=screen.width,
-                height=screen.height,
+                width=project["width"],
+                height=project["height"],
             )
-        except (RendererError, TemplateRenderError) as err:
+        except (ProjectComposeError, RendererError, TemplateRenderError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)
             raise Unresolvable(
                 translation_domain=DOMAIN,
@@ -63,20 +63,23 @@ class OpenDisplayStudioMediaSource(MediaSource):
             ) from err
 
         LOGGER.info(
-            "Rendered %s at %dx%d; liquid=%.2f ms renderer=%s pipeline=%.2f ms",
+            "Rendered project=%s at %dx%d; data=%.2f ms liquid=%.2f ms "
+            "compose=%.2f ms renderer=%s pipeline=%.2f ms",
             item.identifier,
-            screen.width,
-            screen.height,
+            project["width"],
+            project["height"],
+            built.data_ms,
             built.liquid_ms,
+            built.compose_ms,
             result.timings,
-            built.liquid_ms + result.timings.get("total", 0.0),
+            built.compose_ms + result.timings.get("total", 0.0),
         )
         token = self.hass.data[DOMAIN].cache.put(result.png)
         return PlayMedia(f"/api/opendisplay_studio/render/{token}.png", "image/png")
 
     @override
     async def async_browse_media(self, item: MediaSourceItem) -> BrowseMediaSource:
-        """Return the Stage 2 POC documents."""
+        """Return Ready projects only."""
         if item.identifier:
             raise BrowseError("Unknown OpenDisplay Studio directory")
         return BrowseMediaSource(
@@ -98,8 +101,8 @@ class OpenDisplayStudioMediaSource(MediaSource):
                     can_play=True,
                     can_expand=False,
                 )
-                for identifier, screen in SCREENS.items()
-                for title in (screen.title,)
+                for project in self.hass.data[DOMAIN].projects.list(ready_only=True)
+                for identifier, title in ((project["id"], project["name"]),)
             ],
         )
 

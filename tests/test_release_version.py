@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+from custom_components.opendisplay_studio.const import INTEGRATION_VERSION
 from scripts.validate_release import ReleaseValidationError, validate_release
 
 
@@ -18,3 +19,7 @@ def test_release_rejects_mismatch(tmp_path) -> None:
     manifest.write_text(json.dumps({"version": "0.1.0"}), encoding="utf-8")
     with pytest.raises(ReleaseValidationError):
         validate_release("v0.2.0", manifest)
+
+
+def test_panel_build_version_matches_release() -> None:
+    assert INTEGRATION_VERSION == "0.3.0"

@@ -26,6 +26,25 @@ jobs:
       - run: mypy custom_components/opendisplay_studio scripts
       - run: pytest
 
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend-src
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend-src/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Verify committed panel bundle
+        working-directory: .
+        run: git diff --exit-code -- custom_components/opendisplay_studio/frontend/opendisplay-studio.js
+
   hassfest:
     runs-on: ubuntu-latest
     steps:

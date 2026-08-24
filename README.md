@@ -1,34 +1,34 @@
 # OpenDisplay Studio Integration
 
-Home Assistant custom integration proving that renderable OpenDisplay Studio
-documents can be exposed as dynamic image Media Sources.
+Home Assistant custom integration with an ODX-derived graphical e-paper
+designer. Ready projects are dynamic image Media Sources rendered from current
+Home Assistant data.
 
 [![Add the Renderer App repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FMisiu%2FOpenDisplay-Studio-App)
 [![Open this integration in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Misiu&repository=OpenDisplay-Studio-Integration&category=integration)
 [![Add OpenDisplay Studio to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=opendisplay_studio)
 
-Stage 2 exposes ten dynamic Media Sources, including:
+Open **OpenDisplay Studio** in the Home Assistant sidebar to create predefined
+or custom displays, edit their logical grids, compose rectangular regions, and
+assign Entity State, Calendar, or Text widgets. Project configuration is stored
+with Home Assistant's versioned `Store`; browser `localStorage` is not used.
 
-- `media-source://opendisplay_studio/test`
-- `media-source://opendisplay_studio/dashboard`
-- `media-source://opendisplay_studio/trmnl_typography`
-- `media-source://opendisplay_studio/trmnl_table`
-- `media-source://opendisplay_studio/trmnl_liquid`
-- `media-source://opendisplay_studio/trmnl_palette_bw`
-- `media-source://opendisplay_studio/trmnl_palette_bwr`
-- `media-source://opendisplay_studio/trmnl_palette_bwry`
-- `media-source://opendisplay_studio/trmnl_small`
-- `media-source://opendisplay_studio/trmnl_large`
+Draft projects remain private to the designer. A Ready project is exposed at a
+stable URI based on its immutable server-generated ID:
 
-Every resolution renders fresh HTML through the separate OpenDisplay Studio
-Renderer App and exposes the PNG through a short-lived, unguessable Home
-Assistant URL. The integration generates all final HTML, including Liquid
-processing and dynamic Home Assistant-local timestamps. The Renderer App only
-accepts final HTML and dimensions.
+```text
+media-source://opendisplay_studio/<project-id>
+```
 
-The catalog covers 296 x 128, 800 x 480, and 1200 x 825, plus BW, BWR, and
-BWRY Framework modes. See [Stage 2 compatibility](STAGE2_COMPATIBILITY.md) for
-the exact Liquid/TRMNL subset and known gaps.
+On every resolution the integration deduplicates widget data requirements,
+reads current entity states and calendar events, renders widget Liquid
+templates, composes one TRMNL Framework document, and sends that final HTML to
+the Renderer. The Renderer App still knows only HTML, width, and height.
+
+See [the widget contract](WIDGET_CONTRACT.md) for the schema/data/template
+boundary and the planned multi-entity Table and optional-source Weather model.
+See [Stage 2 compatibility](STAGE2_COMPATIBILITY.md) for the Liquid/TRMNL
+compatibility baseline retained by Stage 3.
 
 ## Home Assistant OS / Supervised installation
 
@@ -84,6 +84,11 @@ ruff check .
 ruff format --check .
 mypy custom_components/opendisplay_studio scripts
 pytest
+
+cd frontend-src
+npm ci
+npm test
+npm run build
 ```
 
 ## License

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0
+
+- Move the accepted ODX designer into an admin-only Home Assistant panel.
+- Add server-owned project IDs, versioned HA storage, Draft/Ready lifecycle,
+  predefined/custom displays, editable grids, and graphical regions.
+- Add schema-driven Entity State, Calendar, and Text widget configuration with
+  Home Assistant entity selectors.
+- Add declarative one/many/optional data requirements, deduplicated Entity State
+  and Calendar providers, normalized widget data, and one-page Liquid/TRMNL
+  composition.
+- Expose every Ready project at a stable dynamic Media Source URI.
+- Add frontend CI, TypeScript checks, Vitest coverage, and committed local panel
+  bundle verification.
+
 ## 0.2.0
 
 - Add bounded Liquid processing before the Renderer call with separate timing.

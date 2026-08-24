@@ -6,6 +6,7 @@ import logging
 
 DOMAIN = "opendisplay_studio"
 NAME = "OpenDisplay Studio"
+INTEGRATION_VERSION = "0.3.0"
 
 API_VERSION = 1
 DEFAULT_WIDTH = 800
@@ -32,5 +33,11 @@ DISCOVERY_SERVICE = APP_CONFIG_SLUG
 RENDER_CACHE_TTL_SECONDS = 300
 RENDER_CACHE_MAX_ITEMS = 32
 RENDER_HTTP_PATH = "/api/opendisplay_studio/render/{token}.png"
+
+PANEL_URL_PATH = "opendisplay-studio"
+PANEL_STATIC_URL = "/opendisplay_studio_frontend"
+PANEL_WEB_COMPONENT = "opendisplay-studio-panel"
+STORAGE_KEY = f"{DOMAIN}.projects"
+STORAGE_VERSION = 1
 
 LOGGER = logging.getLogger(__package__)

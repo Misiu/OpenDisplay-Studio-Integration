@@ -30,11 +30,14 @@ from .const import (
     RENDER_CACHE_TTL_SECONDS,
 )
 from .http import RenderedImageView
+from .panel import async_register_panel
+from .projects import ProjectStore
 from .renderer import (
     RendererClient,
     RendererError,
     RendererHealth,
 )
+from .websocket import async_register_commands
 
 
 @dataclass(slots=True)
@@ -52,6 +55,7 @@ class OpenDisplayStudioData:
     """Domain-wide state."""
 
     cache: RenderCache
+    projects: ProjectStore
 
 
 type OpenDisplayStudioConfigEntry = ConfigEntry[OpenDisplayStudioRuntimeData]
@@ -60,14 +64,19 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
-    """Set up the temporary render endpoint once."""
+    """Set up storage, panel APIs, and the temporary render endpoint."""
+    projects = ProjectStore(hass)
+    await projects.async_load()
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(
             ttl_seconds=RENDER_CACHE_TTL_SECONDS,
             max_items=RENDER_CACHE_MAX_ITEMS,
-        )
+        ),
+        projects=projects,
     )
     hass.http.register_view(RenderedImageView(hass))
+    async_register_commands(hass)
+    await async_register_panel(hass)
     return True
 
 

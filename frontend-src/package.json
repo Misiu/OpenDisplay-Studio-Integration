@@ -1,0 +1,22 @@
+{
+  "name": "opendisplay-studio-ha-panel",
+  "private": true,
+  "version": "0.3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@home-assistant/webawesome": "^3.7.0-ha.0",
+    "@mdi/js": "^7.4.47",
+    "lit": "^3.3.3"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vite-plugin-css-injected-by-js": "^5.0.2",
+    "vitest": "^4.0.18"
+  }
+}
