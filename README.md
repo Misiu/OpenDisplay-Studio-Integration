@@ -3,6 +3,10 @@
 Home Assistant custom integration proving that renderable OpenDisplay Studio
 documents can be exposed as dynamic image Media Sources.
 
+[![Add the Renderer App repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FMisiu%2FOpenDisplay-Studio-App)
+[![Open this integration in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Misiu&repository=OpenDisplay-Studio-Integration&category=integration)
+[![Add OpenDisplay Studio to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=opendisplay_studio)
+
 The POC exposes:
 
 - `media-source://opendisplay_studio/test`
@@ -14,13 +18,22 @@ Assistant URL. The test screen includes the current Home Assistant-local time.
 
 ## Home Assistant OS / Supervised installation
 
-1. Add this integration through HACS or copy `custom_components/opendisplay_studio`.
-2. In **Settings > Apps > App store > Repositories**, add exactly:
-   `https://github.com/Misiu/OpenDisplay-Studio-App`
-3. Add the **OpenDisplay Studio** integration.
+1. Click **Add the Renderer App repository** above and confirm the pre-filled
+   repository URL in Home Assistant.
+2. Click **Open this integration in HACS**, download OpenDisplay Studio, and
+   restart Home Assistant when HACS asks you to.
+3. Click **Add OpenDisplay Studio to Home Assistant**.
 4. Confirm **Install Renderer**. The integration uses Home Assistant Core's
    `AddonManager` and config-flow progress UI to install, start, discover, and
    health-check the App.
+
+If a My Home Assistant button is unavailable, use the equivalent manual paths:
+
+- add `https://github.com/Misiu/OpenDisplay-Studio-App` under
+  **Settings > Apps > App store > Repositories**;
+- add this repository to HACS as an **Integration**;
+- open **Settings > Devices & services > Add integration** and select
+  **OpenDisplay Studio**.
 
 The integration deliberately does not add the third-party App repository by
 itself. Home Assistant Core currently provides `AddonManager` for a known App,
