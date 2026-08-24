@@ -1,0 +1,55 @@
+{
+  "title": "OpenDisplay Studio",
+  "config": {
+    "step": {
+      "external": {
+        "title": "External Renderer",
+        "description": "Home Assistant Container cannot manage Apps. Enter the URL of an externally hosted OpenDisplay Studio Renderer.",
+        "data": {
+          "url": "Renderer URL",
+          "auth_token": "Bearer token (optional)"
+        },
+        "data_description": {
+          "url": "Base URL containing /health and /render.",
+          "auth_token": "Token required by POST /render."
+        }
+      },
+      "repository_required": {
+        "title": "Add the Renderer App repository",
+        "description": "OpenDisplay Studio cannot find its Renderer in the App store. Add `{repository_url}` in Settings > Apps > App store > Repositories, wait for the store to refresh, then continue. The integration does not register third-party repositories automatically."
+      },
+      "install_renderer": {
+        "title": "Install Renderer",
+        "description": "OpenDisplay Studio requires the OpenDisplay Studio Renderer to generate images. Continue to install it through Home Assistant Supervisor."
+      },
+      "hassio_confirm": {
+        "title": "OpenDisplay Studio Renderer discovered",
+        "description": "Use the running Renderer App for dynamic OpenDisplay Studio images."
+      }
+    },
+    "progress": {
+      "install_addon": "Installing OpenDisplay Studio Renderer",
+      "start_addon": "Starting and health-checking OpenDisplay Studio Renderer"
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the Renderer",
+      "invalid_url": "Enter a valid absolute HTTP or HTTPS URL"
+    },
+    "abort": {
+      "addon_discovery_failed": "Renderer discovery is unavailable",
+      "addon_install_failed": "Unable to install OpenDisplay Studio Renderer",
+      "addon_start_failed": "Unable to start or health-check OpenDisplay Studio Renderer",
+      "cannot_connect": "Unable to connect to the Renderer",
+      "invalid_discovery": "Renderer discovery data is invalid",
+      "single_instance_allowed": "OpenDisplay Studio is already configured"
+    }
+  },
+  "exceptions": {
+    "config_entry_not_ready": {
+      "message": "OpenDisplay Studio is not ready."
+    },
+    "render_failed": {
+      "message": "The Renderer could not generate this screen."
+    }
+  }
+}
