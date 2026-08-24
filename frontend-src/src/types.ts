@@ -120,6 +120,16 @@ export interface WidgetDefinition {
 
 export interface HomeAssistant {
   callWS<T>(message: Record<string, unknown>): Promise<T>
+  states?: Record<string, { state: string; last_updated?: string }>
+}
+
+export interface ComposePreviewResponse {
+  html: string
+  timings: {
+    data: number
+    liquid: number
+    compose: number
+  }
 }
 
 export interface BootstrapResponse {

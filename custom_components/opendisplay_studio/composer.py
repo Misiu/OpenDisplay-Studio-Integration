@@ -9,7 +9,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
-from .data_providers import CalendarProvider, EntityStateProvider
+from .data_providers import ICON_PATHS, CalendarProvider, EntityStateProvider
 from .liquid_renderer import LIQUID
 from .projects import Project
 from .widgets import TEMPLATES, definition, with_defaults
@@ -27,6 +27,67 @@ class ComposedProject:
 
 class ProjectComposeError(Exception):
     """Raised when current Home Assistant data cannot be resolved."""
+
+
+STUDIO_STYLES = """
+<style>
+  .studio-screen{width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff;box-sizing:border-box}
+  .studio-screen .view--full{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-gap);gap:var(--studio-gap);box-sizing:border-box}
+  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #111;background:#fff;box-sizing:border-box;container-type:size}
+  .studio-region>.item{width:100%!important;height:100%!important;margin:0!important;padding:0!important}
+  .studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}
+  .studio-entity__content{display:flex!important;align-items:center;justify-content:center;gap:clamp(4px,4cqh,14px);padding:clamp(7px,7cqh,22px)!important;overflow:hidden}
+  .studio-entity__icon{display:block;flex:0 0 auto;width:clamp(20px,22cqh,58px);height:clamp(20px,22cqh,58px);fill:currentColor}
+  .studio-entity__name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(9px,7cqh,20px)!important;font-weight:700!important;line-height:1!important;text-transform:none!important}
+  .studio-entity__reading{display:flex;min-width:0;align-items:baseline;justify-content:center;gap:.18em;white-space:nowrap}
+  .studio-entity__value{font-size:clamp(25px,34cqh,84px)!important;font-weight:500!important;line-height:.9!important;letter-spacing:-.045em!important}
+  .studio-entity__unit{font-size:clamp(9px,10cqh,24px)!important;font-weight:700!important;line-height:1!important}
+  .studio-entity__rule{display:none;background:currentColor}
+  .studio-entity--square .studio-entity__content{flex-direction:column}
+  .studio-entity--square .studio-entity__icon{width:clamp(22px,20cqw,64px);height:clamp(22px,20cqw,64px)}
+  .studio-entity--square .studio-entity__name{max-width:100%;font-size:clamp(9px,7cqw,19px)!important}
+  .studio-entity--square .studio-entity__value{font-size:clamp(25px,27cqw,78px)!important}
+  .studio-entity--wide .studio-entity__content{flex-direction:row}
+  .studio-entity--wide .studio-entity__name{flex:1 1 auto}
+  .studio-entity--wide .studio-entity__rule{display:block;width:1px;height:60%;flex:0 0 1px}
+  .studio-entity--wide .studio-entity__reading{flex:0 1 auto;margin-left:auto}
+  .studio-entity--tall .studio-entity__content{flex-direction:column}
+  .studio-entity--tall .studio-entity__icon{width:clamp(22px,32cqw,62px);height:clamp(22px,32cqw,62px)}
+  .studio-entity--tall .studio-entity__name{max-width:100%;font-size:clamp(8px,12cqw,18px)!important}
+  .studio-entity--tall .studio-entity__rule{display:block;width:70%;height:1px;flex:0 0 1px}
+  .studio-entity--tall .studio-entity__reading{flex-direction:column;align-items:center;gap:2px}
+  .studio-entity--tall .studio-entity__value{font-size:clamp(24px,35cqw,66px)!important}
+  .studio-entity--tall .studio-entity__unit{font-size:clamp(9px,15cqw,20px)!important}
+</style>
+"""
+
+
+def _screen_size(width: int, height: int) -> str:
+    """Map arbitrary display dimensions to the nearest TRMNL size tier."""
+    longest = max(width, height)
+    if longest <= 400:
+        return "screen--sm"
+    if longest >= 1_000:
+        return "screen--lg"
+    return "screen--md"
+
+
+def _region_shape(project: Project, region: dict[str, Any], *, gap: int) -> str:
+    """Classify a region using its physical aspect ratio, not grid spans alone."""
+    grid = project["grid"]
+    project_width = int(project.get("width", 800))
+    project_height = int(project.get("height", 480))
+    cell_width = (project_width - gap * (grid["columns"] + 1)) / grid["columns"]
+    cell_height = (project_height - gap * (grid["rows"] + 1)) / grid["rows"]
+    width = cell_width * region["columnSpan"] + gap * (region["columnSpan"] - 1)
+    height = cell_height * region["rowSpan"] + gap * (region["rowSpan"] - 1)
+    ratio = width / max(1, height)
+    if ratio >= 1.55:
+        return "wide"
+    if ratio <= 0.72:
+        return "tall"
+    return "square"
 
 
 def _requirement_sources(
@@ -99,10 +160,24 @@ def _resolve_widget_data(
             values = [
                 entities.get(
                     source,
-                    {"state": "Unavailable", "unit": "", "name": source},
+                    {
+                        "state": "Unavailable",
+                        "unit": "",
+                        "name": source,
+                        "iconPath": ICON_PATHS["default"],
+                    },
                 )
                 for source in sources
             ]
+            if not values and requirement.get("cardinality") != "many":
+                values = [
+                    {
+                        "state": "Unavailable",
+                        "unit": "",
+                        "name": "Choose an entity",
+                        "iconPath": ICON_PATHS["default"],
+                    }
+                ]
         elif requirement["provider"] == "calendar":
             range_key = requirement.get("rangeConfigKey", "days")
             values = [
@@ -138,6 +213,9 @@ async def async_compose_project(
 
     liquid_ms = 0.0
     fragments: list[str] = []
+    width = int(project.get("width", 800))
+    height = int(project.get("height", 480))
+    gap = max(3, min(10, round(min(width, height) / 60)))
     for region in project["regions"]:
         widget = region.get("widget")
         fragment = ""
@@ -145,8 +223,16 @@ async def async_compose_project(
             widget_type = widget["type"]
             config = with_defaults(widget_type, widget["config"])
             data = _resolve_widget_data(widget_type, config, entities, calendars)
+            if widget_type == "entity-state" and data.get("entity") is not None:
+                title = str(config.get("title", "")).strip()
+                data["entity"]["displayName"] = title or data["entity"]["name"]
             result = LIQUID.render(
-                TEMPLATES[widget_type], {"config": config, "data": data}
+                TEMPLATES[widget_type],
+                {
+                    "config": config,
+                    "data": data,
+                    "region": {"shape": _region_shape(project, region, gap=gap)},
+                },
             )
             fragment = result.html
             liquid_ms += result.milliseconds
@@ -154,8 +240,10 @@ async def async_compose_project(
             f"grid-row:{region['row']} / span {region['rowSpan']};"
             f"grid-column:{region['column']} / span {region['columnSpan']};"
         )
+        shape = _region_shape(project, region, gap=gap)
         fragments.append(
-            f'<section class="studio-region" style="{style}">{fragment}</section>'
+            f'<section class="studio-region studio-region--{shape}" '
+            f'style="{style}">{fragment}</section>'
         )
 
     mode = {
@@ -166,12 +254,15 @@ async def async_compose_project(
     }.get(project["palette"], "screen--1bit")
     grid = project["grid"]
     body = "".join(fragments)
+    size = _screen_size(width, height)
+    portrait = " screen--portrait" if height > width else ""
     html = (
-        f'<main class="screen {mode}"><div class="view view--full">'
-        f'<div class="studio-grid" style="display:grid;grid-template-columns:'
+        f'<main class="screen {mode} {size}{portrait} studio-screen" '
+        f'style="--studio-width:{width}px;--studio-height:{height}px;'
+        f'--studio-gap:{gap}px">{STUDIO_STYLES}<div class="view view--full">'
+        f'<div class="studio-grid" style="grid-template-columns:'
         f"repeat({grid['columns']},minmax(0,1fr));grid-template-rows:"
-        f"repeat({grid['rows']},minmax(0,1fr));gap:8px;width:100%;height:100%;"
-        'padding:8px;box-sizing:border-box">'
+        f'repeat({grid["rows"]},minmax(0,1fr))">'
         f"{body}</div></div></main>"
     )
     compose_ms = (perf_counter() - started) * 1_000

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.2
+
+- Make the designer preview use the live Liquid/TRMNL HTML composed by the
+  integration instead of separate frontend sample values.
+- Rebuild Entity State as an adaptive square, wide, or tall tile with current
+  Home Assistant state, unit, friendly name, and a local device-class icon.
+- Add Entity State controls for icon/name visibility and preserve their
+  defaults for projects created with earlier versions.
+- Add the missing TRMNL screen-size classes and verify the 800 × 480 output in
+  the persistent Renderer App at 178.5 ms warm render time.
+
 ## 0.3.1
 
 - Stop bundling and registering a private WebAwesome copy in the Home Assistant

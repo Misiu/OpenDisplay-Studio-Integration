@@ -1523,6 +1523,45 @@ var Le = {
     filter: contrast(0.98);
   }
 
+  .display-screen.live-preview {
+    display: block;
+    padding: 0;
+    gap: 0;
+    filter: none;
+  }
+
+  .html-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+    pointer-events: none;
+  }
+
+  .preview-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
+    gap: var(--preview-gap);
+    padding: var(--preview-gap);
+    box-sizing: border-box;
+  }
+
+  .preview-overlay .screen-region.preview-region {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .preview-overlay .screen-region.preview-region.empty {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
+  }
+
   .display-screen[data-palette='bw'] {
     --screen-paper: #fff;
     --screen-ink: #080808;
@@ -2841,6 +2880,8 @@ var $e = (e) => e <= 1.6 ? {
 			entity: "",
 			title: "",
 			layout: "large",
+			showIcon: !0,
+			showName: !0,
 			showUnit: !0
 		},
 		options: [
@@ -2867,6 +2908,16 @@ var $e = (e) => e <= 1.6 ? {
 				}]
 			},
 			{
+				key: "showIcon",
+				label: "Show icon",
+				type: "toggle"
+			},
+			{
+				key: "showName",
+				label: "Show name",
+				type: "toggle"
+			},
+			{
 				key: "showUnit",
 				label: "Show unit",
 				type: "toggle"
@@ -2876,7 +2927,7 @@ var $e = (e) => e <= 1.6 ? {
     <div class="widget entity-widget">
       ${Y(Xe, "Entity state")}
       <span class="entity-label">${J(e, "title") || J(e, "entity") || "Choose an entity"}</span>
-      <strong class="entity-value">—</strong>
+      <strong class="entity-value">Live data</strong>
     </div>
   `
 	},
@@ -3048,7 +3099,7 @@ var mt = (e) => {
 			schemaVersion: 1,
 			activeProjectId: "",
 			projects: []
-		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.saveRevision = 0;
+		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewHtml = "", this.previewLoading = !1, this.previewError = "", this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
 	}
 	static {
 		this.styles = [
@@ -3060,11 +3111,14 @@ var mt = (e) => {
 	firstUpdated() {
 		this.previewResizeObserver = new ResizeObserver(() => this.updatePreviewScale()), this.previewBoundary && this.previewResizeObserver.observe(this.previewBoundary), this.updatePreviewScale(), this.loadProjects();
 	}
-	updated() {
-		this.previewBoundary && this.previewResizeObserver?.observe(this.previewBoundary), this.updatePreviewScale();
+	updated(e) {
+		if (this.previewBoundary && this.previewResizeObserver?.observe(this.previewBoundary), this.updatePreviewScale(), e.has("hass")) {
+			let e = this.currentEntityStateSignature();
+			e !== this.entityStateSignature && (this.entityStateSignature = e, this.schedulePreview());
+		}
 	}
 	disconnectedCallback() {
-		super.disconnectedCallback(), this.previewResizeObserver?.disconnect();
+		super.disconnectedCallback(), this.previewResizeObserver?.disconnect(), this.previewTimer && window.clearTimeout(this.previewTimer);
 	}
 	get project() {
 		return this.store.projects.find((e) => e.id === this.store.activeProjectId) ?? this.store.projects[0];
@@ -3106,6 +3160,37 @@ var mt = (e) => {
 	persist(e) {
 		this.store = e;
 	}
+	currentEntityStateSignature() {
+		return this.store.projects.length ? this.project.regions.flatMap((e) => e.widget?.type === "entity-state" ? [String(e.widget.config.entity ?? "")] : []).filter(Boolean).sort().map((e) => {
+			let t = this.hass.states?.[e];
+			return `${e}:${t?.state ?? ""}:${t?.last_updated ?? ""}`;
+		}).join("|") : "";
+	}
+	schedulePreview(e = 250) {
+		this.editorMode !== "widgets" || !this.store.projects.length || (this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => {
+			this.previewTimer = void 0, this.composePreview(this.project);
+		}, e));
+	}
+	async composePreview(e) {
+		let t = ++this.previewRevision;
+		this.previewLoading = !0, this.previewError = "";
+		try {
+			let n = await this.hass.callWS({
+				type: "opendisplay_studio/compose_preview",
+				project: e
+			});
+			if (t !== this.previewRevision) return;
+			this.previewHtml = n.html, this.previewTimings = n.timings;
+		} catch (e) {
+			if (t !== this.previewRevision) return;
+			this.previewError = e instanceof Error ? e.message : "Could not compose live preview";
+		} finally {
+			t === this.previewRevision && (this.previewLoading = !1);
+		}
+	}
+	previewDocument() {
+		return `<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light"><style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff}body.trmnl{font-family:Arial,sans-serif;color:#000}.screen{box-sizing:border-box}</style></head><body class="trmnl">${this.previewHtml}</body></html>`;
+	}
 	async loadProjects() {
 		this.loading = !0, this.loadError = "";
 		try {
@@ -3114,7 +3199,7 @@ var mt = (e) => {
 				schemaVersion: 1,
 				activeProjectId: e.projects[0]?.id ?? "",
 				projects: e.projects
-			}, this.widgetMetadata = e.widgets;
+			}, this.widgetMetadata = e.widgets, this.schedulePreview(0);
 		} catch (e) {
 			this.loadError = e instanceof Error ? e.message : "Unable to load projects";
 		} finally {
@@ -3133,7 +3218,7 @@ var mt = (e) => {
 			t === this.saveRevision && (this.store = {
 				...this.store,
 				projects: this.store.projects.map((e) => e.id === n.project.id ? n.project : e)
-			});
+			}, this.schedulePreview());
 		} catch (e) {
 			this.showToast(e instanceof Error ? e.message : "Could not save project");
 		} finally {
@@ -3150,7 +3235,7 @@ var mt = (e) => {
 			projects: t
 		});
 		let n = t.find((e) => e.id === this.store.activeProjectId);
-		n && this.saveProject(n);
+		n && (this.saveProject(n), this.schedulePreview());
 	}
 	updateLayoutDraft(e) {
 		this.layoutDraft &&= e(this.layoutDraft);
@@ -3164,7 +3249,7 @@ var mt = (e) => {
 	applyLayoutEditor() {
 		if (!this.layoutDraft) return;
 		let e = this.layoutDraft;
-		this.updateProject(() => e), this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0, this.selectedRegionId = "", this.showToast("Device and layout updated");
+		this.updateProject(() => e), this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0, this.selectedRegionId = "", this.showToast("Device and layout updated"), this.schedulePreview(0);
 	}
 	showToast(e) {
 		this.toastMessage = e, this.toastTimer && window.clearTimeout(this.toastTimer), this.toastTimer = window.setTimeout(() => {
@@ -3175,7 +3260,7 @@ var mt = (e) => {
 		this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.layoutDraft = void 0, this.editorMode = "widgets", this.persist({
 			...this.store,
 			activeProjectId: e
-		});
+		}), this.previewHtml = "", this.schedulePreview(0);
 	}
 	async addProject() {
 		let e = ct(`Untitled display ${this.store.projects.length + 1}`);
@@ -3202,7 +3287,7 @@ var mt = (e) => {
 			...this.store,
 			activeProjectId: t.id,
 			projects: [...this.store.projects, t]
-		}), this.selectedRegionId = "", this.showToast("Display duplicated");
+		}), this.selectedRegionId = "", this.previewHtml = "", this.schedulePreview(0), this.showToast("Display duplicated");
 	}
 	async deleteProject() {
 		await this.hass.callWS({
@@ -3214,7 +3299,7 @@ var mt = (e) => {
 			...this.store,
 			activeProjectId: e[0]?.id ?? "",
 			projects: e
-		}), this.selectedRegionId = "", this.layoutDraft = void 0, this.editorMode = "widgets", this.showToast("Display deleted");
+		}), this.selectedRegionId = "", this.layoutDraft = void 0, this.editorMode = "widgets", this.previewHtml = "", this.schedulePreview(0), this.showToast("Display deleted");
 	}
 	setProjectStatus(e) {
 		this.updateProject((t) => ({
@@ -3483,15 +3568,15 @@ var mt = (e) => {
     `;
 	}
 	renderScreenRegion(e) {
-		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, a = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), o = i ? e.label ?? Q(a.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`;
+		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !r && !!this.previewHtml, a = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, o = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), s = a ? e.label ?? Q(o.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`;
 		return E`
       <section
-        class="screen-region ${r ? "layout-region" : e.widget ? "" : "empty"} ${!r && e.id === this.selectedRegionId ? "selected" : ""}"
+        class="screen-region ${r ? "layout-region" : e.widget ? "" : "empty"} ${i ? "preview-region" : ""} ${!r && e.id === this.selectedRegionId ? "selected" : ""}"
         style=${I({
 			gridColumn: `${e.column} / span ${e.columnSpan}`,
 			gridRow: `${e.row} / span ${e.rowSpan}`
 		})}
-        aria-label=${r ? i ? `Region ${o}` : `Grid cell ${o}` : t ? `${t.name} region` : "Empty region"}
+        aria-label=${r ? a ? `Region ${s}` : `Grid cell ${s}` : t ? `${t.name} region` : "Empty region"}
         @click=${() => {
 			r || (this.selectedRegionId = e.id);
 		}}
@@ -3499,7 +3584,7 @@ var mt = (e) => {
 			r && this.splitSelectedRegion(e.id);
 		}}
       >
-        ${r ? i ? E`<div class="layout-region-copy composed"><strong>${o}</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>` : O : t && e.widget ? t.render(e.widget.config, {
+        ${i ? O : r ? a ? E`<div class="layout-region-copy composed"><strong>${s}</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>` : O : t && e.widget ? t.render(e.widget.config, {
 			compact: n,
 			palette: this.project.palette
 		}) : E`<div class="empty-region-copy"><strong>Add widget</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>`}
@@ -3549,7 +3634,7 @@ var mt = (e) => {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen"
+                  class="display-screen ${this.editorMode === "widgets" && this.previewHtml ? "live-preview" : ""}"
                   data-palette=${e.palette}
                   style=${I({
 			"--grid-columns": String(e.grid.columns),
@@ -3558,53 +3643,65 @@ var mt = (e) => {
 			height: `${n.height}px`
 		})}
                 >
-                  ${e.regions.map((e) => this.renderScreenRegion(e))}
-                  ${this.renderMergeLayer()}
+                  ${this.editorMode === "widgets" && this.previewHtml ? E`
+                      <iframe class="html-preview" title="Live Home Assistant data preview" sandbox="" .srcdoc=${this.previewDocument()}></iframe>
+                      <div
+                        class="preview-overlay"
+                        style=${I({
+			"--grid-columns": String(e.grid.columns),
+			"--grid-rows": String(e.grid.rows),
+			"--preview-gap": `${Math.max(3, Math.min(10, Math.round(Math.min(n.width, n.height) / 60)))}px`
+		})}
+                      >${e.regions.map((e) => this.renderScreenRegion(e))}</div>
+                    ` : E`
+                      ${e.regions.map((e) => this.renderScreenRegion(e))}
+                      ${this.renderMergeLayer()}
+                    `}
                 </div>
               </div>
             </div>
           </div>
-          ${this.editorMode === "layout" ? this.mergeAnchor ? E`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : E`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : E`<div class="merge-help"><strong>Widget mode:</strong> Select a region to configure its content.</div>`}
+          ${this.editorMode === "layout" ? this.mergeAnchor ? E`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : E`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : E`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Liquid + data composed in ${this.previewTimings.compose.toFixed(1)} ms. Select a region to configure it.` : "Select a region to configure its content."}</div>`}
         </div>
       </main>
     `;
 	}
 	renderOption(e) {
-		let t = this.selectedRegion?.widget?.config[e.key];
+		let t = this.selectedRegion?.widget, n = t?.config[e.key] ?? (t ? this.widgetDefinition(t.type)?.defaults[e.key] : void 0);
 		if (e.type === "entity" || e.type === "entities" || e.type === "calendar") {
-			let n = e.type === "calendar" ? { entity: { domain: "calendar" } } : { entity: e.type === "entities" ? { multiple: !0 } : {} };
+			let t = e.type === "calendar" ? { entity: { domain: "calendar" } } : { entity: e.type === "entities" ? { multiple: !0 } : {} };
 			return E`
         <ha-form
           .hass=${this.hass}
-          .data=${{ [e.key]: t ?? "" }}
+          .data=${{ [e.key]: n ?? "" }}
           .schema=${[{
 				name: e.key,
 				label: e.label,
 				required: e.required ?? !1,
-				selector: n
+				selector: t
 			}]}
           @value-changed=${(t) => this.updateWidgetValue(e, t.detail.value[e.key])}
         ></ha-form>
       `;
 		}
 		return e.type === "toggle" ? E`
-      <div class="toggle-field"><label for=${`option-${e.key}`}>${e.label}</label><input id=${`option-${e.key}`} class="toggle" type="checkbox" .checked=${!!t} @change=${(t) => this.updateWidgetOption(e, t)} /></div>
+      <div class="toggle-field"><label for=${`option-${e.key}`}>${e.label}</label><input id=${`option-${e.key}`} class="toggle" type="checkbox" .checked=${!!n} @change=${(t) => this.updateWidgetOption(e, t)} /></div>
     ` : e.type === "select" ? E`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <select id=${`option-${e.key}`} .value=${String(t ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}>
+        <select id=${`option-${e.key}`} .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}>
           ${e.options?.map((e) => E`<option value=${e.value}>${e.label}</option>`)}
         </select>
       </div>
     ` : e.type === "text" && e.multiline ? E`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <textarea id=${`option-${e.key}`} rows="4" .value=${String(t ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}></textarea>
+        <textarea id=${`option-${e.key}`} rows="4" .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}></textarea>
       </div>
     ` : E`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <input id=${`option-${e.key}`} type=${e.type} .value=${String(t ?? "")} min=${e.min ?? O} max=${e.max ?? O} step=${e.step ?? O} @change=${(t) => this.updateWidgetOption(e, t)} />
+        <input id=${`option-${e.key}`} type=${e.type} .value=${String(n ?? "")} min=${e.min ?? O} max=${e.max ?? O} step=${e.step ?? O} @change=${(t) => this.updateWidgetOption(e, t)} />
       </div>
     `;
 	}
@@ -3757,6 +3854,6 @@ var mt = (e) => {
     `;
 	}
 };
-Z([Fe({ attribute: !1 })], $.prototype, "hass", void 0), Z([P()], $.prototype, "store", void 0), Z([P()], $.prototype, "selectedRegionId", void 0), Z([P()], $.prototype, "mergeAnchor", void 0), Z([P()], $.prototype, "mergeHover", void 0), Z([P()], $.prototype, "toastMessage", void 0), Z([P()], $.prototype, "loading", void 0), Z([P()], $.prototype, "saving", void 0), Z([P()], $.prototype, "loadError", void 0), Z([P()], $.prototype, "renameDraft", void 0), Z([P()], $.prototype, "editorMode", void 0), Z([P()], $.prototype, "layoutDraft", void 0), Z([P()], $.prototype, "widgetMetadata", void 0), Z([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), Z([F(".screen-fit")], $.prototype, "screenFit", void 0), Z([F(".screen-bezel")], $.prototype, "screenBezel", void 0), Z([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = Z([Me("opendisplay-studio-panel")], $);
+Z([Fe({ attribute: !1 })], $.prototype, "hass", void 0), Z([P()], $.prototype, "store", void 0), Z([P()], $.prototype, "selectedRegionId", void 0), Z([P()], $.prototype, "mergeAnchor", void 0), Z([P()], $.prototype, "mergeHover", void 0), Z([P()], $.prototype, "toastMessage", void 0), Z([P()], $.prototype, "loading", void 0), Z([P()], $.prototype, "saving", void 0), Z([P()], $.prototype, "loadError", void 0), Z([P()], $.prototype, "renameDraft", void 0), Z([P()], $.prototype, "editorMode", void 0), Z([P()], $.prototype, "layoutDraft", void 0), Z([P()], $.prototype, "widgetMetadata", void 0), Z([P()], $.prototype, "previewHtml", void 0), Z([P()], $.prototype, "previewLoading", void 0), Z([P()], $.prototype, "previewError", void 0), Z([P()], $.prototype, "previewTimings", void 0), Z([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), Z([F(".screen-fit")], $.prototype, "screenFit", void 0), Z([F(".screen-bezel")], $.prototype, "screenBezel", void 0), Z([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = Z([Me("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OdxApp };

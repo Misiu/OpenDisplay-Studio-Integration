@@ -885,6 +885,45 @@ export const appStyles = css`
     filter: contrast(0.98);
   }
 
+  .display-screen.live-preview {
+    display: block;
+    padding: 0;
+    gap: 0;
+    filter: none;
+  }
+
+  .html-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+    pointer-events: none;
+  }
+
+  .preview-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
+    gap: var(--preview-gap);
+    padding: var(--preview-gap);
+    box-sizing: border-box;
+  }
+
+  .preview-overlay .screen-region.preview-region {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .preview-overlay .screen-region.preview-region.empty {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
+  }
+
   .display-screen[data-palette='bw'] {
     --screen-paper: #fff;
     --screen-ink: #080808;

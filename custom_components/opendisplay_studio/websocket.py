@@ -8,8 +8,14 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
 
+from .composer import ProjectComposeError, async_compose_project
 from .const import DOMAIN
-from .projects import ProjectStore, ProjectValidationError
+from .liquid_renderer import TemplateRenderError
+from .projects import (
+    ProjectStore,
+    ProjectValidationError,
+    validate_project,
+)
 from .widgets import WIDGET_DEFINITIONS
 
 
@@ -107,9 +113,46 @@ async def websocket_delete_project(
     connection.send_result(msg["id"], {})
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/compose_preview",
+        vol.Required("project"): dict,
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def websocket_compose_preview(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Compose the same live Liquid/TRMNL HTML used by Media Source."""
+    try:
+        project = validate_project(msg["project"])
+        composed = await async_compose_project(hass, project)
+    except ProjectValidationError as err:
+        _error(connection, msg, err)
+        return
+    except (ProjectComposeError, TemplateRenderError) as err:
+        connection.send_error(msg["id"], "preview_failed", str(err))
+        return
+    connection.send_result(
+        msg["id"],
+        {
+            "html": composed.html,
+            "timings": {
+                "data": composed.data_ms,
+                "liquid": composed.liquid_ms,
+                "compose": composed.compose_ms,
+            },
+        },
+    )
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     """Register panel commands once during domain setup."""
     websocket_api.async_register_command(hass, websocket_bootstrap)
     websocket_api.async_register_command(hass, websocket_create_project)
     websocket_api.async_register_command(hass, websocket_update_project)
     websocket_api.async_register_command(hass, websocket_delete_project)
+    websocket_api.async_register_command(hass, websocket_compose_preview)

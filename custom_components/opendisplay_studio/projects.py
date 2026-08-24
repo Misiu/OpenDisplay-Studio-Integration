@@ -92,6 +92,8 @@ def _validate_widget(value: object) -> dict[str, Any] | None:
             "entity": str(normalized_config.get("entity", "")),
             "title": str(normalized_config.get("title", ""))[:MAX_NAME_LENGTH],
             "layout": str(layout) if layout in {"large", "compact"} else "large",
+            "showIcon": bool(normalized_config.get("showIcon", True)),
+            "showName": bool(normalized_config.get("showName", True)),
             "showUnit": bool(normalized_config.get("showUnit", True)),
         }
     elif widget_type == "calendar":

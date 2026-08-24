@@ -15,19 +15,23 @@ export const entityValueWidget: WidgetDefinition = {
     entity: '',
     title: '',
     layout: 'large',
+    showIcon: true,
+    showName: true,
     showUnit: true,
   },
   options: [
     { key: 'entity', label: 'Entity', type: 'entity' },
     { key: 'title', label: 'Title', type: 'text' },
     { key: 'layout', label: 'Layout', type: 'select', options: [{ label: 'Large value', value: 'large' }, { label: 'Compact', value: 'compact' }] },
+    { key: 'showIcon', label: 'Show icon', type: 'toggle' },
+    { key: 'showName', label: 'Show name', type: 'toggle' },
     { key: 'showUnit', label: 'Show unit', type: 'toggle' },
   ],
   render: (config) => html`
     <div class="widget entity-widget">
       ${renderIcon(mdiThermometer, 'Entity state')}
       <span class="entity-label">${configText(config, 'title') || configText(config, 'entity') || 'Choose an entity'}</span>
-      <strong class="entity-value">—</strong>
+      <strong class="entity-value">Live data</strong>
     </div>
   `,
 }

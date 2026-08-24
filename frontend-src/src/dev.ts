@@ -11,6 +11,19 @@ if (!customElements.get('ha-form')) {
 }
 
 const now = new Date().toISOString()
+const demoEntityHtml = (project: ScreenProject): string => {
+  const gap = Math.max(3, Math.min(10, Math.round(Math.min(project.width, project.height) / 60)))
+  const regions = project.regions.map((region) => {
+    const entity = String(region.widget?.config.entity ?? '')
+    const title = String(region.widget?.config.title ?? '') || 'Kitchen temperature'
+    const content = region.widget?.type === 'entity-state'
+      ? `<div class="item studio-entity studio-entity--square"><div class="content studio-entity__content"><svg class="studio-entity__icon" viewBox="0 0 24 24"><path d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z"></path></svg><span class="studio-entity__name">${title || entity}</span><span class="studio-entity__reading"><span class="studio-entity__value">21.4</span><span class="studio-entity__unit">°C</span></span></div></div>`
+      : ''
+    return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan}">${content}</section>`
+  }).join('')
+  return `<main class="screen studio-screen"><style>.studio-screen{width:${project.width}px;height:${project.height}px;background:#fff}.studio-grid{display:grid;width:100%;height:100%;padding:${gap}px;gap:${gap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}.studio-entity__content{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px}.studio-entity__icon{width:52px;height:52px}.studio-entity__name{font-size:17px;font-weight:700}.studio-entity__reading{display:flex;align-items:baseline;gap:5px}.studio-entity__value{font-size:68px;line-height:.9}.studio-entity__unit{font-size:18px;font-weight:700}</style><div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
+}
+
 let projects: ScreenProject[] = [
   {
     id: '4a34c31e',
@@ -73,6 +86,12 @@ const hass: HomeAssistant = {
   async callWS<T>(message: Record<string, unknown>): Promise<T> {
     if (message.type === 'opendisplay_studio/bootstrap') {
       return { projects, widgets: [] } as T
+    }
+    if (message.type === 'opendisplay_studio/compose_preview') {
+      return {
+        html: demoEntityHtml(message.project as ScreenProject),
+        timings: { data: 0.4, liquid: 0.7, compose: 1.6 },
+      } as T
     }
     if (message.type === 'opendisplay_studio/create_project') {
       const project = { ...(message.project as ScreenProject), id: crypto.randomUUID() }

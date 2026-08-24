@@ -1,6 +1,6 @@
 [project]
 name = "opendisplay-studio-integration"
-version = "0.3.1"
+version = "0.3.2"
 requires-python = ">=3.14.2"
 
 [tool.pytest.ini_options]
@@ -40,6 +40,8 @@ ignore = [
 "tests/test_liquid_renderer.py" = ["E501"]
 "custom_components/opendisplay_studio/screens.py" = ["E501", "RUF001"]
 "custom_components/opendisplay_studio/widgets.py" = ["E501"]
+"custom_components/opendisplay_studio/data_providers.py" = ["E501"]
+"custom_components/opendisplay_studio/composer.py" = ["E501"]
 "custom_components/opendisplay_studio/projects.py" = ["PLR0915"]
 
 [tool.mypy]

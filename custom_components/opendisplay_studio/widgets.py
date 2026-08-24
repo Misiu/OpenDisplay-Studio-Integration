@@ -11,7 +11,14 @@ WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
         "name": "Entity State",
         "description": "Current state of a Home Assistant entity.",
         "icon": "mdi:gauge",
-        "defaults": {"entity": "", "title": "", "layout": "large", "showUnit": True},
+        "defaults": {
+            "entity": "",
+            "title": "",
+            "layout": "large",
+            "showIcon": True,
+            "showName": True,
+            "showUnit": True,
+        },
         "fields": [
             {"key": "entity", "label": "Entity", "type": "entity", "required": True},
             {"key": "title", "label": "Title", "type": "text"},
@@ -24,6 +31,8 @@ WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
                     {"label": "Compact", "value": "compact"},
                 ],
             },
+            {"key": "showIcon", "label": "Show icon", "type": "toggle"},
+            {"key": "showName", "label": "Show name", "type": "toggle"},
             {"key": "showUnit", "label": "Show unit", "type": "toggle"},
         ],
         "dataRequirements": [
@@ -100,11 +109,21 @@ WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
 ]
 
 ENTITY_TEMPLATE: Final = """
-<div class="item"><div class="content flex flex--col flex--center gap--small">
-  {% if config.title %}<span class="label">{{ config.title }}</span>{% endif %}
-  <span class="value {% if config.layout == 'large' %}value--xxlarge{% else %}value--large{% endif %} value--tnums" data-fit-value="true">{{ data.entity.state }}{% if config.showUnit and data.entity.unit %} {{ data.entity.unit }}{% endif %}</span>
-  {% unless config.title %}<span class="label label--small">{{ data.entity.name }}</span>{% endunless %}
-</div></div>
+<div class="item studio-entity studio-entity--{{ region.shape }}">
+  <div class="content studio-entity__content">
+    {% if config.showIcon %}
+      <svg class="studio-entity__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="{{ data.entity.iconPath }}"></path></svg>
+    {% endif %}
+    {% if config.showName %}
+      <span class="label studio-entity__name">{{ data.entity.displayName }}</span>
+    {% endif %}
+    <span class="studio-entity__rule" aria-hidden="true"></span>
+    <span class="studio-entity__reading">
+      <span class="value value--tnums studio-entity__value" data-fit-value="true">{{ data.entity.state }}</span>
+      {% if config.showUnit and data.entity.unit %}<span class="label studio-entity__unit">{{ data.entity.unit }}</span>{% endif %}
+    </span>
+  </div>
+</div>
 """
 
 CALENDAR_TEMPLATE: Final = """

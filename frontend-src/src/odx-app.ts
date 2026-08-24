@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, type TemplateResult } from 'lit'
+import { LitElement, html, nothing, type PropertyValues, type TemplateResult } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import {
@@ -29,6 +29,7 @@ import { createProject } from './services/storage'
 import type {
   BootstrapResponse,
   CellCoordinate,
+  ComposePreviewResponse,
   GridRegion,
   HomeAssistant,
   Orientation,
@@ -83,6 +84,10 @@ export class OdxApp extends LitElement {
   @state() private editorMode: EditorMode = 'widgets'
   @state() private layoutDraft?: ScreenProject
   @state() private widgetMetadata: BootstrapResponse['widgets'] = []
+  @state() private previewHtml = ''
+  @state() private previewLoading = false
+  @state() private previewError = ''
+  @state() private previewTimings?: ComposePreviewResponse['timings']
 
   @query('.preview-boundary') private previewBoundary?: HTMLElement
   @query('.screen-fit') private screenFit?: HTMLElement
@@ -92,6 +97,9 @@ export class OdxApp extends LitElement {
   private toastTimer?: number
   private previewResizeObserver?: ResizeObserver
   private saveRevision = 0
+  private previewRevision = 0
+  private previewTimer?: number
+  private entityStateSignature = ''
 
   static styles = [appStyles, sharedWidgetStyles, ...widgetStyles]
 
@@ -102,14 +110,22 @@ export class OdxApp extends LitElement {
     void this.loadProjects()
   }
 
-  protected updated(): void {
+  protected updated(changedProperties: PropertyValues<this>): void {
     if (this.previewBoundary) this.previewResizeObserver?.observe(this.previewBoundary)
     this.updatePreviewScale()
+    if (changedProperties.has('hass')) {
+      const signature = this.currentEntityStateSignature()
+      if (signature !== this.entityStateSignature) {
+        this.entityStateSignature = signature
+        this.schedulePreview()
+      }
+    }
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback()
     this.previewResizeObserver?.disconnect()
+    if (this.previewTimer) window.clearTimeout(this.previewTimer)
   }
 
   private get project(): ScreenProject {
@@ -171,6 +187,54 @@ export class OdxApp extends LitElement {
     this.store = store
   }
 
+  private currentEntityStateSignature(): string {
+    if (!this.store.projects.length) return ''
+    return this.project.regions
+      .flatMap((region) => region.widget?.type === 'entity-state'
+        ? [String(region.widget.config.entity ?? '')]
+        : [])
+      .filter(Boolean)
+      .sort()
+      .map((entityId) => {
+        const state = this.hass.states?.[entityId]
+        return `${entityId}:${state?.state ?? ''}:${state?.last_updated ?? ''}`
+      })
+      .join('|')
+  }
+
+  private schedulePreview(delay = 250): void {
+    if (this.editorMode !== 'widgets' || !this.store.projects.length) return
+    if (this.previewTimer) window.clearTimeout(this.previewTimer)
+    this.previewTimer = window.setTimeout(() => {
+      this.previewTimer = undefined
+      void this.composePreview(this.project)
+    }, delay)
+  }
+
+  private async composePreview(project: ScreenProject): Promise<void> {
+    const revision = ++this.previewRevision
+    this.previewLoading = true
+    this.previewError = ''
+    try {
+      const response = await this.hass.callWS<ComposePreviewResponse>({
+        type: 'opendisplay_studio/compose_preview',
+        project,
+      })
+      if (revision !== this.previewRevision) return
+      this.previewHtml = response.html
+      this.previewTimings = response.timings
+    } catch (error) {
+      if (revision !== this.previewRevision) return
+      this.previewError = error instanceof Error ? error.message : 'Could not compose live preview'
+    } finally {
+      if (revision === this.previewRevision) this.previewLoading = false
+    }
+  }
+
+  private previewDocument(): string {
+    return `<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light"><style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff}body.trmnl{font-family:Arial,sans-serif;color:#000}.screen{box-sizing:border-box}</style></head><body class="trmnl">${this.previewHtml}</body></html>`
+  }
+
   private async loadProjects(): Promise<void> {
     this.loading = true
     this.loadError = ''
@@ -182,6 +246,7 @@ export class OdxApp extends LitElement {
         projects: response.projects,
       }
       this.widgetMetadata = response.widgets
+      this.schedulePreview(0)
     } catch (error) {
       this.loadError = error instanceof Error ? error.message : 'Unable to load projects'
     } finally {
@@ -203,6 +268,7 @@ export class OdxApp extends LitElement {
           ...this.store,
           projects: this.store.projects.map((item) => item.id === response.project.id ? response.project : item),
         }
+        this.schedulePreview()
       }
     } catch (error) {
       this.showToast(error instanceof Error ? error.message : 'Could not save project')
@@ -219,7 +285,10 @@ export class OdxApp extends LitElement {
     )
     this.persist({ ...this.store, projects })
     const updated = projects.find((project) => project.id === this.store.activeProjectId)
-    if (updated) void this.saveProject(updated)
+    if (updated) {
+      void this.saveProject(updated)
+      this.schedulePreview()
+    }
   }
 
   private updateLayoutDraft(updater: (project: ScreenProject) => ScreenProject): void {
@@ -252,6 +321,7 @@ export class OdxApp extends LitElement {
     this.mergeHover = undefined
     this.selectedRegionId = ''
     this.showToast('Device and layout updated')
+    this.schedulePreview(0)
   }
 
   private showToast(message: string): void {
@@ -269,6 +339,8 @@ export class OdxApp extends LitElement {
     this.layoutDraft = undefined
     this.editorMode = 'widgets'
     this.persist({ ...this.store, activeProjectId: projectId })
+    this.previewHtml = ''
+    this.schedulePreview(0)
   }
 
   private async addProject(): Promise<void> {
@@ -295,6 +367,8 @@ export class OdxApp extends LitElement {
     const project = response.project
     this.persist({ ...this.store, activeProjectId: project.id, projects: [...this.store.projects, project] })
     this.selectedRegionId = ''
+    this.previewHtml = ''
+    this.schedulePreview(0)
     this.showToast('Display duplicated')
   }
 
@@ -305,6 +379,8 @@ export class OdxApp extends LitElement {
     this.selectedRegionId = ''
     this.layoutDraft = undefined
     this.editorMode = 'widgets'
+    this.previewHtml = ''
+    this.schedulePreview(0)
     this.showToast('Display deleted')
   }
 
@@ -596,6 +672,7 @@ export class OdxApp extends LitElement {
     const definition = region.widget ? this.widgetDefinition(region.widget.type) : undefined
     const compact = region.columnSpan === 1 || region.rowSpan === 1
     const layoutMode = this.editorMode === 'layout'
+    const livePreview = !layoutMode && Boolean(this.previewHtml)
     const isComposed = Boolean(region.label) || region.rowSpan > 1 || region.columnSpan > 1
     const composedRegions = this.canvasProject.regions
       .filter((item) => item.label || item.rowSpan > 1 || item.columnSpan > 1)
@@ -603,13 +680,15 @@ export class OdxApp extends LitElement {
     const label = isComposed ? region.label ?? regionLabel(composedRegions.findIndex((item) => item.id === region.id)) : `${region.column}.${region.row}`
     return html`
       <section
-        class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
+        class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
         style=${styleMap({ gridColumn: `${region.column} / span ${region.columnSpan}`, gridRow: `${region.row} / span ${region.rowSpan}` })}
         aria-label=${layoutMode ? isComposed ? `Region ${label}` : `Grid cell ${label}` : definition ? `${definition.name} region` : 'Empty region'}
         @click=${() => { if (!layoutMode) this.selectedRegionId = region.id }}
         @dblclick=${() => { if (layoutMode) this.splitSelectedRegion(region.id) }}
       >
-        ${layoutMode
+        ${livePreview
+          ? nothing
+          : layoutMode
           ? isComposed
             ? html`<div class="layout-region-copy composed"><strong>${label}</strong><span>${region.columnSpan}×${region.rowSpan} region</span></div>`
             : nothing
@@ -669,7 +748,7 @@ export class OdxApp extends LitElement {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen"
+                  class="display-screen ${this.editorMode === 'widgets' && this.previewHtml ? 'live-preview' : ''}"
                   data-palette=${project.palette}
                   style=${styleMap({
                     '--grid-columns': String(project.grid.columns),
@@ -678,8 +757,22 @@ export class OdxApp extends LitElement {
                     height: `${pixels.height}px`,
                   })}
                 >
-                  ${project.regions.map((region) => this.renderScreenRegion(region))}
-                  ${this.renderMergeLayer()}
+                  ${this.editorMode === 'widgets' && this.previewHtml
+                    ? html`
+                      <iframe class="html-preview" title="Live Home Assistant data preview" sandbox="" .srcdoc=${this.previewDocument()}></iframe>
+                      <div
+                        class="preview-overlay"
+                        style=${styleMap({
+                          '--grid-columns': String(project.grid.columns),
+                          '--grid-rows': String(project.grid.rows),
+                          '--preview-gap': `${Math.max(3, Math.min(10, Math.round(Math.min(pixels.width, pixels.height) / 60)))}px`,
+                        })}
+                      >${project.regions.map((region) => this.renderScreenRegion(region))}</div>
+                    `
+                    : html`
+                      ${project.regions.map((region) => this.renderScreenRegion(region))}
+                      ${this.renderMergeLayer()}
+                    `}
                 </div>
               </div>
             </div>
@@ -688,14 +781,22 @@ export class OdxApp extends LitElement {
             ? this.mergeAnchor
               ? html`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>`
               : html`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>`
-            : html`<div class="merge-help"><strong>Widget mode:</strong> Select a region to configure its content.</div>`}
+            : html`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError
+              ? this.previewError
+              : this.previewLoading
+                ? 'Refreshing current Home Assistant data…'
+                : this.previewTimings
+                  ? `Liquid + data composed in ${this.previewTimings.compose.toFixed(1)} ms. Select a region to configure it.`
+                  : 'Select a region to configure its content.'}</div>`}
         </div>
       </main>
     `
   }
 
   private renderOption(option: WidgetOption): TemplateResult {
-    const value = this.selectedRegion?.widget?.config[option.key]
+    const widget = this.selectedRegion?.widget
+    const value = widget?.config[option.key]
+      ?? (widget ? this.widgetDefinition(widget.type)?.defaults[option.key] : undefined)
     if (option.type === 'entity' || option.type === 'entities' || option.type === 'calendar') {
       const selector = option.type === 'calendar'
         ? { entity: { domain: 'calendar' } }
