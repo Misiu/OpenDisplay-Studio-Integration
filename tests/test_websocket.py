@@ -18,7 +18,6 @@ from custom_components.opendisplay_studio.websocket import (
 PNG = b"\x89PNG\r\n\x1a\n" + b"preview"
 
 PROJECT = {
-    "id": "preview-id",
     "width": 800,
     "height": 480,
 }

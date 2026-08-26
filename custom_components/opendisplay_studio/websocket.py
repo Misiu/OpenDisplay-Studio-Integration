@@ -9,7 +9,7 @@ from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
 
 from .composer import ProjectComposeError, async_compose_project
-from .const import DOMAIN, LOGGER, RENDER_HTTP_PATH
+from .const import DOMAIN, LOGGER, MIN_RENDERER_VERSION, RENDER_HTTP_PATH
 from .liquid_renderer import TemplateRenderError
 from .projects import (
     ProjectStore,
@@ -28,10 +28,11 @@ def _renderer_client(hass: HomeAssistant) -> RendererClient:
     """Return the domain Renderer shared by preview and Media Source."""
     client = getattr(hass.data[DOMAIN], "renderer", None)
     if client is None:
-        raise ProjectComposeError(
-            "Renderer App is not connected. Update and start Renderer App 0.2.3, "
-            "then reload the OpenDisplay Studio integration"
+        message = (
+            "Renderer App is not connected. Update and start Renderer App "
+            f"{MIN_RENDERER_VERSION}, then reload the OpenDisplay Studio integration"
         )
+        raise ProjectComposeError(message)
     return cast("RendererClient", client)
 
 
@@ -168,7 +169,7 @@ async def websocket_compose_preview(
     LOGGER.debug(
         "Rendered live preview project=%s size=%dx%d data=%.2f ms liquid=%.2f ms "
         "compose=%.2f ms renderer=%s pipeline=%.2f ms bytes=%d",
-        project["id"],
+        project.get("id", "unsaved-preview"),
         project["width"],
         project["height"],
         composed.data_ms,

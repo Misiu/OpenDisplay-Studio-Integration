@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.3.6
+
+- Make the Weather data contract total: current conditions render when the
+  entity is not selected, forecast data is absent, or `weather.get_forecasts`
+  fails.
+- Fix successful unsaved previews crashing in diagnostic logging when the
+  normalized project has no `id`.
+- Require Renderer App 0.2.4 with the corrected Home Assistant discovery
+  service name.
+
 ## 0.3.5
 
 - Restore display creation when Home Assistant is served from a context where

@@ -43,6 +43,15 @@ its compatible Renderer App. A widget package declaring another version must
 be rejected or installed alongside an explicitly compatible renderer; it must
 never be rendered against a silently substituted framework version.
 
+### Liquid engine conformance
+
+The CLI uses its exact pinned LiquidJS version while Home Assistant uses the
+bounded Python Liquid runtime. Published built-in widgets must render the same
+contract fixtures successfully in both engines. Every optional nested field
+needs a fixture where the key is absent, not only present with an empty or null
+value. Widget templates must not rely on engine-specific short-circuit or
+undefined-value behavior.
+
 The panel builds controls from `fields`. A field can contain a native Home
 Assistant `selector` object, using the same schema as blueprint inputs. The
 panel passes that object to `ha-form` without recreating selector behavior.

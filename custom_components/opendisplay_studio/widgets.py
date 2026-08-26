@@ -88,7 +88,7 @@ WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
     },
     {
         "id": "weather",
-        "version": 3,
+        "version": 4,
         "name": "Weather",
         "description": "Current conditions and a daily Home Assistant forecast.",
         "icon": "mdi:weather-partly-cloudy",

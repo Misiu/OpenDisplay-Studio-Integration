@@ -15,6 +15,7 @@ from .data_providers import (
     CalendarProvider,
     EntityStateProvider,
     WeatherForecastProvider,
+    weather_placeholder,
 )
 from .liquid_renderer import LIQUID
 from .projects import Project
@@ -207,7 +208,11 @@ def _resolve_widget_data(
                 for source in sources
             ]
         elif requirement["provider"] == "weather_forecast":
-            values = [weather.get(source) for source in sources]
+            values = [
+                weather.get(source, weather_placeholder(source)) for source in sources
+            ]
+            if not values and requirement.get("cardinality") != "many":
+                values = [weather_placeholder()]
         data[requirement["key"]] = (
             values
             if requirement.get("cardinality") == "many"

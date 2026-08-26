@@ -14,7 +14,10 @@ from homeassistant.components.weather import (
     SERVICE_GET_FORECASTS,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util import dt as dt_util
+
+from .const import LOGGER
 
 ICON_PATHS = {
     "calendar": "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z",
@@ -147,6 +150,23 @@ def _weather_icon(condition: str) -> str:
     return f"{WEATHER_ICON_BASE_URL}/{filename}"
 
 
+def weather_placeholder(entity_id: str = "") -> dict[str, Any]:
+    """Return the complete Weather template contract without live data."""
+    return {
+        "entity_id": entity_id,
+        "name": entity_id or "Choose a weather entity",
+        "condition": "unavailable",
+        "condition_label": "Unavailable",
+        "icon": _weather_icon("exceptional"),
+        "temperature": "—",
+        "temperature_unit": "",
+        "apparent_temperature": None,
+        "humidity": None,
+        "updated_at": "",
+        "forecast": [],
+    }
+
+
 def _uv_label(value: object) -> str | None:
     """Convert a numeric UV index into the conventional exposure category."""
     if not isinstance(value, int | float) or isinstance(value, bool):
@@ -189,14 +209,22 @@ class WeatherForecastProvider:
             return {}
 
         sorted_entity_ids = sorted(entity_ids)
-        response = await self._hass.services.async_call(
-            WEATHER_DOMAIN,
-            SERVICE_GET_FORECASTS,
-            {"type": "daily"},
-            blocking=True,
-            target={"entity_id": sorted_entity_ids},
-            return_response=True,
-        )
+        try:
+            response = await self._hass.services.async_call(
+                WEATHER_DOMAIN,
+                SERVICE_GET_FORECASTS,
+                {"type": "daily"},
+                blocking=True,
+                target={"entity_id": sorted_entity_ids},
+                return_response=True,
+            )
+        except HomeAssistantError as err:
+            LOGGER.warning(
+                "Daily weather forecast is unavailable; rendering current "
+                "conditions without forecast: %s",
+                err,
+            )
+            response = {}
         forecast_response = response if isinstance(response, dict) else {}
         today = dt_util.now().date()
         result: dict[str, dict[str, Any]] = {}

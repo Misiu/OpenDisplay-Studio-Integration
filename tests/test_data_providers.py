@@ -2,6 +2,8 @@
 
 from unittest.mock import AsyncMock, patch
 
+from homeassistant.exceptions import HomeAssistantError
+
 from custom_components.opendisplay_studio.data_providers import (
     EntityStateProvider,
     WeatherForecastProvider,
@@ -134,3 +136,32 @@ async def test_weather_provider_uses_explicit_nulls_for_optional_values(hass) ->
     assert current["forecast"][0]["uv_index"] is None
     assert current["forecast"][0]["uv_label"] is None
     assert current["forecast"][0]["precipitation_probability"] is None
+
+
+async def test_weather_provider_keeps_current_conditions_when_forecast_fails(
+    hass,
+) -> None:
+    """A forecast service failure must not blank the entire display."""
+    hass.states.async_set(
+        "weather.home",
+        "rainy",
+        {
+            "friendly_name": "Home",
+            "temperature": 12,
+            "temperature_unit": "°C",
+            "humidity": 88,
+        },
+    )
+
+    with patch.object(
+        type(hass.services),
+        "async_call",
+        AsyncMock(side_effect=HomeAssistantError("forecast unavailable")),
+    ):
+        result = await WeatherForecastProvider(hass).async_get_many({"weather.home"})
+
+    current = result["weather.home"]
+    assert current["condition"] == "rainy"
+    assert current["temperature"] == 12
+    assert current["humidity"] == 88
+    assert current["forecast"] == []

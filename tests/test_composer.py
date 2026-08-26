@@ -165,7 +165,6 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
             "apparent_temperature": 9,
             "humidity": 88,
             "updated_at": "08:15",
-            "forecast": [],
         }
     }
 
@@ -182,3 +181,37 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
     assert "--studio-gap:0px" in result.html
     assert 'data-region-width="190.000"' in result.html
     assert 'data-region-height="228.000"' in result.html
+
+
+async def test_weather_widget_renders_placeholder_before_entity_selection(hass) -> None:
+    """A newly added Weather widget must render before its selector is configured."""
+    project = {
+        "palette": "bw",
+        "width": 400,
+        "height": 300,
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [
+            {
+                "id": "weather",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "weather",
+                    "version": 4,
+                    "config": {"weather": "", "showForecast": False},
+                },
+            }
+        ],
+    }
+
+    with patch(
+        "custom_components.opendisplay_studio.composer.WeatherForecastProvider.async_get_many",
+        AsyncMock(return_value={}),
+    ) as get_many:
+        result = await async_compose_project(hass, project)
+
+    get_many.assert_awaited_once_with(set())
+    assert "Choose a weather entity" in result.html
+    assert "—°" in result.html
