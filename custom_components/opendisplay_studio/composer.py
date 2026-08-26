@@ -40,7 +40,7 @@ STUDIO_STYLES = """
   .studio-screen{width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff;box-sizing:border-box}
   .studio-screen .view--full{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
   .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-gap);gap:var(--studio-gap);box-sizing:border-box}
-  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;border:1px solid #111;background:#fff;box-sizing:border-box;container-type:size}
+  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:#fff;box-sizing:border-box;container-type:size;container-name:od-region}
   .studio-region>.item{width:100%!important;height:100%!important;margin:0!important;padding:0!important}
   .studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}
   .studio-entity__content{display:flex!important;align-items:center;justify-content:center;gap:clamp(4px,4cqh,14px);padding:clamp(7px,7cqh,22px)!important;overflow:hidden}
@@ -79,8 +79,10 @@ def _screen_size(width: int, height: int) -> str:
     return "screen--md"
 
 
-def _region_shape(project: Project, region: dict[str, Any], *, gap: int) -> str:
-    """Classify a region using its physical aspect ratio, not grid spans alone."""
+def _region_size(
+    project: Project, region: dict[str, Any], *, gap: int
+) -> tuple[float, float]:
+    """Calculate the physical CSS-pixel size of one grid region."""
     grid = project["grid"]
     project_width = int(project.get("width", 800))
     project_height = int(project.get("height", 480))
@@ -88,6 +90,12 @@ def _region_shape(project: Project, region: dict[str, Any], *, gap: int) -> str:
     cell_height = (project_height - gap * (grid["rows"] + 1)) / grid["rows"]
     width = cell_width * region["columnSpan"] + gap * (region["columnSpan"] - 1)
     height = cell_height * region["rowSpan"] + gap * (region["rowSpan"] - 1)
+    return width, height
+
+
+def _region_shape(project: Project, region: dict[str, Any], *, gap: int) -> str:
+    """Classify a region using its physical aspect ratio, not grid spans alone."""
+    width, height = _region_size(project, region, gap=gap)
     ratio = width / max(1, height)
     if ratio >= 1.55:
         return "wide"
@@ -231,6 +239,15 @@ async def async_compose_project(
     width = int(project.get("width", 800))
     height = int(project.get("height", 480))
     gap = max(3, min(10, round(min(width, height) / 60)))
+    grid = project["grid"]
+    full_canvas = (
+        len(project["regions"]) == 1
+        and project["regions"][0]["row"] == 1
+        and project["regions"][0]["column"] == 1
+        and project["regions"][0]["rowSpan"] == grid["rows"]
+        and project["regions"][0]["columnSpan"] == grid["columns"]
+    )
+    layout_gap = 0 if full_canvas else gap
     for region in project["regions"]:
         widget = region.get("widget")
         fragment = ""
@@ -252,18 +269,26 @@ async def async_compose_project(
                 {
                     "config": config,
                     "data": data,
-                    "region": {"shape": _region_shape(project, region, gap=gap)},
+                    "region": {"shape": _region_shape(project, region, gap=layout_gap)},
                 },
             )
             fragment = result.html
             liquid_ms += result.milliseconds
+        region_width, region_height = _region_size(project, region, gap=layout_gap)
+        ratio = region_width / max(1, region_height)
         style = (
             f"grid-row:{region['row']} / span {region['rowSpan']};"
             f"grid-column:{region['column']} / span {region['columnSpan']};"
+            f"--od-region-width:{region_width:.3f};"
+            f"--od-region-height:{region_height:.3f};"
+            f"--od-region-aspect-ratio:{ratio:.6f};"
         )
-        shape = _region_shape(project, region, gap=gap)
+        shape = _region_shape(project, region, gap=layout_gap)
         fragments.append(
             f'<section class="studio-region studio-region--{shape}" '
+            f'data-region-width="{region_width:.3f}" '
+            f'data-region-height="{region_height:.3f}" '
+            f'data-region-aspect-ratio="{ratio:.6f}" '
             f'style="{style}">{fragment}</section>'
         )
 
@@ -273,14 +298,14 @@ async def async_compose_project(
         "bwry": "screen--color-4bwry",
         "spectra6": "screen--color-4bwry",
     }.get(project["palette"], "screen--1bit")
-    grid = project["grid"]
     body = "".join(fragments)
     size = _screen_size(width, height)
     portrait = " screen--portrait" if height > width else ""
     html = (
         f'<main class="screen {mode} {size}{portrait} studio-screen" '
         f'style="--studio-width:{width}px;--studio-height:{height}px;'
-        f'--studio-gap:{gap}px">{STUDIO_STYLES}<div class="view view--full">'
+        f"--screen-w:{width}px;--screen-h:{height}px;"
+        f'--studio-gap:{layout_gap}px">{STUDIO_STYLES}<div class="view view--full">'
         f'<div class="studio-grid" style="grid-template-columns:'
         f"repeat({grid['columns']},minmax(0,1fr));grid-template-rows:"
         f'repeat({grid["rows"]},minmax(0,1fr))">'

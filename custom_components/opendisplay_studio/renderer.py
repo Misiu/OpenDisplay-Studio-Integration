@@ -10,7 +10,7 @@ from typing import Any, TypedDict
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from yarl import URL
 
-from .const import API_VERSION
+from .const import API_VERSION, MIN_RENDERER_VERSION, TRMNL_FRAMEWORK_VERSION
 
 
 class RendererHealth(TypedDict):
@@ -104,6 +104,18 @@ class RendererClient:
                 f"Renderer API {api_version} is incompatible with API {API_VERSION}"
             )
             raise RendererIncompatibleError(message)
+        if _version_tuple(version) < _version_tuple(MIN_RENDERER_VERSION):
+            message = (
+                f"Renderer {version} is incompatible; "
+                f"version {MIN_RENDERER_VERSION} or newer is required"
+            )
+            raise RendererIncompatibleError(message)
+        if framework_version != TRMNL_FRAMEWORK_VERSION:
+            message = (
+                f"Renderer framework {framework_version} is incompatible with "
+                f"framework {TRMNL_FRAMEWORK_VERSION}"
+            )
+            raise RendererIncompatibleError(message)
         return RendererHealth(
             status=status,
             version=version,
@@ -160,3 +172,12 @@ def _float_header(value: str | None) -> float | None:
     except ValueError:
         return None
     return parsed if 0 <= parsed < float("inf") else None
+
+
+def _version_tuple(value: str) -> tuple[int, int, int]:
+    """Parse a release version for compatibility comparison."""
+    parts = value.split(".")
+    if len(parts) != 3 or any(not part.isdigit() for part in parts):
+        message = f"Renderer version {value!r} is invalid"
+        raise RendererIncompatibleError(message)
+    return int(parts[0]), int(parts[1]), int(parts[2])

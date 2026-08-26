@@ -26,7 +26,9 @@ On every resolution the integration deduplicates widget data requirements,
 reads current entity states, calendar events, and requested weather forecasts,
 renders widget Liquid templates, composes one TRMNL Framework document, and
 sends that final HTML to the Renderer. The Renderer App still knows only HTML,
-width, and height.
+width, and height. The designer preview calls this same Renderer path and shows
+its PNG, so the visible preview and final Media Source do not have separate CSS
+or layout implementations.
 
 See [the widget contract](WIDGET_CONTRACT.md) for the schema/data/template
 boundary, native Home Assistant selectors, and the controlled provider model.
