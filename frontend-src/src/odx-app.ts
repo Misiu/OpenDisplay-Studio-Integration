@@ -191,9 +191,15 @@ export class OdxApp extends LitElement {
   private currentEntityStateSignature(): string {
     if (!this.store.projects.length) return ''
     return this.project.regions
-      .flatMap((region) => region.widget?.type === 'entity-state'
-        ? [String(region.widget.config.entity ?? '')]
-        : [])
+      .flatMap((region) => {
+        if (region.widget?.type === 'entity-state') {
+          return [String(region.widget.config.entity ?? '')]
+        }
+        if (region.widget?.type === 'weather') {
+          return [String(region.widget.config.weather ?? '')]
+        }
+        return []
+      })
       .filter(Boolean)
       .sort()
       .map((entityId) => {

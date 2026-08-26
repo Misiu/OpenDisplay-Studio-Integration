@@ -27,6 +27,9 @@ def test_requirement_contract_supports_many_and_optional_sources() -> None:
     ) == ["sensor.office", "sensor.kitchen"]
     assert definition("text")["dataRequirements"] == []
     assert definition("entity-state")["dataRequirements"][0]["optional"] is False
+    weather = definition("weather")
+    assert weather["fields"][0]["selector"]["entity"]["filter"]["domain"] == ("weather")
+    assert weather["dataRequirements"][0]["provider"] == "weather_forecast"
 
 
 def test_entity_tile_shape_uses_physical_region_ratio() -> None:
@@ -124,3 +127,52 @@ async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
         pytest.raises(ProjectComposeError),
     ):
         await async_compose_project(hass, project)
+
+
+async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> None:
+    project = {
+        "palette": "bw",
+        "width": 190,
+        "height": 228,
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [
+            {
+                "id": "weather",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "weather",
+                    "version": 2,
+                    "config": {"weather": "weather.home"},
+                },
+            }
+        ],
+    }
+    weather = {
+        "weather.home": {
+            "entity_id": "weather.home",
+            "name": "Home",
+            "condition": "rainy",
+            "condition_label": "Rain",
+            "icon": "https://trmnl.com/images/plugins/weather/wi-rain.svg",
+            "temperature": 12,
+            "temperature_unit": "°C",
+            "apparent_temperature": 9,
+            "humidity": 88,
+            "updated_at": "08:15",
+            "forecast": [],
+        }
+    }
+
+    with patch(
+        "custom_components.opendisplay_studio.composer.WeatherForecastProvider.async_get_many",
+        AsyncMock(return_value=weather),
+    ) as get_many:
+        result = await async_compose_project(hass, project)
+
+    get_many.assert_awaited_once_with({"weather.home"})
+    assert "od-weather" in result.html
+    assert "12°" in result.html
+    assert "08:15" in result.html

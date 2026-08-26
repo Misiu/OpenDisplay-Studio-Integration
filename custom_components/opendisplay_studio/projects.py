@@ -108,6 +108,13 @@ def _validate_widget(value: object) -> dict[str, Any] | None:
             "showDescription": bool(normalized_config.get("showDescription", False)),
             "time24h": bool(normalized_config.get("time24h", True)),
         }
+    elif widget_type == "weather":
+        normalized_config = {
+            "weather": str(normalized_config.get("weather", "")),
+            "showHumidity": bool(normalized_config.get("showHumidity", True)),
+            "showFeelsLike": bool(normalized_config.get("showFeelsLike", True)),
+            "showForecast": bool(normalized_config.get("showForecast", True)),
+        }
     elif widget_type == "text":
         align = normalized_config.get("align", "left")
         normalized_config = {
@@ -204,6 +211,12 @@ def validate_project(value: object) -> Project:
             ):
                 raise ProjectValidationError(
                     "Ready Calendar widgets require a calendar entity"
+                )
+            if widget["type"] == "weather" and not str(config["weather"]).startswith(
+                "weather."
+            ):
+                raise ProjectValidationError(
+                    "Ready Weather widgets require a weather entity"
                 )
 
     display_id = value.get("displayId", "custom")

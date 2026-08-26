@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Add the adaptive Weather widget with a native Home Assistant weather entity
+  selector and live designer preview.
+- Resolve current conditions from entity state and daily forecasts through
+  `weather.get_forecasts`, deduplicated across regions.
+- Allow widget packages to provide native Home Assistant selector schemas while
+  keeping executable provider code inside the integration.
+
 ## 0.3.2
 
 - Make the designer preview use the live Liquid/TRMNL HTML composed by the

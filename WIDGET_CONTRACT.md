@@ -81,25 +81,19 @@ without exposing the full Home Assistant state machine.
 
 ## Weather
 
-Weather can declare a required forecast source and a second optional current
-temperature sensor. Both are resolved at render time:
+Weather declares one required entity. The provider combines its current state
+with the requested daily forecast at render time:
 
 ```json
 {
   "dataRequirements": [
     {
-      "key": "forecast",
+      "key": "weather",
       "provider": "weather_forecast",
       "configKey": "weather",
       "cardinality": "one",
-      "optional": false
-    },
-    {
-      "key": "externalTemperature",
-      "provider": "entity_state",
-      "configKey": "temperatureEntity",
-      "cardinality": "one",
-      "optional": true
+      "optional": false,
+      "forecastType": "daily"
     }
   ]
 }

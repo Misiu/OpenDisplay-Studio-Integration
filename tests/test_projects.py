@@ -52,6 +52,46 @@ def test_validation_rejects_overlapping_regions() -> None:
         validate_project(payload)
 
 
+def test_weather_widget_config_is_normalized() -> None:
+    payload = project_payload()
+    payload["regions"][0]["widget"] = {
+        "type": "weather",
+        "version": 2,
+        "config": {
+            "weather": "weather.home",
+            "showHumidity": False,
+            "showFeelsLike": True,
+            "showForecast": True,
+        },
+    }
+
+    result = validate_project(payload)
+
+    assert result["regions"][0]["widget"] == {
+        "type": "weather",
+        "version": 2,
+        "config": {
+            "weather": "weather.home",
+            "showHumidity": False,
+            "showFeelsLike": True,
+            "showForecast": True,
+        },
+    }
+
+
+def test_ready_weather_widget_requires_weather_entity() -> None:
+    payload = project_payload()
+    payload["status"] = "ready"
+    payload["regions"][0]["widget"] = {
+        "type": "weather",
+        "version": 2,
+        "config": {"weather": "sensor.outdoor_temperature"},
+    }
+
+    with pytest.raises(ProjectValidationError, match="weather entity"):
+        validate_project(payload)
+
+
 async def test_project_identity_survives_rename_and_ready(hass) -> None:
     store = ProjectStore(hass)
     with patch.object(store._store, "async_save", AsyncMock()):
