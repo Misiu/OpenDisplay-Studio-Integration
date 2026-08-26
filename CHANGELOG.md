@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.3.5
+
+- Restore display creation when Home Assistant is served from a context where
+  `crypto.randomUUID()` is unavailable.
+- Store one shared Renderer client for both designer previews and final Media
+  Source images, avoiding config-entry state timing races.
+- Preserve Home Assistant WebSocket error messages in the panel and add
+  backend exception diagnostics for failed live previews.
+
 ## 0.3.4
 
 - Render the designer preview through the configured Renderer App, making the

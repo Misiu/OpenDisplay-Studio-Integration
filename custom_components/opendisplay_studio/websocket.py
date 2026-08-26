@@ -6,7 +6,6 @@ from typing import Any, cast
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
-from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 
 from .composer import ProjectComposeError, async_compose_project
@@ -26,18 +25,14 @@ def _store(hass: HomeAssistant) -> ProjectStore:
 
 
 def _renderer_client(hass: HomeAssistant) -> RendererClient:
-    """Return the client owned by the loaded single config entry."""
-    entry = next(
-        (
-            entry
-            for entry in hass.config_entries.async_entries(DOMAIN)
-            if entry.state is ConfigEntryState.LOADED
-        ),
-        None,
-    )
-    if entry is None:
-        raise ProjectComposeError("Renderer App is not ready")
-    return cast("RendererClient", entry.runtime_data.client)
+    """Return the domain Renderer shared by preview and Media Source."""
+    client = getattr(hass.data[DOMAIN], "renderer", None)
+    if client is None:
+        raise ProjectComposeError(
+            "Renderer App is not connected. Update and start Renderer App 0.2.3, "
+            "then reload the OpenDisplay Studio integration"
+        )
+    return cast("RendererClient", client)
 
 
 def _error(
@@ -158,6 +153,14 @@ async def websocket_compose_preview(
     except (ProjectComposeError, RendererError, TemplateRenderError) as err:
         LOGGER.warning("Live preview render failed: %s", err)
         connection.send_error(msg["id"], "preview_failed", str(err))
+        return
+    except Exception as err:  # noqa: BLE001 - WebSocket boundary must return diagnostics
+        LOGGER.exception("Unexpected live preview failure")
+        connection.send_error(
+            msg["id"],
+            "preview_failed",
+            f"Unexpected preview failure: {err}",
+        )
         return
     token = hass.data[DOMAIN].cache.put(rendered.png)
     image_url = RENDER_HTTP_PATH.replace("{token}", token)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import override
+from typing import cast, override
 
 from homeassistant.components.media_player import (
     BrowseError,
@@ -16,14 +16,12 @@ from homeassistant.components.media_source import (
     PlayMedia,
     Unresolvable,
 )
-from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 
-from . import OpenDisplayStudioConfigEntry
 from .composer import ProjectComposeError, async_compose_project
 from .const import DOMAIN, LOGGER
 from .liquid_renderer import TemplateRenderError
-from .renderer import RendererError
+from .renderer import RendererClient, RendererError
 
 
 async def async_get_media_source(hass: HomeAssistant) -> OpenDisplayStudioMediaSource:
@@ -47,10 +45,10 @@ class OpenDisplayStudioMediaSource(MediaSource):
         project = self.hass.data[DOMAIN].projects.get(item.identifier)
         if project is None or project["status"] != "ready":
             raise Unresolvable("Unknown or Draft OpenDisplay Studio project")
-        entry = self._loaded_entry()
+        client = self._renderer_client()
         try:
             built = await async_compose_project(self.hass, project)
-            result = await entry.runtime_data.client.async_render(
+            result = await client.async_render(
                 html=built.html,
                 width=project["width"],
                 height=project["height"],
@@ -106,19 +104,12 @@ class OpenDisplayStudioMediaSource(MediaSource):
             ],
         )
 
-    def _loaded_entry(self) -> OpenDisplayStudioConfigEntry:
-        """Return the loaded single config entry."""
-        entry = next(
-            (
-                entry
-                for entry in self.hass.config_entries.async_entries(DOMAIN)
-                if entry.state is ConfigEntryState.LOADED
-            ),
-            None,
-        )
-        if entry is None:
+    def _renderer_client(self) -> RendererClient:
+        """Return the same domain Renderer used by the designer preview."""
+        client = getattr(self.hass.data[DOMAIN], "renderer", None)
+        if client is None:
             raise Unresolvable(
                 translation_domain=DOMAIN,
                 translation_key="config_entry_not_ready",
             )
-        return entry
+        return cast("RendererClient", client)

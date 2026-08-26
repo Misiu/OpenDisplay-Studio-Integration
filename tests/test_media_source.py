@@ -34,23 +34,17 @@ async def test_resolve_renders_and_publishes_temporary_png(hass) -> None:
             )
         )
     )
-    entry = SimpleNamespace(
-        runtime_data=SimpleNamespace(
-            client=client,
-            width=800,
-            height=480,
-        )
-    )
     projects = SimpleNamespace(
         get=lambda _project_id: PROJECT, list=lambda **_: [PROJECT]
     )
     hass.data[DOMAIN] = OpenDisplayStudioData(
-        cache=RenderCache(ttl_seconds=300, max_items=32), projects=projects
+        cache=RenderCache(ttl_seconds=300, max_items=32),
+        projects=projects,
+        renderer=client,
     )
     source = OpenDisplayStudioMediaSource(hass)
 
     with (
-        patch.object(source, "_loaded_entry", return_value=entry),
         patch(
             "custom_components.opendisplay_studio.media_source.async_compose_project",
             AsyncMock(

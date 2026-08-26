@@ -56,6 +56,8 @@ class OpenDisplayStudioData:
 
     cache: RenderCache
     projects: ProjectStore
+    renderer: RendererClient | None = None
+    renderer_health: RendererHealth | None = None
 
 
 type OpenDisplayStudioConfigEntry = ConfigEntry[OpenDisplayStudioRuntimeData]
@@ -100,13 +102,17 @@ async def async_setup_entry(
     try:
         health = await client.async_health()
     except RendererError as err:
-        raise ConfigEntryNotReady("Renderer health check failed") from err
+        message = f"Renderer health check failed: {err}"
+        raise ConfigEntryNotReady(message) from err
     entry.runtime_data = OpenDisplayStudioRuntimeData(
         client=client,
         health=health,
         width=entry.data.get("width", DEFAULT_WIDTH),
         height=entry.data.get("height", DEFAULT_HEIGHT),
     )
+    domain_data: OpenDisplayStudioData = hass.data[DOMAIN]
+    domain_data.renderer = client
+    domain_data.renderer_health = health
     LOGGER.info(
         "Renderer available version=%s apiVersion=%d trmnlFrameworkVersion=%s",
         health["version"],
@@ -117,9 +123,13 @@ async def async_setup_entry(
 
 
 async def async_unload_entry(
-    _hass: HomeAssistant, _entry: OpenDisplayStudioConfigEntry
+    hass: HomeAssistant, entry: OpenDisplayStudioConfigEntry
 ) -> bool:
     """Unload the stateless Renderer client."""
+    domain_data: OpenDisplayStudioData = hass.data[DOMAIN]
+    if domain_data.renderer is entry.runtime_data.client:
+        domain_data.renderer = None
+        domain_data.renderer_health = None
     return True
 
 
