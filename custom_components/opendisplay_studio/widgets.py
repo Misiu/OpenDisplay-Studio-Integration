@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Final
+
+TEMPLATE_DIRECTORY: Final = Path(__file__).with_name("widget_templates")
 
 WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
     {
@@ -84,6 +87,58 @@ WIDGET_DEFINITIONS: Final[list[dict[str, Any]]] = [
         ],
     },
     {
+        "id": "weather",
+        "version": 2,
+        "name": "Weather",
+        "description": "Current conditions and a daily Home Assistant forecast.",
+        "icon": "mdi:weather-partly-cloudy",
+        "defaults": {
+            "weather": "",
+            "showHumidity": True,
+            "showFeelsLike": True,
+            "showForecast": True,
+        },
+        "fields": [
+            {
+                "key": "weather",
+                "label": "Weather entity",
+                "required": True,
+                "selector": {
+                    "entity": {
+                        "filter": {
+                            "domain": "weather",
+                        }
+                    }
+                },
+            },
+            {
+                "key": "showHumidity",
+                "label": "Show humidity",
+                "selector": {"boolean": {}},
+            },
+            {
+                "key": "showFeelsLike",
+                "label": "Show feels like",
+                "selector": {"boolean": {}},
+            },
+            {
+                "key": "showForecast",
+                "label": "Show forecast",
+                "selector": {"boolean": {}},
+            },
+        ],
+        "dataRequirements": [
+            {
+                "key": "weather",
+                "provider": "weather_forecast",
+                "configKey": "weather",
+                "cardinality": "one",
+                "optional": False,
+                "forecastType": "daily",
+            }
+        ],
+    },
+    {
         "id": "text",
         "version": 1,
         "name": "Text",
@@ -147,9 +202,14 @@ TEXT_TEMPLATE: Final = """
 </div></div>
 """
 
+WEATHER_TEMPLATE: Final = (TEMPLATE_DIRECTORY / "weather.liquid").read_text(
+    encoding="utf-8"
+)
+
 TEMPLATES: Final = {
     "entity-state": ENTITY_TEMPLATE,
     "calendar": CALENDAR_TEMPLATE,
+    "weather": WEATHER_TEMPLATE,
     "text": TEXT_TEMPLATE,
 }
 

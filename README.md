@@ -10,8 +10,10 @@ Home Assistant data.
 
 Open **OpenDisplay Studio** in the Home Assistant sidebar to create predefined
 or custom displays, edit their logical grids, compose rectangular regions, and
-assign Entity State, Calendar, or Text widgets. Project configuration is stored
-with Home Assistant's versioned `Store`; browser `localStorage` is not used.
+assign Entity State, Calendar, Weather, or Text widgets. Weather configuration
+uses Home Assistant's native entity selector and renders current conditions plus
+the selected entity's daily forecast. Project configuration is stored with Home
+Assistant's versioned `Store`; browser `localStorage` is not used.
 
 Draft projects remain private to the designer. A Ready project is exposed at a
 stable URI based on its immutable server-generated ID:
@@ -21,12 +23,13 @@ media-source://opendisplay_studio/<project-id>
 ```
 
 On every resolution the integration deduplicates widget data requirements,
-reads current entity states and calendar events, renders widget Liquid
-templates, composes one TRMNL Framework document, and sends that final HTML to
-the Renderer. The Renderer App still knows only HTML, width, and height.
+reads current entity states, calendar events, and requested weather forecasts,
+renders widget Liquid templates, composes one TRMNL Framework document, and
+sends that final HTML to the Renderer. The Renderer App still knows only HTML,
+width, and height.
 
 See [the widget contract](WIDGET_CONTRACT.md) for the schema/data/template
-boundary and the planned multi-entity Table and optional-source Weather model.
+boundary, native Home Assistant selectors, and the controlled provider model.
 See [Stage 2 compatibility](STAGE2_COMPATIBILITY.md) for the Liquid/TRMNL
 compatibility baseline retained by Stage 3.
 

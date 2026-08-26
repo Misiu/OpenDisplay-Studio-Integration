@@ -37,6 +37,7 @@ import type {
   PersistedState,
   ScreenProject,
   WidgetDefinition,
+  WidgetConfigValue,
   WidgetOption,
 } from './types'
 import { WIDGETS, getWidgetDefinition, widgetStyles } from './widgets/registry'
@@ -190,9 +191,15 @@ export class OdxApp extends LitElement {
   private currentEntityStateSignature(): string {
     if (!this.store.projects.length) return ''
     return this.project.regions
-      .flatMap((region) => region.widget?.type === 'entity-state'
-        ? [String(region.widget.config.entity ?? '')]
-        : [])
+      .flatMap((region) => {
+        if (region.widget?.type === 'entity-state') {
+          return [String(region.widget.config.entity ?? '')]
+        }
+        if (region.widget?.type === 'weather') {
+          return [String(region.widget.config.weather ?? '')]
+        }
+        return []
+      })
       .filter(Boolean)
       .sort()
       .map((entityId) => {
@@ -797,10 +804,15 @@ export class OdxApp extends LitElement {
     const widget = this.selectedRegion?.widget
     const value = widget?.config[option.key]
       ?? (widget ? this.widgetDefinition(widget.type)?.defaults[option.key] : undefined)
-    if (option.type === 'entity' || option.type === 'entities' || option.type === 'calendar') {
-      const selector = option.type === 'calendar'
-        ? { entity: { domain: 'calendar' } }
-        : { entity: option.type === 'entities' ? { multiple: true } : {} }
+    const selector = option.selector
+      ?? (option.type === 'calendar'
+        ? { entity: { filter: { domain: 'calendar' } } }
+        : option.type === 'entities'
+          ? { entity: { multiple: true } }
+          : option.type === 'entity'
+            ? { entity: {} }
+            : undefined)
+    if (selector) {
       return html`
         <ha-form
           .hass=${this.hass}
@@ -836,6 +848,11 @@ export class OdxApp extends LitElement {
   }
 
   private updateWidgetValue(option: WidgetOption, value: unknown): void {
+    const normalizedValue: WidgetConfigValue = Array.isArray(value)
+      ? value.map((item) => String(item))
+      : typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+        ? value
+        : String(value ?? '')
     this.updateProject((project) => ({
       ...project,
       regions: project.regions.map((region) => {
@@ -846,9 +863,7 @@ export class OdxApp extends LitElement {
             ...region.widget,
             config: {
               ...region.widget.config,
-              [option.key]: Array.isArray(value)
-                ? value.map((item) => String(item))
-                : String(value ?? ''),
+              [option.key]: normalizedValue,
             },
           },
         }

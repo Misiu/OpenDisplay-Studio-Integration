@@ -9,10 +9,27 @@ data requirements
 Liquid template
 ```
 
-The panel builds controls from `fields`. Home Assistant-aware field types
-currently include `entity` and `calendar`; the contract already represents an
-`entities` multi-selector for future widgets. Configuration stores references,
-never current values.
+Widget packages are declarative and never contain executable Python. A package
+can only request provider names registered by OpenDisplay Studio Integration.
+This keeps installation reviewable and prevents a downloaded widget from
+executing arbitrary code inside Home Assistant.
+
+The panel builds controls from `fields`. A field can contain a native Home
+Assistant `selector` object, using the same schema as blueprint inputs. The
+panel passes that object to `ha-form` without recreating selector behavior.
+Legacy built-in fields can continue using the shorthand `type` property while
+packages migrate. Configuration stores references, never current values.
+
+```yaml
+fields:
+  - key: weather
+    label: Weather entity
+    required: true
+    selector:
+      entity:
+        filter:
+          domain: weather
+```
 
 Data requirements are declarative. A requirement names its provider, the
 configuration key containing its source, whether the source has cardinality
@@ -62,32 +79,27 @@ A Table can use ordinary presentation fields plus a multi-entity requirement:
 Its normalized Liquid context can then contain five room-temperature rows
 without exposing the full Home Assistant state machine.
 
-## Future Weather
+## Weather
 
-Weather can declare a required forecast source and a second optional current
-temperature sensor. Both are resolved at render time:
+Weather declares one required entity. The provider combines its current state
+with the requested daily forecast at render time:
 
 ```json
 {
   "dataRequirements": [
     {
-      "key": "forecast",
+      "key": "weather",
       "provider": "weather_forecast",
       "configKey": "weather",
       "cardinality": "one",
-      "optional": false
-    },
-    {
-      "key": "externalTemperature",
-      "provider": "entity_state",
-      "configKey": "temperatureEntity",
-      "cardinality": "one",
-      "optional": true
+      "optional": false,
+      "forecastType": "daily"
     }
   ]
 }
 ```
 
-Adding that widget requires a `WeatherProvider` and its definition/template;
-it does not change project storage, Media Source identity, the frontend/backend
-transport, or the Renderer API.
+The `weather_forecast` provider belongs to the integration. It uses the selected
+entity's state for current conditions and the public `weather.get_forecasts`
+action for forecasts, then exposes one normalized Liquid object. Multiple
+widgets selecting the same entity share the same collected provider result.

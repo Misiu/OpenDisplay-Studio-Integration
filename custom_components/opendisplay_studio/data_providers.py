@@ -4,8 +4,15 @@ from __future__ import annotations
 
 import asyncio
 from datetime import date, datetime, timedelta
+from typing import Any
 
 from homeassistant.components.calendar import DATA_COMPONENT, CalendarEntity
+from homeassistant.components.weather import (
+    DOMAIN as WEATHER_DOMAIN,
+)
+from homeassistant.components.weather import (
+    SERVICE_GET_FORECASTS,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
@@ -31,6 +38,44 @@ MDI_ICON_KEYS = {
     "mdi:toggle-switch-outline": "switch",
     "mdi:water-percent": "humidity",
 }
+
+WEATHER_CONDITION_LABELS = {
+    "clear-night": "Clear night",
+    "cloudy": "Cloudy",
+    "exceptional": "Exceptional",
+    "fog": "Fog",
+    "hail": "Hail",
+    "lightning": "Lightning",
+    "lightning-rainy": "Thunderstorms and rain",
+    "partlycloudy": "Partly cloudy",
+    "pouring": "Heavy rain",
+    "rainy": "Rain",
+    "snowy": "Snow",
+    "snowy-rainy": "Snow and rain",
+    "sunny": "Sunny",
+    "windy": "Windy",
+    "windy-variant": "Windy and cloudy",
+}
+
+WEATHER_CONDITION_ICONS = {
+    "clear-night": "wi-night-clear.svg",
+    "cloudy": "wi-cloudy.svg",
+    "exceptional": "wi-na.svg",
+    "fog": "wi-fog.svg",
+    "hail": "wi-hail.svg",
+    "lightning": "wi-lightning.svg",
+    "lightning-rainy": "wi-thunderstorm.svg",
+    "partlycloudy": "wi-day-cloudy.svg",
+    "pouring": "wi-rain-wind.svg",
+    "rainy": "wi-rain.svg",
+    "snowy": "wi-snow.svg",
+    "snowy-rainy": "wi-rain-mix.svg",
+    "sunny": "wi-day-sunny.svg",
+    "windy": "wi-strong-wind.svg",
+    "windy-variant": "wi-cloudy-windy.svg",
+}
+
+WEATHER_ICON_BASE_URL = "https://trmnl.com/images/plugins/weather"
 
 
 def _entity_icon_path(entity_id: str, attributes: dict[str, object]) -> str:
@@ -84,6 +129,132 @@ class EntityStateProvider:
                 "unit": str(state.attributes.get("unit_of_measurement", "")),
                 "name": str(state.attributes.get("friendly_name", entity_id)),
                 "iconPath": _entity_icon_path(entity_id, state.attributes),
+            }
+        return result
+
+
+def _weather_condition_label(condition: str) -> str:
+    """Return an English fallback label for a Home Assistant condition."""
+    return WEATHER_CONDITION_LABELS.get(
+        condition,
+        condition.replace("-", " ").capitalize() if condition else "Unavailable",
+    )
+
+
+def _weather_icon(condition: str) -> str:
+    """Map a Home Assistant condition to a TRMNL weather icon."""
+    filename = WEATHER_CONDITION_ICONS.get(condition, "wi-na.svg")
+    return f"{WEATHER_ICON_BASE_URL}/{filename}"
+
+
+def _uv_label(value: object) -> str | None:
+    """Convert a numeric UV index into the conventional exposure category."""
+    if not isinstance(value, int | float) or isinstance(value, bool):
+        return None
+    if value >= 11:
+        return "Extreme"
+    if value >= 8:
+        return "Very high"
+    if value >= 6:
+        return "High"
+    if value >= 3:
+        return "Moderate"
+    return "Low"
+
+
+def _forecast_date_label(value: object, today: date) -> str:
+    """Create a compact local label for a forecast timestamp."""
+    parsed = dt_util.parse_datetime(str(value)) if value else None
+    if parsed is None:
+        return ""
+    local_date = dt_util.as_local(parsed).date()
+    offset = (local_date - today).days
+    if offset == 0:
+        return "Today"
+    if offset == 1:
+        return "Tomorrow"
+    return local_date.strftime("%a")
+
+
+class WeatherForecastProvider:
+    """Resolve current weather state and daily forecasts."""
+
+    def __init__(self, hass: HomeAssistant) -> None:
+        """Initialize the provider."""
+        self._hass = hass
+
+    async def async_get_many(self, entity_ids: set[str]) -> dict[str, dict[str, Any]]:
+        """Resolve selected weather entities with one forecast action call."""
+        if not entity_ids:
+            return {}
+
+        sorted_entity_ids = sorted(entity_ids)
+        response = await self._hass.services.async_call(
+            WEATHER_DOMAIN,
+            SERVICE_GET_FORECASTS,
+            {"type": "daily"},
+            blocking=True,
+            target={"entity_id": sorted_entity_ids},
+            return_response=True,
+        )
+        forecast_response = response if isinstance(response, dict) else {}
+        today = dt_util.now().date()
+        result: dict[str, dict[str, Any]] = {}
+
+        for entity_id in sorted_entity_ids:
+            state = self._hass.states.get(entity_id)
+            attributes = state.attributes if state is not None else {}
+            condition = state.state if state is not None else "unavailable"
+            response_item = forecast_response.get(entity_id, {})
+            raw_forecasts = (
+                response_item.get("forecast", [])
+                if isinstance(response_item, dict)
+                else []
+            )
+            forecasts: list[dict[str, Any]] = []
+            if isinstance(raw_forecasts, list):
+                for item in raw_forecasts:
+                    if not isinstance(item, dict):
+                        continue
+                    forecast_condition = str(item.get("condition") or "exceptional")
+                    uv_index = item.get("uv_index")
+                    forecasts.append(
+                        {
+                            "datetime": str(item.get("datetime") or ""),
+                            "date_label": _forecast_date_label(
+                                item.get("datetime"), today
+                            ),
+                            "condition": forecast_condition,
+                            "condition_label": _weather_condition_label(
+                                forecast_condition
+                            ),
+                            "icon": _weather_icon(forecast_condition),
+                            "temperature": item.get("temperature"),
+                            "templow": item.get("templow"),
+                            "uv_index": uv_index,
+                            "uv_label": _uv_label(uv_index),
+                            "precipitation_probability": item.get(
+                                "precipitation_probability"
+                            ),
+                        }
+                    )
+
+            result[entity_id] = {
+                "entity_id": entity_id,
+                "name": str(attributes.get("friendly_name", entity_id)),
+                "condition": condition,
+                "condition_label": _weather_condition_label(condition),
+                "icon": _weather_icon(condition),
+                "temperature": attributes.get("temperature", "—"),
+                "temperature_unit": str(attributes.get("temperature_unit", "")),
+                "apparent_temperature": attributes.get("apparent_temperature"),
+                "humidity": attributes.get("humidity"),
+                "updated_at": (
+                    dt_util.as_local(state.last_updated).strftime("%H:%M")
+                    if state is not None
+                    else ""
+                ),
+                "forecast": forecasts,
             }
         return result
 

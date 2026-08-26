@@ -1,7 +1,7 @@
 {
   "domain": "opendisplay_studio",
   "name": "OpenDisplay Studio",
-  "after_dependencies": ["calendar", "hassio"],
+  "after_dependencies": ["calendar", "hassio", "weather"],
   "codeowners": ["@Misiu"],
   "config_flow": true,
   "dependencies": ["http", "media_source", "panel_custom", "websocket_api"],
@@ -11,5 +11,5 @@
   "issue_tracker": "https://github.com/Misiu/OpenDisplay-Studio-Integration/issues",
   "requirements": ["python-liquid==2.3.1"],
   "single_config_entry": true,
-  "version": "0.3.2"
+  "version": "0.3.3"
 }

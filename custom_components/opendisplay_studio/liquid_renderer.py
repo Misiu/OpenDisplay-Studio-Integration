@@ -81,7 +81,7 @@ def _find_by(
 class _BoundedEnvironment(Environment):
     context_depth_limit = 20
     loop_iteration_limit = 5_000
-    local_namespace_limit = 1_000
+    local_namespace_limit = 10_000
     output_stream_limit = MAX_LIQUID_OUTPUT_BYTES
 
 
