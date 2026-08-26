@@ -44,6 +44,18 @@ import { WIDGETS, getWidgetDefinition, widgetStyles } from './widgets/registry'
 import { renderButtonIcon, renderIcon } from './widgets/shared'
 import { sharedWidgetStyles } from './widgets/shared-styles'
 
+const errorMessage = (error: unknown, fallback: string): string => {
+  if (error instanceof Error && error.message) return error.message
+  if (typeof error === 'string' && error) return error
+  if (error && typeof error === 'object') {
+    const response = error as Record<string, unknown>
+    if (typeof response.message === 'string' && response.message) return response.message
+    if (typeof response.body === 'string' && response.body) return response.body
+    if (typeof response.code === 'string' && response.code) return `${fallback} (${response.code})`
+  }
+  return fallback
+}
+
 const cloneProject = (project: ScreenProject): ScreenProject => {
   const now = new Date().toISOString()
   return {
@@ -233,7 +245,10 @@ export class OdxApp extends LitElement {
     } catch (error) {
       if (revision !== this.previewRevision) return
       this.previewImageUrl = ''
-      this.previewError = error instanceof Error ? error.message : 'Could not compose live preview'
+      this.previewError = errorMessage(error, 'Could not compose live preview')
+      if (this.previewError.startsWith('Renderer App is not connected')) {
+        this.schedulePreview(1500)
+      }
     } finally {
       if (revision === this.previewRevision) this.previewLoading = false
     }
@@ -257,7 +272,7 @@ export class OdxApp extends LitElement {
       this.widgetMetadata = response.widgets
       this.schedulePreview(0)
     } catch (error) {
-      this.loadError = error instanceof Error ? error.message : 'Unable to load projects'
+      this.loadError = errorMessage(error, 'Unable to load projects')
     } finally {
       this.loading = false
     }
@@ -280,7 +295,7 @@ export class OdxApp extends LitElement {
         this.schedulePreview()
       }
     } catch (error) {
-      this.showToast(error instanceof Error ? error.message : 'Could not save project')
+      this.showToast(errorMessage(error, 'Could not save project'))
     } finally {
       if (revision === this.saveRevision) this.saving = false
     }
@@ -353,8 +368,8 @@ export class OdxApp extends LitElement {
   }
 
   private async addProject(): Promise<void> {
-    const draft = createProject(`Untitled display ${this.store.projects.length + 1}`)
     try {
+      const draft = createProject(`Untitled display ${this.store.projects.length + 1}`)
       const response = await this.hass.callWS<{ project: ScreenProject }>({
         type: 'opendisplay_studio/create_project',
         project: draft,
@@ -366,7 +381,7 @@ export class OdxApp extends LitElement {
       this.editorMode = 'layout'
       this.showToast('Display created')
     } catch (error) {
-      this.showToast(error instanceof Error ? error.message : 'Could not create display')
+      this.showToast(errorMessage(error, 'Could not create display'))
     }
   }
 

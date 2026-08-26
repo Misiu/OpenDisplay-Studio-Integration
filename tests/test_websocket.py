@@ -11,6 +11,7 @@ from custom_components.opendisplay_studio.renderer import (
     RenderResult,
 )
 from custom_components.opendisplay_studio.websocket import (
+    async_register_commands,
     websocket_compose_preview,
 )
 
@@ -117,3 +118,41 @@ async def test_preview_exposes_renderer_failure(hass) -> None:
         "preview_failed",
         "asset failed",
     )
+
+
+async def test_preview_command_round_trip_uses_renderer(hass, hass_ws_client) -> None:
+    """Exercise the registered command through Home Assistant's WebSocket server."""
+    cache = RenderCache(ttl_seconds=300, max_items=32)
+    hass.data[DOMAIN] = SimpleNamespace(cache=cache)
+    client = SimpleNamespace(
+        async_render=AsyncMock(
+            return_value=RenderResult(png=PNG, timings={"total": 41.5})
+        )
+    )
+    websocket = await hass_ws_client(hass)
+    async_register_commands(hass)
+
+    with (
+        patch(
+            "custom_components.opendisplay_studio.websocket.validate_project",
+            return_value=PROJECT,
+        ),
+        patch(
+            "custom_components.opendisplay_studio.websocket.async_compose_project",
+            AsyncMock(
+                return_value=ComposedProject("<main>same-html</main>", 1.0, 2.0, 3.0)
+            ),
+        ),
+        patch(
+            "custom_components.opendisplay_studio.websocket._renderer_client",
+            return_value=client,
+        ),
+    ):
+        await websocket.send_json_auto_id(
+            {"type": "opendisplay_studio/compose_preview", "project": {}}
+        )
+        response = await websocket.receive_json()
+
+    assert response["success"] is True
+    assert response["result"]["imageUrl"].startswith("/api/opendisplay_studio/render/")
+    assert response["result"]["timings"]["pipeline"] == 44.5

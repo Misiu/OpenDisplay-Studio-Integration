@@ -1,6 +1,7 @@
 import './index.css'
 import './odx-app'
 import type { HomeAssistant, ScreenProject } from './types'
+import { createId } from './services/layout'
 
 if (!customElements.get('ha-form')) {
   customElements.define('ha-form', class extends HTMLElement {
@@ -99,7 +100,7 @@ const hass: HomeAssistant = {
       } as T
     }
     if (message.type === 'opendisplay_studio/create_project') {
-      const project = { ...(message.project as ScreenProject), id: crypto.randomUUID() }
+      const project = { ...(message.project as ScreenProject), id: createId() }
       projects = [...projects, project]
       return { project } as T
     }

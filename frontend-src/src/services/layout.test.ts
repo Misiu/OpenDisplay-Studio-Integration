@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { GridRegion } from '../types'
 import {
+  createId,
   createRegions,
   mergeRegions,
   rotateRegions,
@@ -8,6 +9,19 @@ import {
 } from './layout'
 
 describe('layout service', () => {
+  it('creates IDs when randomUUID is unavailable', () => {
+    const fallbackCrypto = {
+      getRandomValues<T extends ArrayBufferView | null>(array: T): T {
+        if (array instanceof Uint8Array) array.fill(7)
+        return array
+      },
+    } as Crypto
+
+    expect(createId(fallbackCrypto)).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    )
+  })
+
   it('creates one region for every grid cell', () => {
     const regions = createRegions({ columns: 5, rows: 2 })
 
