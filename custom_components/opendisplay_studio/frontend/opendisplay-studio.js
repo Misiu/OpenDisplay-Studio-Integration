@@ -3667,24 +3667,20 @@ var mt = (e) => {
     `;
 	}
 	renderOption(e) {
-		let t = this.selectedRegion?.widget, n = t?.config[e.key] ?? (t ? this.widgetDefinition(t.type)?.defaults[e.key] : void 0);
-		if (e.type === "entity" || e.type === "entities" || e.type === "calendar") {
-			let t = e.type === "calendar" ? { entity: { domain: "calendar" } } : { entity: e.type === "entities" ? { multiple: !0 } : {} };
-			return E`
+		let t = this.selectedRegion?.widget, n = t?.config[e.key] ?? (t ? this.widgetDefinition(t.type)?.defaults[e.key] : void 0), r = e.selector ?? (e.type === "calendar" ? { entity: { filter: { domain: "calendar" } } } : e.type === "entities" ? { entity: { multiple: !0 } } : e.type === "entity" ? { entity: {} } : void 0);
+		return r ? E`
         <ha-form
           .hass=${this.hass}
           .data=${{ [e.key]: n ?? "" }}
           .schema=${[{
-				name: e.key,
-				label: e.label,
-				required: e.required ?? !1,
-				selector: t
-			}]}
+			name: e.key,
+			label: e.label,
+			required: e.required ?? !1,
+			selector: r
+		}]}
           @value-changed=${(t) => this.updateWidgetValue(e, t.detail.value[e.key])}
         ></ha-form>
-      `;
-		}
-		return e.type === "toggle" ? E`
+      ` : e.type === "toggle" ? E`
       <div class="toggle-field"><label for=${`option-${e.key}`}>${e.label}</label><input id=${`option-${e.key}`} class="toggle" type="checkbox" .checked=${!!n} @change=${(t) => this.updateWidgetOption(e, t)} /></div>
     ` : e.type === "select" ? E`
       <div class="field">
@@ -3706,15 +3702,16 @@ var mt = (e) => {
     `;
 	}
 	updateWidgetValue(e, t) {
-		this.updateProject((n) => ({
-			...n,
-			regions: n.regions.map((n) => n.id !== this.selectedRegionId || !n.widget ? n : {
-				...n,
+		let n = Array.isArray(t) ? t.map((e) => String(e)) : typeof t == "string" || typeof t == "number" || typeof t == "boolean" ? t : String(t ?? "");
+		this.updateProject((t) => ({
+			...t,
+			regions: t.regions.map((t) => t.id !== this.selectedRegionId || !t.widget ? t : {
+				...t,
 				widget: {
-					...n.widget,
+					...t.widget,
 					config: {
-						...n.widget.config,
-						[e.key]: Array.isArray(t) ? t.map((e) => String(e)) : String(t ?? "")
+						...t.widget.config,
+						[e.key]: n
 					}
 				}
 			})

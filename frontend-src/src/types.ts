@@ -88,7 +88,8 @@ export type WidgetFieldType = 'text' | 'number' | 'select' | 'toggle' | 'entity'
 export interface WidgetOption {
   key: string
   label: string
-  type: WidgetFieldType
+  type?: WidgetFieldType
+  selector?: Record<string, unknown>
   min?: number
   max?: number
   step?: number

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from time import perf_counter
 from typing import Any
@@ -9,7 +10,12 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
-from .data_providers import ICON_PATHS, CalendarProvider, EntityStateProvider
+from .data_providers import (
+    ICON_PATHS,
+    CalendarProvider,
+    EntityStateProvider,
+    WeatherForecastProvider,
+)
 from .liquid_renderer import LIQUID
 from .projects import Project
 from .widgets import TEMPLATES, definition, with_defaults
@@ -122,10 +128,11 @@ def _calendar_value(
 
 def _collect_requirements(
     project: Project,
-) -> tuple[set[str], dict[str, int]]:
+) -> tuple[set[str], dict[str, int], set[str]]:
     """Compile widget declarations into one deduplicated screen request."""
     entity_ids: set[str] = set()
     calendar_requests: dict[str, int] = {}
+    weather_requests: set[str] = set()
     for region in project["regions"]:
         widget = region.get("widget")
         if widget is None:
@@ -142,7 +149,9 @@ def _collect_requirements(
                     calendar_requests[entity_id] = max(
                         calendar_requests.get(entity_id, 0), days
                     )
-    return entity_ids, calendar_requests
+            elif requirement["provider"] == "weather_forecast":
+                weather_requests.update(sources)
+    return entity_ids, calendar_requests, weather_requests
 
 
 def _resolve_widget_data(
@@ -150,6 +159,7 @@ def _resolve_widget_data(
     config: dict[str, Any],
     entities: dict[str, dict[str, str]],
     calendars: dict[str, list[dict[str, str | bool | int]]],
+    weather: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     """Hydrate declared requirements with normalized provider values."""
     data: dict[str, Any] = {}
@@ -188,6 +198,8 @@ def _resolve_widget_data(
                 )
                 for source in sources
             ]
+        elif requirement["provider"] == "weather_forecast":
+            values = [weather.get(source) for source in sources]
         data[requirement["key"]] = (
             values
             if requirement.get("cardinality") == "many"
@@ -203,10 +215,13 @@ async def async_compose_project(
 ) -> ComposedProject:
     """Collect requirements once, render fragments, and create one screen."""
     started = perf_counter()
-    entity_ids, calendar_requests = _collect_requirements(project)
+    entity_ids, calendar_requests, weather_requests = _collect_requirements(project)
     entities = EntityStateProvider(hass).get_many(entity_ids)
     try:
-        calendars = await CalendarProvider(hass).async_get_many(calendar_requests)
+        calendars, weather = await asyncio.gather(
+            CalendarProvider(hass).async_get_many(calendar_requests),
+            WeatherForecastProvider(hass).async_get_many(weather_requests),
+        )
     except HomeAssistantError as err:
         raise ProjectComposeError("Could not resolve widget data") from err
     data_ms = (perf_counter() - started) * 1_000
@@ -222,7 +237,13 @@ async def async_compose_project(
         if widget is not None:
             widget_type = widget["type"]
             config = with_defaults(widget_type, widget["config"])
-            data = _resolve_widget_data(widget_type, config, entities, calendars)
+            data = _resolve_widget_data(
+                widget_type,
+                config,
+                entities,
+                calendars,
+                weather,
+            )
             if widget_type == "entity-state" and data.get("entity") is not None:
                 title = str(config.get("title", "")).strip()
                 data["entity"]["displayName"] = title or data["entity"]["name"]
