@@ -892,14 +892,23 @@ export const appStyles = css`
     filter: none;
   }
 
-  .html-preview {
+  .rendered-preview {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    border: 0;
+    display: block;
+    object-fit: fill;
     background: #fff;
     pointer-events: none;
+  }
+
+  .preview-failure {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    z-index: 1;
+    width: min(70%, 520px);
+    transform: translate(-50%, -50%);
   }
 
   .preview-overlay {

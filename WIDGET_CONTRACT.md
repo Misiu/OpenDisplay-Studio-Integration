@@ -14,6 +14,35 @@ can only request provider names registered by OpenDisplay Studio Integration.
 This keeps installation reviewable and prevents a downloaded widget from
 executing arbitrary code inside Home Assistant.
 
+## Rendering invariant
+
+One widget package has one visual contract across all surfaces:
+
+```text
+CLI fixture -> Liquid -> pinned TRMNL Framework -> region container
+HA preview  -> HA data -> Liquid -> Renderer App -> PNG
+final image -> HA data -> Liquid -> Renderer App -> PNG
+```
+
+The Home Assistant preview and final Media Source call the same Renderer API
+with the same composed HTML, width, and height. The panel displays the returned
+PNG and does not maintain a second browser-only rendering implementation.
+
+`--screen-w` and `--screen-h` always describe the physical device. Responsive
+widget decisions use the actual region size through a CSS size container. Grid
+span names are editor concepts and must not select a presentation variant.
+
+External assets must never fail silently. The current compatibility layer only
+permits fixed TRMNL weather SVG paths, and the Renderer rejects the render if an
+image is missing. The package format will carry declared assets inside the ODX
+archive so installed community widgets can render deterministically without
+arbitrary network access.
+
+An integration release accepts only the TRMNL Framework version reported by
+its compatible Renderer App. A widget package declaring another version must
+be rejected or installed alongside an explicitly compatible renderer; it must
+never be rendered against a silently substituted framework version.
+
 The panel builds controls from `fields`. A field can contain a native Home
 Assistant `selector` object, using the same schema as blueprint inputs. The
 panel passes that object to `ha-form` without recreating selector behavior.

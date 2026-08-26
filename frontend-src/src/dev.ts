@@ -24,6 +24,11 @@ const demoEntityHtml = (project: ScreenProject): string => {
   return `<main class="screen studio-screen"><style>.studio-screen{width:${project.width}px;height:${project.height}px;background:#fff}.studio-grid{display:grid;width:100%;height:100%;padding:${gap}px;gap:${gap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}.studio-entity__content{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px}.studio-entity__icon{width:52px;height:52px}.studio-entity__name{font-size:17px;font-weight:700}.studio-entity__reading{display:flex;align-items:baseline;gap:5px}.studio-entity__value{font-size:68px;line-height:.9}.studio-entity__unit{font-size:18px;font-weight:700}</style><div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
 }
 
+const demoPreviewImage = (project: ScreenProject): string => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${project.width}" height="${project.height}" viewBox="0 0 ${project.width} ${project.height}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${demoEntityHtml(project)}</div></foreignObject></svg>`
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
 let projects: ScreenProject[] = [
   {
     id: '4a34c31e',
@@ -89,8 +94,8 @@ const hass: HomeAssistant = {
     }
     if (message.type === 'opendisplay_studio/compose_preview') {
       return {
-        html: demoEntityHtml(message.project as ScreenProject),
-        timings: { data: 0.4, liquid: 0.7, compose: 1.6 },
+        imageUrl: demoPreviewImage(message.project as ScreenProject),
+        timings: { data: 0.4, liquid: 0.7, compose: 1.6, renderer: 4.2, pipeline: 5.8 },
       } as T
     }
     if (message.type === 'opendisplay_studio/create_project') {

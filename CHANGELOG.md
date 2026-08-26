@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.3.4
+
+- Render the designer preview through the configured Renderer App, making the
+  preview and final Media Source PNG use the same pipeline.
+- Preserve physical device dimensions independently from responsive region
+  dimensions and remove editor-only region borders from rendered output.
+- Report Renderer and total pipeline timings and surface preview failures
+  instead of falling back to a misleading local approximation.
+
 ## 0.3.3
 
 - Add the adaptive Weather widget with a native Home Assistant weather entity

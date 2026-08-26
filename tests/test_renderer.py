@@ -18,7 +18,7 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         return web.json_response(
             {
                 "status": "ok",
-                "version": "0.2.0",
+                "version": "0.2.3",
                 "apiVersion": 1,
                 "trmnlFrameworkVersion": "3.2.0",
             }
@@ -50,7 +50,7 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         client = RendererClient(session, str(server.make_url("/")), "secret")
         assert await client.async_health() == {
             "status": "ok",
-            "version": "0.2.0",
+            "version": "0.2.3",
             "apiVersion": 1,
             "trmnlFrameworkVersion": "3.2.0",
         }
@@ -77,6 +77,40 @@ async def test_health_rejects_incompatible_api(aiohttp_server, socket_enabled) -
                 "version": "9.0.0",
                 "apiVersion": 9,
                 "trmnlFrameworkVersion": "3.2.0",
+            }
+        )
+
+    app.router.add_get("/health", incompatible_health)
+    server = await aiohttp_server(app)
+    async with ClientSession() as session:
+        client = RendererClient(session, str(server.make_url("/")))
+        with pytest.raises(RendererIncompatibleError):
+            await client.async_health()
+
+
+@pytest.mark.parametrize(
+    ("version", "framework_version"),
+    [
+        ("0.2.2", "3.2.0"),
+        ("0.2.3-dev", "3.2.0"),
+        ("0.2.3", "3.1.0"),
+    ],
+)
+async def test_health_rejects_incompatible_renderer_or_framework(
+    aiohttp_server,
+    socket_enabled,
+    version: str,
+    framework_version: str,
+) -> None:
+    app = web.Application()
+
+    async def incompatible_health(_request):
+        return web.json_response(
+            {
+                "status": "ok",
+                "version": version,
+                "apiVersion": 1,
+                "trmnlFrameworkVersion": framework_version,
             }
         )
 

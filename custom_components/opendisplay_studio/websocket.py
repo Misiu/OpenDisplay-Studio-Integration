@@ -6,21 +6,38 @@ from typing import Any, cast
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 
 from .composer import ProjectComposeError, async_compose_project
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER, RENDER_HTTP_PATH
 from .liquid_renderer import TemplateRenderError
 from .projects import (
     ProjectStore,
     ProjectValidationError,
     validate_project,
 )
+from .renderer import RendererClient, RendererError
 from .widgets import WIDGET_DEFINITIONS
 
 
 def _store(hass: HomeAssistant) -> ProjectStore:
     return cast("ProjectStore", hass.data[DOMAIN].projects)
+
+
+def _renderer_client(hass: HomeAssistant) -> RendererClient:
+    """Return the client owned by the loaded single config entry."""
+    entry = next(
+        (
+            entry
+            for entry in hass.config_entries.async_entries(DOMAIN)
+            if entry.state is ConfigEntryState.LOADED
+        ),
+        None,
+    )
+    if entry is None:
+        raise ProjectComposeError("Renderer App is not ready")
+    return entry.runtime_data.client
 
 
 def _error(
@@ -126,24 +143,48 @@ async def websocket_compose_preview(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Compose the same live Liquid/TRMNL HTML used by Media Source."""
+    """Render the same live PNG used by Media Source."""
     try:
         project = validate_project(msg["project"])
         composed = await async_compose_project(hass, project)
+        rendered = await _renderer_client(hass).async_render(
+            html=composed.html,
+            width=project["width"],
+            height=project["height"],
+        )
     except ProjectValidationError as err:
         _error(connection, msg, err)
         return
-    except (ProjectComposeError, TemplateRenderError) as err:
+    except (ProjectComposeError, RendererError, TemplateRenderError) as err:
+        LOGGER.warning("Live preview render failed: %s", err)
         connection.send_error(msg["id"], "preview_failed", str(err))
         return
+    token = hass.data[DOMAIN].cache.put(rendered.png)
+    image_url = RENDER_HTTP_PATH.replace("{token}", token)
+    renderer_ms = rendered.timings.get("total", 0.0)
+    LOGGER.debug(
+        "Rendered live preview project=%s size=%dx%d data=%.2f ms liquid=%.2f ms "
+        "compose=%.2f ms renderer=%s pipeline=%.2f ms bytes=%d",
+        project["id"],
+        project["width"],
+        project["height"],
+        composed.data_ms,
+        composed.liquid_ms,
+        composed.compose_ms,
+        rendered.timings,
+        composed.compose_ms + renderer_ms,
+        len(rendered.png),
+    )
     connection.send_result(
         msg["id"],
         {
-            "html": composed.html,
+            "imageUrl": image_url,
             "timings": {
                 "data": composed.data_ms,
                 "liquid": composed.liquid_ms,
                 "compose": composed.compose_ms,
+                "renderer": renderer_ms,
+                "pipeline": composed.compose_ms + renderer_ms,
             },
         },
     )

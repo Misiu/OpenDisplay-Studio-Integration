@@ -125,11 +125,13 @@ export interface HomeAssistant {
 }
 
 export interface ComposePreviewResponse {
-  html: string
+  imageUrl: string
   timings: {
     data: number
     liquid: number
     compose: number
+    renderer: number
+    pipeline: number
   }
 }
 

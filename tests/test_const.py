@@ -6,6 +6,7 @@ from custom_components.opendisplay_studio.const import (
     ADDON_SLUG,
     APP_CONFIG_SLUG,
     APP_REPOSITORY_URL,
+    TRMNL_FRAMEWORK_VERSION,
 )
 
 
@@ -14,3 +15,4 @@ def test_addon_slug_matches_current_supervisor_algorithm() -> None:
         APP_REPOSITORY_URL.lower().encode()
     ).hexdigest()[:8]
     assert f"{repository_slug}_{APP_CONFIG_SLUG}" == ADDON_SLUG
+    assert TRMNL_FRAMEWORK_VERSION == "3.2.0"

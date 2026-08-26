@@ -1530,14 +1530,23 @@ var Le = {
     filter: none;
   }
 
-  .html-preview {
+  .rendered-preview {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    border: 0;
+    display: block;
+    object-fit: fill;
     background: #fff;
     pointer-events: none;
+  }
+
+  .preview-failure {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    z-index: 1;
+    width: min(70%, 520px);
+    transform: translate(-50%, -50%);
   }
 
   .preview-overlay {
@@ -3025,7 +3034,7 @@ var et = (e) => e <= 1.6 ? {
 	},
 	{
 		id: "weather",
-		version: 2,
+		version: 3,
 		name: "Weather",
 		description: "Current conditions and a daily Home Assistant forecast.",
 		icon: Qe,
@@ -3167,7 +3176,7 @@ var ht = (e) => {
 			schemaVersion: 1,
 			activeProjectId: "",
 			projects: []
-		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewHtml = "", this.previewLoading = !1, this.previewError = "", this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
+		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewImageUrl = "", this.previewLoading = !1, this.previewError = "", this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
 	}
 	static {
 		this.styles = [
@@ -3248,16 +3257,16 @@ var ht = (e) => {
 				project: e
 			});
 			if (t !== this.previewRevision) return;
-			this.previewHtml = n.html, this.previewTimings = n.timings;
+			this.previewImageUrl = n.imageUrl, this.previewTimings = n.timings;
 		} catch (e) {
 			if (t !== this.previewRevision) return;
-			this.previewError = e instanceof Error ? e.message : "Could not compose live preview";
+			this.previewImageUrl = "", this.previewError = e instanceof Error ? e.message : "Could not compose live preview";
 		} finally {
 			t === this.previewRevision && (this.previewLoading = !1);
 		}
 	}
-	previewDocument() {
-		return `<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light"><style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff}body.trmnl{font-family:Arial,sans-serif;color:#000}.screen{box-sizing:border-box}</style></head><body class="trmnl">${this.previewHtml}</body></html>`;
+	previewImageFailed() {
+		this.previewImageUrl = "", this.previewError = "Renderer preview image could not be loaded";
 	}
 	async loadProjects() {
 		this.loading = !0, this.loadError = "";
@@ -3328,7 +3337,7 @@ var ht = (e) => {
 		this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.layoutDraft = void 0, this.editorMode = "widgets", this.persist({
 			...this.store,
 			activeProjectId: e
-		}), this.previewHtml = "", this.schedulePreview(0);
+		}), this.previewImageUrl = "", this.schedulePreview(0);
 	}
 	async addProject() {
 		let e = lt(`Untitled display ${this.store.projects.length + 1}`);
@@ -3355,7 +3364,7 @@ var ht = (e) => {
 			...this.store,
 			activeProjectId: t.id,
 			projects: [...this.store.projects, t]
-		}), this.selectedRegionId = "", this.previewHtml = "", this.schedulePreview(0), this.showToast("Display duplicated");
+		}), this.selectedRegionId = "", this.previewImageUrl = "", this.schedulePreview(0), this.showToast("Display duplicated");
 	}
 	async deleteProject() {
 		await this.hass.callWS({
@@ -3367,7 +3376,7 @@ var ht = (e) => {
 			...this.store,
 			activeProjectId: e[0]?.id ?? "",
 			projects: e
-		}), this.selectedRegionId = "", this.layoutDraft = void 0, this.editorMode = "widgets", this.previewHtml = "", this.schedulePreview(0), this.showToast("Display deleted");
+		}), this.selectedRegionId = "", this.layoutDraft = void 0, this.editorMode = "widgets", this.previewImageUrl = "", this.schedulePreview(0), this.showToast("Display deleted");
 	}
 	setProjectStatus(e) {
 		this.updateProject((t) => ({
@@ -3636,7 +3645,7 @@ var ht = (e) => {
     `;
 	}
 	renderScreenRegion(e) {
-		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !r && !!this.previewHtml, a = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, o = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), s = a ? e.label ?? Q(o.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`;
+		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !r && !!(this.previewImageUrl || this.previewError), a = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, o = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), s = a ? e.label ?? Q(o.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`;
 		return w`
       <section
         class="screen-region ${r ? "layout-region" : e.widget ? "" : "empty"} ${i ? "preview-region" : ""} ${!r && e.id === this.selectedRegionId ? "selected" : ""}"
@@ -3702,7 +3711,7 @@ var ht = (e) => {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen ${this.editorMode === "widgets" && this.previewHtml ? "live-preview" : ""}"
+                  class="display-screen ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? "live-preview" : ""}"
                   data-palette=${e.palette}
                   style=${I({
 			"--grid-columns": String(e.grid.columns),
@@ -3711,8 +3720,8 @@ var ht = (e) => {
 			height: `${n.height}px`
 		})}
                 >
-                  ${this.editorMode === "widgets" && this.previewHtml ? w`
-                      <iframe class="html-preview" title="Live Home Assistant data preview" sandbox="" .srcdoc=${this.previewDocument()}></iframe>
+                  ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? w`
+                      ${this.previewImageUrl ? w`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />` : w`<ha-alert class="preview-failure" alert-type="error" .title=${"Exact preview unavailable"}>${this.previewError}</ha-alert>`}
                       <div
                         class="preview-overlay"
                         style=${I({
@@ -3729,7 +3738,7 @@ var ht = (e) => {
               </div>
             </div>
           </div>
-          ${this.editorMode === "layout" ? this.mergeAnchor ? w`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : w`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : w`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Liquid + data composed in ${this.previewTimings.compose.toFixed(1)} ms. Select a region to configure it.` : "Select a region to configure its content."}</div>`}
+          ${this.editorMode === "layout" ? this.mergeAnchor ? w`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : w`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : w`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.` : "Select a region to configure its content."}</div>`}
         </div>
       </main>
     `;
@@ -3919,6 +3928,6 @@ var ht = (e) => {
     `;
 	}
 };
-Z([Fe({ attribute: !1 })], $.prototype, "hass", void 0), Z([P()], $.prototype, "store", void 0), Z([P()], $.prototype, "selectedRegionId", void 0), Z([P()], $.prototype, "mergeAnchor", void 0), Z([P()], $.prototype, "mergeHover", void 0), Z([P()], $.prototype, "toastMessage", void 0), Z([P()], $.prototype, "loading", void 0), Z([P()], $.prototype, "saving", void 0), Z([P()], $.prototype, "loadError", void 0), Z([P()], $.prototype, "renameDraft", void 0), Z([P()], $.prototype, "editorMode", void 0), Z([P()], $.prototype, "layoutDraft", void 0), Z([P()], $.prototype, "widgetMetadata", void 0), Z([P()], $.prototype, "previewHtml", void 0), Z([P()], $.prototype, "previewLoading", void 0), Z([P()], $.prototype, "previewError", void 0), Z([P()], $.prototype, "previewTimings", void 0), Z([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), Z([F(".screen-fit")], $.prototype, "screenFit", void 0), Z([F(".screen-bezel")], $.prototype, "screenBezel", void 0), Z([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = Z([Me("opendisplay-studio-panel")], $);
+Z([Fe({ attribute: !1 })], $.prototype, "hass", void 0), Z([P()], $.prototype, "store", void 0), Z([P()], $.prototype, "selectedRegionId", void 0), Z([P()], $.prototype, "mergeAnchor", void 0), Z([P()], $.prototype, "mergeHover", void 0), Z([P()], $.prototype, "toastMessage", void 0), Z([P()], $.prototype, "loading", void 0), Z([P()], $.prototype, "saving", void 0), Z([P()], $.prototype, "loadError", void 0), Z([P()], $.prototype, "renameDraft", void 0), Z([P()], $.prototype, "editorMode", void 0), Z([P()], $.prototype, "layoutDraft", void 0), Z([P()], $.prototype, "widgetMetadata", void 0), Z([P()], $.prototype, "previewImageUrl", void 0), Z([P()], $.prototype, "previewLoading", void 0), Z([P()], $.prototype, "previewError", void 0), Z([P()], $.prototype, "previewTimings", void 0), Z([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), Z([F(".screen-fit")], $.prototype, "screenFit", void 0), Z([F(".screen-bezel")], $.prototype, "screenBezel", void 0), Z([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = Z([Me("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OdxApp };

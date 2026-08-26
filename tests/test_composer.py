@@ -111,6 +111,9 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
     assert "studio-entity--square" in result.html
     assert result.html.count(">Office</span>") == 2
     assert "--studio-width:800px;--studio-height:480px" in result.html
+    assert "--screen-w:800px;--screen-h:480px" in result.html
+    assert "border:1px solid" not in result.html
+    assert 'data-region-width="388.000"' in result.html
 
 
 async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
@@ -176,3 +179,6 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
     assert "od-weather" in result.html
     assert "12°" in result.html
     assert "08:15" in result.html
+    assert "--studio-gap:0px" in result.html
+    assert 'data-region-width="190.000"' in result.html
+    assert 'data-region-height="228.000"' in result.html

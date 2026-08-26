@@ -6,7 +6,7 @@ import { weatherStyles } from './styles'
 
 export const weatherWidget: WidgetDefinition = {
   id: 'weather',
-  version: 2,
+  version: 3,
   name: 'Weather',
   description: 'Current conditions and a daily Home Assistant forecast.',
   icon: mdiWeatherPartlyCloudy,

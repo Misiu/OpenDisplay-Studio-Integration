@@ -85,7 +85,7 @@ export class OdxApp extends LitElement {
   @state() private editorMode: EditorMode = 'widgets'
   @state() private layoutDraft?: ScreenProject
   @state() private widgetMetadata: BootstrapResponse['widgets'] = []
-  @state() private previewHtml = ''
+  @state() private previewImageUrl = ''
   @state() private previewLoading = false
   @state() private previewError = ''
   @state() private previewTimings?: ComposePreviewResponse['timings']
@@ -228,18 +228,20 @@ export class OdxApp extends LitElement {
         project,
       })
       if (revision !== this.previewRevision) return
-      this.previewHtml = response.html
+      this.previewImageUrl = response.imageUrl
       this.previewTimings = response.timings
     } catch (error) {
       if (revision !== this.previewRevision) return
+      this.previewImageUrl = ''
       this.previewError = error instanceof Error ? error.message : 'Could not compose live preview'
     } finally {
       if (revision === this.previewRevision) this.previewLoading = false
     }
   }
 
-  private previewDocument(): string {
-    return `<!doctype html><html><head><meta charset="utf-8"><meta name="color-scheme" content="light"><style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#fff}body.trmnl{font-family:Arial,sans-serif;color:#000}.screen{box-sizing:border-box}</style></head><body class="trmnl">${this.previewHtml}</body></html>`
+  private previewImageFailed(): void {
+    this.previewImageUrl = ''
+    this.previewError = 'Renderer preview image could not be loaded'
   }
 
   private async loadProjects(): Promise<void> {
@@ -346,7 +348,7 @@ export class OdxApp extends LitElement {
     this.layoutDraft = undefined
     this.editorMode = 'widgets'
     this.persist({ ...this.store, activeProjectId: projectId })
-    this.previewHtml = ''
+    this.previewImageUrl = ''
     this.schedulePreview(0)
   }
 
@@ -374,7 +376,7 @@ export class OdxApp extends LitElement {
     const project = response.project
     this.persist({ ...this.store, activeProjectId: project.id, projects: [...this.store.projects, project] })
     this.selectedRegionId = ''
-    this.previewHtml = ''
+    this.previewImageUrl = ''
     this.schedulePreview(0)
     this.showToast('Display duplicated')
   }
@@ -386,7 +388,7 @@ export class OdxApp extends LitElement {
     this.selectedRegionId = ''
     this.layoutDraft = undefined
     this.editorMode = 'widgets'
-    this.previewHtml = ''
+    this.previewImageUrl = ''
     this.schedulePreview(0)
     this.showToast('Display deleted')
   }
@@ -679,7 +681,7 @@ export class OdxApp extends LitElement {
     const definition = region.widget ? this.widgetDefinition(region.widget.type) : undefined
     const compact = region.columnSpan === 1 || region.rowSpan === 1
     const layoutMode = this.editorMode === 'layout'
-    const livePreview = !layoutMode && Boolean(this.previewHtml)
+    const livePreview = !layoutMode && Boolean(this.previewImageUrl || this.previewError)
     const isComposed = Boolean(region.label) || region.rowSpan > 1 || region.columnSpan > 1
     const composedRegions = this.canvasProject.regions
       .filter((item) => item.label || item.rowSpan > 1 || item.columnSpan > 1)
@@ -755,7 +757,7 @@ export class OdxApp extends LitElement {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen ${this.editorMode === 'widgets' && this.previewHtml ? 'live-preview' : ''}"
+                  class="display-screen ${this.editorMode === 'widgets' && (this.previewImageUrl || this.previewError) ? 'live-preview' : ''}"
                   data-palette=${project.palette}
                   style=${styleMap({
                     '--grid-columns': String(project.grid.columns),
@@ -764,9 +766,11 @@ export class OdxApp extends LitElement {
                     height: `${pixels.height}px`,
                   })}
                 >
-                  ${this.editorMode === 'widgets' && this.previewHtml
+                  ${this.editorMode === 'widgets' && (this.previewImageUrl || this.previewError)
                     ? html`
-                      <iframe class="html-preview" title="Live Home Assistant data preview" sandbox="" .srcdoc=${this.previewDocument()}></iframe>
+                      ${this.previewImageUrl
+                        ? html`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />`
+                        : html`<ha-alert class="preview-failure" alert-type="error" .title=${'Exact preview unavailable'}>${this.previewError}</ha-alert>`}
                       <div
                         class="preview-overlay"
                         style=${styleMap({
@@ -793,7 +797,7 @@ export class OdxApp extends LitElement {
               : this.previewLoading
                 ? 'Refreshing current Home Assistant data…'
                 : this.previewTimings
-                  ? `Liquid + data composed in ${this.previewTimings.compose.toFixed(1)} ms. Select a region to configure it.`
+                  ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.`
                   : 'Select a region to configure its content.'}</div>`}
         </div>
       </main>
