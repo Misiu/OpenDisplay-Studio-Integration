@@ -37,7 +37,7 @@ def _renderer_client(hass: HomeAssistant) -> RendererClient:
     )
     if entry is None:
         raise ProjectComposeError("Renderer App is not ready")
-    return entry.runtime_data.client
+    return cast("RendererClient", entry.runtime_data.client)
 
 
 def _error(
