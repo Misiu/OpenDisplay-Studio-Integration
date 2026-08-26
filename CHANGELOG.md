@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.3
+
 - Add the adaptive Weather widget with a native Home Assistant weather entity
   selector and live designer preview.
 - Resolve current conditions from entity state and daily forecasts through
