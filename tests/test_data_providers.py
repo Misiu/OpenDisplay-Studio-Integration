@@ -62,7 +62,7 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
     }
 
     with patch.object(
-        hass.services,
+        type(hass.services),
         "async_call",
         AsyncMock(return_value=service_response),
     ) as async_call:
@@ -121,7 +121,7 @@ async def test_weather_provider_uses_explicit_nulls_for_optional_values(hass) ->
     }
 
     with patch.object(
-        hass.services,
+        type(hass.services),
         "async_call",
         AsyncMock(return_value=service_response),
     ):

@@ -23,7 +23,7 @@ def test_release_rejects_mismatch(tmp_path) -> None:
 
 
 def test_panel_build_version_matches_release() -> None:
-    assert INTEGRATION_VERSION == "0.3.2"
+    assert INTEGRATION_VERSION == "0.3.3"
 
 
 def test_panel_does_not_bundle_home_assistant_component_implementations() -> None:
