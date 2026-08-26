@@ -3043,7 +3043,7 @@ var et = (e) => e <= 1.6 ? {
 	},
 	{
 		id: "weather",
-		version: 3,
+		version: 4,
 		name: "Weather",
 		description: "Current conditions and a daily Home Assistant forecast.",
 		icon: Qe,
