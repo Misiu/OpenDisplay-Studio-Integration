@@ -53,7 +53,7 @@ async def test_preview_uses_renderer_and_returns_cached_png(hass) -> None:
             return_value=client,
         ),
     ):
-        await websocket_compose_preview(
+        await websocket_compose_preview.__wrapped__.__wrapped__(
             hass,
             connection,
             {"id": 7, "project": {}},
@@ -105,7 +105,7 @@ async def test_preview_exposes_renderer_failure(hass) -> None:
             return_value=client,
         ),
     ):
-        await websocket_compose_preview(
+        await websocket_compose_preview.__wrapped__.__wrapped__(
             hass,
             connection,
             {"id": 8, "project": {}},
