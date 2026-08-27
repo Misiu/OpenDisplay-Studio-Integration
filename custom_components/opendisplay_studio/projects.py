@@ -234,7 +234,7 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
                 if requirement.get("optional"):
                     continue
                 config_key = requirement.get("configKey")
-                field = next(
+                field: dict[str, Any] = next(
                     (
                         item
                         for item in widget_definition["fields"]

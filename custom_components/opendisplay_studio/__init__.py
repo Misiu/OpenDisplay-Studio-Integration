@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from homeassistant.components.hassio import AddonError, AddonManager, AddonState
@@ -72,7 +73,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up storage, panel APIs, and the temporary render endpoint."""
     installed_widgets = Path(hass.config.path(DOMAIN, "widgets"))
     await hass.async_add_executor_job(
-        installed_widgets.mkdir, parents=True, exist_ok=True
+        partial(installed_widgets.mkdir, parents=True, exist_ok=True)
     )
     widgets = await hass.async_add_executor_job(
         WidgetRegistry.from_directories,
