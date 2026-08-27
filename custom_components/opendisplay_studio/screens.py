@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from time import perf_counter
 from typing import Final
 
 from homeassistant.util import dt as dt_util
-
-from .liquid_renderer import LIQUID
+from trmnl_liquid import render as render_liquid
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,23 +168,22 @@ LIQUID_TEMPLATE: Final = """
 def build_liquid_screen() -> BuiltScreen:
     """Render dynamic HTML before Chromium and expose the Liquid time."""
     now = dt_util.now()
-    result = LIQUID.render(
+    started = perf_counter()
+    html = render_liquid(
         LIQUID_TEMPLATE,
-        {
-            "title": "Liquid · Łódź",
-            "generated_at": now.strftime("%H:%M:%S"),
-            "metrics": [
-                {"label": "Temperatura", "value": 21.4, "unit": "°C"},
-                {"label": "Wilgotność", "value": 47, "unit": "%"},
-                {"label": "Ciśnienie", "value": 1017, "unit": " hPa"},
-            ],
-            "events": [
-                {"time": "10:00", "title": "Spotkanie produkcyjne"},
-                {"time": "16:00", "title": "Przegląd projektu"},
-            ],
-        },
+        title="Liquid · Łódź",
+        generated_at=now.strftime("%H:%M:%S"),
+        metrics=[
+            {"label": "Temperatura", "value": 21.4, "unit": "°C"},
+            {"label": "Wilgotność", "value": 47, "unit": "%"},
+            {"label": "Ciśnienie", "value": 1017, "unit": " hPa"},
+        ],
+        events=[
+            {"time": "10:00", "title": "Spotkanie produkcyjne"},
+            {"time": "16:00", "title": "Przegląd projektu"},
+        ],
     )
-    return BuiltScreen(result.html, result.milliseconds)
+    return BuiltScreen(html, (perf_counter() - started) * 1_000)
 
 
 SCREENS: Final = {

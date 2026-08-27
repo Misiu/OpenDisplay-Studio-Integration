@@ -4,6 +4,10 @@
 
 ## 0.5.1
 
+- Replace the integration-owned Liquid subset with `trmnl-liquid-py` 0.1.0,
+  matching the supported non-I18n TRMNL Liquid 0.8.2 rendering surface.
+- Validate every bundled widget template against the shared TRMNL engine and
+  cover lax missing-data and inline-template behavior with regression tests.
 - Add project-level light and dark TRMNL themes.
 - Add project-level default, classic, and TRMNL font families plus four text scales.
 - Add a short-wide Weather composition for dense grids such as 800×480 at 3×3.

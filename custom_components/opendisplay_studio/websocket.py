@@ -10,7 +10,6 @@ from homeassistant.core import HomeAssistant
 
 from .composer import ProjectComposeError, async_compose_project
 from .const import DOMAIN, LOGGER, MIN_RENDERER_VERSION, RENDER_HTTP_PATH
-from .liquid_renderer import TemplateRenderError
 from .projects import (
     ProjectStore,
     ProjectValidationError,
@@ -159,7 +158,7 @@ async def websocket_compose_preview(
     except ProjectValidationError as err:
         _error(connection, msg, err)
         return
-    except (ProjectComposeError, RendererError, TemplateRenderError) as err:
+    except (ProjectComposeError, RendererError) as err:
         LOGGER.warning("Live preview render failed: %s", err)
         connection.send_error(msg["id"], "preview_failed", str(err))
         return

@@ -9,9 +9,10 @@ from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
+from liquid.exceptions import LiquidError
+from trmnl_liquid import render as render_liquid
 
 from .const import DOMAIN
-from .liquid_renderer import LIQUID
 from .projects import Project
 from .widgets import DEFAULT_REGISTRY, WidgetRegistry, definition, with_defaults
 
@@ -218,16 +219,18 @@ async def async_compose_project(
                 resolved,
                 registry,
             )
-            result = LIQUID.render(
-                registry.template(widget_type),
-                {
-                    "config": config,
-                    "data": data,
-                    "region": {"shape": _region_shape(project, region, gap=layout_gap)},
-                },
-            )
-            fragment = result.html
-            liquid_ms += result.milliseconds
+            liquid_started = perf_counter()
+            try:
+                fragment = render_liquid(
+                    registry.template(widget_type),
+                    config=config,
+                    data=data,
+                    region={"shape": _region_shape(project, region, gap=layout_gap)},
+                )
+            except LiquidError as err:
+                message = f"Could not render {widget_type} widget: {err}"
+                raise ProjectComposeError(message) from err
+            liquid_ms += (perf_counter() - liquid_started) * 1_000
         region_width, region_height = _region_size(project, region, gap=layout_gap)
         ratio = region_width / max(1, region_height)
         style = (
