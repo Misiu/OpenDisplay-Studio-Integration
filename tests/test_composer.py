@@ -5,6 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.exceptions import HomeAssistantError
+from liquid.exceptions import LiquidSyntaxError
 
 from custom_components.opendisplay_studio.composer import (
     ProjectComposeError,
@@ -117,6 +118,26 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
     assert 'data-region-width="388.000"' in result.html
 
 
+async def test_display_preferences_become_trmnl_screen_classes(hass) -> None:
+    project = {
+        "theme": "dark",
+        "fontFamily": "classic",
+        "textScale": "small",
+        "palette": "bw",
+        "width": 400,
+        "height": 300,
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    result = await async_compose_project(hass, project)
+
+    assert "screen--dark-mode" in result.html
+    assert "screen--fonts-classic" in result.html
+    assert "screen--text-scale-small" in result.html
+    assert "var(--framework-semantic-canvas-bg-color,#fff)" in result.html
+
+
 async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
     project = {
         "palette": "bw",
@@ -143,6 +164,36 @@ async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
             AsyncMock(side_effect=HomeAssistantError("calendar unavailable")),
         ),
         pytest.raises(ProjectComposeError),
+    ):
+        await async_compose_project(hass, project)
+
+
+async def test_liquid_syntax_error_is_exposed_as_compose_error(hass) -> None:
+    project = {
+        "palette": "bw",
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [
+            {
+                "id": "text",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "text",
+                    "version": "0.5.0",
+                    "config": {"text": "Broken"},
+                },
+            }
+        ],
+    }
+
+    with (
+        patch(
+            "custom_components.opendisplay_studio.composer.render_liquid",
+            side_effect=LiquidSyntaxError("broken template", token=None),
+        ),
+        pytest.raises(ProjectComposeError, match="Could not render text widget"),
     ):
         await async_compose_project(hass, project)
 

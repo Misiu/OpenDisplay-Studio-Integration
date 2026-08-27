@@ -125,6 +125,12 @@ The panel displays the PNG returned by the same renderer used for Media Source.
 Its local widget component is only a temporary loading fallback; it is not a
 second authoritative renderer.
 
+Display-wide presentation is part of the project contract. `theme` maps to
+the TRMNL light or dark screen mode, `fontFamily` selects the default, classic,
+or TRMNL family, and `textScale` selects small, regular, large, or extra-large
+framework typography. These settings must remain outside widget configuration
+so every package shares one predictable display environment.
+
 `--screen-w` and `--screen-h` describe the physical device. Responsive widget
 decisions use the actual CSS region container dimensions, never names such as
 full or half. A package must work for arbitrary device and region sizes.

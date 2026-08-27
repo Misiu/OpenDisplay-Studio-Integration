@@ -65,6 +65,12 @@ whole screen, invokes Home Assistant-aware providers, renders Liquid fragments,
 and composes a single TRMNL document. The Renderer App contract remains
 `HTML + width + height -> PNG` and contains no project or HA concepts.
 
+Theme, font family, and text scale are project-level display preferences. The
+composer maps them to TRMNL Framework screen classes before sending the same
+HTML to preview and Media Source. Widgets do not own or duplicate these
+settings; they react to the framework variables and their physical region
+container.
+
 Backend panel registration follows the current Core Dynalite pattern: local
 static files, WebSocket commands, and an admin-only custom panel. Studio is not
 a standalone frontend, so its component model follows the Matter and ZHA

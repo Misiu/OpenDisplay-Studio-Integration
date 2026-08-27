@@ -2703,6 +2703,9 @@ var tt = (e) => e <= 1.6 ? {
 		name: e,
 		status: "draft",
 		language: t,
+		theme: "light",
+		fontFamily: "default",
+		textScale: "regular",
 		displayId: n.id,
 		orientation: r,
 		palette: n.defaultPalette,
@@ -3469,6 +3472,26 @@ var Z = (e, t) => {
 			palette: t
 		}));
 	}
+	changeTheme(e) {
+		this.updateLayoutDraft((t) => ({
+			...t,
+			theme: e
+		}));
+	}
+	changeFontFamily(e) {
+		let t = e.currentTarget.value;
+		this.updateLayoutDraft((e) => ({
+			...e,
+			fontFamily: t
+		}));
+	}
+	changeTextScale(e) {
+		let t = e.currentTarget.value;
+		this.updateLayoutDraft((e) => ({
+			...e,
+			textScale: t
+		}));
+	}
 	changeOrientation(e) {
 		if (e === this.canvasProject.orientation) return;
 		let t = this.canvasProject.displayId === "custom" ? {
@@ -3657,6 +3680,30 @@ var Z = (e, t) => {
           </select>
         </div>
         <div class="control">
+          <span class="field-label">Theme</span>
+          <div class="segment" role="group" aria-label="Display theme">
+            <button class=${e.theme === "light" ? "active" : ""} @click=${() => this.changeTheme("light")}>Light</button>
+            <button class=${e.theme === "dark" ? "active" : ""} @click=${() => this.changeTheme("dark")}>Dark</button>
+          </div>
+        </div>
+        <div class="control">
+          <label for="font-family">Font family</label>
+          <select id="font-family" .value=${e.fontFamily} @change=${this.changeFontFamily}>
+            <option value="default">Default</option>
+            <option value="classic">Classic</option>
+            <option value="trmnl">TRMNL</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="text-scale">Text scale</label>
+          <select id="text-scale" .value=${e.textScale} @change=${this.changeTextScale}>
+            <option value="small">Small</option>
+            <option value="regular">Regular</option>
+            <option value="large">Large</option>
+            <option value="xlarge">Extra large</option>
+          </select>
+        </div>
+        <div class="control">
           <span class="field-label">Orientation</span>
           <div class="segment" role="group" aria-label="Display orientation">
             <button class=${e.orientation === "landscape" ? "active" : ""} @click=${() => this.changeOrientation("landscape")}>Landscape</button>
@@ -3678,7 +3725,7 @@ var Z = (e, t) => {
         <div class="device-summary">
           <span class="step-kicker">Step 2 · Widgets</span>
           <strong>${this.displayName(this.project)}</strong>
-          <span>${e.width}×${e.height} · ${R[this.project.palette]} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
+          <span>${e.width}×${e.height} · ${R[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
         <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Qe)} Edit device & layout</ha-button>
       </div>

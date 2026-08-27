@@ -79,6 +79,15 @@ describe('Weather LiquidJS contract', () => {
     await expect(render(current, false)).resolves.toContain('12°')
   })
 
+  it('includes a dedicated composition for short wide regions', async () => {
+    const html = await render(current)
+
+    expect(html).toContain('data-weather-composition="strip"')
+    expect(html).toContain(
+      '@container weather (min-width: 361px) and (max-height: 199px)',
+    )
+  })
+
   it('renders localized vocabulary supplied by Home Assistant', async () => {
     const html = await render({
       ...current,

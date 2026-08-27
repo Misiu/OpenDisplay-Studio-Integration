@@ -8,41 +8,32 @@ height. The App has no Liquid dependency or template API.
 
 ## Liquid engine
 
-The integration pins `python-liquid==2.3.1`, a Python implementation tested
-against Shopify's Golden Liquid suite. It runs in strict mode, has no filesystem
-loader, auto-escapes variables, and applies limits for block depth, context
-depth, loop iterations, local variables, and output bytes.
+The integration pins
+[`trmnl-liquid-py==0.1.0`](https://github.com/Misiu/trmnl-liquid-py). The package
+targets byte-for-byte compatibility with the supported non-I18n surface of Ruby
+`trmnl-liquid` 0.8.2. Its differential corpus currently matches all 574 covered
+Ruby outputs and maps all 73 upstream RSpec examples.
 
-Supported in the POC:
+The shared package supplies the standard Liquid language, TRMNL's inline
+`{% template %}` tag, Ruby-compatible lax syntax and runtime behavior, Markdown,
+QR generation, and the supported TRMNL filters. Rendering intentionally follows
+TRMNL's unescaped, lax semantics; missing provider fields become empty Liquid
+values instead of failing an otherwise renderable display. Each widget fragment
+uses a fresh in-memory environment, so inline template definitions cannot leak
+between installed widgets and Liquid has no filesystem fallback.
 
-- variables and nested mapping/list access;
-- `assign`, `capture`, `if`/`elsif`/`else`, `unless`, `case`, `for`, `break`,
-  `continue`, and standard Shopify filters supplied by Python Liquid;
-- selected TRMNL filters ported from `trmnl-liquid` 0.8.2:
-  `number_with_delimiter`, `json`, `parse_json`, `map_to_i`, `group_by`, and
-  `find_by`.
-
-Not yet ported:
-
-- TRMNL's custom `{% template %}` tag;
-- `where_exp`, QR code, Markdown, locale/Rails helpers, currency, ordinal, and
-  timezone-specific filters;
-- arbitrary user templates or Home Assistant entity bindings.
-
-The official `usetrmnl/byos_node_lite` reference does not use Ruby either. It
-uses LiquidJS with strict filters and variables inside its Node server. That is
-useful compatibility evidence, but moving Liquid into this project's App would
-violate the renderer-only boundary. A fuller Python port can become a separate
-integration-side package after the POC.
+Rails/ActionView behavior and full I18n implementations of `l_word` and `l_date`
+remain outside the package's 0.1.0 compatibility target. Widget-owned translation
+files and Home Assistant localization handle OpenDisplay Studio presentation
+language independently of those Rails helpers.
 
 ## TRMNL Liquid Components
 
 The stat/item, table, and progress structures were adapted from the MIT-licensed
 `usetrmnl/trmnl-liquid-components` repository at commit
-`77445360fb10b0d9edd2b28ffe574574ae563417`. Its custom `{% template %}` wrapper
-was deliberately removed because that tag is outside the current subset. The
-resulting HTML uses the same public Framework classes and renders as one DOM and
-one screenshot.
+`77445360fb10b0d9edd2b28ffe574574ae563417`. Installed widgets may now use the
+same `{% template %}` and `{% render %}` primitives as TRMNL. The resulting HTML
+uses the public Framework classes and renders as one DOM and one screenshot.
 
 ## Display profiles and palettes
 
@@ -61,5 +52,5 @@ not final e-paper quantization or dithering by OpenDisplay.
 
 The App bundles TRMNL Framework 3.2.0 CSS/JS and fonts with upstream MIT, OFL,
 and CC BY notices. It contains no Highcharts distribution or plugin image
-bundle. The integration's Python Liquid dependency and the adapted Liquid
-Components source are MIT licensed. No render path requires Internet access.
+bundle. The integration's `trmnl-liquid-py` dependency and the adapted Liquid
+Components source are MIT licensed.

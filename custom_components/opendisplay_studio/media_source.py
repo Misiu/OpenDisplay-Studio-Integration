@@ -20,7 +20,6 @@ from homeassistant.core import HomeAssistant
 
 from .composer import ProjectComposeError, async_compose_project
 from .const import DOMAIN, LOGGER
-from .liquid_renderer import TemplateRenderError
 from .renderer import RendererClient, RendererError
 
 
@@ -53,7 +52,7 @@ class OpenDisplayStudioMediaSource(MediaSource):
                 width=project["width"],
                 height=project["height"],
             )
-        except (ProjectComposeError, RendererError, TemplateRenderError) as err:
+        except (ProjectComposeError, RendererError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)
             raise Unresolvable(
                 translation_domain=DOMAIN,
