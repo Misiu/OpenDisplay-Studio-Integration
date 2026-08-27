@@ -117,6 +117,26 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
     assert 'data-region-width="388.000"' in result.html
 
 
+async def test_display_preferences_become_trmnl_screen_classes(hass) -> None:
+    project = {
+        "theme": "dark",
+        "fontFamily": "classic",
+        "textScale": "small",
+        "palette": "bw",
+        "width": 400,
+        "height": 300,
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    result = await async_compose_project(hass, project)
+
+    assert "screen--dark-mode" in result.html
+    assert "screen--fonts-classic" in result.html
+    assert "screen--text-scale-small" in result.html
+    assert "var(--framework-semantic-canvas-bg-color,#fff)" in result.html
+
+
 async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
     project = {
         "palette": "bw",

@@ -1,6 +1,9 @@
 import type { CSSResult, TemplateResult } from 'lit'
 
 export type Orientation = 'landscape' | 'portrait'
+export type DisplayTheme = 'light' | 'dark'
+export type FontFamily = 'default' | 'classic' | 'trmnl'
+export type TextScale = 'small' | 'regular' | 'large' | 'xlarge'
 
 export type PaletteId =
   | 'bw'
@@ -63,6 +66,9 @@ export interface ScreenProject {
   name: string
   status: 'draft' | 'ready'
   language: string
+  theme: DisplayTheme
+  fontFamily: FontFamily
+  textScale: TextScale
   displayId: string
   driverId?: string
   orientation: Orientation

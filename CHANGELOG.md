@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.5.1
+
+- Add project-level light and dark TRMNL themes.
+- Add project-level default, classic, and TRMNL font families plus four text scales.
+- Add a short-wide Weather composition for dense grids such as 800×480 at 3×3.
+- Verify bundled Home Assistant brand icon dimensions in CI.
+
 ## 0.5.0
 
 - Introduce self-contained widget packages under `opendisplay_studio/widgets`.

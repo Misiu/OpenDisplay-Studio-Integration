@@ -30,12 +30,15 @@ import type {
   BootstrapResponse,
   CellCoordinate,
   ComposePreviewResponse,
+  DisplayTheme,
+  FontFamily,
   GridRegion,
   HomeAssistant,
   Orientation,
   PaletteId,
   PersistedState,
   ScreenProject,
+  TextScale,
   WidgetDefinition,
   WidgetConfigValue,
   WidgetOption,
@@ -462,6 +465,20 @@ export class OdxApp extends LitElement {
     this.updateLayoutDraft((project) => ({ ...project, palette }))
   }
 
+  private changeTheme(theme: DisplayTheme): void {
+    this.updateLayoutDraft((project) => ({ ...project, theme }))
+  }
+
+  private changeFontFamily(event: Event): void {
+    const fontFamily = (event.currentTarget as HTMLSelectElement).value as FontFamily
+    this.updateLayoutDraft((project) => ({ ...project, fontFamily }))
+  }
+
+  private changeTextScale(event: Event): void {
+    const textScale = (event.currentTarget as HTMLSelectElement).value as TextScale
+    this.updateLayoutDraft((project) => ({ ...project, textScale }))
+  }
+
   private changeOrientation(orientation: Orientation): void {
     if (orientation === this.canvasProject.orientation) return
     const grid = this.canvasProject.displayId === 'custom'
@@ -662,6 +679,30 @@ export class OdxApp extends LitElement {
           </select>
         </div>
         <div class="control">
+          <span class="field-label">Theme</span>
+          <div class="segment" role="group" aria-label="Display theme">
+            <button class=${project.theme === 'light' ? 'active' : ''} @click=${() => this.changeTheme('light')}>Light</button>
+            <button class=${project.theme === 'dark' ? 'active' : ''} @click=${() => this.changeTheme('dark')}>Dark</button>
+          </div>
+        </div>
+        <div class="control">
+          <label for="font-family">Font family</label>
+          <select id="font-family" .value=${project.fontFamily} @change=${this.changeFontFamily}>
+            <option value="default">Default</option>
+            <option value="classic">Classic</option>
+            <option value="trmnl">TRMNL</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="text-scale">Text scale</label>
+          <select id="text-scale" .value=${project.textScale} @change=${this.changeTextScale}>
+            <option value="small">Small</option>
+            <option value="regular">Regular</option>
+            <option value="large">Large</option>
+            <option value="xlarge">Extra large</option>
+          </select>
+        </div>
+        <div class="control">
           <span class="field-label">Orientation</span>
           <div class="segment" role="group" aria-label="Display orientation">
             <button class=${project.orientation === 'landscape' ? 'active' : ''} @click=${() => this.changeOrientation('landscape')}>Landscape</button>
@@ -681,7 +722,7 @@ export class OdxApp extends LitElement {
         <div class="device-summary">
           <span class="step-kicker">Step 2 · Widgets</span>
           <strong>${this.displayName(this.project)}</strong>
-          <span>${pixels.width}×${pixels.height} · ${PALETTE_LABELS[this.project.palette]} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
+          <span>${pixels.width}×${pixels.height} · ${PALETTE_LABELS[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
         <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${renderButtonIcon(mdiTuneVariant)} Edit device & layout</ha-button>
       </div>

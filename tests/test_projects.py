@@ -96,6 +96,30 @@ def test_project_language_defaults_to_system_and_accepts_bcp47() -> None:
     assert validate_project(payload)["language"] == "pt-BR"
 
 
+def test_display_preferences_have_safe_defaults() -> None:
+    result = validate_project(project_payload())
+
+    assert result["theme"] == "light"
+    assert result["fontFamily"] == "default"
+    assert result["textScale"] == "regular"
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [
+        ("theme", "system"),
+        ("fontFamily", "comic-sans"),
+        ("textScale", "tiny"),
+    ],
+)
+def test_display_preferences_reject_unknown_values(key: str, value: str) -> None:
+    payload = project_payload()
+    payload[key] = value
+
+    with pytest.raises(ProjectValidationError, match=key):
+        validate_project(payload)
+
+
 @pytest.mark.parametrize("language", ["", "polish", "../pl", "pl_PL"])
 def test_project_language_rejects_invalid_values(language: str) -> None:
     payload = project_payload()

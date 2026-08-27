@@ -23,6 +23,9 @@ MAX_REGIONS = 256
 MAX_NAME_LENGTH = 100
 MAX_TEXT_LENGTH = 4_096
 PALETTES = {"bw", "gray4", "gray16", "bwr", "bwy", "bwry", "spectra6"}
+DISPLAY_THEMES = {"light", "dark"}
+FONT_FAMILIES = {"default", "classic", "trmnl"}
+TEXT_SCALES = {"small", "regular", "large", "xlarge"}
 LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 WIDGET_VERSION_PATTERN = re.compile(
     r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$"
@@ -172,6 +175,15 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
         language != "system" and LANGUAGE_PATTERN.fullmatch(language) is None
     ):
         raise ProjectValidationError("language is invalid")
+    theme = value.get("theme", "light")
+    if theme not in DISPLAY_THEMES:
+        raise ProjectValidationError("theme is invalid")
+    font_family = value.get("fontFamily", "default")
+    if font_family not in FONT_FAMILIES:
+        raise ProjectValidationError("fontFamily is invalid")
+    text_scale = value.get("textScale", "regular")
+    if text_scale not in TEXT_SCALES:
+        raise ProjectValidationError("textScale is invalid")
     grid = value.get("grid")
     if not isinstance(grid, dict):
         raise ProjectValidationError("grid must be an object")
@@ -284,6 +296,9 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
         "name": name,
         "status": status,
         "language": language,
+        "theme": theme,
+        "fontFamily": font_family,
+        "textScale": text_scale,
         "displayId": display_id or "custom",
         "width": width,
         "height": height,

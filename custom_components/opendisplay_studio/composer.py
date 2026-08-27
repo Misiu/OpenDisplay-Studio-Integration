@@ -32,10 +32,10 @@ class ProjectComposeError(Exception):
 
 STUDIO_STYLES = """
 <style>
-  .studio-screen{width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#fff;box-sizing:border-box}
+  .studio-screen{width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:var(--framework-semantic-canvas-bg-color,#fff)!important;color:var(--framework-semantic-text-primary-text-color,#000);box-sizing:border-box}
   .studio-screen .view--full{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
   .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-gap);gap:var(--studio-gap);box-sizing:border-box}
-  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:#fff;box-sizing:border-box;container-type:size;container-name:od-region}
+  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--framework-semantic-surface-bg-color,transparent);color:inherit;box-sizing:border-box;container-type:size;container-name:od-region}
   .studio-region>.item{width:100%!important;height:100%!important;margin:0!important;padding:0!important}
   .studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}
   .studio-entity__content{display:flex!important;align-items:center;justify-content:center;gap:clamp(4px,4cqh,14px);padding:clamp(7px,7cqh,22px)!important;overflow:hidden}
@@ -72,6 +72,20 @@ def _screen_size(width: int, height: int) -> str:
     if longest >= 1_000:
         return "screen--lg"
     return "screen--md"
+
+
+def _screen_preferences(project: Project) -> str:
+    """Map persisted display preferences to TRMNL screen classes."""
+    classes: list[str] = []
+    if project.get("theme", "light") == "dark":
+        classes.append("screen--dark-mode")
+    font_family = project.get("fontFamily", "default")
+    if font_family in {"classic", "trmnl"}:
+        classes.append(f"screen--fonts-{font_family}")
+    text_scale = project.get("textScale", "regular")
+    if text_scale in {"small", "large", "xlarge"}:
+        classes.append(f"screen--text-scale-{text_scale}")
+    return " ".join(classes)
 
 
 def _region_size(
@@ -241,8 +255,10 @@ async def async_compose_project(
     body = "".join(fragments)
     size = _screen_size(width, height)
     portrait = " screen--portrait" if height > width else ""
+    preferences = _screen_preferences(project)
+    preference_classes = f" {preferences}" if preferences else ""
     html = (
-        f'<main class="screen {mode} {size}{portrait} studio-screen" '
+        f'<main class="screen {mode} {size}{portrait}{preference_classes} studio-screen" '
         f'style="--studio-width:{width}px;--studio-height:{height}px;'
         f"--screen-w:{width}px;--screen-h:{height}px;"
         f'--studio-gap:{layout_gap}px">{STUDIO_STYLES}<div class="view view--full">'
