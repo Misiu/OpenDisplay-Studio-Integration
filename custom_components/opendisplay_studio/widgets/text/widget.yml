@@ -1,0 +1,33 @@
+id: text
+name: Text
+version: "0.5.0"
+description: Static heading and body text.
+icon: mdi:text
+framework: 3.2.0
+template: widget.liquid
+
+defaults:
+  title: ""
+  text: Text
+  align: left
+
+fields:
+  - key: title
+    label: Title
+    type: text
+  - key: text
+    label: Text
+    type: text
+    multiline: true
+  - key: align
+    label: Alignment
+    type: select
+    options:
+      - label: Left
+        value: left
+      - label: Center
+        value: center
+      - label: Right
+        value: right
+
+dataRequirements: []

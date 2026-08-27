@@ -2,15 +2,27 @@
 
 ## Unreleased
 
-## 0.3.6
+## 0.5.0
+
+- Introduce self-contained widget packages under `opendisplay_studio/widgets`.
+  Templates, selectors, translations, and optional Python data providers now
+  ship with their owning widget and can be updated independently.
+- Discover locally installed widget packages without hardcoded widget IDs and
+  expose backend-only community widgets in the Studio picker.
+- Scope providers to their owning package, preventing name collisions between
+  independently installed community widgets.
+- Use the project language across live preview, Media Source, and physical
+  output. Weather reuses Home Assistant condition translations and carries its
+  own English and Polish presentation vocabulary.
+- Require Renderer App 0.5.0 so the public suite has one compatible release
+  line for exact previews and final images.
 
 - Make the Weather data contract total: current conditions render when the
   entity is not selected, forecast data is absent, or `weather.get_forecasts`
   fails.
 - Fix successful unsaved previews crashing in diagnostic logging when the
   normalized project has no `id`.
-- Require Renderer App 0.2.4 with the corrected Home Assistant discovery
-  service name.
+- Use the corrected Home Assistant discovery service name.
 
 ## 0.3.5
 

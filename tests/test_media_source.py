@@ -13,6 +13,7 @@ from custom_components.opendisplay_studio.media_source import (
     OpenDisplayStudioMediaSource,
 )
 from custom_components.opendisplay_studio.renderer import RenderResult
+from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"dynamic"
 
@@ -40,6 +41,7 @@ async def test_resolve_renders_and_publishes_temporary_png(hass) -> None:
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(ttl_seconds=300, max_items=32),
         projects=projects,
+        widgets=DEFAULT_REGISTRY,
         renderer=client,
     )
     source = OpenDisplayStudioMediaSource(hass)

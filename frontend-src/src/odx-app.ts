@@ -40,7 +40,7 @@ import type {
   WidgetConfigValue,
   WidgetOption,
 } from './types'
-import { WIDGETS, getWidgetDefinition, widgetStyles } from './widgets/registry'
+import { getRuntimeWidgetDefinition, getWidgetDefinition, widgetStyles } from './widgets/registry'
 import { renderButtonIcon, renderIcon } from './widgets/shared'
 import { sharedWidgetStyles } from './widgets/shared-styles'
 
@@ -168,15 +168,8 @@ export class OdxApp extends LitElement {
   private widgetDefinition(widgetId: string): WidgetDefinition | undefined {
     const local = getWidgetDefinition(widgetId)
     const backend = this.widgetMetadata.find((item) => item.id === widgetId)
-    if (!local || !backend) return local
-    return {
-      ...local,
-      version: backend.version,
-      name: backend.name,
-      description: backend.description,
-      defaults: backend.defaults,
-      options: backend.fields,
-    }
+    if (!backend) return local
+    return getRuntimeWidgetDefinition(backend)
   }
 
   private updatePreviewScale(): void {
@@ -369,7 +362,10 @@ export class OdxApp extends LitElement {
 
   private async addProject(): Promise<void> {
     try {
-      const draft = createProject(`Untitled display ${this.store.projects.length + 1}`)
+      const draft = createProject(
+        `Untitled display ${this.store.projects.length + 1}`,
+        this.hass.language,
+      )
       const response = await this.hass.callWS<{ project: ScreenProject }>({
         type: 'opendisplay_studio/create_project',
         project: draft,
@@ -900,9 +896,12 @@ export class OdxApp extends LitElement {
       <aside class="inspector">
         <div class="inspector-heading"><h2>Region settings</h2><span class="region-address">R${region.row}:C${region.column} · ${region.columnSpan}×${region.rowSpan}</span></div>
         <div class="widget-picker">
-          ${WIDGETS.map((widget) => html`
+          ${this.widgetMetadata.map((widget) => html`
             <button class="widget-choice ${definition?.id === widget.id ? 'active' : ''}" @click=${() => this.assignWidget(widget.id)}>
-              ${renderIcon(widget.icon)}<strong>${widget.name}</strong><span>${widget.description}</span>
+              ${getWidgetDefinition(widget.id)
+                ? renderIcon(getWidgetDefinition(widget.id)!.icon)
+                : html`<ha-icon .icon=${widget.icon}></ha-icon>`}
+              <strong>${widget.name}</strong><span>${widget.description}</span>
             </button>
           `)}
         </div>
@@ -927,6 +926,21 @@ export class OdxApp extends LitElement {
           <div><dt>Grid</dt><dd>${project.grid.columns} × ${project.grid.rows}</dd></div>
           <div><dt>Regions</dt><dd>${project.regions.length}</dd></div>
         </dl>
+        <ha-form
+          .hass=${this.hass}
+          .data=${{ language: project.language === 'system' ? this.hass.language : project.language }}
+          .schema=${[{
+            name: 'language',
+            label: 'Display language',
+            required: true,
+            selector: { language: { native_name: true } },
+          }]}
+          @value-changed=${(event: CustomEvent<{ value: { language?: string } }>) => {
+            const language = event.detail.value.language
+            if (language) this.updateLayoutDraft((draft) => ({ ...draft, language }))
+          }}
+        ></ha-form>
+        <p>The selected language is used by live preview, Media Source, and the physical display.</p>
         <ol class="layout-instructions">
           <li>Click the first corner of a new region.</li>
           <li>Move across the grid and click the opposite corner.</li>

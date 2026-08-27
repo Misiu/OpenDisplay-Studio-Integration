@@ -4,7 +4,7 @@ import { getDisplayProfile } from '../data/display-profiles'
 
 const DEFAULT_DISPLAY = 'solum-newton-pro-5-8'
 
-export const createProject = (name = 'Kitchen display'): ScreenProject => {
+export const createProject = (name = 'Kitchen display', language = 'en'): ScreenProject => {
   const display = getDisplayProfile(DEFAULT_DISPLAY)
   const orientation = 'landscape' as const
   const grid = gridForOrientation(display, orientation)
@@ -14,6 +14,7 @@ export const createProject = (name = 'Kitchen display'): ScreenProject => {
     schemaVersion: 1,
     name,
     status: 'draft',
+    language,
     displayId: display.id,
     orientation,
     palette: display.defaultPalette,

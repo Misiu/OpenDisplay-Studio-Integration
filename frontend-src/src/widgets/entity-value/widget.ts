@@ -6,7 +6,7 @@ import { entityValueStyles } from './styles'
 
 export const entityValueWidget: WidgetDefinition = {
   id: 'entity-state',
-  version: 1,
+  version: '0.5.0',
   name: 'Entity State',
   description: 'A prominent value from a single entity.',
   icon: mdiHomeThermometerOutline,

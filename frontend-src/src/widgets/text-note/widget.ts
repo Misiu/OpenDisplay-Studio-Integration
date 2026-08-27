@@ -6,7 +6,7 @@ import { textNoteStyles } from './styles'
 
 export const textNoteWidget: WidgetDefinition = {
   id: 'text',
-  version: 1,
+  version: '0.5.0',
   name: 'Text',
   description: 'A simple message or heading.',
   icon: mdiFormatText,

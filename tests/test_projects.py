@@ -30,7 +30,7 @@ def project_payload() -> dict:
                 "columnSpan": 1,
                 "widget": {
                     "type": "entity-state",
-                    "version": 1,
+                    "version": "0.5.0",
                     "config": {"entity": "sensor.office"},
                 },
             },
@@ -56,7 +56,7 @@ def test_weather_widget_config_is_normalized() -> None:
     payload = project_payload()
     payload["regions"][0]["widget"] = {
         "type": "weather",
-        "version": 2,
+        "version": "0.5.0",
         "config": {
             "weather": "weather.home",
             "showHumidity": False,
@@ -69,7 +69,7 @@ def test_weather_widget_config_is_normalized() -> None:
 
     assert result["regions"][0]["widget"] == {
         "type": "weather",
-        "version": 2,
+        "version": "0.5.0",
         "config": {
             "weather": "weather.home",
             "showHumidity": False,
@@ -79,12 +79,38 @@ def test_weather_widget_config_is_normalized() -> None:
     }
 
 
+def test_widget_version_requires_semver() -> None:
+    payload = project_payload()
+    payload["regions"][0]["widget"]["version"] = 4
+
+    with pytest.raises(ProjectValidationError, match="semantic version"):
+        validate_project(payload)
+
+
+def test_project_language_defaults_to_system_and_accepts_bcp47() -> None:
+    payload = project_payload()
+
+    assert validate_project(payload)["language"] == "system"
+
+    payload["language"] = "pt-BR"
+    assert validate_project(payload)["language"] == "pt-BR"
+
+
+@pytest.mark.parametrize("language", ["", "polish", "../pl", "pl_PL"])
+def test_project_language_rejects_invalid_values(language: str) -> None:
+    payload = project_payload()
+    payload["language"] = language
+
+    with pytest.raises(ProjectValidationError, match="language"):
+        validate_project(payload)
+
+
 def test_ready_weather_widget_requires_weather_entity() -> None:
     payload = project_payload()
     payload["status"] = "ready"
     payload["regions"][0]["widget"] = {
         "type": "weather",
-        "version": 2,
+        "version": "0.5.0",
         "config": {"weather": "sensor.outdoor_temperature"},
     }
 
@@ -102,6 +128,7 @@ async def test_project_identity_survives_rename_and_ready(hass) -> None:
 
     assert updated["id"] == created["id"]
     assert updated["createdAt"] == created["createdAt"]
+    assert updated["language"] == hass.config.language
     assert [item["name"] for item in store.list(ready_only=True)] == ["Main kitchen"]
 
 
@@ -121,4 +148,5 @@ async def test_projects_reload_from_versioned_store(hass) -> None:
     loaded = store.get("stable-id")
     assert loaded is not None
     assert loaded["name"] == "Kitchen"
+    assert loaded["language"] == hass.config.language
     assert loaded["createdAt"] == "2026-08-24T08:00:00+00:00"

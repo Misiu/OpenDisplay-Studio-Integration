@@ -43,7 +43,7 @@ export interface CustomDriverProfile {
 
 export interface WidgetInstance {
   type: string
-  version: number
+  version: string
   config: WidgetConfig
 }
 
@@ -62,6 +62,7 @@ export interface ScreenProject {
   schemaVersion: 1
   name: string
   status: 'draft' | 'ready'
+  language: string
   displayId: string
   driverId?: string
   orientation: Orientation
@@ -106,7 +107,7 @@ export interface WidgetRenderContext {
 
 export interface WidgetDefinition {
   id: string
-  version: number
+  version: string
   name: string
   description: string
   icon: string
@@ -121,6 +122,7 @@ export interface WidgetDefinition {
 
 export interface HomeAssistant {
   callWS<T>(message: Record<string, unknown>): Promise<T>
+  language: string
   states?: Record<string, { state: string; last_updated?: string }>
 }
 
@@ -139,7 +141,7 @@ export interface BootstrapResponse {
   projects: ScreenProject[]
   widgets: Array<{
     id: string
-    version: number
+    version: string
     name: string
     description: string
     icon: string

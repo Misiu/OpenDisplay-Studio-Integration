@@ -1,0 +1,12 @@
+<div class="item"><div class="content layout layout--col gap--small">
+  <span class="title">{{ config.title }}</span>
+  {% if data.calendar.events.size > 0 %}
+  <table class="table table--small" data-table-limit="true"><tbody>
+    {% for event in data.calendar.events %}<tr>
+      <td><span class="value value--xxsmall value--tnums">{{ event.time }}</span></td>
+      <td><span class="label">{{ event.summary }}</span>{% if config.showLocation and event.location %}<span class="description">{{ event.location }}</span>{% endif %}{% if config.showDescription and event.description %}<span class="description">{{ event.description }}</span>{% endif %}</td>
+    </tr>{% endfor %}
+  </tbody></table>
+  {% else %}<span class="label">No upcoming events</span>{% endif %}
+</div></div>
+

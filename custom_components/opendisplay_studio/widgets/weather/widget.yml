@@ -1,0 +1,43 @@
+id: weather
+name: Weather
+version: "0.5.0"
+description: Current conditions and a daily Home Assistant forecast.
+icon: mdi:weather-partly-cloudy
+framework: 3.2.0
+template: widget.liquid
+provider: provider.py
+
+defaults:
+  weather: ""
+  showHumidity: true
+  showFeelsLike: true
+  showForecast: true
+
+fields:
+  - key: weather
+    label: Weather entity
+    required: true
+    selector:
+      entity:
+        filter:
+          domain: weather
+  - key: showHumidity
+    label: Show humidity
+    selector:
+      boolean: {}
+  - key: showFeelsLike
+    label: Show feels like
+    selector:
+      boolean: {}
+  - key: showForecast
+    label: Show forecast
+    selector:
+      boolean: {}
+
+dataRequirements:
+  - key: weather
+    provider: weather_forecast
+    configKey: weather
+    cardinality: one
+    optional: false
+    forecastType: daily

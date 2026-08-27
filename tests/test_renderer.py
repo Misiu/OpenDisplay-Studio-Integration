@@ -18,7 +18,7 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         return web.json_response(
             {
                 "status": "ok",
-                "version": "0.2.4",
+                "version": "0.5.0",
                 "apiVersion": 1,
                 "trmnlFrameworkVersion": "3.2.0",
             }
@@ -50,7 +50,7 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         client = RendererClient(session, str(server.make_url("/")), "secret")
         assert await client.async_health() == {
             "status": "ok",
-            "version": "0.2.4",
+            "version": "0.5.0",
             "apiVersion": 1,
             "trmnlFrameworkVersion": "3.2.0",
         }
@@ -91,9 +91,9 @@ async def test_health_rejects_incompatible_api(aiohttp_server, socket_enabled) -
 @pytest.mark.parametrize(
     ("version", "framework_version"),
     [
-        ("0.2.3", "3.2.0"),
-        ("0.2.4-dev", "3.2.0"),
-        ("0.2.4", "3.1.0"),
+        ("0.4.9", "3.2.0"),
+        ("0.5.0-dev", "3.2.0"),
+        ("0.5.0", "3.1.0"),
     ],
 )
 async def test_health_rejects_incompatible_renderer_or_framework(

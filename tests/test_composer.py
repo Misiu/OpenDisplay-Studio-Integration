@@ -1,6 +1,7 @@
 """Tests for render-time data aggregation and one-page composition."""
 
-from unittest.mock import AsyncMock, Mock, patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from homeassistant.exceptions import HomeAssistantError
@@ -11,7 +12,10 @@ from custom_components.opendisplay_studio.composer import (
     _requirement_sources,
     async_compose_project,
 )
-from custom_components.opendisplay_studio.widgets import definition
+from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY, definition
+from custom_components.opendisplay_studio.widgets.weather.provider import (
+    WeatherLocalizer,
+)
 
 
 def test_requirement_contract_supports_many_and_optional_sources() -> None:
@@ -55,7 +59,7 @@ def test_entity_tile_shape_uses_physical_region_ratio() -> None:
 async def test_entity_requirements_are_deduplicated(hass) -> None:
     widget = {
         "type": "entity-state",
-        "version": 1,
+        "version": "0.5.0",
         "config": {"entity": "sensor.office", "showUnit": True},
     }
     project = {
@@ -80,7 +84,7 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
             },
         ],
     }
-    get_many = Mock(
+    resolve = AsyncMock(
         return_value={
             "sensor.office": {
                 "state": "22.8",
@@ -91,18 +95,15 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
         }
     )
     with (
-        patch(
-            "custom_components.opendisplay_studio.composer.EntityStateProvider.get_many",
-            get_many,
-        ),
-        patch(
-            "custom_components.opendisplay_studio.composer.CalendarProvider.async_get_many",
-            AsyncMock(return_value={}),
+        patch.object(
+            DEFAULT_REGISTRY.provider("entity-state", "entity_state"),
+            "async_resolve",
+            resolve,
         ),
     ):
         result = await async_compose_project(hass, project)
 
-    get_many.assert_called_once_with({"sensor.office"})
+    resolve.assert_awaited_once_with(hass, {"sensor.office"}, hass.config.language)
     assert result.html.count("22.8") == 2
     assert result.html.startswith(
         '<main class="screen screen--1bit screen--md studio-screen"'
@@ -120,11 +121,25 @@ async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
     project = {
         "palette": "bw",
         "grid": {"columns": 1, "rows": 1},
-        "regions": [],
+        "regions": [
+            {
+                "id": "entity",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "entity-state",
+                    "version": "0.5.0",
+                    "config": {"entity": "sensor.office"},
+                },
+            }
+        ],
     }
     with (
-        patch(
-            "custom_components.opendisplay_studio.composer.CalendarProvider.async_get_many",
+        patch.object(
+            DEFAULT_REGISTRY.provider("entity-state", "entity_state"),
+            "async_resolve",
             AsyncMock(side_effect=HomeAssistantError("calendar unavailable")),
         ),
         pytest.raises(ProjectComposeError),
@@ -147,7 +162,7 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
                 "columnSpan": 1,
                 "widget": {
                     "type": "weather",
-                    "version": 2,
+                    "version": "0.5.0",
                     "config": {"weather": "weather.home"},
                 },
             }
@@ -168,13 +183,19 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
         }
     }
 
-    with patch(
-        "custom_components.opendisplay_studio.composer.WeatherForecastProvider.async_get_many",
-        AsyncMock(return_value=weather),
-    ) as get_many:
+    resolve = AsyncMock(
+        return_value=SimpleNamespace(
+            values=weather, localizer=WeatherLocalizer.english()
+        )
+    )
+    with patch.object(
+        DEFAULT_REGISTRY.provider("weather", "weather_forecast"),
+        "async_resolve",
+        resolve,
+    ):
         result = await async_compose_project(hass, project)
 
-    get_many.assert_awaited_once_with({"weather.home"})
+    resolve.assert_awaited_once_with(hass, {"weather.home"}, hass.config.language)
     assert "od-weather" in result.html
     assert "12°" in result.html
     assert "08:15" in result.html
@@ -199,19 +220,94 @@ async def test_weather_widget_renders_placeholder_before_entity_selection(hass) 
                 "columnSpan": 1,
                 "widget": {
                     "type": "weather",
-                    "version": 4,
+                    "version": "0.5.0",
                     "config": {"weather": "", "showForecast": False},
                 },
             }
         ],
     }
 
-    with patch(
-        "custom_components.opendisplay_studio.composer.WeatherForecastProvider.async_get_many",
-        AsyncMock(return_value={}),
-    ) as get_many:
+    resolve = AsyncMock(
+        return_value=SimpleNamespace(values={}, localizer=WeatherLocalizer.english())
+    )
+    with patch.object(
+        DEFAULT_REGISTRY.provider("weather", "weather_forecast"),
+        "async_resolve",
+        resolve,
+    ):
         result = await async_compose_project(hass, project)
 
-    get_many.assert_awaited_once_with(set())
+    resolve.assert_awaited_once_with(hass, set(), hass.config.language)
     assert "Choose a weather entity" in result.html
     assert "—°" in result.html
+
+
+async def test_weather_widget_uses_project_language_for_every_render_surface(
+    hass,
+) -> None:
+    project = {
+        "language": "pl",
+        "palette": "bw",
+        "width": 400,
+        "height": 300,
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [
+            {
+                "id": "weather",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "weather",
+                    "version": "0.5.0",
+                    "config": {"weather": "weather.home"},
+                },
+            }
+        ],
+    }
+    labels = {
+        **WeatherLocalizer.english().labels,
+        "weather": "Pogoda",
+        "temperature": "Temperatura",
+        "apparent_temperature": "Odczuwalna temperatura",
+        "humidity": "Wilgotność",
+        "right_now": "Teraz",
+        "uv_moderate": "Umiarkowane",
+    }
+    localizer = WeatherLocalizer(
+        language="pl",
+        labels=labels,
+        condition_labels={"sunny": "słonecznie"},
+    )
+    weather = {
+        "weather.home": {
+            "entity_id": "weather.home",
+            "name": "OpenWeatherMap",
+            "condition": "sunny",
+            "condition_label": "słonecznie",
+            "icon": "https://trmnl.com/images/plugins/weather/wi-day-sunny.svg",
+            "temperature": 11,
+            "temperature_unit": "°C",
+            "apparent_temperature": 10,
+            "humidity": 93,
+            "updated_at": "06:02",
+            "forecast": [],
+        }
+    }
+    resolve = AsyncMock(
+        return_value=SimpleNamespace(values=weather, localizer=localizer)
+    )
+    with patch.object(
+        DEFAULT_REGISTRY.provider("weather", "weather_forecast"),
+        "async_resolve",
+        resolve,
+    ):
+        result = await async_compose_project(hass, project)
+
+    resolve.assert_awaited_once_with(hass, {"weather.home"}, "pl")
+    assert "słonecznie" in result.html
+    assert "Temperatura" in result.html
+    assert "Odczuwalna temperatura" in result.html
+    assert "Wilgotność" in result.html
+    assert "Teraz" in result.html

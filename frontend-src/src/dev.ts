@@ -36,6 +36,7 @@ let projects: ScreenProject[] = [
     schemaVersion: 1,
     name: 'Kitchen dashboard',
     status: 'ready',
+    language: 'en',
     displayId: 'opendisplay-e1001',
     width: 800,
     height: 480,
@@ -52,7 +53,7 @@ let projects: ScreenProject[] = [
         columnSpan: 1,
         widget: {
           type: 'entity-state',
-          version: 1,
+          version: '0.5.0',
           config: { entity: 'sensor.kitchen_temperature', title: 'Kitchen', layout: 'large', showUnit: true },
         },
       },
@@ -65,7 +66,7 @@ let projects: ScreenProject[] = [
         columnSpan: 2,
         widget: {
           type: 'calendar',
-          version: 1,
+          version: '0.5.0',
           config: { calendar: 'calendar.family', title: 'Upcoming', days: 7, showLocation: true },
         },
       },
@@ -78,7 +79,7 @@ let projects: ScreenProject[] = [
         columnSpan: 3,
         widget: {
           type: 'text',
-          version: 1,
+          version: '0.5.0',
           config: { title: 'HOME', text: 'OpenDisplay Studio', align: 'center' },
         },
       },
@@ -89,6 +90,7 @@ let projects: ScreenProject[] = [
 ]
 
 const hass: HomeAssistant = {
+  language: 'en',
   async callWS<T>(message: Record<string, unknown>): Promise<T> {
     if (message.type === 'opendisplay_studio/bootstrap') {
       return { projects, widgets: [] } as T

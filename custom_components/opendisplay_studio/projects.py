@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Iterable
 from copy import deepcopy
 from datetime import UTC, datetime
@@ -13,7 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import STORAGE_KEY, STORAGE_VERSION
-from .widgets import WIDGET_DEFINITIONS
+from .widgets import DEFAULT_REGISTRY, WidgetRegistry
 
 type Project = dict[str, Any]
 
@@ -22,7 +23,10 @@ MAX_REGIONS = 256
 MAX_NAME_LENGTH = 100
 MAX_TEXT_LENGTH = 4_096
 PALETTES = {"bw", "gray4", "gray16", "bwr", "bwy", "bwry", "spectra6"}
-WIDGET_TYPES = {item["id"] for item in WIDGET_DEFINITIONS}
+LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
+WIDGET_VERSION_PATTERN = re.compile(
+    r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$"
+)
 
 
 class ProjectValidationError(ValueError):
@@ -54,20 +58,42 @@ def _string(value: object, name: str, maximum: int = MAX_TEXT_LENGTH) -> str:
     return result
 
 
-def _validate_widget(value: object) -> dict[str, Any] | None:
+def _widget_version(value: object) -> str:
+    """Validate one semantic widget version."""
+    if isinstance(value, str) and WIDGET_VERSION_PATTERN.fullmatch(value):
+        return value
+    raise ProjectValidationError("widget.version must be a semantic version")
+
+
+def _validate_widget(value: object, registry: WidgetRegistry) -> dict[str, Any] | None:
     if value is None:
         return None
     if not isinstance(value, dict):
         raise ProjectValidationError("widget must be an object")
     widget_type = _string(value.get("type"), "widget.type", 50)
-    if widget_type not in WIDGET_TYPES:
+    if widget_type not in registry.widget_types:
         message = f"Unsupported widget type: {widget_type}"
         raise _invalid(message)
     config = value.get("config", {})
     if not isinstance(config, dict):
         raise ProjectValidationError("widget.config must be an object")
+    widget_definition = registry.definition(widget_type)
+    allowed_keys = set(widget_definition["defaults"])
+    allowed_keys.update(
+        field["key"]
+        for field in widget_definition["fields"]
+        if isinstance(field.get("key"), str)
+    )
+    unknown_keys = set(config) - allowed_keys
+    if unknown_keys:
+        message = (
+            f"{widget_type} widget has unknown configuration: "
+            f"{', '.join(sorted(str(key) for key in unknown_keys))}"
+        )
+        raise ProjectValidationError(message)
+    merged_config = {**widget_definition["defaults"], **config}
     normalized_config: dict[str, str | int | float | bool | list[str]] = {}
-    for key, item in config.items():
+    for key, item in merged_config.items():
         if not isinstance(key, str) or not key or len(key) > 64:
             raise ProjectValidationError("widget configuration key is invalid")
         scalar = isinstance(item, str | int | float | bool) and not isinstance(
@@ -86,51 +112,47 @@ def _validate_widget(value: object) -> dict[str, Any] | None:
             normalized_config[key] = [str(value) for value in item]
         else:
             normalized_config[key] = item
-    if widget_type == "entity-state":
-        layout = normalized_config.get("layout", "large")
-        normalized_config = {
-            "entity": str(normalized_config.get("entity", "")),
-            "title": str(normalized_config.get("title", ""))[:MAX_NAME_LENGTH],
-            "layout": str(layout) if layout in {"large", "compact"} else "large",
-            "showIcon": bool(normalized_config.get("showIcon", True)),
-            "showName": bool(normalized_config.get("showName", True)),
-            "showUnit": bool(normalized_config.get("showUnit", True)),
-        }
-    elif widget_type == "calendar":
-        days = normalized_config.get("days", 7)
-        if isinstance(days, bool) or not isinstance(days, int) or not 1 <= days <= 31:
-            raise ProjectValidationError("calendar days must be between 1 and 31")
-        normalized_config = {
-            "calendar": str(normalized_config.get("calendar", "")),
-            "title": str(normalized_config.get("title", "Upcoming"))[:MAX_NAME_LENGTH],
-            "days": days,
-            "showLocation": bool(normalized_config.get("showLocation", True)),
-            "showDescription": bool(normalized_config.get("showDescription", False)),
-            "time24h": bool(normalized_config.get("time24h", True)),
-        }
-    elif widget_type == "weather":
-        normalized_config = {
-            "weather": str(normalized_config.get("weather", "")),
-            "showHumidity": bool(normalized_config.get("showHumidity", True)),
-            "showFeelsLike": bool(normalized_config.get("showFeelsLike", True)),
-            "showForecast": bool(normalized_config.get("showForecast", True)),
-        }
-    elif widget_type == "text":
-        align = normalized_config.get("align", "left")
-        normalized_config = {
-            "title": str(normalized_config.get("title", ""))[:MAX_NAME_LENGTH],
-            "text": str(normalized_config.get("text", "Text"))[:MAX_TEXT_LENGTH],
-            "align": align if align in {"left", "center", "right"} else "left",
-        }
+    for field in widget_definition["fields"]:
+        key = field.get("key")
+        if not isinstance(key, str) or key not in normalized_config:
+            continue
+        item = normalized_config[key]
+        field_type = field.get("type")
+        selector = field.get("selector")
+        if field_type == "toggle" or (
+            isinstance(selector, dict) and "boolean" in selector
+        ):
+            normalized_config[key] = bool(item)
+        elif field_type == "number":
+            if isinstance(item, bool) or not isinstance(item, int | float):
+                message = f"{widget_type} {key} must be numeric"
+                raise ProjectValidationError(message)
+            minimum = field.get("min")
+            maximum = field.get("max")
+            if isinstance(minimum, int | float) and item < minimum:
+                message = f"{widget_type} {key} is too small"
+                raise ProjectValidationError(message)
+            if isinstance(maximum, int | float) and item > maximum:
+                message = f"{widget_type} {key} is too large"
+                raise ProjectValidationError(message)
+        elif field_type == "select":
+            allowed = {
+                option.get("value")
+                for option in field.get("options", [])
+                if isinstance(option, dict)
+            }
+            if item not in allowed:
+                normalized_config[key] = widget_definition["defaults"].get(key, "")
     return {
         "type": widget_type,
-        "version": _integer(value.get("version", 1), "widget.version", 1, 100),
+        "version": _widget_version(value.get("version", widget_definition["version"])),
         "config": normalized_config,
     }
 
 
-def validate_project(value: object) -> Project:
+def validate_project(value: object, registry: WidgetRegistry | None = None) -> Project:
     """Validate and normalize a complete project payload."""
+    registry = registry or DEFAULT_REGISTRY
     if not isinstance(value, dict):
         raise ProjectValidationError("project must be an object")
     name = _string(value.get("name"), "name", MAX_NAME_LENGTH)
@@ -145,6 +167,11 @@ def validate_project(value: object) -> Project:
     status = value.get("status", "draft")
     if status not in {"draft", "ready"}:
         raise ProjectValidationError("status is invalid")
+    language = value.get("language", "system")
+    if not isinstance(language, str) or (
+        language != "system" and LANGUAGE_PATTERN.fullmatch(language) is None
+    ):
+        raise ProjectValidationError("language is invalid")
     grid = value.get("grid")
     if not isinstance(grid, dict):
         raise ProjectValidationError("grid must be an object")
@@ -191,7 +218,7 @@ def validate_project(value: object) -> Project:
         label = region.get("label")
         if isinstance(label, str) and label.strip():
             normalized_region["label"] = label.strip()[:MAX_NAME_LENGTH]
-        widget = _validate_widget(region.get("widget"))
+        widget = _validate_widget(region.get("widget"), registry)
         if widget is not None:
             normalized_region["widget"] = widget
         normalized_regions.append(normalized_region)
@@ -201,23 +228,53 @@ def validate_project(value: object) -> Project:
             widget = region.get("widget")
             if widget is None:
                 continue
+            widget_definition = registry.definition(widget["type"])
             config = widget["config"]
-            if widget["type"] == "entity-state" and not config["entity"]:
-                raise ProjectValidationError(
-                    "Ready Entity State widgets require an entity"
+            for requirement in widget_definition["dataRequirements"]:
+                if requirement.get("optional"):
+                    continue
+                config_key = requirement.get("configKey")
+                field: dict[str, Any] = next(
+                    (
+                        item
+                        for item in widget_definition["fields"]
+                        if item.get("key") == config_key
+                    ),
+                    {},
                 )
-            if widget["type"] == "calendar" and not str(config["calendar"]).startswith(
-                "calendar."
-            ):
-                raise ProjectValidationError(
-                    "Ready Calendar widgets require a calendar entity"
+                label = str(field.get("label", config_key or "data source")).lower()
+                source_value = (
+                    config.get(config_key) if isinstance(config_key, str) else None
                 )
-            if widget["type"] == "weather" and not str(config["weather"]).startswith(
-                "weather."
-            ):
-                raise ProjectValidationError(
-                    "Ready Weather widgets require a weather entity"
+                sources = (
+                    source_value
+                    if isinstance(source_value, list)
+                    else [source_value]
+                    if source_value
+                    else []
                 )
+                expected_domain = (
+                    "calendar" if field.get("type") == "calendar" else None
+                )
+                selector = field.get("selector")
+                if isinstance(selector, dict):
+                    entity_selector = selector.get("entity")
+                    if isinstance(entity_selector, dict):
+                        selector_filter = entity_selector.get("filter")
+                        if isinstance(selector_filter, dict):
+                            domain = selector_filter.get("domain")
+                            if isinstance(domain, str):
+                                expected_domain = domain
+                if sources and (
+                    expected_domain is None
+                    or all(
+                        str(source).startswith(f"{expected_domain}.")
+                        for source in sources
+                    )
+                ):
+                    continue
+                message = f"Ready {widget['type']} widgets require {label}"
+                raise ProjectValidationError(message)
 
     display_id = value.get("displayId", "custom")
     if not isinstance(display_id, str) or len(display_id) > 100:
@@ -226,6 +283,7 @@ def validate_project(value: object) -> Project:
         "schemaVersion": 1,
         "name": name,
         "status": status,
+        "language": language,
         "displayId": display_id or "custom",
         "width": width,
         "height": height,
@@ -239,13 +297,23 @@ def validate_project(value: object) -> Project:
 class ProjectStore:
     """Home Assistant-native authoritative project storage."""
 
-    def __init__(self, hass: HomeAssistant) -> None:
+    def __init__(
+        self, hass: HomeAssistant, registry: WidgetRegistry | None = None
+    ) -> None:
         """Initialize the versioned Store."""
         self._store: Store[dict[str, Any]] = Store(
             hass, STORAGE_VERSION, STORAGE_KEY, atomic_writes=True
         )
         self._projects: dict[str, Project] = {}
         self._lock = asyncio.Lock()
+        self._default_language = hass.config.language
+        self._registry = registry or DEFAULT_REGISTRY
+
+    def _resolve_language(self, project: Project) -> Project:
+        """Pin legacy projects to the Home Assistant system language."""
+        if project["language"] == "system":
+            project["language"] = self._default_language
+        return project
 
     async def async_load(self) -> None:
         """Load projects and discard malformed legacy entries safely."""
@@ -255,7 +323,9 @@ class ProjectStore:
             return
         for raw in raw_projects:
             try:
-                normalized = validate_project(raw)
+                normalized = self._resolve_language(
+                    validate_project(raw, self._registry)
+                )
                 project_id = _string(raw.get("id"), "id", 64)
             except ProjectValidationError:
                 continue
@@ -285,7 +355,7 @@ class ProjectStore:
 
     async def async_create(self, value: object) -> Project:
         """Create a project with server-owned identity and timestamps."""
-        normalized = validate_project(value)
+        normalized = self._resolve_language(validate_project(value, self._registry))
         async with self._lock:
             if len(self._projects) >= MAX_PROJECTS:
                 message = f"At most {MAX_PROJECTS} projects are allowed"
@@ -299,7 +369,7 @@ class ProjectStore:
 
     async def async_update(self, project_id: str, value: object) -> Project:
         """Replace editable fields while preserving stable identity."""
-        normalized = validate_project(value)
+        normalized = self._resolve_language(validate_project(value, self._registry))
         async with self._lock:
             existing = self._projects.get(project_id)
             if existing is None:
