@@ -1252,11 +1252,13 @@ export const appStyles = css`
     background: color-mix(in srgb, var(--odx-blue) 8%, var(--odx-surface));
   }
 
-  .widget-choice svg {
-    width: 22px;
-    height: 22px;
-    fill: var(--odx-blue-strong);
-  }
+  .widget-choice svg,
+  .widget-choice ha-icon {
+      width: 22px;
+      height: 22px;
+      color: var(--odx-blue-strong);
+      fill: currentColor;
+    }
 
   .widget-choice strong,
   .widget-choice span {

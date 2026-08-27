@@ -6,7 +6,7 @@ import { calendarStyles } from './styles'
 
 export const calendarWidget: WidgetDefinition = {
   id: 'calendar',
-  version: 1,
+  version: '0.5.0',
   name: 'Calendar',
   description: 'An agenda from one or more calendar entities.',
   icon: mdiCalendarMonthOutline,

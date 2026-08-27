@@ -1,16 +1,17 @@
-"""Tests for normalized Home Assistant widget providers."""
+"""Tests for package-owned Home Assistant widget providers."""
 
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.exceptions import HomeAssistantError
 
-from custom_components.opendisplay_studio.data_providers import (
-    EntityStateProvider,
-    WeatherForecastProvider,
+from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
+from custom_components.opendisplay_studio.widgets.weather.provider import (
+    WeatherDataProvider,
+    WeatherLocalizer,
 )
 
 
-def test_entity_provider_returns_normalized_current_state(hass) -> None:
+async def test_entity_provider_returns_normalized_current_state(hass) -> None:
     hass.states.async_set(
         "sensor.office_temperature",
         "22.8",
@@ -21,7 +22,9 @@ def test_entity_provider_returns_normalized_current_state(hass) -> None:
         },
     )
 
-    result = EntityStateProvider(hass).get_many({"sensor.office_temperature"})
+    result = await DEFAULT_REGISTRY.provider(
+        "entity-state", "entity_state"
+    ).async_resolve(hass, {"sensor.office_temperature"}, "en")
 
     assert result == {
         "sensor.office_temperature": {
@@ -34,6 +37,54 @@ def test_entity_provider_returns_normalized_current_state(hass) -> None:
             ),
         }
     }
+
+
+async def test_weather_localizer_uses_home_assistant_and_widget_translations(
+    hass,
+) -> None:
+    attribute_prefix = (
+        "component.weather.entity_component._.state_attributes."
+    )
+    entity_translations = {
+        "component.weather.entity_component._.state.sunny": "słonecznie",
+        f"{attribute_prefix}temperature.name": "Temperatura",
+        f"{attribute_prefix}apparent_temperature.name": "Odczuwalna temperatura",
+        f"{attribute_prefix}humidity.name": "Wilgotność",
+    }
+    title_translations = {"component.weather.title": "Pogoda"}
+    with patch(
+        "custom_components.opendisplay_studio.widgets.weather.provider.async_get_translations",
+        AsyncMock(
+            side_effect=[
+                entity_translations,
+                title_translations,
+            ]
+        ),
+    ):
+        localizer = await WeatherLocalizer.async_create(hass, "pl")
+
+    assert localizer.language == "pl"
+    assert localizer.condition("sunny") == "słonecznie"
+    assert localizer.labels["weather"] == "Pogoda"
+    assert localizer.labels["temperature"] == "Temperatura"
+    assert localizer.labels["apparent_temperature"] == "Odczuwalna temperatura"
+    assert localizer.labels["humidity"] == "Wilgotność"
+    assert localizer.labels["right_now"] == "Teraz"
+    assert localizer.labels["uv_moderate"] == "Umiarkowane"
+
+
+async def test_weather_localizer_loads_real_polish_home_assistant_resources(
+    hass,
+) -> None:
+    localizer = await WeatherLocalizer.async_create(hass, "pl")
+
+    assert localizer.condition("sunny") == "słonecznie"
+    assert localizer.labels["weather"] == "Pogoda"
+    assert localizer.labels["temperature"] == "Temperatura"
+    assert localizer.labels["apparent_temperature"] == "Odczuwalna temperatura"
+    assert localizer.labels["humidity"] == "Wilgotność"
+    assert localizer.labels["right_now"] == "Teraz"
+    assert localizer.labels["uv_moderate"] == "Umiarkowane"
 
 
 async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -> None:
@@ -68,7 +119,9 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
         "async_call",
         AsyncMock(return_value=service_response),
     ) as async_call:
-        result = await WeatherForecastProvider(hass).async_get_many({"weather.home"})
+        result = await WeatherDataProvider().async_resolve(
+            hass, {"weather.home"}, "en"
+        )
 
     async_call.assert_awaited_once_with(
         "weather",
@@ -78,7 +131,7 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
         target={"entity_id": ["weather.home"]},
         return_response=True,
     )
-    current = result["weather.home"]
+    current = result.values["weather.home"]
     assert current["entity_id"] == "weather.home"
     assert current["name"] == "Home"
     assert current["condition"] == "partlycloudy"
@@ -91,7 +144,7 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
     forecast = current["forecast"][0]
     assert forecast["datetime"] == "2026-08-26T12:00:00+02:00"
     assert forecast["condition"] == "rainy"
-    assert forecast["condition_label"] == "Rain"
+    assert forecast["condition_label"] == "Rainy"
     assert forecast["icon"] == ("https://trmnl.com/images/plugins/weather/wi-rain.svg")
     assert forecast["temperature"] == 20
     assert forecast["templow"] == 13
@@ -127,9 +180,11 @@ async def test_weather_provider_uses_explicit_nulls_for_optional_values(hass) ->
         "async_call",
         AsyncMock(return_value=service_response),
     ):
-        result = await WeatherForecastProvider(hass).async_get_many({"weather.home"})
+        result = await WeatherDataProvider().async_resolve(
+            hass, {"weather.home"}, "en"
+        )
 
-    current = result["weather.home"]
+    current = result.values["weather.home"]
     assert current["apparent_temperature"] is None
     assert current["humidity"] is None
     assert current["forecast"][0]["templow"] is None
@@ -158,9 +213,11 @@ async def test_weather_provider_keeps_current_conditions_when_forecast_fails(
         "async_call",
         AsyncMock(side_effect=HomeAssistantError("forecast unavailable")),
     ):
-        result = await WeatherForecastProvider(hass).async_get_many({"weather.home"})
+        result = await WeatherDataProvider().async_resolve(
+            hass, {"weather.home"}, "en"
+        )
 
-    current = result["weather.home"]
+    current = result.values["weather.home"]
     assert current["condition"] == "rainy"
     assert current["temperature"] == 12
     assert current["humidity"] == 88

@@ -1,0 +1,47 @@
+id: calendar
+name: Calendar
+version: "0.5.0"
+description: Upcoming events from one Home Assistant calendar.
+icon: mdi:calendar
+framework: 3.2.0
+template: widget.liquid
+provider: provider.py
+
+defaults:
+  calendar: ""
+  title: Upcoming
+  days: 7
+  showLocation: true
+  showDescription: false
+  time24h: true
+
+fields:
+  - key: calendar
+    label: Calendar
+    type: calendar
+    required: true
+  - key: title
+    label: Title
+    type: text
+  - key: days
+    label: Days
+    type: number
+    min: 1
+    max: 31
+  - key: showLocation
+    label: Show location
+    type: toggle
+  - key: showDescription
+    label: Show description
+    type: toggle
+  - key: time24h
+    label: 24-hour time
+    type: toggle
+
+dataRequirements:
+  - key: calendar
+    provider: calendar
+    configKey: calendar
+    cardinality: one
+    optional: false
+    rangeConfigKey: days

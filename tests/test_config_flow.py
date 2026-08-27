@@ -15,7 +15,7 @@ async def test_container_uses_external_renderer_flow(hass, aioclient_mock) -> No
         "http://renderer:8099/health",
         json={
             "status": "ok",
-            "version": "0.2.4",
+            "version": "0.5.0",
             "apiVersion": 1,
             "trmnlFrameworkVersion": "3.2.0",
         },

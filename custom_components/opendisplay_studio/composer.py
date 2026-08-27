@@ -10,16 +10,10 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
-from .data_providers import (
-    ICON_PATHS,
-    CalendarProvider,
-    EntityStateProvider,
-    WeatherForecastProvider,
-    weather_placeholder,
-)
+from .const import DOMAIN
 from .liquid_renderer import LIQUID
 from .projects import Project
-from .widgets import TEMPLATES, definition, with_defaults
+from .widgets import DEFAULT_REGISTRY, WidgetRegistry, definition, with_defaults
 
 
 @dataclass(frozen=True, slots=True)
@@ -115,104 +109,41 @@ def _requirement_sources(
     return [str(value)] if value else []
 
 
-def _calendar_value(
-    events: list[dict[str, str | bool | int]],
-    *,
-    days: int,
-    time_24h: bool,
-) -> dict[str, list[dict[str, str | bool | int]]]:
-    """Apply presentation range and time format to normalized events."""
-    visible_events = [
-        dict(event) for event in events if int(event.get("dayOffset", 0)) < days
-    ]
-    if not time_24h:
-        for event in visible_events:
-            time_value = str(event["time"])
-            if time_value != "All day":
-                hours, minutes = (int(part) for part in time_value.split(":"))
-                suffix = "AM" if hours < 12 else "PM"
-                event["time"] = f"{hours % 12 or 12}:{minutes:02d} {suffix}"
-    return {"events": visible_events}
-
-
 def _collect_requirements(
-    project: Project,
-) -> tuple[set[str], dict[str, int], set[str]]:
+    project: Project, registry: WidgetRegistry
+) -> dict[tuple[str, str], object]:
     """Compile widget declarations into one deduplicated screen request."""
-    entity_ids: set[str] = set()
-    calendar_requests: dict[str, int] = {}
-    weather_requests: set[str] = set()
+    requests: dict[tuple[str, str], object] = {}
     for region in project["regions"]:
         widget = region.get("widget")
         if widget is None:
             continue
-        config = with_defaults(widget["type"], widget["config"])
-        for requirement in definition(widget["type"])["dataRequirements"]:
+        config = with_defaults(widget["type"], widget["config"], registry)
+        for requirement in definition(widget["type"], registry)["dataRequirements"]:
             sources = _requirement_sources(config, requirement)
-            if requirement["provider"] == "entity_state":
-                entity_ids.update(sources)
-            elif requirement["provider"] == "calendar":
-                range_key = requirement.get("rangeConfigKey", "days")
-                days = max(1, min(31, int(config.get(range_key, 7))))
-                for entity_id in sources:
-                    calendar_requests[entity_id] = max(
-                        calendar_requests.get(entity_id, 0), days
-                    )
-            elif requirement["provider"] == "weather_forecast":
-                weather_requests.update(sources)
-    return entity_ids, calendar_requests, weather_requests
+            provider_name = requirement["provider"]
+            provider = registry.provider(widget["type"], provider_name)
+            provider_key = (widget["type"], provider_name)
+            request = requests.setdefault(provider_key, provider.new_request())
+            provider.add_request(request, sources, config, requirement)
+    return requests
 
 
 def _resolve_widget_data(
     widget_type: str,
     config: dict[str, Any],
-    entities: dict[str, dict[str, str]],
-    calendars: dict[str, list[dict[str, str | bool | int]]],
-    weather: dict[str, dict[str, Any]],
+    resolved: dict[tuple[str, str], object],
+    registry: WidgetRegistry,
 ) -> dict[str, Any]:
     """Hydrate declared requirements with normalized provider values."""
     data: dict[str, Any] = {}
-    for requirement in definition(widget_type)["dataRequirements"]:
+    for requirement in definition(widget_type, registry)["dataRequirements"]:
         sources = _requirement_sources(config, requirement)
-        values: list[Any] = []
-        if requirement["provider"] == "entity_state":
-            values = [
-                entities.get(
-                    source,
-                    {
-                        "state": "Unavailable",
-                        "unit": "",
-                        "name": source,
-                        "iconPath": ICON_PATHS["default"],
-                    },
-                )
-                for source in sources
-            ]
-            if not values and requirement.get("cardinality") != "many":
-                values = [
-                    {
-                        "state": "Unavailable",
-                        "unit": "",
-                        "name": "Choose an entity",
-                        "iconPath": ICON_PATHS["default"],
-                    }
-                ]
-        elif requirement["provider"] == "calendar":
-            range_key = requirement.get("rangeConfigKey", "days")
-            values = [
-                _calendar_value(
-                    calendars.get(source, []),
-                    days=int(config.get(range_key, 7)),
-                    time_24h=bool(config.get("time24h", True)),
-                )
-                for source in sources
-            ]
-        elif requirement["provider"] == "weather_forecast":
-            values = [
-                weather.get(source, weather_placeholder(source)) for source in sources
-            ]
-            if not values and requirement.get("cardinality") != "many":
-                values = [weather_placeholder()]
+        provider_name = requirement["provider"]
+        provider = registry.provider(widget_type, provider_name)
+        values = provider.values(
+            resolved[(widget_type, provider_name)], sources, config, requirement
+        )
         data[requirement["key"]] = (
             values
             if requirement.get("cardinality") == "many"
@@ -228,15 +159,25 @@ async def async_compose_project(
 ) -> ComposedProject:
     """Collect requirements once, render fragments, and create one screen."""
     started = perf_counter()
-    entity_ids, calendar_requests, weather_requests = _collect_requirements(project)
-    entities = EntityStateProvider(hass).get_many(entity_ids)
+    domain_data = hass.data.get(DOMAIN)
+    registry = getattr(domain_data, "widgets", DEFAULT_REGISTRY)
+    requests = _collect_requirements(project, registry)
+    language = str(project.get("language", "system"))
+    if language == "system":
+        language = hass.config.language
     try:
-        calendars, weather = await asyncio.gather(
-            CalendarProvider(hass).async_get_many(calendar_requests),
-            WeatherForecastProvider(hass).async_get_many(weather_requests),
+        provider_keys = list(requests)
+        provider_values = await asyncio.gather(
+            *(
+                registry.provider(*key).async_resolve(
+                    hass, requests[key], language
+                )
+                for key in provider_keys
+            )
         )
     except HomeAssistantError as err:
         raise ProjectComposeError("Could not resolve widget data") from err
+    resolved = dict(zip(provider_keys, provider_values, strict=True))
     data_ms = (perf_counter() - started) * 1_000
 
     liquid_ms = 0.0
@@ -258,19 +199,15 @@ async def async_compose_project(
         fragment = ""
         if widget is not None:
             widget_type = widget["type"]
-            config = with_defaults(widget_type, widget["config"])
+            config = with_defaults(widget_type, widget["config"], registry)
             data = _resolve_widget_data(
                 widget_type,
                 config,
-                entities,
-                calendars,
-                weather,
+                resolved,
+                registry,
             )
-            if widget_type == "entity-state" and data.get("entity") is not None:
-                title = str(config.get("title", "")).strip()
-                data["entity"]["displayName"] = title or data["entity"]["name"]
             result = LIQUID.render(
-                TEMPLATES[widget_type],
+                registry.template(widget_type),
                 {
                     "config": config,
                     "data": data,

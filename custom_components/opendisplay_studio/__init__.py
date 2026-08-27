@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from homeassistant.components.hassio import AddonError, AddonManager, AddonState
 from homeassistant.config_entries import ConfigEntry
@@ -38,6 +39,7 @@ from .renderer import (
     RendererHealth,
 )
 from .websocket import async_register_commands
+from .widgets import BUILTIN_WIDGET_DIRECTORY, WidgetRegistry
 
 
 @dataclass(slots=True)
@@ -56,6 +58,7 @@ class OpenDisplayStudioData:
 
     cache: RenderCache
     projects: ProjectStore
+    widgets: WidgetRegistry
     renderer: RendererClient | None = None
     renderer_health: RendererHealth | None = None
 
@@ -67,7 +70,15 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up storage, panel APIs, and the temporary render endpoint."""
-    projects = ProjectStore(hass)
+    installed_widgets = Path(hass.config.path(DOMAIN, "widgets"))
+    await hass.async_add_executor_job(
+        installed_widgets.mkdir, parents=True, exist_ok=True
+    )
+    widgets = await hass.async_add_executor_job(
+        WidgetRegistry.from_directories,
+        [BUILTIN_WIDGET_DIRECTORY, installed_widgets],
+    )
+    projects = ProjectStore(hass, widgets)
     await projects.async_load()
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(
@@ -75,6 +86,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
             max_items=RENDER_CACHE_MAX_ITEMS,
         ),
         projects=projects,
+        widgets=widgets,
     )
     hass.http.register_view(RenderedImageView(hass))
     async_register_commands(hass)

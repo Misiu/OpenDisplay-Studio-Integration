@@ -1,62 +1,72 @@
-# OpenDisplay Studio widget contract
+# OpenDisplay Studio widget package contract
 
-Each widget definition owns four independent concerns:
+A widget is a self-contained, independently versioned package. The integration
+core does not contain widget IDs, widget-specific data normalization, labels,
+or rendering branches.
 
-```text
-identity and version
-configuration fields
-data requirements
-Liquid template
-```
+## Package layout
 
-Widget packages are declarative and never contain executable Python. A package
-can only request provider names registered by OpenDisplay Studio Integration.
-This keeps installation reviewable and prevents a downloaded widget from
-executing arbitrary code inside Home Assistant.
-
-## Rendering invariant
-
-One widget package has one visual contract across all surfaces:
+Installed packages live below `opendisplay_studio/widgets`:
 
 ```text
-CLI fixture -> Liquid -> pinned TRMNL Framework -> region container
-HA preview  -> HA data -> Liquid -> Renderer App -> PNG
-final image -> HA data -> Liquid -> Renderer App -> PNG
+widgets/
+  weather/
+    widget.yml
+    widget.liquid
+    provider.py
+    translations/
+      en.json
+      pl.json
+    assets/
 ```
 
-The Home Assistant preview and final Media Source call the same Renderer API
-with the same composed HTML, width, and height. The panel displays the returned
-PNG and does not maintain a second browser-only rendering implementation.
+`widget.yml` declares identity, version, configuration selectors, defaults,
+data requirements, the Liquid template, and the optional provider module.
+`provider.py` and `translations` belong to that widget. A static widget such as
+Text does not need a provider.
 
-`--screen-w` and `--screen-h` always describe the physical device. Responsive
-widget decisions use the actual region size through a CSS size container. Grid
-span names are editor concepts and must not select a presentation variant.
+The integration ships built-in packages in
+`custom_components/opendisplay_studio/widgets`. Independently installed
+packages use `/config/opendisplay_studio/widgets`. The registry scans both
+locations; an installed package with the same widget ID replaces the bundled
+version. The registry can be reloaded in place, so an installer or Store update
+does not require a new integration release.
 
-External assets must never fail silently. The current compatibility layer only
-permits fixed TRMNL weather SVG paths, and the Renderer rejects the render if an
-image is missing. The package format will carry declared assets inside the ODX
-archive so installed community widgets can render deterministically without
-arbitrary network access.
+## Provider boundary
 
-An integration release accepts only the TRMNL Framework version reported by
-its compatible Renderer App. A widget package declaring another version must
-be rejected or installed alongside an explicitly compatible renderer; it must
-never be rendered against a silently substituted framework version.
+The core knows only the provider protocol:
 
-### Liquid engine conformance
+```text
+new_request -> add_request -> async_resolve -> values
+```
 
-The CLI uses its exact pinned LiquidJS version while Home Assistant uses the
-bounded Python Liquid runtime. Published built-in widgets must render the same
-contract fixtures successfully in both engines. Every optional nested field
-needs a fixture where the key is absent, not only present with an empty or null
-value. Widget templates must not rely on engine-specific short-circuit or
-undefined-value behavior.
+Providers are scoped to their owning widget package. Identical provider names
+in two community packages cannot overwrite or share state with each other.
+Requests from multiple regions using the same widget are aggregated before the
+provider runs, allowing deduplication within that package.
 
-The panel builds controls from `fields`. A field can contain a native Home
-Assistant `selector` object, using the same schema as blueprint inputs. The
-panel passes that object to `ha-form` without recreating selector behavior.
-Legacy built-in fields can continue using the shorthand `type` property while
-packages migrate. Configuration stores references, never current values.
+Examples of package-owned behavior:
+
+- `widgets/weather/provider.py` reads a Weather entity, calls
+  `weather.get_forecasts`, normalizes the result, and localizes it.
+- `widgets/calendar/provider.py` reads calendar events and applies the
+  widget's date range and time format.
+- `widgets/entity_state/provider.py` normalizes an entity state and selects the
+  icon used by that widget.
+
+None of these behaviors belongs in the integration composer or a central
+provider table.
+
+Provider modules are executable Python inside the Home Assistant process.
+Packages copied into the local config directory are therefore trusted code.
+A public Store must verify package provenance and signatures before installing
+or updating a provider-bearing package; downloading arbitrary unsigned Python
+must never be an implicit background action.
+
+## Configuration and data requirements
+
+Fields can contain native Home Assistant selector schemas. The panel passes a
+selector to `ha-form` instead of reimplementing its behavior:
 
 ```yaml
 fields:
@@ -69,75 +79,60 @@ fields:
           domain: weather
 ```
 
-Data requirements are declarative. A requirement names its provider, the
-configuration key containing its source, whether the source has cardinality
-`one` or `many`, and whether it is optional. Range-based providers may name a
-second configuration key such as Calendar's `days`.
+A requirement maps a configuration source to a key in the Liquid context:
 
-Example current Entity State requirement:
-
-```json
-{
-  "key": "entity",
-  "provider": "entity_state",
-  "configKey": "entity",
-  "cardinality": "one",
-  "optional": false
-}
+```yaml
+dataRequirements:
+  - key: weather
+    provider: weather_forecast
+    configKey: weather
+    cardinality: one
+    optional: false
 ```
 
-The composer aggregates every region before providers run. Two widgets asking
-for the same entity cause one state-machine lookup. Calendar requests for the
-same entity use the largest requested range, then each widget receives only its
-configured presentation range.
+The provider name above resolves only inside the Weather package. Configuration
+stores references such as entity IDs, never snapshots of Home Assistant state.
 
-## Future Table
+## Localization
 
-A Table can use ordinary presentation fields plus a multi-entity requirement:
+Language is selected per project so preview, Media Source, and the physical
+display render the same pixels. New projects use the current Home Assistant
+language and legacy projects pin the Home Assistant system language when they
+are loaded.
 
-```json
-{
-  "fields": [
-    { "key": "entities", "type": "entities", "label": "Rows" },
-    { "key": "nameColumn", "type": "text", "label": "First column" },
-    { "key": "valueColumn", "type": "text", "label": "Second column" }
-  ],
-  "dataRequirements": [
-    {
-      "key": "rows",
-      "provider": "entity_state",
-      "configKey": "entities",
-      "cardinality": "many",
-      "optional": false
-    }
-  ]
-}
+Widget-specific vocabulary lives in that widget's `translations` directory.
+A provider may additionally reuse official Home Assistant translations for the
+domain it reads. Weather, for example, obtains condition and attribute names
+from Home Assistant and presentation terms from
+`widgets/weather/translations`. English is the package fallback.
+
+Liquid templates receive localized labels and normalized values. They must not
+contain user-facing language-specific strings. CLI fixtures carry the same
+complete data contract, including `labels`, so standalone design remains
+deterministic.
+
+## Rendering invariant
+
+One package has one visual path across every surface:
+
+```text
+CLI fixture -> Liquid -> pinned TRMNL Framework -> region container
+HA preview  -> provider -> Liquid -> Renderer App -> PNG
+Media Source / physical display -> provider -> Liquid -> Renderer App -> PNG
 ```
 
-Its normalized Liquid context can then contain five room-temperature rows
-without exposing the full Home Assistant state machine.
+The panel displays the PNG returned by the same renderer used for Media Source.
+Its local widget component is only a temporary loading fallback; it is not a
+second authoritative renderer.
 
-## Weather
+`--screen-w` and `--screen-h` describe the physical device. Responsive widget
+decisions use the actual CSS region container dimensions, never names such as
+full or half. A package must work for arbitrary device and region sizes.
 
-Weather declares one required entity. The provider combines its current state
-with the requested daily forecast at render time:
+The CLI and integration use bounded Liquid engines. Published widgets need
+contract fixtures covering missing optional nested fields, not only empty or
+null values, and must avoid engine-specific undefined-value behavior.
 
-```json
-{
-  "dataRequirements": [
-    {
-      "key": "weather",
-      "provider": "weather_forecast",
-      "configKey": "weather",
-      "cardinality": "one",
-      "optional": false,
-      "forecastType": "daily"
-    }
-  ]
-}
-```
-
-The `weather_forecast` provider belongs to the integration. It uses the selected
-entity's state for current conditions and the public `weather.get_forecasts`
-action for forecasts, then exposes one normalized Liquid object. Multiple
-widgets selecting the same entity share the same collected provider result.
+External assets cannot fail silently. Published archives will carry declared
+assets so rendering remains deterministic. Framework compatibility is also
+declared by the package and must be checked rather than silently substituted.

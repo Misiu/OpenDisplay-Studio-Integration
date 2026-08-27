@@ -17,7 +17,7 @@ from .projects import (
     validate_project,
 )
 from .renderer import RendererClient, RendererError
-from .widgets import WIDGET_DEFINITIONS
+from .widgets import DEFAULT_REGISTRY, WidgetRegistry
 
 
 def _store(hass: HomeAssistant) -> ProjectStore:
@@ -34,6 +34,14 @@ def _renderer_client(hass: HomeAssistant) -> RendererClient:
         )
         raise ProjectComposeError(message)
     return cast("RendererClient", client)
+
+
+def _widgets(hass: HomeAssistant) -> WidgetRegistry:
+    """Return the discovered package registry used by every render surface."""
+    return cast(
+        "WidgetRegistry",
+        getattr(hass.data[DOMAIN], "widgets", DEFAULT_REGISTRY),
+    )
 
 
 def _error(
@@ -55,7 +63,7 @@ def websocket_bootstrap(
     """Return authoritative projects and widget metadata."""
     connection.send_result(
         msg["id"],
-        {"projects": _store(hass).list(), "widgets": WIDGET_DEFINITIONS},
+        {"projects": _store(hass).list(), "widgets": _widgets(hass).definitions},
     )
 
 
@@ -141,7 +149,7 @@ async def websocket_compose_preview(
 ) -> None:
     """Render the same live PNG used by Media Source."""
     try:
-        project = validate_project(msg["project"])
+        project = validate_project(msg["project"], _widgets(hass))
         composed = await async_compose_project(hass, project)
         rendered = await _renderer_client(hass).async_render(
             html=composed.html,
