@@ -169,9 +169,7 @@ async def async_compose_project(
         provider_keys = list(requests)
         provider_values = await asyncio.gather(
             *(
-                registry.provider(*key).async_resolve(
-                    hass, requests[key], language
-                )
+                registry.provider(*key).async_resolve(hass, requests[key], language)
                 for key in provider_keys
             )
         )

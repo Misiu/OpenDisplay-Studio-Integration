@@ -228,9 +228,7 @@ async def test_weather_widget_renders_placeholder_before_entity_selection(hass) 
     }
 
     resolve = AsyncMock(
-        return_value=SimpleNamespace(
-            values={}, localizer=WeatherLocalizer.english()
-        )
+        return_value=SimpleNamespace(values={}, localizer=WeatherLocalizer.english())
     )
     with patch.object(
         DEFAULT_REGISTRY.provider("weather", "weather_forecast"),

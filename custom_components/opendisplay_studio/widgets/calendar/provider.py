@@ -20,9 +20,7 @@ async def _async_get_events(
     if not isinstance(entity, CalendarEntity):
         return entity_id, []
     start = dt_util.now()
-    events = await entity.async_get_events(
-        hass, start, start + timedelta(days=days)
-    )
+    events = await entity.async_get_events(hass, start, start + timedelta(days=days))
     normalized: list[dict[str, str | bool | int]] = []
     for event in events:
         event_start = event.start
@@ -39,9 +37,7 @@ async def _async_get_events(
             time_value = "All day"
             date_value = event_start.strftime("%a %d %b")
         event_date = (
-            event_start.date()
-            if isinstance(event_start, datetime)
-            else event_start
+            event_start.date() if isinstance(event_start, datetime) else event_start
         )
         normalized.append(
             {
@@ -123,9 +119,7 @@ class CalendarDataProvider:
         requirement: dict[str, Any],
     ) -> list[Any]:
         """Map normalized calendar events back to one widget."""
-        calendars = cast(
-            "dict[str, list[dict[str, str | bool | int]]]", resolved
-        )
+        calendars = cast("dict[str, list[dict[str, str | bool | int]]]", resolved)
         range_key = str(requirement.get("rangeConfigKey", "days"))
         return [
             _calendar_value(

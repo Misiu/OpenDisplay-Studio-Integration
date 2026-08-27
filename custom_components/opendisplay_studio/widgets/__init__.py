@@ -43,9 +43,7 @@ class DataProvider(Protocol):
         """Add one widget requirement to the aggregate request."""
         ...
 
-    async def async_resolve(
-        self, hass: Any, request: object, language: str
-    ) -> object:
+    async def async_resolve(self, hass: Any, request: object, language: str) -> object:
         """Resolve one aggregate request."""
         ...
 
@@ -146,9 +144,7 @@ def _load_definition(
     template_path = _safe_package_file(
         directory, raw.get("template", "widget.liquid"), "template"
     )
-    definition = {
-        key: raw[key] for key in ("id", "name", "description", "icon")
-    }
+    definition = {key: raw[key] for key in ("id", "name", "description", "icon")}
     definition["version"] = version
     definition.update(
         {

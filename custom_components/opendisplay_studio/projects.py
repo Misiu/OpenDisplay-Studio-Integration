@@ -65,9 +65,7 @@ def _widget_version(value: object) -> str:
     raise ProjectValidationError("widget.version must be a semantic version")
 
 
-def _validate_widget(
-    value: object, registry: WidgetRegistry
-) -> dict[str, Any] | None:
+def _validate_widget(value: object, registry: WidgetRegistry) -> dict[str, Any] | None:
     if value is None:
         return None
     if not isinstance(value, dict):
@@ -147,16 +145,12 @@ def _validate_widget(
                 normalized_config[key] = widget_definition["defaults"].get(key, "")
     return {
         "type": widget_type,
-        "version": _widget_version(
-            value.get("version", widget_definition["version"])
-        ),
+        "version": _widget_version(value.get("version", widget_definition["version"])),
         "config": normalized_config,
     }
 
 
-def validate_project(
-    value: object, registry: WidgetRegistry | None = None
-) -> Project:
+def validate_project(value: object, registry: WidgetRegistry | None = None) -> Project:
     """Validate and normalize a complete project payload."""
     registry = registry or DEFAULT_REGISTRY
     if not isinstance(value, dict):

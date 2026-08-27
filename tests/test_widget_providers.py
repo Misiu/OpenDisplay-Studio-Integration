@@ -42,9 +42,7 @@ async def test_entity_provider_returns_normalized_current_state(hass) -> None:
 async def test_weather_localizer_uses_home_assistant_and_widget_translations(
     hass,
 ) -> None:
-    attribute_prefix = (
-        "component.weather.entity_component._.state_attributes."
-    )
+    attribute_prefix = "component.weather.entity_component._.state_attributes."
     entity_translations = {
         "component.weather.entity_component._.state.sunny": "słonecznie",
         f"{attribute_prefix}temperature.name": "Temperatura",
@@ -119,9 +117,7 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
         "async_call",
         AsyncMock(return_value=service_response),
     ) as async_call:
-        result = await WeatherDataProvider().async_resolve(
-            hass, {"weather.home"}, "en"
-        )
+        result = await WeatherDataProvider().async_resolve(hass, {"weather.home"}, "en")
 
     async_call.assert_awaited_once_with(
         "weather",
@@ -180,9 +176,7 @@ async def test_weather_provider_uses_explicit_nulls_for_optional_values(hass) ->
         "async_call",
         AsyncMock(return_value=service_response),
     ):
-        result = await WeatherDataProvider().async_resolve(
-            hass, {"weather.home"}, "en"
-        )
+        result = await WeatherDataProvider().async_resolve(hass, {"weather.home"}, "en")
 
     current = result.values["weather.home"]
     assert current["apparent_temperature"] is None
@@ -213,9 +207,7 @@ async def test_weather_provider_keeps_current_conditions_when_forecast_fails(
         "async_call",
         AsyncMock(side_effect=HomeAssistantError("forecast unavailable")),
     ):
-        result = await WeatherDataProvider().async_resolve(
-            hass, {"weather.home"}, "en"
-        )
+        result = await WeatherDataProvider().async_resolve(hass, {"weather.home"}, "en")
 
     current = result.values["weather.home"]
     assert current["condition"] == "rainy"

@@ -77,9 +77,7 @@ async def test_unknown_package_is_discovered_validated_and_composed(
 ) -> None:
     """Adding a package must not require an integration source-code change."""
     _write_quote_package(tmp_path)
-    registry = WidgetRegistry.from_directories(
-        [BUILTIN_WIDGET_DIRECTORY, tmp_path]
-    )
+    registry = WidgetRegistry.from_directories([BUILTIN_WIDGET_DIRECTORY, tmp_path])
     project = validate_project(
         {
             "name": "Community widget",
