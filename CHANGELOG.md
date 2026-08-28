@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.7.2
+
+- Display widget package labels for Home Assistant selector fields instead of
+  exposing raw configuration keys such as `showEntityId` and `showFooter`.
+- Restore a theme-independent red selection outline and add keyboard selection
+  and focus states for display regions.
+
 ## 0.7.1
 
 - Add independent Sensor and Weather options for hiding the entity label or

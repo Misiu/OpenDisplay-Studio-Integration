@@ -744,7 +744,15 @@ export class OdxApp extends LitElement {
         class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
         style=${styleMap({ gridColumn: `${region.column} / span ${region.columnSpan}`, gridRow: `${region.row} / span ${region.rowSpan}` })}
         aria-label=${layoutMode ? isComposed ? `Region ${label}` : `Grid cell ${label}` : definition ? `${definition.name} region` : 'Empty region'}
+        aria-pressed=${layoutMode ? nothing : String(region.id === this.selectedRegionId)}
+        role=${layoutMode ? nothing : 'button'}
+        tabindex=${layoutMode ? nothing : 0}
         @click=${() => { if (!layoutMode) this.selectedRegionId = region.id }}
+        @keydown=${(event: KeyboardEvent) => {
+          if (layoutMode || (event.key !== 'Enter' && event.key !== ' ')) return
+          event.preventDefault()
+          this.selectedRegionId = region.id
+        }}
         @dblclick=${() => { if (layoutMode) this.splitSelectedRegion(region.id) }}
       >
         ${livePreview
@@ -874,6 +882,7 @@ export class OdxApp extends LitElement {
           .hass=${this.hass}
           .data=${{ [option.key]: value ?? '' }}
           .schema=${[{ name: option.key, label: option.label, required: option.required ?? false, selector }]}
+          .computeLabel=${() => option.label}
           @value-changed=${(event: CustomEvent<{ value: Record<string, unknown> }>) => this.updateWidgetValue(option, event.detail.value[option.key])}
         ></ha-form>
       `
@@ -976,6 +985,7 @@ export class OdxApp extends LitElement {
             required: true,
             selector: { language: { native_name: true } },
           }]}
+          .computeLabel=${() => 'Display language'}
           @value-changed=${(event: CustomEvent<{ value: { language?: string } }>) => {
             const language = event.detail.value.language
             if (language) this.updateLayoutDraft((draft) => ({ ...draft, language }))

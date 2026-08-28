@@ -11,6 +11,7 @@ export const appStyles = css`
     --odx-line: var(--divider-color, #dfe4e7);
     --odx-warning: var(--warning-color, #f4a000);
     --odx-danger: var(--error-color, #db4437);
+    --odx-selection: var(--error-color, #db4437);
     --odx-radius: var(--ha-card-border-radius, 14px);
     --odx-canvas-max-width: 880px;
     --odx-canvas-max-height: 520px;
@@ -1008,11 +1009,23 @@ export const appStyles = css`
     isolation: isolate;
   }
 
-  .screen-region:hover,
-  .screen-region.selected {
+  .screen-region:hover {
     outline: max(2px, 0.3cqw) solid var(--screen-accent);
     outline-offset: calc(max(2px, 0.3cqw) * -1);
     z-index: 2;
+  }
+
+  .screen-region:focus-visible {
+    outline: max(3px, 0.38cqw) solid var(--odx-blue);
+    outline-offset: calc(max(3px, 0.38cqw) * -1);
+    z-index: 3;
+  }
+
+  .screen-region.selected {
+    outline: max(3px, 0.38cqw) solid var(--odx-selection);
+    outline-offset: calc(max(3px, 0.38cqw) * -1);
+    box-shadow: inset 0 0 0 max(1px, 0.14cqw) var(--screen-paper);
+    z-index: 3;
   }
 
   .screen-region.empty {

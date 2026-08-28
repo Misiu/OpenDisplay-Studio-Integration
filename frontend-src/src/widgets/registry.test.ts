@@ -9,6 +9,8 @@ describe('runtime widget registry', () => {
     expect(widget?.defaults.showFooter).toBe(true)
     expect(widget?.options.find((option) => option.key === 'showEntityId')?.selector).toEqual({ boolean: {} })
     expect(widget?.options.find((option) => option.key === 'showFooter')?.selector).toEqual({ boolean: {} })
+    expect(widget?.options.find((option) => option.key === 'showEntityId')?.label).toBe('Show entity ID')
+    expect(widget?.options.find((option) => option.key === 'showFooter')?.label).toBe('Show footer')
   })
 
   it('creates a selectable definition for a backend-only widget package', () => {

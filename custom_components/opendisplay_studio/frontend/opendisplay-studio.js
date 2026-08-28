@@ -649,6 +649,7 @@ var Le = {
     --odx-line: var(--divider-color, #dfe4e7);
     --odx-warning: var(--warning-color, #f4a000);
     --odx-danger: var(--error-color, #db4437);
+    --odx-selection: var(--error-color, #db4437);
     --odx-radius: var(--ha-card-border-radius, 14px);
     --odx-canvas-max-width: 880px;
     --odx-canvas-max-height: 520px;
@@ -1646,11 +1647,23 @@ var Le = {
     isolation: isolate;
   }
 
-  .screen-region:hover,
-  .screen-region.selected {
+  .screen-region:hover {
     outline: max(2px, 0.3cqw) solid var(--screen-accent);
     outline-offset: calc(max(2px, 0.3cqw) * -1);
     z-index: 2;
+  }
+
+  .screen-region:focus-visible {
+    outline: max(3px, 0.38cqw) solid var(--odx-blue);
+    outline-offset: calc(max(3px, 0.38cqw) * -1);
+    z-index: 3;
+  }
+
+  .screen-region.selected {
+    outline: max(3px, 0.38cqw) solid var(--odx-selection);
+    outline-offset: calc(max(3px, 0.38cqw) * -1);
+    box-shadow: inset 0 0 0 max(1px, 0.14cqw) var(--screen-paper);
+    z-index: 3;
   }
 
   .screen-region.empty {
@@ -3732,8 +3745,14 @@ var Z = (e, t) => {
 			gridRow: `${e.row} / span ${e.rowSpan}`
 		})}
         aria-label=${r ? a ? `Region ${s}` : `Grid cell ${s}` : t ? `${t.name} region` : "Empty region"}
+        aria-pressed=${r ? D : String(e.id === this.selectedRegionId)}
+        role=${r ? D : "button"}
+        tabindex=${r ? D : 0}
         @click=${() => {
 			r || (this.selectedRegionId = e.id);
+		}}
+        @keydown=${(t) => {
+			r || t.key !== "Enter" && t.key !== " " || (t.preventDefault(), this.selectedRegionId = e.id);
 		}}
         @dblclick=${() => {
 			r && this.splitSelectedRegion(e.id);
@@ -3833,6 +3852,7 @@ var Z = (e, t) => {
 			required: e.required ?? !1,
 			selector: r
 		}]}
+          .computeLabel=${() => e.label}
           @value-changed=${(t) => this.updateWidgetValue(e, t.detail.value[e.key])}
         ></ha-form>
       ` : e.type === "toggle" ? T`
@@ -3918,6 +3938,7 @@ var Z = (e, t) => {
 			required: !0,
 			selector: { language: { native_name: !0 } }
 		}]}
+          .computeLabel=${() => "Display language"}
           @value-changed=${(e) => {
 			let t = e.detail.value.language;
 			t && this.updateLayoutDraft((e) => ({

@@ -4,9 +4,54 @@ import type { HomeAssistant, ScreenProject } from './types'
 import { createId } from './services/layout'
 
 if (!customElements.get('ha-form')) {
-  customElements.define('ha-form', class extends HTMLElement {
+  customElements.define('ha-form', class DemoHaForm extends HTMLElement {
+    private formData: Record<string, unknown> = {}
+    private formSchema: Array<{ name: string, label?: string, selector?: Record<string, unknown> }> = []
+    private labelResolver?: (schema: { name: string, label?: string }) => string
+
+    set data(value: Record<string, unknown>) {
+      this.formData = value
+      this.renderForm()
+    }
+
+    set schema(value: Array<{ name: string, label?: string, selector?: Record<string, unknown> }>) {
+      this.formSchema = value
+      this.renderForm()
+    }
+
+    set computeLabel(value: (schema: { name: string, label?: string }) => string) {
+      this.labelResolver = value
+      this.renderForm()
+    }
+
     connectedCallback(): void {
-      this.innerHTML = '<label style="display:grid;gap:6px;font:500 12px system-ui">Home Assistant selector<input style="min-height:40px;border:1px solid #c5cdd2;border-radius:8px;padding:0 10px" value="sensor.kitchen_temperature" /></label>'
+      this.renderForm()
+    }
+
+    private renderForm(): void {
+      if (!this.isConnected || this.formSchema.length === 0) return
+      const field = this.formSchema[0]
+      const label = document.createElement('label')
+      const labelText = document.createElement('span')
+      const input = document.createElement('input')
+      const isBoolean = Boolean(field.selector && 'boolean' in field.selector)
+      const currentValue = this.formData[field.name]
+
+      label.style.cssText = 'display:grid;gap:6px;font:500 12px system-ui'
+      labelText.textContent = this.labelResolver?.(field) ?? field.label ?? field.name
+      input.style.cssText = 'min-height:40px;border:1px solid #c5cdd2;border-radius:8px;padding:0 10px'
+      input.type = isBoolean ? 'checkbox' : 'text'
+      if (isBoolean) input.checked = Boolean(currentValue)
+      else input.value = String(currentValue ?? '')
+      input.addEventListener('change', () => {
+        this.dispatchEvent(new CustomEvent('value-changed', {
+          bubbles: true,
+          composed: true,
+          detail: { value: { ...this.formData, [field.name]: isBoolean ? input.checked : input.value } },
+        }))
+      })
+      label.append(labelText, input)
+      this.replaceChildren(label)
     }
   })
 }
