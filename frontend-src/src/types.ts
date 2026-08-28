@@ -4,6 +4,29 @@ export type Orientation = 'landscape' | 'portrait'
 export type DisplayTheme = 'light' | 'dark'
 export type FontFamily = 'default' | 'classic' | 'trmnl'
 export type TextScale = 'small' | 'regular' | 'large' | 'xlarge'
+export type BackgroundMode = 'stretch' | 'contain' | 'cover' | 'manual'
+export type BackgroundAnchor =
+  | 'top-left'
+  | 'top-center'
+  | 'top-right'
+  | 'center-left'
+  | 'center'
+  | 'center-right'
+  | 'bottom-left'
+  | 'bottom-center'
+  | 'bottom-right'
+
+export interface MediaSelectorValue {
+  media_content_id: string
+  media_content_type: string
+}
+
+export interface DisplayBackground {
+  media: MediaSelectorValue
+  mode: BackgroundMode
+  anchor: BackgroundAnchor
+  scale: number
+}
 
 export type PaletteId =
   | 'bw'
@@ -77,6 +100,7 @@ export interface ScreenProject {
   height: number
   grid: GridSize
   regions: GridRegion[]
+  background?: DisplayBackground
   createdAt: string
   updatedAt: string
 }

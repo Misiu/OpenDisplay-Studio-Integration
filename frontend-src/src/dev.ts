@@ -35,6 +35,7 @@ if (!customElements.get('ha-form')) {
       const labelText = document.createElement('span')
       const input = document.createElement('input')
       const isBoolean = Boolean(field.selector && 'boolean' in field.selector)
+      const isMedia = Boolean(field.selector && 'media' in field.selector)
       const currentValue = this.formData[field.name]
 
       label.style.cssText = 'display:grid;gap:6px;font:500 12px system-ui'
@@ -42,12 +43,19 @@ if (!customElements.get('ha-form')) {
       input.style.cssText = 'min-height:40px;border:1px solid #c5cdd2;border-radius:8px;padding:0 10px'
       input.type = isBoolean ? 'checkbox' : 'text'
       if (isBoolean) input.checked = Boolean(currentValue)
-      else input.value = String(currentValue ?? '')
-      input.addEventListener('change', () => {
+      else if (isMedia && currentValue && typeof currentValue === 'object') {
+        input.value = String((currentValue as Record<string, unknown>).media_content_id ?? '')
+      } else input.value = String(currentValue ?? '')
+      input.addEventListener(isMedia ? 'input' : 'change', () => {
+        const value = isBoolean
+          ? input.checked
+          : isMedia && input.value
+            ? { media_content_id: input.value, media_content_type: 'image/png' }
+            : input.value
         this.dispatchEvent(new CustomEvent('value-changed', {
           bubbles: true,
           composed: true,
-          detail: { value: { ...this.formData, [field.name]: isBoolean ? input.checked : input.value } },
+          detail: { value: { ...this.formData, [field.name]: value } },
         }))
       })
       label.append(labelText, input)

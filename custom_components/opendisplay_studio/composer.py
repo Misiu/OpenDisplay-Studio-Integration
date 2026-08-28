@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import re
 from dataclasses import dataclass
+from pathlib import Path
 from time import perf_counter
 from typing import Any
 from urllib.parse import urlsplit
 
+from homeassistant.components.media_source import async_resolve_media
+from homeassistant.components.media_source.error import MediaSourceError
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from liquid.exceptions import LiquidError
@@ -58,6 +62,23 @@ REMOTE_ASSET_PATTERNS = (
     ),
 )
 REMOTE_URL_PATTERN = re.compile(r"https?://[^\s,\"']+", re.IGNORECASE)
+MAX_BACKGROUND_BYTES = 5 * 1024 * 1024
+BACKGROUND_MIME_SIGNATURES = {
+    "image/jpeg": (b"\xff\xd8\xff",),
+    "image/png": (b"\x89PNG\r\n\x1a\n",),
+    "image/webp": (b"RIFF",),
+}
+BACKGROUND_ANCHOR_STYLES = {
+    "top-left": ("flex-start", "flex-start", "left top"),
+    "top-center": ("center", "flex-start", "center top"),
+    "top-right": ("flex-end", "flex-start", "right top"),
+    "center-left": ("flex-start", "center", "left center"),
+    "center": ("center", "center", "center center"),
+    "center-right": ("flex-end", "center", "right center"),
+    "bottom-left": ("flex-start", "flex-end", "left bottom"),
+    "bottom-center": ("center", "flex-end", "center bottom"),
+    "bottom-right": ("flex-end", "flex-end", "right bottom"),
+}
 
 
 def _assert_asset_permissions(
@@ -99,13 +120,98 @@ def _new_composition_state() -> tuple[float, list[str], set[str]]:
 
 STUDIO_STYLES = """
 <style>
-  .studio-screen{width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:var(--framework-semantic-canvas-bg-color,#fff)!important;color:var(--framework-semantic-text-primary-text-color,#000);box-sizing:border-box}
-  .studio-screen .view--full{width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .studio-screen{position:relative;width:var(--studio-width)!important;height:var(--studio-height)!important;margin:0!important;padding:0!important;overflow:hidden!important;background:var(--framework-semantic-canvas-bg-color,#fff)!important;color:var(--framework-semantic-text-primary-text-color,#000);box-sizing:border-box}
+  .studio-screen .view--full{position:relative;z-index:1;width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
+  .studio-background-layer{position:absolute;inset:0;z-index:0;display:flex;justify-content:var(--studio-background-x);align-items:var(--studio-background-y);overflow:hidden;pointer-events:none}
+  .studio-background{display:block;flex:none;object-position:var(--studio-background-position)}
+  .studio-background-layer:not(.studio-background-layer--manual) .studio-background{width:100%;height:100%;object-fit:var(--studio-background-fit)}
+  .studio-background-layer--manual .studio-background{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;transform:scale(var(--studio-background-scale));transform-origin:var(--studio-background-position)}
   .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-gap);gap:var(--studio-gap);box-sizing:border-box}
   .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--framework-semantic-surface-bg-color,transparent);color:inherit;box-sizing:border-box;container-type:size;container-name:od-region}
   .studio-region>.item{width:100%!important;height:100%!important;margin:0!important;padding:0!important}
 </style>
 """
+
+
+def _read_background(path: Path) -> bytes:
+    """Read one bounded local media file without blocking the event loop."""
+    if not path.is_file():
+        raise ProjectComposeError("Selected background media file is unavailable")
+    if path.stat().st_size > MAX_BACKGROUND_BYTES:
+        raise ProjectComposeError("Selected background image exceeds 5 MB")
+    content = path.read_bytes()
+    if len(content) > MAX_BACKGROUND_BYTES:
+        raise ProjectComposeError("Selected background image exceeds 5 MB")
+    return content
+
+
+def _validate_background_content(content: bytes, mime_type: str) -> None:
+    """Reject unsupported or mislabeled display background content."""
+    signatures = BACKGROUND_MIME_SIGNATURES.get(mime_type)
+    if signatures is None:
+        raise ProjectComposeError(
+            "Selected background must be a PNG, JPEG, or WebP image"
+        )
+    if mime_type == "image/webp":
+        valid = content.startswith(b"RIFF") and content[8:12] == b"WEBP"
+    else:
+        valid = any(content.startswith(signature) for signature in signatures)
+    if not valid:
+        raise ProjectComposeError("Selected background image content is invalid")
+
+
+async def _async_resolve_background(
+    hass: HomeAssistant, project: Project
+) -> str | None:
+    """Resolve a Home Assistant Media Source image to a local data URI."""
+    background = project.get("background")
+    if not isinstance(background, dict):
+        return None
+    media = background["media"]
+    try:
+        resolved = await async_resolve_media(hass, str(media["media_content_id"]), None)
+    except MediaSourceError as err:
+        raise ProjectComposeError("Selected background media is unavailable") from err
+    if resolved.path is None:
+        raise ProjectComposeError(
+            "Selected background must be stored in local Home Assistant media"
+        )
+    mime_type = resolved.mime_type.lower().split(";", maxsplit=1)[0].strip()
+    try:
+        content = await hass.async_add_executor_job(
+            _read_background, Path(resolved.path)
+        )
+    except OSError as err:
+        raise ProjectComposeError(
+            "Selected background media file could not be read"
+        ) from err
+    _validate_background_content(content, mime_type)
+    encoded = base64.b64encode(content).decode("ascii")
+    return f"data:{mime_type};base64,{encoded}"
+
+
+def _background_markup(project: Project, data_uri: str | None) -> str:
+    """Create the deterministic screen background layer."""
+    background = project.get("background")
+    if data_uri is None or not isinstance(background, dict):
+        return ""
+    mode = str(background["mode"])
+    anchor = str(background["anchor"])
+    horizontal, vertical, position = BACKGROUND_ANCHOR_STYLES[anchor]
+    object_fit = {"stretch": "fill", "contain": "contain", "cover": "cover"}.get(
+        mode, "contain"
+    )
+    scale = int(background["scale"]) / 100
+    manual_class = " studio-background-layer--manual" if mode == "manual" else ""
+    return (
+        f'<div class="studio-background-layer{manual_class}" aria-hidden="true" '
+        f'style="--studio-background-x:{horizontal};'
+        f"--studio-background-y:{vertical};"
+        f"--studio-background-position:{position};"
+        f"--studio-background-fit:{object_fit};"
+        f'--studio-background-scale:{scale:g}">'
+        f'<img class="studio-background" src="{data_uri}" alt=""></div>'
+    )
 
 
 def _screen_size(width: int, height: int) -> str:
@@ -234,6 +340,7 @@ async def async_compose_project(
     except HomeAssistantError as err:
         raise ProjectComposeError("Could not resolve widget data") from err
     resolved = dict(zip(provider_keys, provider_values, strict=True))
+    background_data_uri = await _async_resolve_background(hass, project)
     data_ms = (perf_counter() - started) * 1_000
 
     liquid_ms, fragments, allowed_asset_origins = _new_composition_state()
@@ -310,7 +417,9 @@ async def async_compose_project(
         f'<main class="screen {mode} {size}{portrait}{preference_classes} studio-screen" '
         f'style="--studio-width:{width}px;--studio-height:{height}px;'
         f"--screen-w:{width}px;--screen-h:{height}px;"
-        f'--studio-gap:{layout_gap}px">{STUDIO_STYLES}<div class="view view--full">'
+        f'--studio-gap:{layout_gap}px">{STUDIO_STYLES}'
+        f"{_background_markup(project, background_data_uri)}"
+        f'<div class="view view--full">'
         f'<div class="studio-grid" style="grid-template-columns:'
         f"repeat({grid['columns']},minmax(0,1fr));grid-template-rows:"
         f'repeat({grid["rows"]},minmax(0,1fr))">'

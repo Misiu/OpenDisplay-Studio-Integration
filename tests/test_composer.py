@@ -8,7 +8,9 @@ from homeassistant.exceptions import HomeAssistantError
 from liquid.exceptions import LiquidSyntaxError
 
 from custom_components.opendisplay_studio.composer import (
+    MAX_BACKGROUND_BYTES,
     ProjectComposeError,
+    _read_background,
     _region_shape,
     _requirement_sources,
     async_compose_project,
@@ -57,6 +59,15 @@ def test_entity_tile_shape_uses_physical_region_ratio() -> None:
         )
         == "tall"
     )
+
+
+def test_background_size_is_bounded_for_renderer_payload(tmp_path) -> None:
+    image_path = tmp_path / "oversized.png"
+    with image_path.open("wb") as file_handle:
+        file_handle.truncate(MAX_BACKGROUND_BYTES + 1)
+
+    with pytest.raises(ProjectComposeError, match="exceeds 5 MB"):
+        _read_background(image_path)
 
 
 async def test_sensor_requirements_are_deduplicated(hass) -> None:
@@ -149,6 +160,140 @@ async def test_display_preferences_become_trmnl_screen_classes(hass) -> None:
     assert "screen--fonts-classic" in result.html
     assert "screen--text-scale-small" in result.html
     assert "var(--framework-semantic-canvas-bg-color,#fff)" in result.html
+
+
+async def test_manual_background_uses_natural_image_scale_and_anchor(
+    hass, tmp_path
+) -> None:
+    image_path = tmp_path / "mountains.png"
+    image_path.write_bytes(b"\x89PNG\r\n\x1a\nlocal-image")
+    project = {
+        "palette": "bw",
+        "width": 800,
+        "height": 480,
+        "background": {
+            "media": {
+                "media_content_id": "media-source://media_source/local/mountains.png",
+                "media_content_type": "image/png",
+            },
+            "mode": "manual",
+            "anchor": "bottom-right",
+            "scale": 50,
+        },
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    with patch(
+        "custom_components.opendisplay_studio.composer.async_resolve_media",
+        AsyncMock(
+            return_value=SimpleNamespace(
+                path=image_path,
+                mime_type="image/png",
+            )
+        ),
+    ):
+        result = await async_compose_project(hass, project)
+
+    assert "data:image/png;base64," in result.html
+    assert "studio-background-layer--manual" in result.html
+    assert "--studio-background-scale:0.5" in result.html
+    assert "--studio-background-x:flex-end" in result.html
+    assert "--studio-background-y:flex-end" in result.html
+    assert "--studio-background-position:right bottom" in result.html
+    assert "width:auto!important;height:auto!important" in result.html
+
+
+@pytest.mark.parametrize(
+    ("mode", "object_fit"),
+    [("stretch", "fill"), ("contain", "contain"), ("cover", "cover")],
+)
+async def test_fitted_background_modes_map_to_css_object_fit(
+    hass, tmp_path, mode: str, object_fit: str
+) -> None:
+    image_path = tmp_path / "background.jpg"
+    image_path.write_bytes(b"\xff\xd8\xfflocal-image")
+    project = {
+        "palette": "bw",
+        "background": {
+            "media": {
+                "media_content_id": "media-source://media_source/local/background.jpg",
+                "media_content_type": "image/jpeg",
+            },
+            "mode": mode,
+            "anchor": "top-left",
+            "scale": 100,
+        },
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    with patch(
+        "custom_components.opendisplay_studio.composer.async_resolve_media",
+        AsyncMock(
+            return_value=SimpleNamespace(path=image_path, mime_type="image/jpeg")
+        ),
+    ):
+        result = await async_compose_project(hass, project)
+
+    assert '<div class="studio-background-layer" aria-hidden="true"' in result.html
+    assert f"--studio-background-fit:{object_fit}" in result.html
+
+
+async def test_background_requires_local_media_path(hass) -> None:
+    project = {
+        "palette": "bw",
+        "background": {
+            "media": {
+                "media_content_id": "media-source://remote/image.png",
+                "media_content_type": "image/png",
+            },
+            "mode": "contain",
+            "anchor": "center",
+            "scale": 100,
+        },
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    with (
+        patch(
+            "custom_components.opendisplay_studio.composer.async_resolve_media",
+            AsyncMock(return_value=SimpleNamespace(path=None, mime_type="image/png")),
+        ),
+        pytest.raises(ProjectComposeError, match="local Home Assistant media"),
+    ):
+        await async_compose_project(hass, project)
+
+
+async def test_background_rejects_mislabeled_content(hass, tmp_path) -> None:
+    image_path = tmp_path / "invalid.png"
+    image_path.write_bytes(b"not-a-png")
+    project = {
+        "palette": "bw",
+        "background": {
+            "media": {
+                "media_content_id": "media-source://media_source/local/invalid.png",
+                "media_content_type": "image/png",
+            },
+            "mode": "contain",
+            "anchor": "center",
+            "scale": 100,
+        },
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [],
+    }
+
+    with (
+        patch(
+            "custom_components.opendisplay_studio.composer.async_resolve_media",
+            AsyncMock(
+                return_value=SimpleNamespace(path=image_path, mime_type="image/png")
+            ),
+        ),
+        pytest.raises(ProjectComposeError, match="content is invalid"),
+    ):
+        await async_compose_project(hass, project)
 
 
 async def test_provider_error_is_exposed_as_compose_error(hass) -> None:

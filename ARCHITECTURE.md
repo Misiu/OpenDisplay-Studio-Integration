@@ -71,6 +71,16 @@ HTML to preview and Media Source. Widgets do not own or duplicate these
 settings; they react to the framework variables and their physical region
 container.
 
+Display backgrounds are also project-level presentation. The panel stores the
+Home Assistant media selector value together with fit mode, nine-point anchor,
+and scale. `stretch`, `contain`, and `cover` map to deterministic object-fit
+rules. `manual` scales the image from its natural pixel dimensions, so 50% of
+an 800 × 800 source is always 400 × 400 pixels. The composer resolves only a
+local Media Source path, validates PNG, JPEG, or WebP content up to 5 MB, and
+embeds it as a data URI in the same HTML used by exact preview and Media Source.
+The Renderer App therefore never needs network access or Home Assistant media
+credentials.
+
 Backend panel registration follows the current Core Dynalite pattern: local
 static files, WebSocket commands, and an admin-only custom panel. Studio is not
 a standalone frontend, so its component model follows the Matter and ZHA

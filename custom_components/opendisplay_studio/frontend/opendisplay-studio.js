@@ -1572,6 +1572,15 @@ var Le = {
     border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
   }
 
+  .preview-overlay .screen-region.layout-region {
+    background: color-mix(in srgb, var(--screen-paper) 34%, transparent);
+  }
+
+  .display-screen.live-preview .merge-layer {
+    inset: var(--preview-gap);
+    gap: var(--preview-gap);
+  }
+
   .display-screen[data-palette='bw'] {
     --screen-paper: #fff;
     --screen-ink: #080808;
@@ -1848,6 +1857,132 @@ var Le = {
 
   .layout-instructions strong {
     color: var(--odx-ink);
+  }
+
+  .layout-section {
+    display: grid;
+    gap: var(--ha-space-3, 12px);
+    padding-block: var(--ha-space-3, 12px);
+    border-block: 1px solid var(--odx-line);
+  }
+
+  .layout-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ha-space-2, 8px);
+  }
+
+  .layout-section-heading h3 {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .layout-section-heading p,
+  .background-empty,
+  .background-scale p {
+    margin: 4px 0 0;
+    color: var(--odx-muted);
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .background-settings {
+    display: grid;
+    gap: var(--ha-space-4, 16px);
+  }
+
+  .background-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .background-fieldset legend {
+    margin-block-end: var(--ha-space-2, 8px);
+    color: var(--odx-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .background-fieldset:disabled {
+    opacity: 0.48;
+  }
+
+  .background-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ha-space-2, 8px);
+  }
+
+  .background-mode-grid button,
+  .background-anchor-grid button {
+    appearance: none;
+    border: 1px solid var(--odx-line);
+    border-radius: 8px;
+    background: var(--odx-surface);
+    color: var(--odx-ink);
+    cursor: pointer;
+  }
+
+  .background-mode-grid button {
+    min-height: 36px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .background-mode-grid button:hover,
+  .background-mode-grid button:focus-visible,
+  .background-anchor-grid button:hover,
+  .background-anchor-grid button:focus-visible {
+    border-color: var(--odx-blue);
+    outline: 2px solid color-mix(in srgb, var(--odx-blue) 34%, transparent);
+    outline-offset: 1px;
+  }
+
+  .background-mode-grid button.active,
+  .background-anchor-grid button.active {
+    border-color: var(--odx-blue);
+    background: color-mix(in srgb, var(--odx-blue) 14%, var(--odx-surface));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--odx-blue) 32%, transparent);
+  }
+
+  .background-anchor-grid {
+    width: 132px;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+
+  .background-anchor-grid button {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .background-anchor-grid button span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .background-anchor-grid button.active span {
+    color: var(--odx-blue-strong);
+    transform: scale(1.35);
+  }
+
+  .background-anchor-grid button:disabled {
+    cursor: not-allowed;
+  }
+
+  .background-scale {
+    gap: 6px;
   }
 
   .inspector-heading {
@@ -2646,7 +2781,66 @@ var $e = (e) => e <= 1.6 ? {
 } : {
 	width: e.nativeHeight,
 	height: e.nativeWidth
-}, at = 0, W = (e = globalThis.crypto) => {
+}, at = [
+	{
+		value: "stretch",
+		label: "Stretch"
+	},
+	{
+		value: "contain",
+		label: "Fit"
+	},
+	{
+		value: "cover",
+		label: "Cover"
+	},
+	{
+		value: "manual",
+		label: "Manual"
+	}
+], ot = [
+	{
+		value: "top-left",
+		label: "Top left"
+	},
+	{
+		value: "top-center",
+		label: "Top center"
+	},
+	{
+		value: "top-right",
+		label: "Top right"
+	},
+	{
+		value: "center-left",
+		label: "Center left"
+	},
+	{
+		value: "center",
+		label: "Center"
+	},
+	{
+		value: "center-right",
+		label: "Center right"
+	},
+	{
+		value: "bottom-left",
+		label: "Bottom left"
+	},
+	{
+		value: "bottom-center",
+		label: "Bottom center"
+	},
+	{
+		value: "bottom-right",
+		label: "Bottom right"
+	}
+], st = (e) => ({
+	media: e,
+	mode: "contain",
+	anchor: "center",
+	scale: 100
+}), ct = (e) => Number.isFinite(e) ? Math.max(1, Math.min(400, Math.round(e))) : 100, lt = 0, W = (e = globalThis.crypto) => {
 	if (typeof e?.randomUUID == "function") return e.randomUUID();
 	if (e) {
 		let t = e.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
@@ -2654,7 +2848,7 @@ var $e = (e) => e <= 1.6 ? {
 		let n = Array.from(t, (e) => e.toString(16).padStart(2, "0")).join("");
 		return `${n.slice(0, 8)}-${n.slice(8, 12)}-${n.slice(12, 16)}-${n.slice(16, 20)}-${n.slice(20)}`;
 	}
-	return at += 1, `odx-${Date.now().toString(36)}-${at.toString(36)}`;
+	return lt += 1, `odx-${Date.now().toString(36)}-${lt.toString(36)}`;
 }, G = (e) => {
 	let t = [];
 	for (let n = 1; n <= e.rows; n += 1) for (let r = 1; r <= e.columns; r += 1) t.push({
@@ -2665,7 +2859,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: 1
 	});
 	return t;
-}, ot = (e, t) => t.row >= e.row && t.row < e.row + e.rowSpan && t.column >= e.column && t.column < e.column + e.columnSpan, st = (e, t, n) => {
+}, ut = (e, t) => t.row >= e.row && t.row < e.row + e.rowSpan && t.column >= e.column && t.column < e.column + e.columnSpan, dt = (e, t, n) => {
 	let r = Math.min(t.row, n.row), i = Math.min(t.column, n.column), a = Math.max(t.row, n.row), o = Math.max(t.column, n.column), s = e.filter((e) => e.row >= r && e.column >= i && e.row + e.rowSpan - 1 <= a && e.column + e.columnSpan - 1 <= o);
 	if ((a - r + 1) * (o - i + 1) !== s.reduce((e, t) => e + t.rowSpan * t.columnSpan, 0) || s.length === 0) return null;
 	let c = s.find((e) => e.widget)?.widget, l = new Set(s.map((e) => e.id));
@@ -2677,7 +2871,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: o - i + 1,
 		widget: c
 	}];
-}, ct = (e, t) => {
+}, ft = (e, t) => {
 	let n = e.find((e) => e.id === t);
 	if (!n || n.rowSpan === 1 && n.columnSpan === 1 && !n.label) return e;
 	if (n.rowSpan === 1 && n.columnSpan === 1) return e.map((e) => e.id === t ? {
@@ -2696,7 +2890,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: 1
 	});
 	return [...e.filter((e) => e.id !== t), ...r];
-}, lt = (e, t, n, r) => t.columns === n.rows && t.rows === n.columns ? e.map((e) => r === "clockwise" ? {
+}, pt = (e, t, n, r) => t.columns === n.rows && t.rows === n.columns ? e.map((e) => r === "clockwise" ? {
 	...e,
 	row: e.column,
 	column: t.rows - e.row - e.rowSpan + 2,
@@ -2708,8 +2902,8 @@ var $e = (e) => e <= 1.6 ? {
 	column: e.row,
 	rowSpan: e.columnSpan,
 	columnSpan: e.rowSpan
-}) : G(n), ut = (e, t) => ({ ...e.grid[t] }), dt = (e = "Kitchen display", t = "en") => {
-	let n = U(rt), r = "landscape", i = ut(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
+}) : G(n), mt = (e, t) => ({ ...e.grid[t] }), ht = (e = "Kitchen display", t = "en") => {
+	let n = U(rt), r = "landscape", i = mt(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		id: W(),
 		schemaVersion: 1,
@@ -2729,7 +2923,7 @@ var $e = (e) => e <= 1.6 ? {
 		createdAt: a,
 		updatedAt: a
 	};
-}, K = (e, t) => String(e[t] ?? ""), ft = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => T`
+}, K = (e, t) => String(e[t] ?? ""), gt = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => T`
   <svg class="widget-icon" viewBox="0 0 24 24" role="img" aria-label=${t}>
     <path d=${e}></path>
   </svg>
@@ -2737,7 +2931,7 @@ var $e = (e) => e <= 1.6 ? {
   <svg slot="start" class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path d=${e}></path>
   </svg>
-`, pt = [
+`, _t = [
 	{
 		id: "calendar",
 		version: "0.5.0",
@@ -2860,7 +3054,7 @@ var $e = (e) => e <= 1.6 ? {
         <div class="widget-heading">
           <span>${q(He)}</span>
           <strong>${K(e, "title")}</strong>
-          <span class="widget-kicker">${ft(e, "days")} days</span>
+          <span class="widget-kicker">${gt(e, "days")} days</span>
         </div>
         <div class="event-list">
           ${r.map(([e, t, n]) => T`
@@ -3119,7 +3313,7 @@ var $e = (e) => e <= 1.6 ? {
     </div>
   `
 	}
-], Y = (e) => pt.find((t) => t.id === e), mt = (e) => {
+], Y = (e) => _t.find((t) => t.id === e), vt = (e) => {
 	let t = Y(e.id);
 	return t ? {
 		...t,
@@ -3145,7 +3339,7 @@ var $e = (e) => e <= 1.6 ? {
       </div>
     `
 	};
-}, ht = pt.map((e) => e.styles), gt = o`
+}, yt = _t.map((e) => e.styles), bt = o`
   .widget {
     width: 100%;
     height: 100%;
@@ -3208,7 +3402,7 @@ var Z = (e, t) => {
 		if (typeof n.code == "string" && n.code) return `${t} (${n.code})`;
 	}
 	return t;
-}, _t = (e) => {
+}, xt = (e) => {
 	let t = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		...structuredClone(e),
@@ -3236,8 +3430,8 @@ var Z = (e, t) => {
 	static {
 		this.styles = [
 			Qe,
-			gt,
-			...ht
+			bt,
+			...yt
 		];
 	}
 	firstUpdated() {
@@ -3275,7 +3469,7 @@ var Z = (e, t) => {
 	}
 	widgetDefinition(e) {
 		let t = Y(e), n = this.widgetMetadata.find((t) => t.id === e);
-		return n ? mt(n) : t;
+		return n ? vt(n) : t;
 	}
 	updatePreviewScale() {
 		if (!this.previewBoundary || !this.screenFit || !this.screenBezel) return;
@@ -3292,8 +3486,8 @@ var Z = (e, t) => {
 		}).join("|") : "";
 	}
 	schedulePreview(e = 250) {
-		this.editorMode !== "widgets" || !this.store.projects.length || (this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => {
-			this.previewTimer = void 0, this.composePreview(this.project);
+		this.store.projects.length && (this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => {
+			this.previewTimer = void 0, this.composePreview(this.canvasProject);
 		}, e));
 	}
 	async composePreview(e) {
@@ -3363,13 +3557,13 @@ var Z = (e, t) => {
 		n && (this.saveProject(n), this.schedulePreview());
 	}
 	updateLayoutDraft(e) {
-		this.layoutDraft &&= e(this.layoutDraft);
+		this.layoutDraft && (this.layoutDraft = e(this.layoutDraft), this.schedulePreview());
 	}
 	openLayoutEditor() {
-		this.layoutDraft = structuredClone(this.project), this.editorMode = "layout", this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0;
+		this.layoutDraft = structuredClone(this.project), this.editorMode = "layout", this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.previewImageUrl = "", this.schedulePreview(0);
 	}
 	cancelLayoutEditor() {
-		this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0;
+		this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0, this.previewImageUrl = "", this.schedulePreview(0);
 	}
 	applyLayoutEditor() {
 		if (!this.layoutDraft) return;
@@ -3389,7 +3583,7 @@ var Z = (e, t) => {
 	}
 	async addProject() {
 		try {
-			let e = dt(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
+			let e = ht(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
 				type: "opendisplay_studio/create_project",
 				project: e
 			})).project;
@@ -3397,13 +3591,13 @@ var Z = (e, t) => {
 				...this.store,
 				activeProjectId: t.id,
 				projects: [...this.store.projects, t]
-			}), this.selectedRegionId = "", this.layoutDraft = structuredClone(t), this.editorMode = "layout", this.showToast("Display created");
+			}), this.selectedRegionId = "", this.layoutDraft = structuredClone(t), this.editorMode = "layout", this.showToast("Display created"), this.schedulePreview(0);
 		} catch (e) {
 			this.showToast(Z(e, "Could not create display"));
 		}
 	}
 	async duplicateProject() {
-		let e = _t(this.project), t = (await this.hass.callWS({
+		let e = xt(this.project), t = (await this.hass.callWS({
 			type: "opendisplay_studio/create_project",
 			project: e
 		})).project;
@@ -3442,7 +3636,7 @@ var Z = (e, t) => {
 		})), this.renameDialog?.close(), this.showToast("Name updated"));
 	}
 	applyDisplayProfile(e, t) {
-		let n = U(e), r = ut(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
+		let n = U(e), r = mt(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
 			...e,
 			widget: a[t]
 		})), s = it(n, this.canvasProject.orientation);
@@ -3496,12 +3690,56 @@ var Z = (e, t) => {
 			textScale: t
 		}));
 	}
+	changeBackgroundMedia(e) {
+		let t = e.detail.value.backgroundMedia;
+		this.updateLayoutDraft((e) => ({
+			...e,
+			background: t?.media_content_id ? e.background ? {
+				...e.background,
+				media: t
+			} : st(t) : void 0
+		}));
+	}
+	clearBackground() {
+		this.updateLayoutDraft((e) => ({
+			...e,
+			background: void 0
+		}));
+	}
+	changeBackgroundMode(e) {
+		this.updateLayoutDraft((t) => t.background ? {
+			...t,
+			background: {
+				...t.background,
+				mode: e
+			}
+		} : t);
+	}
+	changeBackgroundAnchor(e) {
+		this.updateLayoutDraft((t) => t.background ? {
+			...t,
+			background: {
+				...t.background,
+				anchor: e
+			}
+		} : t);
+	}
+	changeBackgroundScale(e) {
+		let t = ct(Number(e.currentTarget.value));
+		this.updateLayoutDraft((e) => e.background ? {
+			...e,
+			background: {
+				...e.background,
+				scale: t
+			}
+		} : e);
+	}
 	changeOrientation(e) {
 		if (e === this.canvasProject.orientation) return;
 		let t = this.canvasProject.displayId === "custom" ? {
 			columns: this.canvasProject.grid.rows,
 			rows: this.canvasProject.grid.columns
-		} : ut(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = lt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
+		} : mt(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = pt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
 			width: this.canvasProject.height,
 			height: this.canvasProject.width
 		} : it(this.canvasDisplay, e);
@@ -3543,7 +3781,7 @@ var Z = (e, t) => {
 		});
 	}
 	selectMergeCell(e) {
-		let t = this.canvasProject.regions.find((t) => ot(t, e));
+		let t = this.canvasProject.regions.find((t) => ut(t, e));
 		if (t && (t.label || t.rowSpan > 1 || t.columnSpan > 1)) return;
 		if (!this.mergeAnchor) {
 			this.mergeAnchor = e, this.mergeHover = e;
@@ -3553,7 +3791,7 @@ var Z = (e, t) => {
 			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Remove the existing region before drawing across it");
 			return;
 		}
-		let n = st(this.canvasProject.regions, this.mergeAnchor, e);
+		let n = dt(this.canvasProject.regions, this.mergeAnchor, e);
 		if (!n) {
 			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("The selected rectangle crosses an existing merged region");
 			return;
@@ -3573,7 +3811,7 @@ var Z = (e, t) => {
 		let t = this.canvasProject.regions.find((t) => t.id === e);
 		!t || t.rowSpan === 1 && t.columnSpan === 1 && !t.label || (this.updateLayoutDraft((t) => ({
 			...t,
-			regions: ct(t.regions, e)
+			regions: ft(t.regions, e)
 		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Region removed"));
 	}
 	assignWidget(e) {
@@ -3776,7 +4014,7 @@ var Z = (e, t) => {
 			this.mergeHover = void 0;
 		}}>
         ${e.map((e) => {
-			let r = this.canvasProject.regions.find((t) => ot(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
+			let r = this.canvasProject.regions.find((t) => ut(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
 			return T`
             <button
               class="merge-cell ${i ? "occupied" : ""} ${a ? "preview" : ""} ${n && a ? "invalid" : ""} ${this.mergeAnchor?.row === e.row && this.mergeAnchor?.column === e.column ? "anchor" : ""}"
@@ -3798,7 +4036,7 @@ var Z = (e, t) => {
 		let e = this.canvasProject, t = this.canvasDisplay, n = {
 			width: e.width,
 			height: e.height
-		};
+		}, r = !!(this.previewImageUrl || this.previewError), i = e.regions.length === 1 && e.regions[0].row === 1 && e.regions[0].column === 1 && e.regions[0].rowSpan === e.grid.rows && e.regions[0].columnSpan === e.grid.columns ? 0 : Math.max(3, Math.min(10, Math.round(Math.min(n.width, n.height) / 60)));
 		return T`
       <main class="canvas-area">
         <div class="canvas-stage">
@@ -3808,7 +4046,7 @@ var Z = (e, t) => {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? "live-preview" : ""}"
+                  class="display-screen ${r ? "live-preview" : ""}"
                   data-palette=${e.palette}
                   style=${I({
 			"--grid-columns": String(e.grid.columns),
@@ -3817,16 +4055,17 @@ var Z = (e, t) => {
 			height: `${n.height}px`
 		})}
                 >
-                  ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? T`
+                  ${r ? T`
                       ${this.previewImageUrl ? T`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />` : T`<ha-alert class="preview-failure" alert-type="error" .title=${"Exact preview unavailable"}>${this.previewError}</ha-alert>`}
                       <div
                         class="preview-overlay"
                         style=${I({
 			"--grid-columns": String(e.grid.columns),
 			"--grid-rows": String(e.grid.rows),
-			"--preview-gap": `${Math.max(3, Math.min(10, Math.round(Math.min(n.width, n.height) / 60)))}px`
+			"--preview-gap": `${i}px`
 		})}
                       >${e.regions.map((e) => this.renderScreenRegion(e))}</div>
+                      ${this.renderMergeLayer()}
                     ` : T`
                       ${e.regions.map((e) => this.renderScreenRegion(e))}
                       ${this.renderMergeLayer()}
@@ -3929,6 +4168,70 @@ var Z = (e, t) => {
           <div><dt>Grid</dt><dd>${e.grid.columns} × ${e.grid.rows}</dd></div>
           <div><dt>Regions</dt><dd>${e.regions.length}</dd></div>
         </dl>
+        <section class="layout-section" aria-labelledby="background-heading">
+          <div class="layout-section-heading">
+            <div><h3 id="background-heading">Display background</h3><p>Choose an image stored in Home Assistant Media.</p></div>
+            ${e.background ? T`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>` : D}
+          </div>
+          <ha-form
+            .hass=${this.hass}
+            .data=${{ backgroundMedia: e.background?.media }}
+            .schema=${[{
+			name: "backgroundMedia",
+			label: "Background image",
+			selector: { media: { accept: ["image/*"] } }
+		}]}
+            .computeLabel=${() => "Background image"}
+            .computeHelper=${() => "Home Assistant Media images only"}
+            @value-changed=${this.changeBackgroundMedia}
+          ></ha-form>
+          ${e.background ? T`
+              <div class="background-settings">
+                <fieldset class="background-fieldset">
+                  <legend>Image fit</legend>
+                  <div class="background-mode-grid">
+                    ${at.map((t) => T`
+                      <button
+                        class=${e.background?.mode === t.value ? "active" : ""}
+                        aria-pressed=${e.background?.mode === t.value}
+                        @click=${() => this.changeBackgroundMode(t.value)}
+                      >${t.label}</button>
+                    `)}
+                  </div>
+                </fieldset>
+                <fieldset class="background-fieldset" ?disabled=${e.background.mode === "stretch"}>
+                  <legend>Position</legend>
+                  <div class="background-anchor-grid">
+                    ${ot.map((t) => T`
+                      <button
+                        class=${e.background?.anchor === t.value ? "active" : ""}
+                        aria-label=${t.label}
+                        title=${t.label}
+                        aria-pressed=${e.background?.anchor === t.value}
+                        ?disabled=${e.background?.mode === "stretch"}
+                        @click=${() => this.changeBackgroundAnchor(t.value)}
+                      ><span></span></button>
+                    `)}
+                  </div>
+                </fieldset>
+                ${e.background.mode === "manual" ? T`
+                    <div class="field background-scale">
+                      <label class="field-label" for="background-scale">Scale of original image (%)</label>
+                      <input
+                        id="background-scale"
+                        type="number"
+                        min="1"
+                        max="400"
+                        step="1"
+                        .value=${String(e.background.scale)}
+                        @change=${this.changeBackgroundScale}
+                      />
+                      <p>100% uses the image's natural pixel size. An 800 × 800 image at 50% renders as 400 × 400 px.</p>
+                    </div>
+                  ` : D}
+              </div>
+            ` : T`<p class="background-empty">No background image. The display uses its selected theme canvas.</p>`}
+        </section>
         <ha-form
           .hass=${this.hass}
           .data=${{ language: e.language === "system" ? this.hass.language : e.language }}

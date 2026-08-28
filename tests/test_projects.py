@@ -116,6 +116,70 @@ def test_display_preferences_have_safe_defaults() -> None:
     assert result["textScale"] == "regular"
 
 
+def test_display_background_is_normalized() -> None:
+    payload = project_payload()
+    payload["background"] = {
+        "media": {
+            "media_content_id": "media-source://media_source/local/mountains.png",
+            "media_content_type": "IMAGE/PNG",
+        },
+        "mode": "manual",
+        "anchor": "bottom-right",
+        "scale": 50,
+    }
+
+    assert validate_project(payload)["background"] == {
+        "media": {
+            "media_content_id": "media-source://media_source/local/mountains.png",
+            "media_content_type": "image/png",
+        },
+        "mode": "manual",
+        "anchor": "bottom-right",
+        "scale": 50,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("mode", "tile", "background.mode"),
+        ("anchor", "middle", "background.anchor"),
+        ("scale", 0, "background.scale"),
+        ("scale", 401, "background.scale"),
+    ],
+)
+def test_display_background_rejects_invalid_settings(
+    field: str, value: object, message: str
+) -> None:
+    payload = project_payload()
+    payload["background"] = {
+        "media": {
+            "media_content_id": "media-source://media_source/local/mountains.png",
+            "media_content_type": "image/png",
+        },
+        "mode": "contain",
+        "anchor": "center",
+        "scale": 100,
+        field: value,
+    }
+
+    with pytest.raises(ProjectValidationError, match=message):
+        validate_project(payload)
+
+
+def test_display_background_requires_image_media() -> None:
+    payload = project_payload()
+    payload["background"] = {
+        "media": {
+            "media_content_id": "media-source://media_source/local/notes.txt",
+            "media_content_type": "text/plain",
+        }
+    }
+
+    with pytest.raises(ProjectValidationError, match="must be an image"):
+        validate_project(payload)
+
+
 @pytest.mark.parametrize(
     ("key", "value"),
     [

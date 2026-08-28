@@ -17,6 +17,12 @@ import {
   getPixelSize,
 } from './data/display-profiles'
 import {
+  BACKGROUND_ANCHORS,
+  BACKGROUND_MODES,
+  clampBackgroundScale,
+  createDisplayBackground,
+} from './services/background'
+import {
   createId,
   createRegions,
   gridForOrientation,
@@ -28,12 +34,15 @@ import {
 import { createProject } from './services/storage'
 import type {
   BootstrapResponse,
+  BackgroundAnchor,
+  BackgroundMode,
   CellCoordinate,
   ComposePreviewResponse,
   DisplayTheme,
   FontFamily,
   GridRegion,
   HomeAssistant,
+  MediaSelectorValue,
   Orientation,
   PaletteId,
   PersistedState,
@@ -218,11 +227,11 @@ export class OdxApp extends LitElement {
   }
 
   private schedulePreview(delay = 250): void {
-    if (this.editorMode !== 'widgets' || !this.store.projects.length) return
+    if (!this.store.projects.length) return
     if (this.previewTimer) window.clearTimeout(this.previewTimer)
     this.previewTimer = window.setTimeout(() => {
       this.previewTimer = undefined
-      void this.composePreview(this.project)
+      void this.composePreview(this.canvasProject)
     }, delay)
   }
 
@@ -314,6 +323,7 @@ export class OdxApp extends LitElement {
   private updateLayoutDraft(updater: (project: ScreenProject) => ScreenProject): void {
     if (!this.layoutDraft) return
     this.layoutDraft = updater(this.layoutDraft)
+    this.schedulePreview()
   }
 
   private openLayoutEditor(): void {
@@ -322,6 +332,8 @@ export class OdxApp extends LitElement {
     this.selectedRegionId = ''
     this.mergeAnchor = undefined
     this.mergeHover = undefined
+    this.previewImageUrl = ''
+    this.schedulePreview(0)
   }
 
   private cancelLayoutEditor(): void {
@@ -329,6 +341,8 @@ export class OdxApp extends LitElement {
     this.editorMode = 'widgets'
     this.mergeAnchor = undefined
     this.mergeHover = undefined
+    this.previewImageUrl = ''
+    this.schedulePreview(0)
   }
 
   private applyLayoutEditor(): void {
@@ -379,6 +393,7 @@ export class OdxApp extends LitElement {
       this.layoutDraft = structuredClone(project)
       this.editorMode = 'layout'
       this.showToast('Display created')
+      this.schedulePreview(0)
     } catch (error) {
       this.showToast(errorMessage(error, 'Could not create display'))
     }
@@ -477,6 +492,41 @@ export class OdxApp extends LitElement {
   private changeTextScale(event: Event): void {
     const textScale = (event.currentTarget as HTMLSelectElement).value as TextScale
     this.updateLayoutDraft((project) => ({ ...project, textScale }))
+  }
+
+  private changeBackgroundMedia(event: CustomEvent<{ value: { backgroundMedia?: MediaSelectorValue } }>): void {
+    const media = event.detail.value.backgroundMedia
+    this.updateLayoutDraft((project) => ({
+      ...project,
+      background: media?.media_content_id
+        ? project.background
+          ? { ...project.background, media }
+          : createDisplayBackground(media)
+        : undefined,
+    }))
+  }
+
+  private clearBackground(): void {
+    this.updateLayoutDraft((project) => ({ ...project, background: undefined }))
+  }
+
+  private changeBackgroundMode(mode: BackgroundMode): void {
+    this.updateLayoutDraft((project) => project.background
+      ? { ...project, background: { ...project.background, mode } }
+      : project)
+  }
+
+  private changeBackgroundAnchor(anchor: BackgroundAnchor): void {
+    this.updateLayoutDraft((project) => project.background
+      ? { ...project, background: { ...project.background, anchor } }
+      : project)
+  }
+
+  private changeBackgroundScale(event: Event): void {
+    const scale = clampBackgroundScale(Number((event.currentTarget as HTMLInputElement).value))
+    this.updateLayoutDraft((project) => project.background
+      ? { ...project, background: { ...project.background, scale } }
+      : project)
   }
 
   private changeOrientation(orientation: Orientation): void {
@@ -808,6 +858,13 @@ export class OdxApp extends LitElement {
     const project = this.canvasProject
     const display = this.canvasDisplay
     const pixels = { width: project.width, height: project.height }
+    const exactPreview = Boolean(this.previewImageUrl || this.previewError)
+    const fullCanvas = project.regions.length === 1
+      && project.regions[0].row === 1
+      && project.regions[0].column === 1
+      && project.regions[0].rowSpan === project.grid.rows
+      && project.regions[0].columnSpan === project.grid.columns
+    const previewGap = fullCanvas ? 0 : Math.max(3, Math.min(10, Math.round(Math.min(pixels.width, pixels.height) / 60)))
     return html`
       <main class="canvas-area">
         <div class="canvas-stage">
@@ -817,7 +874,7 @@ export class OdxApp extends LitElement {
               <div class="screen-bezel">
                 <div
                   id="display-screen"
-                  class="display-screen ${this.editorMode === 'widgets' && (this.previewImageUrl || this.previewError) ? 'live-preview' : ''}"
+                  class="display-screen ${exactPreview ? 'live-preview' : ''}"
                   data-palette=${project.palette}
                   style=${styleMap({
                     '--grid-columns': String(project.grid.columns),
@@ -826,7 +883,7 @@ export class OdxApp extends LitElement {
                     height: `${pixels.height}px`,
                   })}
                 >
-                  ${this.editorMode === 'widgets' && (this.previewImageUrl || this.previewError)
+                  ${exactPreview
                     ? html`
                       ${this.previewImageUrl
                         ? html`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />`
@@ -836,9 +893,10 @@ export class OdxApp extends LitElement {
                         style=${styleMap({
                           '--grid-columns': String(project.grid.columns),
                           '--grid-rows': String(project.grid.rows),
-                          '--preview-gap': `${Math.max(3, Math.min(10, Math.round(Math.min(pixels.width, pixels.height) / 60)))}px`,
+                          '--preview-gap': `${previewGap}px`,
                         })}
                       >${project.regions.map((region) => this.renderScreenRegion(region))}</div>
+                      ${this.renderMergeLayer()}
                     `
                     : html`
                       ${project.regions.map((region) => this.renderScreenRegion(region))}
@@ -976,6 +1034,76 @@ export class OdxApp extends LitElement {
           <div><dt>Grid</dt><dd>${project.grid.columns} × ${project.grid.rows}</dd></div>
           <div><dt>Regions</dt><dd>${project.regions.length}</dd></div>
         </dl>
+        <section class="layout-section" aria-labelledby="background-heading">
+          <div class="layout-section-heading">
+            <div><h3 id="background-heading">Display background</h3><p>Choose an image stored in Home Assistant Media.</p></div>
+            ${project.background
+              ? html`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>`
+              : nothing}
+          </div>
+          <ha-form
+            .hass=${this.hass}
+            .data=${{ backgroundMedia: project.background?.media }}
+            .schema=${[{
+              name: 'backgroundMedia',
+              label: 'Background image',
+              selector: { media: { accept: ['image/*'] } },
+            }]}
+            .computeLabel=${() => 'Background image'}
+            .computeHelper=${() => 'Home Assistant Media images only'}
+            @value-changed=${this.changeBackgroundMedia}
+          ></ha-form>
+          ${project.background
+            ? html`
+              <div class="background-settings">
+                <fieldset class="background-fieldset">
+                  <legend>Image fit</legend>
+                  <div class="background-mode-grid">
+                    ${BACKGROUND_MODES.map((item) => html`
+                      <button
+                        class=${project.background?.mode === item.value ? 'active' : ''}
+                        aria-pressed=${project.background?.mode === item.value}
+                        @click=${() => this.changeBackgroundMode(item.value)}
+                      >${item.label}</button>
+                    `)}
+                  </div>
+                </fieldset>
+                <fieldset class="background-fieldset" ?disabled=${project.background.mode === 'stretch'}>
+                  <legend>Position</legend>
+                  <div class="background-anchor-grid">
+                    ${BACKGROUND_ANCHORS.map((item) => html`
+                      <button
+                        class=${project.background?.anchor === item.value ? 'active' : ''}
+                        aria-label=${item.label}
+                        title=${item.label}
+                        aria-pressed=${project.background?.anchor === item.value}
+                        ?disabled=${project.background?.mode === 'stretch'}
+                        @click=${() => this.changeBackgroundAnchor(item.value)}
+                      ><span></span></button>
+                    `)}
+                  </div>
+                </fieldset>
+                ${project.background.mode === 'manual'
+                  ? html`
+                    <div class="field background-scale">
+                      <label class="field-label" for="background-scale">Scale of original image (%)</label>
+                      <input
+                        id="background-scale"
+                        type="number"
+                        min="1"
+                        max="400"
+                        step="1"
+                        .value=${String(project.background.scale)}
+                        @change=${this.changeBackgroundScale}
+                      />
+                      <p>100% uses the image's natural pixel size. An 800 × 800 image at 50% renders as 400 × 400 px.</p>
+                    </div>
+                  `
+                  : nothing}
+              </div>
+            `
+            : html`<p class="background-empty">No background image. The display uses its selected theme canvas.</p>`}
+        </section>
         <ha-form
           .hass=${this.hass}
           .data=${{ language: project.language === 'system' ? this.hass.language : project.language }}

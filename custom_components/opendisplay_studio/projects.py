@@ -26,6 +26,18 @@ PALETTES = {"bw", "gray4", "gray16", "bwr", "bwy", "bwry", "spectra6"}
 DISPLAY_THEMES = {"light", "dark"}
 FONT_FAMILIES = {"default", "classic", "trmnl"}
 TEXT_SCALES = {"small", "regular", "large", "xlarge"}
+BACKGROUND_MODES = {"stretch", "contain", "cover", "manual"}
+BACKGROUND_ANCHORS = {
+    "top-left",
+    "top-center",
+    "top-right",
+    "center-left",
+    "center",
+    "center-right",
+    "bottom-left",
+    "bottom-center",
+    "bottom-right",
+}
 LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 WIDGET_VERSION_PATTERN = re.compile(
     r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$"
@@ -66,6 +78,41 @@ def _widget_version(value: object) -> str:
     if isinstance(value, str) and WIDGET_VERSION_PATTERN.fullmatch(value):
         return value
     raise ProjectValidationError("widget.version must be a semantic version")
+
+
+def _validate_background(value: object) -> dict[str, Any] | None:
+    """Validate a display background selected through Home Assistant media."""
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ProjectValidationError("background must be an object")
+    media = value.get("media")
+    if not isinstance(media, dict):
+        raise ProjectValidationError("background.media must be an object")
+    media_content_id = _string(
+        media.get("media_content_id"), "background.media.media_content_id"
+    )
+    media_content_type = _string(
+        media.get("media_content_type"), "background.media.media_content_type", 100
+    ).lower()
+    if not media_content_type.startswith("image/"):
+        raise ProjectValidationError("background media must be an image")
+    mode = value.get("mode", "contain")
+    if mode not in BACKGROUND_MODES:
+        raise ProjectValidationError("background.mode is invalid")
+    anchor = value.get("anchor", "center")
+    if anchor not in BACKGROUND_ANCHORS:
+        raise ProjectValidationError("background.anchor is invalid")
+    scale = _integer(value.get("scale", 100), "background.scale", 1, 400)
+    return {
+        "media": {
+            "media_content_id": media_content_id,
+            "media_content_type": media_content_type,
+        },
+        "mode": mode,
+        "anchor": anchor,
+        "scale": scale,
+    }
 
 
 def _validate_widget(value: object, registry: WidgetRegistry) -> dict[str, Any] | None:
@@ -184,6 +231,7 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
     text_scale = value.get("textScale", "regular")
     if text_scale not in TEXT_SCALES:
         raise ProjectValidationError("textScale is invalid")
+    background = _validate_background(value.get("background"))
     grid = value.get("grid")
     if not isinstance(grid, dict):
         raise ProjectValidationError("grid must be an object")
@@ -291,7 +339,7 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
     display_id = value.get("displayId", "custom")
     if not isinstance(display_id, str) or len(display_id) > 100:
         raise ProjectValidationError("displayId is invalid")
-    return {
+    normalized_project: Project = {
         "schemaVersion": 1,
         "name": name,
         "status": status,
@@ -307,6 +355,9 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
         "grid": {"columns": columns, "rows": rows},
         "regions": normalized_regions,
     }
+    if background is not None:
+        normalized_project["background"] = background
+    return normalized_project
 
 
 class ProjectStore:

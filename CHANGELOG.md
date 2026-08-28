@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.8.0
+
+- Add display backgrounds selected through Home Assistant Media with Stretch,
+  Fit, Cover, and natural-size Manual modes plus a nine-point anchor.
+- Render layout drafts through the exact Renderer preview so background fit,
+  position, and scale match final Media Source images before applying changes.
+- Keep background rendering local by validating bounded PNG, JPEG, and WebP
+  media and embedding it directly in the composed screen document.
+
 ## 0.7.2
 
 - Display widget package labels for Home Assistant selector fields instead of
