@@ -19,8 +19,8 @@ from .addon import get_addon_manager
 from .cache import RenderCache
 from .const import (
     ADDON_SLUG,
-    API_VERSION,
     CONF_ADDON_SLUG,
+    CONF_API_VERSION,
     CONF_AUTH_TOKEN,
     CONF_INTEGRATION_CREATED_ADDON,
     CONF_USE_ADDON,
@@ -99,9 +99,13 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: OpenDisplayStudioConfigEntry
 ) -> bool:
     """Set up and health-check the configured Renderer."""
+    renderer_url = entry.data[CONF_URL]
+    renderer_token = entry.data.get(CONF_AUTH_TOKEN, "")
     if entry.data.get(CONF_USE_ADDON):
         await _async_ensure_addon_running(hass)
         connection = await _async_get_addon_connection(hass)
+        renderer_url = connection[CONF_URL]
+        renderer_token = connection[CONF_AUTH_TOKEN]
         if any(entry.data.get(key) != value for key, value in connection.items()):
             hass.config_entries.async_update_entry(
                 entry, data={**entry.data, **connection}
@@ -109,14 +113,19 @@ async def async_setup_entry(
 
     client = RendererClient(
         async_get_clientsession(hass),
-        entry.data[CONF_URL],
-        entry.data.get(CONF_AUTH_TOKEN, ""),
+        renderer_url,
+        renderer_token,
     )
     try:
         health = await client.async_health()
     except RendererError as err:
         message = f"Renderer health check failed: {err}"
         raise ConfigEntryNotReady(message) from err
+    if entry.data.get(CONF_API_VERSION) != health["apiVersion"]:
+        hass.config_entries.async_update_entry(
+            entry,
+            data={**entry.data, CONF_API_VERSION: health["apiVersion"]},
+        )
     entry.runtime_data = OpenDisplayStudioRuntimeData(
         client=client,
         health=health,
@@ -179,17 +188,26 @@ async def _async_ensure_addon_running(hass: HomeAssistant) -> None:
         raise ConfigEntryNotReady("Renderer App start scheduled")
 
 
-async def _async_get_addon_connection(hass: HomeAssistant) -> dict[str, object]:
-    """Resolve internal hostname and token from supported Supervisor discovery."""
+async def _async_get_addon_connection(hass: HomeAssistant) -> dict[str, str]:
+    """
+    Resolve the transport fields from Supervisor discovery.
+
+    Renderer identity and API compatibility are verified by the authenticated
+    health endpoint. Discovery metadata can briefly be stale while Supervisor
+    processes an App update, so it must not prevent that authoritative check.
+    """
     try:
         discovery = await get_addon_manager(hass).async_get_addon_discovery_info()
     except AddonError as err:
         raise ConfigEntryNotReady("Renderer App discovery is unavailable") from err
     host = discovery.get("host")
-    port = discovery.get("port")
+    raw_port = discovery.get("port")
     token = discovery.get(CONF_AUTH_TOKEN)
-    instance_id = discovery.get("instance_id")
-    api_version = discovery.get("api_version")
+    port = (
+        int(raw_port)
+        if isinstance(raw_port, str) and raw_port.isdecimal()
+        else raw_port
+    )
     if (
         not isinstance(host, str)
         or not host
@@ -198,14 +216,32 @@ async def _async_get_addon_connection(hass: HomeAssistant) -> dict[str, object]:
         or not 1 <= port <= 65535
         or not isinstance(token, str)
         or not token
-        or not isinstance(instance_id, str)
-        or api_version != API_VERSION
     ):
+        LOGGER.warning(
+            "Renderer App discovery transport is invalid: keys=%s "
+            "host_type=%s port=%r port_type=%s auth_token_present=%s "
+            "instance_id_present=%s api_version=%r",
+            sorted(str(key) for key in discovery),
+            type(host).__name__,
+            raw_port,
+            type(raw_port).__name__,
+            isinstance(token, str) and bool(token),
+            isinstance(discovery.get("instance_id"), str)
+            and bool(discovery.get("instance_id")),
+            discovery.get("api_version"),
+        )
         raise ConfigEntryNotReady("Renderer App discovery is invalid")
+    LOGGER.debug(
+        "Renderer App discovery transport resolved: host=%s port=%d "
+        "instance_id_present=%s discovery_api_version=%r",
+        host,
+        port,
+        isinstance(discovery.get("instance_id"), str)
+        and bool(discovery.get("instance_id")),
+        discovery.get("api_version"),
+    )
     return {
         CONF_URL: f"http://{host}:{port}",
         CONF_AUTH_TOKEN: token,
-        "instance_id": instance_id,
-        "api_version": api_version,
         CONF_ADDON_SLUG: ADDON_SLUG,
     }

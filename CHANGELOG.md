@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.1
+
+- Use Supervisor discovery only for Renderer transport details and verify API
+  compatibility through the authenticated health endpoint, allowing clean
+  upgrades while discovery identity metadata is briefly stale.
+- Accept numeric discovery ports serialized as either JSON numbers or strings
+  and log sanitized diagnostics when transport data is invalid.
+
 ## 0.6.0
 
 - Resolve package-owned files from `widgets/<id>/assets` into bounded `data:`
