@@ -27,9 +27,17 @@ reads current entity states, calendar events, and requested weather forecasts,
 renders widget Liquid templates through
 [`trmnl-liquid-py`](https://github.com/Misiu/trmnl-liquid-py), composes one
 TRMNL Framework document, and sends that final HTML to the Renderer. The
-Renderer App still knows only HTML, width, and height. The designer preview
+Renderer App still knows only HTML, dimensions, and the request-scoped asset
+origin allowlist. The designer preview
 calls this same Renderer path and shows its PNG, so the visible preview and
 final Media Source do not have separate CSS or layout implementations.
+
+Widget templates can use the complete, locally bundled Material Design Icons
+catalog through `mdi` classes. Package-owned files below `assets/` are converted
+by the integration to bounded base64 `data:` URIs before HTML reaches the
+Renderer. No display render requires remote image or font requests.
+Widgets are local-only by default; packages that intentionally need a remote
+asset must declare exact allowed origins in their own manifest.
 
 See [the widget contract](WIDGET_CONTRACT.md) for the schema/data/template
 boundary, native Home Assistant selectors, and the controlled provider model.

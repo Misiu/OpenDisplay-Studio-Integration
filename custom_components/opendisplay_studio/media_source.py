@@ -51,6 +51,7 @@ class OpenDisplayStudioMediaSource(MediaSource):
                 html=built.html,
                 width=project["width"],
                 height=project["height"],
+                allowed_asset_origins=built.allowed_asset_origins,
             )
         except (ProjectComposeError, RendererError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)

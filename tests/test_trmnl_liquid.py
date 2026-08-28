@@ -51,6 +51,14 @@ def test_every_bundled_widget_template_compiles(widget_type: str) -> None:
     Environment().from_string(DEFAULT_REGISTRY.template(widget_type))
 
 
+def test_weather_template_has_no_remote_assets() -> None:
+    template = DEFAULT_REGISTRY.template("weather")
+
+    assert "http://" not in template
+    assert "https://" not in template
+    assert "mdi-weather" in template
+
+
 @pytest.mark.parametrize("widget_type", sorted(DEFAULT_REGISTRY.widget_types))
 def test_every_bundled_widget_renders_with_missing_provider_data(
     widget_type: str,
@@ -62,6 +70,7 @@ def test_every_bundled_widget_renders_with_missing_provider_data(
         DEFAULT_REGISTRY.template(widget_type),
         config=definition["defaults"],
         data=data,
+        assets=DEFAULT_REGISTRY.assets(widget_type),
         region={"shape": "square"},
     )
 

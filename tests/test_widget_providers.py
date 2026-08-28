@@ -141,7 +141,7 @@ async def test_weather_provider_combines_entity_state_and_daily_forecast(hass) -
     assert forecast["datetime"] == "2026-08-26T12:00:00+02:00"
     assert forecast["condition"] == "rainy"
     assert forecast["condition_label"] == "Rainy"
-    assert forecast["icon"] == ("https://trmnl.com/images/plugins/weather/wi-rain.svg")
+    assert forecast["icon"] == "mdi-weather-rainy"
     assert forecast["temperature"] == 20
     assert forecast["templow"] == 13
     assert forecast["uv_index"] == 3

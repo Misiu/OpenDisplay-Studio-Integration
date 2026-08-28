@@ -57,18 +57,34 @@ PROVIDER = QuoteProvider()
 """
 
 
-def _write_quote_package(root: Path, *, version: str = "0.5.0") -> Path:
+def _write_quote_package(
+    root: Path,
+    *,
+    version: str = "0.5.0",
+    allowed_origins: tuple[str, ...] = (),
+    remote_asset: str | None = None,
+) -> Path:
     """Create a complete external widget package for discovery tests."""
     package = root / "quote"
     package.mkdir(parents=True, exist_ok=True)
-    (package / "widget.yml").write_text(
-        QUOTE_MANIFEST.format(version=version), encoding="utf-8"
-    )
+    manifest = QUOTE_MANIFEST.format(version=version)
+    if allowed_origins:
+        manifest += "permissions:\n  network:\n    allowedOrigins:\n"
+        manifest += "".join(f"      - {origin}\n" for origin in allowed_origins)
+    (package / "widget.yml").write_text(manifest, encoding="utf-8")
+    asset_source = remote_asset or "{{ assets['icons/quote.svg'] }}"
     (package / "widget.liquid").write_text(
-        '<div class="quote">{{ data.quote.message }}</div>',
+        f'<div class="quote"><img src="{asset_source}">'
+        "{{ data.quote.message }}</div>",
         encoding="utf-8",
     )
     (package / "provider.py").write_text(QUOTE_PROVIDER, encoding="utf-8")
+    assets = package / "assets" / "icons"
+    assets.mkdir(parents=True, exist_ok=True)
+    (assets / "quote.svg").write_text(
+        '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h1v1z"/></svg>',
+        encoding="utf-8",
+    )
     return package
 
 
@@ -112,6 +128,75 @@ async def test_unknown_package_is_discovered_validated_and_composed(
 
     assert registry.definition("quote")["name"] == "Quote"
     assert "Hello community" in result.html
+    assert 'src="data:image/svg+xml;base64,' in result.html
+    assert registry.assets("quote")["icons/quote.svg"].startswith(
+        "data:image/svg+xml;base64,"
+    )
+    assert result.allowed_asset_origins == ()
+
+
+async def test_declared_remote_widget_asset_is_passed_to_renderer(
+    hass, tmp_path: Path
+) -> None:
+    _write_quote_package(
+        tmp_path,
+        allowed_origins=("https://cdn.example.com/",),
+        remote_asset="https://cdn.example.com/quote.svg",
+    )
+    registry = WidgetRegistry.from_directories([tmp_path])
+    project = validate_project(
+        {
+            "name": "Remote widget",
+            "status": "draft",
+            "language": "en",
+            "displayId": "custom",
+            "width": 400,
+            "height": 300,
+            "orientation": "landscape",
+            "palette": "bw",
+            "grid": {"columns": 1, "rows": 1},
+            "regions": [
+                {
+                    "id": "quote",
+                    "row": 1,
+                    "column": 1,
+                    "rowSpan": 1,
+                    "columnSpan": 1,
+                    "widget": {
+                        "type": "quote",
+                        "version": "0.5.0",
+                        "config": {"source": "community"},
+                    },
+                }
+            ],
+        },
+        registry,
+    )
+    hass.data[DOMAIN] = SimpleNamespace(widgets=registry)
+
+    result = await async_compose_project(hass, project)
+
+    assert registry.definition("quote")["permissions"] == {
+        "network": {"allowedOrigins": ["https://cdn.example.com"]}
+    }
+    assert result.allowed_asset_origins == ("https://cdn.example.com",)
+
+
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "https://example.com/path",
+        "https://user:pass@example.com",
+        "file:///tmp/assets",
+    ],
+)
+def test_invalid_widget_network_permissions_are_rejected(
+    tmp_path: Path, origin: str
+) -> None:
+    _write_quote_package(tmp_path, allowed_origins=(origin,))
+
+    with pytest.raises(WidgetPackageError, match="network permission"):
+        WidgetRegistry.from_directories([tmp_path])
 
 
 def test_registry_can_reload_updated_packages_without_replacing_consumers(
@@ -147,4 +232,29 @@ dataRequirements: []
     )
 
     with pytest.raises(WidgetPackageError, match="package"):
+        WidgetRegistry.from_directories([tmp_path])
+
+
+def test_unsupported_widget_assets_are_rejected(tmp_path: Path) -> None:
+    package = _write_quote_package(tmp_path)
+    (package / "assets" / "payload.py").write_text("unsafe", encoding="utf-8")
+
+    with pytest.raises(WidgetPackageError, match="Unsupported widget asset type"):
+        WidgetRegistry.from_directories([tmp_path])
+
+
+def test_oversized_widget_assets_are_rejected(tmp_path: Path) -> None:
+    package = _write_quote_package(tmp_path)
+    (package / "assets" / "large.png").write_bytes(b"0" * 512_001)
+
+    with pytest.raises(WidgetPackageError, match="exceeds 512000 bytes"):
+        WidgetRegistry.from_directories([tmp_path])
+
+
+def test_widget_asset_total_is_bounded(tmp_path: Path) -> None:
+    package = _write_quote_package(tmp_path)
+    (package / "assets" / "first.png").write_bytes(b"0" * 300_000)
+    (package / "assets" / "second.png").write_bytes(b"0" * 300_000)
+
+    with pytest.raises(WidgetPackageError, match="assets exceed 512000 bytes"):
         WidgetRegistry.from_directories([tmp_path])

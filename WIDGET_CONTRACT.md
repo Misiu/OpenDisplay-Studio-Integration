@@ -25,6 +25,34 @@ data requirements, the Liquid template, and the optional provider module.
 `provider.py` and `translations` belong to that widget. A static widget such as
 Text does not need a provider.
 
+Files below `assets/` are package-owned and available to Liquid as base64 data
+URIs keyed by their POSIX relative path:
+
+```liquid
+<img src="{{ assets['icons/logo.svg'] }}" alt="">
+```
+
+Supported files are SVG, PNG, JPEG, GIF, WebP, WOFF, and WOFF2. Both an
+individual asset and the complete package asset set are limited to 512,000
+bytes before base64 encoding. Symbolic links and unsupported executable files
+are rejected. Asset data never needs to be copied into the Renderer container.
+
+Packages are local-only by default. A widget that intentionally loads a remote
+asset declares each exact HTTP(S) origin in `widget.yml`:
+
+```yaml
+permissions:
+  network:
+    allowedOrigins:
+      - https://cdn.example.com
+```
+
+Origins cannot contain credentials, paths, queries, or fragments. The
+integration rejects undeclared remote asset references and passes only origins
+actually used by the composed screen to the Renderer. The declaration is a
+package capability, so installing or reviewing a widget does not require
+widget-specific integration code.
+
 The integration ships built-in packages in
 `custom_components/opendisplay_studio/widgets`. Independently installed
 packages use `/config/opendisplay_studio/widgets`. The registry scans both
@@ -135,10 +163,16 @@ so every package shares one predictable display environment.
 decisions use the actual CSS region container dimensions, never names such as
 full or half. A package must work for arbitrary device and region sizes.
 
-The CLI and integration use bounded Liquid engines. Published widgets need
-contract fixtures covering missing optional nested fields, not only empty or
-null values, and must avoid engine-specific undefined-value behavior.
+The CLI and integration follow the shared TRMNL Liquid contract. Published
+widgets need contract fixtures covering missing optional nested fields, not
+only empty or null values, and must avoid engine-specific undefined-value
+behavior.
 
-External assets cannot fail silently. Published archives will carry declared
-assets so rendering remains deterministic. Framework compatibility is also
-declared by the package and must be checked rather than silently substituted.
+The Renderer bundles the complete Material Design Icons font. Templates can use
+any icon locally with markup such as `<span class="mdi mdi-weather-rainy"></span>`.
+Widget-specific files should normally belong in `assets/` and use the Liquid
+mapping above. Undeclared HTTP and HTTPS origins are blocked by the Renderer;
+remote access is available only through the explicit manifest permission.
+Published archives carry their local assets so rendering remains
+deterministic. Framework compatibility is also declared by the package and
+must be checked rather than silently substituted.

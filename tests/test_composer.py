@@ -198,6 +198,40 @@ async def test_liquid_syntax_error_is_exposed_as_compose_error(hass) -> None:
         await async_compose_project(hass, project)
 
 
+async def test_remote_widget_asset_is_rejected_before_renderer(hass) -> None:
+    project = {
+        "palette": "bw",
+        "grid": {"columns": 1, "rows": 1},
+        "regions": [
+            {
+                "id": "text",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "text",
+                    "version": "0.5.0",
+                    "config": {"text": "Remote"},
+                },
+            }
+        ],
+    }
+
+    with (
+        patch.object(
+            DEFAULT_REGISTRY,
+            "template",
+            return_value='<img src="https://example.com/remote.svg">',
+        ),
+        pytest.raises(
+            ProjectComposeError,
+            match="text widget uses undeclared remote asset origin",
+        ),
+    ):
+        await async_compose_project(hass, project)
+
+
 async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> None:
     project = {
         "palette": "bw",
@@ -225,7 +259,7 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
             "name": "Home",
             "condition": "rainy",
             "condition_label": "Rain",
-            "icon": "https://trmnl.com/images/plugins/weather/wi-rain.svg",
+            "icon": "mdi-weather-rainy",
             "temperature": 12,
             "temperature_unit": "°C",
             "apparent_temperature": 9,
@@ -337,7 +371,7 @@ async def test_weather_widget_uses_project_language_for_every_render_surface(
             "name": "OpenWeatherMap",
             "condition": "sunny",
             "condition_label": "słonecznie",
-            "icon": "https://trmnl.com/images/plugins/weather/wi-day-sunny.svg",
+            "icon": "mdi-white-balance-sunny",
             "temperature": 11,
             "temperature_unit": "°C",
             "apparent_temperature": 10,

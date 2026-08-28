@@ -3,8 +3,9 @@
 ## Component boundary
 
 Liquid runs only in the Home Assistant integration. It produces final HTML and
-records `liquid_ms`; the Renderer App receives only final HTML, width, and
-height. The App has no Liquid dependency or template API.
+records `liquid_ms`; the Renderer App receives only final HTML, dimensions, and
+the request-scoped asset origin allowlist. The App has no Liquid dependency or
+template API.
 
 ## Liquid engine
 
@@ -51,6 +52,9 @@ not final e-paper quantization or dithering by OpenDisplay.
 ## Licenses and offline assets
 
 The App bundles TRMNL Framework 3.2.0 CSS/JS and fonts with upstream MIT, OFL,
-and CC BY notices. It contains no Highcharts distribution or plugin image
-bundle. The integration's `trmnl-liquid-py` dependency and the adapted Liquid
-Components source are MIT licensed.
+and CC BY notices plus Material Design Icons 7.4.47 under Apache-2.0. It
+contains no Highcharts distribution or plugin image bundle. The integration's
+`trmnl-liquid-py` dependency and the adapted Liquid Components source are MIT
+licensed. Rendered widgets use only local MDI or package-owned data URIs, and
+the Renderer blocks undeclared HTTP and HTTPS origins and scopes declared
+widget origins to the individual render request.

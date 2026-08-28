@@ -18,8 +18,8 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         return web.json_response(
             {
                 "status": "ok",
-                "version": "0.5.0",
-                "apiVersion": 1,
+                "version": "0.6.0",
+                "apiVersion": 2,
                 "trmnlFrameworkVersion": "3.2.0",
             }
         )
@@ -30,6 +30,7 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
             "html": "<div>test</div>",
             "width": 800,
             "height": 480,
+            "allowedAssetOrigins": ["https://cdn.example.com"],
         }
         return web.Response(
             body=PNG,
@@ -50,12 +51,15 @@ async def test_health_and_raw_png_with_timings(aiohttp_server, socket_enabled) -
         client = RendererClient(session, str(server.make_url("/")), "secret")
         assert await client.async_health() == {
             "status": "ok",
-            "version": "0.5.0",
-            "apiVersion": 1,
+            "version": "0.6.0",
+            "apiVersion": 2,
             "trmnlFrameworkVersion": "3.2.0",
         }
         result = await client.async_render(
-            html="<div>test</div>", width=800, height=480
+            html="<div>test</div>",
+            width=800,
+            height=480,
+            allowed_asset_origins=("https://cdn.example.com",),
         )
     assert result.png == PNG
     assert result.timings == {
@@ -93,6 +97,7 @@ async def test_health_rejects_incompatible_api(aiohttp_server, socket_enabled) -
     [
         ("0.4.9", "3.2.0"),
         ("0.5.0-dev", "3.2.0"),
+        ("0.5.1", "3.2.0"),
         ("0.5.0", "3.1.0"),
     ],
 )
@@ -109,7 +114,7 @@ async def test_health_rejects_incompatible_renderer_or_framework(
             {
                 "status": "ok",
                 "version": version,
-                "apiVersion": 1,
+                "apiVersion": 2,
                 "trmnlFrameworkVersion": framework_version,
             }
         )

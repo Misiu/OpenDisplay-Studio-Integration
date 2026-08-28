@@ -15,8 +15,8 @@ async def test_container_uses_external_renderer_flow(hass, aioclient_mock) -> No
         "http://renderer:8099/health",
         json={
             "status": "ok",
-            "version": "0.5.0",
-            "apiVersion": 1,
+            "version": "0.6.0",
+            "apiVersion": 2,
             "trmnlFrameworkVersion": "3.2.0",
         },
     )
@@ -37,7 +37,7 @@ async def test_container_uses_external_renderer_flow(hass, aioclient_mock) -> No
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["data"]["use_addon"] is False
-    assert result["data"]["api_version"] == 1
+    assert result["data"]["api_version"] == 2
 
 
 async def test_supervisor_requires_repository_when_app_is_unknown(hass) -> None:

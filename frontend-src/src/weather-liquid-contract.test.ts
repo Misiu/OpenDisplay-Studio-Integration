@@ -8,8 +8,8 @@ const templateUrl = new URL(
 )
 const engine = new Liquid({
   dynamicPartials: true,
-  strictFilters: true,
-  strictVariables: true,
+  strictFilters: false,
+  strictVariables: false,
 })
 
 const englishLabels = {
@@ -40,7 +40,7 @@ const current = {
   name: 'Home',
   condition: 'rainy',
   condition_label: 'Rain',
-  icon: 'https://trmnl.com/images/plugins/weather/wi-rain.svg',
+  icon: 'mdi-weather-rainy',
   temperature: 12,
   temperature_unit: '°C',
   apparent_temperature: 9,

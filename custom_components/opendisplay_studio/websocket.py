@@ -154,6 +154,7 @@ async def websocket_compose_preview(
             html=composed.html,
             width=project["width"],
             height=project["height"],
+            allowed_asset_origins=composed.allowed_asset_origins,
         )
     except ProjectValidationError as err:
         _error(connection, msg, err)

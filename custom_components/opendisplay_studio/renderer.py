@@ -123,13 +123,25 @@ class RendererClient:
             trmnlFrameworkVersion=framework_version,
         )
 
-    async def async_render(self, *, html: str, width: int, height: int) -> RenderResult:
+    async def async_render(
+        self,
+        *,
+        html: str,
+        width: int,
+        height: int,
+        allowed_asset_origins: tuple[str, ...] = (),
+    ) -> RenderResult:
         """Render HTML and return raw PNG data and timing response headers."""
         try:
             async with self._session.post(
                 self._base_url.with_path("/render"),
                 headers=self._headers,
-                json={"html": html, "width": width, "height": height},
+                json={
+                    "html": html,
+                    "width": width,
+                    "height": height,
+                    "allowedAssetOrigins": list(allowed_asset_origins),
+                },
                 timeout=ClientTimeout(total=30),
             ) as response:
                 if response.status == 401:
