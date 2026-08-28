@@ -59,6 +59,29 @@ def test_weather_template_has_no_remote_assets() -> None:
     assert "mdi-weather" in template
 
 
+def test_sensor_template_fits_unitless_states_and_uses_weather_footer_order() -> None:
+    html = render(
+        DEFAULT_REGISTRY.template("sensor"),
+        config={"entity": "sensor.air_quality_status"},
+        data={
+            "sensor": {
+                "entity_id": "sensor.air_quality_status",
+                "name": "Air quality status",
+                "state": "Calibrating",
+                "unit": "",
+                "icon": "mdi-air-filter",
+                "updated_at": "08:18",
+            }
+        },
+        assets=DEFAULT_REGISTRY.assets("sensor"),
+        region={"shape": "square"},
+    )
+
+    assert "od-sensor__reading--unitless" in html
+    assert '<h1 class="title">08:18</h1>' in html
+    assert '<span class="instance">sensor.air_quality_status</span>' in html
+
+
 @pytest.mark.parametrize("widget_type", sorted(DEFAULT_REGISTRY.widget_types))
 def test_every_bundled_widget_renders_with_missing_provider_data(
     widget_type: str,

@@ -1,13 +1,13 @@
 import { css, html } from 'lit'
 import type { BootstrapResponse, WidgetDefinition } from '../types'
 import { calendarWidget } from './calendar/widget'
-import { entityValueWidget } from './entity-value/widget'
+import { sensorWidget } from './sensor/widget'
 import { textNoteWidget } from './text-note/widget'
 import { weatherWidget } from './weather/widget'
 
 export const WIDGETS = [
   calendarWidget,
-  entityValueWidget,
+  sensorWidget,
   textNoteWidget,
   weatherWidget,
 ]

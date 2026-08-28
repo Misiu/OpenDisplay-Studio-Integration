@@ -22,7 +22,7 @@ from custom_components.opendisplay_studio.widgets.weather.provider import (
 def test_requirement_contract_supports_many_and_optional_sources() -> None:
     requirement = {
         "key": "rows",
-        "provider": "entity_state",
+        "provider": "sensor",
         "configKey": "entities",
         "cardinality": "many",
         "optional": False,
@@ -31,7 +31,9 @@ def test_requirement_contract_supports_many_and_optional_sources() -> None:
         {"entities": ["sensor.office", "sensor.kitchen"]}, requirement
     ) == ["sensor.office", "sensor.kitchen"]
     assert definition("text")["dataRequirements"] == []
-    assert definition("entity-state")["dataRequirements"][0]["optional"] is False
+    sensor = definition("sensor")
+    assert sensor["fields"][0]["selector"]["entity"]["filter"]["domain"] == "sensor"
+    assert sensor["dataRequirements"][0]["optional"] is False
     weather = definition("weather")
     assert weather["fields"][0]["selector"]["entity"]["filter"]["domain"] == ("weather")
     assert weather["dataRequirements"][0]["provider"] == "weather_forecast"
@@ -57,11 +59,11 @@ def test_entity_tile_shape_uses_physical_region_ratio() -> None:
     )
 
 
-async def test_entity_requirements_are_deduplicated(hass) -> None:
+async def test_sensor_requirements_are_deduplicated(hass) -> None:
     widget = {
-        "type": "entity-state",
-        "version": "0.5.0",
-        "config": {"entity": "sensor.office", "showUnit": True},
+        "type": "sensor",
+        "version": "0.6.0",
+        "config": {"entity": "sensor.office"},
     }
     project = {
         "palette": "bw",
@@ -87,17 +89,26 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
     }
     resolve = AsyncMock(
         return_value={
-            "sensor.office": {
-                "state": "22.8",
-                "unit": "°C",
-                "name": "Office",
-                "iconPath": "M0 0H24V24H0Z",
-            }
+            "values": {
+                "sensor.office": {
+                    "entity_id": "sensor.office",
+                    "state": "22.8",
+                    "unit": "°C",
+                    "name": "Office",
+                    "icon": "mdi-thermometer",
+                    "updated_at": "08:15",
+                }
+            },
+            "labels": {
+                "choose_sensor": "Choose a sensor",
+                "unavailable": "Unavailable",
+                "unknown": "Unknown",
+            },
         }
     )
     with (
         patch.object(
-            DEFAULT_REGISTRY.provider("entity-state", "entity_state"),
+            DEFAULT_REGISTRY.provider("sensor", "sensor"),
             "async_resolve",
             resolve,
         ),
@@ -109,9 +120,11 @@ async def test_entity_requirements_are_deduplicated(hass) -> None:
     assert result.html.startswith(
         '<main class="screen screen--1bit screen--md studio-screen"'
     )
-    assert result.html.count('<svg class="studio-entity__icon"') == 2
-    assert "studio-entity--square" in result.html
-    assert result.html.count(">Office</span>") == 2
+    assert result.html.count("mdi-thermometer od-sensor__icon") == 2
+    assert result.html.count('class="od-sensor"') == 2
+    assert result.html.count(">Office</h2>") == 2
+    assert result.html.count(">08:15</h1>") == 2
+    assert result.html.count(">sensor.office</span>") == 2
     assert "--studio-width:800px;--studio-height:480px" in result.html
     assert "--screen-w:800px;--screen-h:480px" in result.html
     assert "border:1px solid" not in result.html
@@ -150,8 +163,8 @@ async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
                 "rowSpan": 1,
                 "columnSpan": 1,
                 "widget": {
-                    "type": "entity-state",
-                    "version": "0.5.0",
+                    "type": "sensor",
+                    "version": "0.6.0",
                     "config": {"entity": "sensor.office"},
                 },
             }
@@ -159,7 +172,7 @@ async def test_provider_error_is_exposed_as_compose_error(hass) -> None:
     }
     with (
         patch.object(
-            DEFAULT_REGISTRY.provider("entity-state", "entity_state"),
+            DEFAULT_REGISTRY.provider("sensor", "sensor"),
             "async_resolve",
             AsyncMock(side_effect=HomeAssistantError("calendar unavailable")),
         ),

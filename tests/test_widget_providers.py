@@ -5,13 +5,16 @@ from unittest.mock import AsyncMock, patch
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
+from custom_components.opendisplay_studio.widgets.sensor.provider import (
+    _sensor_icon,
+)
 from custom_components.opendisplay_studio.widgets.weather.provider import (
     WeatherDataProvider,
     WeatherLocalizer,
 )
 
 
-async def test_entity_provider_returns_normalized_current_state(hass) -> None:
+async def test_sensor_provider_returns_normalized_current_state(hass) -> None:
     hass.states.async_set(
         "sensor.office_temperature",
         "22.8",
@@ -22,21 +25,80 @@ async def test_entity_provider_returns_normalized_current_state(hass) -> None:
         },
     )
 
-    result = await DEFAULT_REGISTRY.provider(
-        "entity-state", "entity_state"
-    ).async_resolve(hass, {"sensor.office_temperature"}, "en")
-
-    assert result == {
-        "sensor.office_temperature": {
-            "state": "22.8",
-            "unit": "°C",
-            "name": "Office",
-            "iconPath": (
-                "M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 "
-                "13 5V8H11V5A1 1 0 0 1 12 4Z"
-            ),
+    resources = {
+        "sensor": {
+            "temperature": {"default": "mdi:thermometer"},
+            "_": {"default": "mdi:eye"},
         }
     }
+    with patch(
+        "custom_components.opendisplay_studio.widgets.sensor.provider.async_get_icons",
+        AsyncMock(return_value=resources),
+    ):
+        result = await DEFAULT_REGISTRY.provider("sensor", "sensor").async_resolve(
+            hass, {"sensor.office_temperature"}, "en"
+        )
+
+    assert result["values"]["sensor.office_temperature"] == {
+        "entity_id": "sensor.office_temperature",
+        "state": "22.8",
+        "unit": "°C",
+        "name": "Office",
+        "icon": "mdi-thermometer",
+        "updated_at": result["values"]["sensor.office_temperature"]["updated_at"],
+    }
+    assert result["values"]["sensor.office_temperature"]["updated_at"]
+    assert result["labels"]["choose_sensor"] == "Choose a sensor"
+
+
+def test_sensor_icon_uses_home_assistant_precedence_and_ranges() -> None:
+    resources = {
+        "sensor": {
+            "battery": {
+                "default": "mdi:battery",
+                "range": {
+                    "0": "mdi:battery-outline",
+                    "20": "mdi:battery-20",
+                    "80": "mdi:battery-80",
+                },
+            }
+        }
+    }
+
+    assert (
+        _sensor_icon(
+            "61", {"device_class": "battery", "icon": "mdi:flash"}, None, resources
+        )
+        == "mdi-flash"
+    )
+    assert (
+        _sensor_icon(
+            "61",
+            {"device_class": "battery", "icon": "mdi:flash"},
+            "mdi:home",
+            resources,
+        )
+        == "mdi-home"
+    )
+    assert (
+        _sensor_icon("61", {"device_class": "battery"}, None, resources)
+        == "mdi-battery-20"
+    )
+
+
+async def test_sensor_provider_localizes_unavailable_state(hass) -> None:
+    hass.states.async_set("sensor.outdoor", "unavailable")
+
+    with patch(
+        "custom_components.opendisplay_studio.widgets.sensor.provider.async_get_icons",
+        AsyncMock(return_value={}),
+    ):
+        result = await DEFAULT_REGISTRY.provider("sensor", "sensor").async_resolve(
+            hass, {"sensor.outdoor"}, "pl"
+        )
+
+    assert result["values"]["sensor.outdoor"]["state"] == "Niedostępny"
+    assert result["values"]["sensor.outdoor"]["icon"] == "mdi-eye"
 
 
 async def test_weather_localizer_uses_home_assistant_and_widget_translations(

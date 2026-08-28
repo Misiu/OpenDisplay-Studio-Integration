@@ -20,7 +20,7 @@ describe('runtime widget registry', () => {
       dataRequirements: [
         {
           key: 'entity',
-          provider: 'entity_state',
+          provider: 'sensor',
           configKey: 'entity',
           cardinality: 'one',
           optional: false,

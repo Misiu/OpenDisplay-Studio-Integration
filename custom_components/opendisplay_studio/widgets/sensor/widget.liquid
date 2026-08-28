@@ -1,0 +1,233 @@
+{% assign sensor = data.sensor %}
+<div class="od-sensor">
+  <section class="od-sensor__composition">
+    <div class="layout od-sensor__body">
+      <h2 class="od-sensor__name">{{ sensor.name }}</h2>
+      <div class="od-sensor__hero">
+        <span class="mdi {{ sensor.icon }} od-sensor__icon" aria-label="{{ sensor.name }}"></span>
+        <div class="od-sensor__reading{% if sensor.unit == blank %} od-sensor__reading--unitless{% endif %}">
+          <span class="value value--tnums od-sensor__value" data-fit-value="true">{{ sensor.state }}</span>
+          {% if sensor.unit %}<span class="label od-sensor__unit">{{ sensor.unit }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="title_bar od-sensor__footer">
+      <span class="mdi {{ sensor.icon }}" aria-hidden="true"></span>
+      <h1 class="title">{{ sensor.updated_at }}</h1>
+      <span class="instance">{{ sensor.entity_id }}</span>
+    </div>
+  </section>
+</div>
+
+<style>
+  .od-sensor {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    container-name: sensor;
+    container-type: size;
+    overflow: hidden;
+  }
+
+  .od-sensor__composition {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .od-sensor__body {
+    width: 100%;
+    height: auto !important;
+    min-width: 0;
+    min-height: 0;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(6px, 2.6cqh, 16px);
+    padding: clamp(8px, 3cqh, 16px) !important;
+    overflow: hidden;
+  }
+
+  .od-sensor__name {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-size: clamp(
+      calc(14px * var(--text-ui-scale, 1)),
+      calc(5.8cqh * var(--text-ui-scale, 1)),
+      calc(26px * var(--text-ui-scale, 1))
+    );
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .od-sensor__hero {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(10px, 4cqw, 30px);
+    overflow: hidden;
+  }
+
+  .od-sensor__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    font-size: min(24cqw, 38cqh, 96px);
+    line-height: 1;
+  }
+
+  .od-sensor__reading {
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.2em;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .od-sensor__value {
+    min-width: 0;
+    overflow: hidden;
+    font-size: clamp(
+      calc(40px * var(--text-ui-scale, 1)),
+      calc(29cqh * var(--text-ui-scale, 1)),
+      calc(128px * var(--text-ui-scale, 1))
+    );
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 0.88;
+    text-overflow: ellipsis;
+  }
+
+  .od-sensor__reading--unitless .od-sensor__value {
+    flex: 0 0 auto;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .od-sensor__unit {
+    flex: 0 0 auto;
+    font-size: clamp(
+      calc(13px * var(--text-ui-scale, 1)),
+      calc(7cqh * var(--text-ui-scale, 1)),
+      calc(30px * var(--text-ui-scale, 1))
+    );
+    font-weight: 700;
+    line-height: 1;
+    text-transform: none;
+  }
+
+  .od-sensor__footer {
+    width: 100%;
+    height: var(--title-bar-small-height);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .od-sensor__footer > .mdi {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--title-bar-small-image-height);
+    line-height: 1;
+  }
+
+  .od-sensor__footer > .title {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .od-sensor__footer > .instance {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @container sensor (max-width: 440px) and (min-height: 300px) {
+    .od-sensor__hero {
+      flex-direction: column;
+      gap: clamp(6px, 2cqh, 14px);
+    }
+
+    .od-sensor__icon {
+      font-size: min(28cqw, 20cqh, 72px);
+    }
+
+    .od-sensor__value {
+      font-size: clamp(
+        calc(38px * var(--text-ui-scale, 1)),
+        calc(25cqw * var(--text-ui-scale, 1)),
+        calc(96px * var(--text-ui-scale, 1))
+      );
+    }
+  }
+
+  @container sensor (max-width: 260px) {
+    .od-sensor__body {
+      gap: 4px;
+      padding: 8px !important;
+    }
+
+    .od-sensor__name {
+      font-size: calc(13px * var(--text-ui-scale, 1));
+    }
+
+    .od-sensor__hero {
+      gap: 8px;
+    }
+
+    .od-sensor__icon {
+      font-size: min(22cqw, 32cqh, 44px);
+    }
+
+    .od-sensor__value {
+      font-size: min(
+        calc(23cqw * var(--text-ui-scale, 1)),
+        calc(25cqh * var(--text-ui-scale, 1)),
+        calc(48px * var(--text-ui-scale, 1))
+      );
+    }
+
+    .od-sensor__unit {
+      font-size: calc(12px * var(--text-ui-scale, 1));
+    }
+  }
+
+  @container sensor (max-width: 260px) and (min-height: 240px) {
+    .od-sensor__hero {
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .od-sensor__icon {
+      font-size: min(33cqw, 22cqh, 58px);
+    }
+
+    .od-sensor__value {
+      font-size: clamp(
+        calc(34px * var(--text-ui-scale, 1)),
+        calc(27cqw * var(--text-ui-scale, 1)),
+        calc(58px * var(--text-ui-scale, 1))
+      );
+    }
+  }
+
+</style>

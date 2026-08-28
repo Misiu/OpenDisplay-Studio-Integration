@@ -1,1 +1,0 @@
-"""Entity State widget package."""

@@ -16,13 +16,12 @@ const demoEntityHtml = (project: ScreenProject): string => {
   const gap = Math.max(3, Math.min(10, Math.round(Math.min(project.width, project.height) / 60)))
   const regions = project.regions.map((region) => {
     const entity = String(region.widget?.config.entity ?? '')
-    const title = String(region.widget?.config.title ?? '') || 'Kitchen temperature'
-    const content = region.widget?.type === 'entity-state'
-      ? `<div class="item studio-entity studio-entity--square"><div class="content studio-entity__content"><svg class="studio-entity__icon" viewBox="0 0 24 24"><path d="M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z"></path></svg><span class="studio-entity__name">${title || entity}</span><span class="studio-entity__reading"><span class="studio-entity__value">21.4</span><span class="studio-entity__unit">°C</span></span></div></div>`
+    const content = region.widget?.type === 'sensor'
+      ? `<div class="item demo-sensor"><strong>Kitchen temperature</strong><div class="demo-sensor__reading"><span>♨</span><span class="demo-sensor__value">21.4</span><span>°C</span></div><footer><span>${entity}</span><time>08:15</time></footer></div>`
       : ''
     return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan}">${content}</section>`
   }).join('')
-  return `<main class="screen studio-screen"><style>.studio-screen{width:${project.width}px;height:${project.height}px;background:#fff}.studio-grid{display:grid;width:100%;height:100%;padding:${gap}px;gap:${gap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.studio-entity,.studio-entity__content{width:100%;height:100%;box-sizing:border-box}.studio-entity__content{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px}.studio-entity__icon{width:52px;height:52px}.studio-entity__name{font-size:17px;font-weight:700}.studio-entity__reading{display:flex;align-items:baseline;gap:5px}.studio-entity__value{font-size:68px;line-height:.9}.studio-entity__unit{font-size:18px;font-weight:700}</style><div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
+  return `<main class="screen studio-screen"><style>.studio-screen{width:${project.width}px;height:${project.height}px;background:#fff}.studio-grid{display:grid;width:100%;height:100%;padding:${gap}px;gap:${gap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style><div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
 }
 
 const demoPreviewImage = (project: ScreenProject): string => {
@@ -55,9 +54,9 @@ let projects: ScreenProject[] = [
         rowSpan: 1,
         columnSpan: 1,
         widget: {
-          type: 'entity-state',
-          version: '0.5.0',
-          config: { entity: 'sensor.kitchen_temperature', title: 'Kitchen', layout: 'large', showUnit: true },
+          type: 'sensor',
+          version: '0.6.0',
+          config: { entity: 'sensor.kitchen_temperature' },
         },
       },
       {

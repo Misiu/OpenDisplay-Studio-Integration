@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 0.7.0
+
+- Replace the bundled Entity State widget with the focused Sensor widget and
+  use Home Assistant's native sensor entity selector.
+- Resolve sensor names, units, values, timestamps, and Material Design icons
+  from Home Assistant, including official device-class icon resources.
+- Keep the Sensor data provider, Liquid template, styles, and English/Polish
+  translations inside its self-contained widget package.
+- Add responsive Sensor compositions for full, wide, tall, quadrant, dense
+  3x3, and small displays with the shared Weather-style footer.
+- Remove integration-global Entity State presentation CSS so package-owned
+  widgets render consistently in CLI previews, Studio previews, and final
+  Renderer output.
+- Breaking: the widget ID `entity-state` is now `sensor`; existing test
+  projects using the old widget must select Sensor again.
+
 ## 0.6.1
 
 - Use Supervisor discovery only for Renderer transport details and verify API

@@ -638,7 +638,7 @@ var Re = {
 		}
 		return w;
 	}
-}), Ue = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", We = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", Ge = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Ke = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", qe = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", Je = "M19 8C20.11 8 21 8.9 21 10V16.76C21.61 17.31 22 18.11 22 19C22 20.66 20.66 22 19 22C17.34 22 16 20.66 16 19C16 18.11 16.39 17.31 17 16.76V10C17 8.9 17.9 8 19 8M19 9C18.45 9 18 9.45 18 10V11H20V10C20 9.45 19.55 9 19 9M12 5.69L7 10.19V18H14.1L14 19L14.1 20H5V12H2L12 3L16.4 6.96C15.89 7.4 15.5 7.97 15.25 8.61L12 5.69Z", Ye = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Xe = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Ze = "M15 13V5A3 3 0 0 0 9 5V13A5 5 0 1 0 15 13M12 4A1 1 0 0 1 13 5V8H11V5A1 1 0 0 1 12 4Z", Qe = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", $e = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", et = o`
+}), Ue = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", We = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", Ge = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Ke = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", qe = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", Je = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", Ye = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Xe = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Ze = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", Qe = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", $e = o`
   :host {
     --odx-blue: var(--primary-color, #03a9f4);
     --odx-blue-strong: #0086c5;
@@ -2209,7 +2209,7 @@ var Re = {
   }
 `, I = "https://opendisplay.org/firmware/toolbox/index.html";
 `${I}`, `${I}`, `${I}`, `${I}`;
-var tt = (e) => e <= 1.6 ? {
+var et = (e) => e <= 1.6 ? {
 	landscape: {
 		columns: 1,
 		rows: 1
@@ -2274,11 +2274,11 @@ var tt = (e) => e <= 1.6 ? {
 	nativeOrientation: r >= i ? "landscape" : "portrait",
 	palettes: a === "bw" ? ["bw"] : ["bw", a],
 	defaultPalette: a,
-	grid: tt(n),
+	grid: et(n),
 	source: I,
 	connectorPins: o,
 	toolboxId: e
-}), nt = [
+}), tt = [
 	L("ep154-200x200", "1.54″ Monochrome · 200×200", 1.54, 200, 200, "bw", [24]),
 	L("ep154-152x152", "1.54″ B/W/R · 152×152", 1.54, 152, 152, "bwr", [24]),
 	L("ep154yr-200x200", "1.54″ B/W/R/Y · 200×200", 1.54, 200, 200, "bwry", [24]),
@@ -2301,7 +2301,7 @@ var tt = (e) => e <= 1.6 ? {
 	L("ep75-800x480-4gray", "7.5″ 4-level grayscale · 800×480", 7.5, 800, 480, "gray4", [24]),
 	L("ep73-spectra-800x480", "7.3″ Spectra 6 · 800×480", 7.3, 800, 480, "spectra6", [50]),
 	L("ep75-bwry-800x480", "7.5″ B/W/R/Y · 800×480", 7.5, 800, 480, "bwry", [24])
-], R = {
+], nt = {
 	bw: "Monochrome · black / white",
 	gray4: "Grayscale · 4 levels",
 	gray16: "Grayscale · 16 levels",
@@ -2309,7 +2309,7 @@ var tt = (e) => e <= 1.6 ? {
 	bwy: "Black / white / yellow",
 	bwry: "Black / white / red / yellow",
 	spectra6: "Spectra 6 · B/W/R/Y/B/G"
-}, rt = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", z = "https://opendisplay.org/what-hardware-to-buy.html", B = (e, t, n, r, i, a, o, s, c, l) => ({
+}, rt = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", R = "https://opendisplay.org/what-hardware-to-buy.html", z = (e, t, n, r, i, a, o, s, c, l) => ({
 	id: e,
 	manufacturer: t,
 	family: "OpenDisplay",
@@ -2324,8 +2324,8 @@ var tt = (e) => e <= 1.6 ? {
 		landscape: c,
 		portrait: l
 	},
-	source: z
-}), V = (e, t, n, r, i, a, o, s = !1) => ({
+	source: R
+}), B = (e, t, n, r, i, a, o, s = !1) => ({
 	id: e,
 	manufacturer: "SOLUM",
 	family: "Newton Pro",
@@ -2342,169 +2342,169 @@ var tt = (e) => e <= 1.6 ? {
 	},
 	freezer: s,
 	source: rt
-}), H = [
-	V("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
+}), V = [
+	B("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
 		columns: 1,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 1
 	}),
-	V("solum-newton-pro-1-6-h", "Newton Pro 1.6″ H", 1.6, 200, 200, {
+	B("solum-newton-pro-1-6-h", "Newton Pro 1.6″ H", 1.6, 200, 200, {
 		columns: 1,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 1
 	}),
-	V("solum-newton-pro-2-2", "Newton Pro 2.2″", 2.2, 296, 160, {
+	B("solum-newton-pro-2-2", "Newton Pro 2.2″", 2.2, 296, 160, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}),
-	V("solum-newton-pro-2-2-f", "Newton Pro 2.2″ Freezer", 2.2, 296, 160, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}, !0),
-	V("solum-newton-pro-2-6", "Newton Pro 2.6″", 2.6, 360, 184, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}),
-	V("solum-newton-pro-2-6-f", "Newton Pro 2.6″ Freezer", 2.6, 360, 184, {
+	B("solum-newton-pro-2-2-f", "Newton Pro 2.2″ Freezer", 2.2, 296, 160, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}, !0),
-	V("solum-newton-pro-2-7", "Newton Pro 2.7″", 2.7, 300, 200, {
+	B("solum-newton-pro-2-6", "Newton Pro 2.6″", 2.6, 360, 184, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}),
-	V("solum-newton-pro-2-9", "Newton Pro 2.9″", 2.9, 384, 168, {
+	B("solum-newton-pro-2-6-f", "Newton Pro 2.6″ Freezer", 2.6, 360, 184, {
+		columns: 2,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 2
+	}, !0),
+	B("solum-newton-pro-2-7", "Newton Pro 2.7″", 2.7, 300, 200, {
+		columns: 2,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 2
+	}),
+	B("solum-newton-pro-2-9", "Newton Pro 2.9″", 2.9, 384, 168, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}),
-	V("solum-newton-pro-2-9-f", "Newton Pro 2.9″ Freezer", 2.9, 384, 168, {
+	B("solum-newton-pro-2-9-f", "Newton Pro 2.9″ Freezer", 2.9, 384, 168, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}, !0),
-	V("solum-newton-pro-3-45", "Newton Pro 3.5″ · 3.45 panel", 3.45, 480, 224, {
+	B("solum-newton-pro-3-45", "Newton Pro 3.5″ · 3.45 panel", 3.45, 480, 224, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}),
-	V("solum-newton-pro-3-45-f", "Newton Pro 3.5″ Freezer · 3.45 panel", 3.45, 480, 224, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}, !0),
-	V("solum-newton-pro-3-52", "Newton Pro 3.5″ · 3.52 panel", 3.52, 384, 180, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}),
-	V("solum-newton-pro-3-52-f", "Newton Pro 3.5″ Freezer · 3.52 panel", 3.52, 384, 180, {
+	B("solum-newton-pro-3-45-f", "Newton Pro 3.5″ Freezer · 3.45 panel", 3.45, 480, 224, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}, !0),
-	V("solum-newton-pro-4-2", "Newton Pro 4.2″", 4.2, 400, 300, {
+	B("solum-newton-pro-3-52", "Newton Pro 3.5″ · 3.52 panel", 3.52, 384, 180, {
+		columns: 3,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 3
+	}),
+	B("solum-newton-pro-3-52-f", "Newton Pro 3.5″ Freezer · 3.52 panel", 3.52, 384, 180, {
+		columns: 3,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 3
+	}, !0),
+	B("solum-newton-pro-4-2", "Newton Pro 4.2″", 4.2, 400, 300, {
 		columns: 2,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 2
 	}),
-	V("solum-newton-pro-4-3", "Newton Pro 4.3″", 4.3, 522, 152, {
+	B("solum-newton-pro-4-3", "Newton Pro 4.3″", 4.3, 522, 152, {
 		columns: 4,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 4
 	}),
-	V("solum-newton-pro-4-5", "Newton Pro 4.5″", 4.5, 480, 176, {
+	B("solum-newton-pro-4-5", "Newton Pro 4.5″", 4.5, 480, 176, {
 		columns: 4,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 4
 	}),
-	V("solum-newton-pro-5-8", "Newton Pro 5.8″", 5.8, 792, 272, {
+	B("solum-newton-pro-5-8", "Newton Pro 5.8″", 5.8, 792, 272, {
 		columns: 4,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 4
 	}),
-	V("solum-newton-pro-5-8-f", "Newton Pro 5.8″ Freezer", 5.8, 792, 272, {
+	B("solum-newton-pro-5-8-f", "Newton Pro 5.8″ Freezer", 5.8, 792, 272, {
 		columns: 4,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 4
 	}, !0),
-	V("solum-newton-pro-6-1", "Newton Pro 6.1″", 6.1, 648, 480, {
+	B("solum-newton-pro-6-1", "Newton Pro 6.1″", 6.1, 648, 480, {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	V("solum-newton-pro-7-5", "Newton Pro 7.5″", 7.5, 480, 800, {
+	B("solum-newton-pro-7-5", "Newton Pro 7.5″", 7.5, 480, 800, {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	V("solum-newton-pro-9-7", "Newton Pro 9.7″", 9.7, 672, 960, {
+	B("solum-newton-pro-9-7", "Newton Pro 9.7″", 9.7, 672, 960, {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	V("solum-newton-pro-11-6", "Newton Pro 11.6″", 11.6, 640, 960, {
+	B("solum-newton-pro-11-6", "Newton Pro 11.6″", 11.6, 640, 960, {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	V("solum-newton-pro-12-2", "Newton Pro 12.2″", 12.2, 768, 960, {
+	B("solum-newton-pro-12-2", "Newton Pro 12.2″", 12.2, 768, 960, {
 		columns: 4,
 		rows: 4
 	}, {
 		columns: 4,
 		rows: 4
 	}),
-	B("opendisplay-e1001", "Seeed Studio", "reTerminal E1001 7.5″", 7.5, 800, 480, ["bw"], "bw", {
+	z("opendisplay-e1001", "Seeed Studio", "reTerminal E1001 7.5″", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
@@ -2532,7 +2532,7 @@ var tt = (e) => e <= 1.6 ? {
 				rows: 3
 			}
 		},
-		source: z
+		source: R
 	},
 	{
 		id: "opendisplay-e1002",
@@ -2555,7 +2555,7 @@ var tt = (e) => e <= 1.6 ? {
 				rows: 3
 			}
 		},
-		source: z
+		source: R
 	},
 	{
 		id: "opendisplay-e1003",
@@ -2582,58 +2582,58 @@ var tt = (e) => e <= 1.6 ? {
 				rows: 4
 			}
 		},
-		source: z
+		source: R
 	},
-	B("opendisplay-e1004", "Seeed Studio", "reTerminal E1004 13.3″ Spectra 6", 13.3, 1200, 1600, ["bw", "spectra6"], "spectra6", {
+	z("opendisplay-e1004", "Seeed Studio", "reTerminal E1004 13.3″ Spectra 6", 13.3, 1200, 1600, ["bw", "spectra6"], "spectra6", {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	B("opendisplay-xiao-7-5", "Seeed Studio", "XIAO 7.5″ ePaper kit", 7.5, 800, 480, ["bw"], "bw", {
+	z("opendisplay-xiao-7-5", "Seeed Studio", "XIAO 7.5″ ePaper kit", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	B("opendisplay-seeed-7-5-diy", "Seeed Studio", "7.5″ DIY · EE04", 7.5, 800, 480, ["bw"], "bw", {
+	z("opendisplay-seeed-7-5-diy", "Seeed Studio", "7.5″ DIY · EE04", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	B("opendisplay-4-26-mono-kit", "OpenDisplay", "OpenDisplay 4.26″ Mono Kit", 4.26, 800, 480, ["bw"], "bw", {
+	z("opendisplay-4-26-mono-kit", "OpenDisplay", "OpenDisplay 4.26″ Mono Kit", 4.26, 800, 480, ["bw"], "bw", {
 		columns: 2,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 2
 	}),
-	B("opendisplay-7-3-color-kit", "OpenDisplay", "OpenDisplay 7.3″ Color Kit", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
+	z("opendisplay-7-3-color-kit", "OpenDisplay", "OpenDisplay 7.3″ Color Kit", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	B("opendisplay-waveshare-photopainter", "Waveshare", "ESP32-S3 PhotoPainter 7.3″", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
+	z("opendisplay-waveshare-photopainter", "Waveshare", "ESP32-S3 PhotoPainter 7.3″", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	...nt
-], U = (e) => H.find((t) => t.id === e) ?? H.find((e) => e.id === "solum-newton-pro-5-8") ?? H[0], it = (e, t) => e.nativeOrientation === t ? {
+	...tt
+], H = (e) => V.find((t) => t.id === e) ?? V.find((e) => e.id === "solum-newton-pro-5-8") ?? V[0], it = (e, t) => e.nativeOrientation === t ? {
 	width: e.nativeWidth,
 	height: e.nativeHeight
 } : {
 	width: e.nativeHeight,
 	height: e.nativeWidth
-}, at = 0, W = (e = globalThis.crypto) => {
+}, at = 0, U = (e = globalThis.crypto) => {
 	if (typeof e?.randomUUID == "function") return e.randomUUID();
 	if (e) {
 		let t = e.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
@@ -2642,10 +2642,10 @@ var tt = (e) => e <= 1.6 ? {
 		return `${n.slice(0, 8)}-${n.slice(8, 12)}-${n.slice(12, 16)}-${n.slice(16, 20)}-${n.slice(20)}`;
 	}
 	return at += 1, `odx-${Date.now().toString(36)}-${at.toString(36)}`;
-}, G = (e) => {
+}, W = (e) => {
 	let t = [];
 	for (let n = 1; n <= e.rows; n += 1) for (let r = 1; r <= e.columns; r += 1) t.push({
-		id: W(),
+		id: U(),
 		row: n,
 		column: r,
 		rowSpan: 1,
@@ -2657,7 +2657,7 @@ var tt = (e) => e <= 1.6 ? {
 	if ((a - r + 1) * (o - i + 1) !== s.reduce((e, t) => e + t.rowSpan * t.columnSpan, 0) || s.length === 0) return null;
 	let c = s.find((e) => e.widget)?.widget, l = new Set(s.map((e) => e.id));
 	return [...e.filter((e) => !l.has(e.id)), {
-		id: W(),
+		id: U(),
 		row: r,
 		column: i,
 		rowSpan: a - r + 1,
@@ -2668,7 +2668,7 @@ var tt = (e) => e <= 1.6 ? {
 	let n = e.find((e) => e.id === t);
 	if (!n || n.rowSpan === 1 && n.columnSpan === 1 && !n.label) return e;
 	if (n.rowSpan === 1 && n.columnSpan === 1) return e.map((e) => e.id === t ? {
-		id: W(),
+		id: U(),
 		row: e.row,
 		column: e.column,
 		rowSpan: 1,
@@ -2676,7 +2676,7 @@ var tt = (e) => e <= 1.6 ? {
 	} : e);
 	let r = [];
 	for (let e = n.row; e < n.row + n.rowSpan; e += 1) for (let t = n.column; t < n.column + n.columnSpan; t += 1) r.push({
-		id: W(),
+		id: U(),
 		row: e,
 		column: t,
 		rowSpan: 1,
@@ -2695,10 +2695,10 @@ var tt = (e) => e <= 1.6 ? {
 	column: e.row,
 	rowSpan: e.columnSpan,
 	columnSpan: e.rowSpan
-}) : G(n), ut = (e, t) => ({ ...e.grid[t] }), dt = "solum-newton-pro-5-8", ft = (e = "Kitchen display", t = "en") => {
-	let n = U(dt), r = "landscape", i = ut(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
+}) : W(n), G = (e, t) => ({ ...e.grid[t] }), ut = "solum-newton-pro-5-8", dt = (e = "Kitchen display", t = "en") => {
+	let n = H(ut), r = "landscape", i = G(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
 	return {
-		id: W(),
+		id: U(),
 		schemaVersion: 1,
 		name: e,
 		status: "draft",
@@ -2712,11 +2712,11 @@ var tt = (e) => e <= 1.6 ? {
 		width: n.nativeWidth,
 		height: n.nativeHeight,
 		grid: i,
-		regions: G(i),
+		regions: W(i),
 		createdAt: a,
 		updatedAt: a
 	};
-}, K = (e, t) => String(e[t] ?? ""), pt = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => C`
+}, K = (e, t) => String(e[t] ?? ""), ft = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => C`
   <svg class="widget-icon" viewBox="0 0 24 24" role="img" aria-label=${t}>
     <path d=${e}></path>
   </svg>
@@ -2724,7 +2724,7 @@ var tt = (e) => e <= 1.6 ? {
   <svg slot="start" class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path d=${e}></path>
   </svg>
-`, mt = [
+`, pt = [
 	{
 		id: "calendar",
 		version: "0.5.0",
@@ -2847,7 +2847,7 @@ var tt = (e) => e <= 1.6 ? {
         <div class="widget-heading">
           <span>${q(Ue)}</span>
           <strong>${K(e, "title")}</strong>
-          <span class="widget-kicker">${pt(e, "days")} days</span>
+          <span class="widget-kicker">${ft(e, "days")} days</span>
         </div>
         <div class="event-list">
           ${r.map(([e, t, n]) => C`
@@ -2863,95 +2863,58 @@ var tt = (e) => e <= 1.6 ? {
 		}
 	},
 	{
-		id: "entity-state",
-		version: "0.5.0",
-		name: "Entity State",
-		description: "A prominent value from a single entity.",
+		id: "sensor",
+		version: "0.6.0",
+		name: "Sensor",
+		description: "Current value of a selected Home Assistant sensor.",
 		icon: Je,
 		styles: o`
-  .entity-widget {
-    align-items: flex-start;
+  .sensor-widget {
     justify-content: space-between;
   }
 
-  .entity-widget > .widget-icon {
-    width: clamp(18px, 18cqh, 44px);
-    height: clamp(18px, 18cqh, 44px);
-    color: var(--screen-accent);
+  .sensor-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: clamp(10px, 6cqh, 20px);
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  .entity-label {
-    font-size: clamp(7px, 7cqh, 15px);
-    font-weight: 800;
-    text-transform: uppercase;
+  .sensor-reading {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    align-self: stretch;
+    justify-content: center;
+    gap: clamp(8px, 5cqw, 24px);
   }
 
-  .entity-value {
-    align-self: flex-end;
-    font-size: clamp(22px, 35cqh, 74px);
-    line-height: 0.85;
-    letter-spacing: -0.07em;
+  .sensor-reading > .widget-icon {
+    width: clamp(28px, 24cqh, 72px);
+    height: clamp(28px, 24cqh, 72px);
   }
 
-  .entity-value small {
-    margin-left: 0.15em;
-    color: var(--screen-accent);
-    font-size: 0.32em;
-    letter-spacing: 0;
+  .sensor-reading > strong {
+    font-size: clamp(26px, 22cqh, 76px);
+    line-height: 1;
   }
 `,
-		defaults: {
-			entity: "",
-			title: "",
-			layout: "large",
-			showIcon: !0,
-			showName: !0,
-			showUnit: !0
-		},
-		options: [
-			{
-				key: "entity",
-				label: "Entity",
-				type: "entity"
-			},
-			{
-				key: "title",
-				label: "Title",
-				type: "text"
-			},
-			{
-				key: "layout",
-				label: "Layout",
-				type: "select",
-				options: [{
-					label: "Large value",
-					value: "large"
-				}, {
-					label: "Compact",
-					value: "compact"
-				}]
-			},
-			{
-				key: "showIcon",
-				label: "Show icon",
-				type: "toggle"
-			},
-			{
-				key: "showName",
-				label: "Show name",
-				type: "toggle"
-			},
-			{
-				key: "showUnit",
-				label: "Show unit",
-				type: "toggle"
-			}
-		],
+		defaults: { entity: "" },
+		options: [{
+			key: "entity",
+			label: "Sensor entity",
+			required: !0,
+			selector: { entity: { filter: { domain: "sensor" } } }
+		}],
 		render: (e) => C`
-    <div class="widget entity-widget">
-      ${q(Ze, "Entity state")}
-      <span class="entity-label">${K(e, "title") || K(e, "entity") || "Choose an entity"}</span>
-      <strong class="entity-value">Live data</strong>
+    <div class="widget sensor-widget">
+      <span class="sensor-name">${K(e, "entity") || "Choose a sensor"}</span>
+      <div class="sensor-reading">
+        ${q(Je, "Sensor")}
+        <strong>Live data</strong>
+      </div>
     </div>
   `
 	},
@@ -3052,7 +3015,7 @@ var tt = (e) => e <= 1.6 ? {
 		version: "0.5.0",
 		name: "Weather",
 		description: "Current conditions and a daily Home Assistant forecast.",
-		icon: $e,
+		icon: Qe,
 		styles: o`
   .weather-widget-placeholder {
     align-items: center;
@@ -3109,13 +3072,13 @@ var tt = (e) => e <= 1.6 ? {
 		],
 		render: (e) => C`
     <div class="widget weather-widget-placeholder">
-      ${q($e, "Weather")}
+      ${q(Qe, "Weather")}
       <strong>Weather</strong>
       <span>${K(e, "weather") || "Choose a weather entity"}</span>
     </div>
   `
 	}
-], Y = (e) => mt.find((t) => t.id === e), ht = (e) => {
+], Y = (e) => pt.find((t) => t.id === e), mt = (e) => {
 	let t = Y(e.id);
 	return t ? {
 		...t,
@@ -3141,7 +3104,7 @@ var tt = (e) => e <= 1.6 ? {
       </div>
     `
 	};
-}, gt = mt.map((e) => e.styles), _t = o`
+}, ht = pt.map((e) => e.styles), gt = o`
   .widget {
     width: 100%;
     height: 100%;
@@ -3204,17 +3167,17 @@ var Z = (e, t) => {
 		if (typeof n.code == "string" && n.code) return `${t} (${n.code})`;
 	}
 	return t;
-}, vt = (e) => {
+}, _t = (e) => {
 	let t = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		...structuredClone(e),
-		id: W(),
+		id: U(),
 		name: `${e.name} copy`,
 		createdAt: t,
 		updatedAt: t,
 		regions: e.regions.map((e) => ({
 			...structuredClone(e),
-			id: W()
+			id: U()
 		}))
 	};
 }, Q = (e) => {
@@ -3231,9 +3194,9 @@ var Z = (e, t) => {
 	}
 	static {
 		this.styles = [
-			et,
-			_t,
-			...gt
+			$e,
+			gt,
+			...ht
 		];
 	}
 	firstUpdated() {
@@ -3255,7 +3218,7 @@ var Z = (e, t) => {
 		return this.layoutDraft ?? this.project;
 	}
 	get canvasDisplay() {
-		return U(this.canvasProject.displayId);
+		return H(this.canvasProject.displayId);
 	}
 	get canvasPixels() {
 		return {
@@ -3264,14 +3227,14 @@ var Z = (e, t) => {
 		};
 	}
 	displayName(e) {
-		return e.displayId === "custom" ? "Custom display" : U(e.displayId).name;
+		return e.displayId === "custom" ? "Custom display" : H(e.displayId).name;
 	}
 	get selectedRegion() {
 		return this.project.regions.find((e) => e.id === this.selectedRegionId);
 	}
 	widgetDefinition(e) {
 		let t = Y(e), n = this.widgetMetadata.find((t) => t.id === e);
-		return n ? ht(n) : t;
+		return n ? mt(n) : t;
 	}
 	updatePreviewScale() {
 		if (!this.previewBoundary || !this.screenFit || !this.screenBezel) return;
@@ -3282,7 +3245,7 @@ var Z = (e, t) => {
 		this.store = e;
 	}
 	currentEntityStateSignature() {
-		return this.store.projects.length ? this.project.regions.flatMap((e) => e.widget?.type === "entity-state" ? [String(e.widget.config.entity ?? "")] : e.widget?.type === "weather" ? [String(e.widget.config.weather ?? "")] : []).filter(Boolean).sort().map((e) => {
+		return this.store.projects.length ? this.project.regions.flatMap((e) => e.widget?.type === "sensor" ? [String(e.widget.config.entity ?? "")] : e.widget?.type === "weather" ? [String(e.widget.config.weather ?? "")] : []).filter(Boolean).sort().map((e) => {
 			let t = this.hass.states?.[e];
 			return `${e}:${t?.state ?? ""}:${t?.last_updated ?? ""}`;
 		}).join("|") : "";
@@ -3385,7 +3348,7 @@ var Z = (e, t) => {
 	}
 	async addProject() {
 		try {
-			let e = ft(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
+			let e = dt(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
 				type: "opendisplay_studio/create_project",
 				project: e
 			})).project;
@@ -3399,7 +3362,7 @@ var Z = (e, t) => {
 		}
 	}
 	async duplicateProject() {
-		let e = vt(this.project), t = (await this.hass.callWS({
+		let e = _t(this.project), t = (await this.hass.callWS({
 			type: "opendisplay_studio/create_project",
 			project: e
 		})).project;
@@ -3438,7 +3401,7 @@ var Z = (e, t) => {
 		})), this.renameDialog?.close(), this.showToast("Name updated"));
 	}
 	applyDisplayProfile(e, t) {
-		let n = U(e), r = ut(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
+		let n = H(e), r = G(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : W(r).map((e, t) => ({
 			...e,
 			widget: a[t]
 		})), s = it(n, this.canvasProject.orientation);
@@ -3497,7 +3460,7 @@ var Z = (e, t) => {
 		let t = this.canvasProject.displayId === "custom" ? {
 			columns: this.canvasProject.grid.rows,
 			rows: this.canvasProject.grid.columns
-		} : ut(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = lt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
+		} : G(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = lt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
 			width: this.canvasProject.height,
 			height: this.canvasProject.width
 		} : it(this.canvasDisplay, e);
@@ -3520,7 +3483,7 @@ var Z = (e, t) => {
 		let n = Math.max(1, Math.min(24, Number(t.currentTarget.value))), r = {
 			...this.canvasProject.grid,
 			[e]: n
-		}, i = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), a = G(r).map((e, t) => ({
+		}, i = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), a = W(r).map((e, t) => ({
 			...e,
 			widget: i[t]
 		}));
@@ -3644,17 +3607,17 @@ var Z = (e, t) => {
           <label for="device-model">Device model</label>
           <select id="device-model" .value=${e.displayId === "custom" ? "custom" : t.id} @change=${this.changeDisplay}>
             <optgroup label="SOLUM · Newton Pro">
-              ${H.filter((e) => e.family === "Newton Pro").map((e) => C`
+              ${V.filter((e) => e.family === "Newton Pro").map((e) => C`
                 <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}${e.freezer ? " · mono" : ""}</option>
               `)}
             </optgroup>
             <optgroup label="Seeed · ready to use">
-              ${H.filter((e) => e.family === "OpenDisplay" && e.manufacturer === "Seeed Studio").map((e) => C`
+              ${V.filter((e) => e.family === "OpenDisplay" && e.manufacturer === "Seeed Studio").map((e) => C`
                 <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
               `)}
             </optgroup>
             <optgroup label="Other OpenDisplay hardware">
-              ${H.filter((e) => e.family === "OpenDisplay" && e.manufacturer !== "Seeed Studio").map((e) => C`
+              ${V.filter((e) => e.family === "OpenDisplay" && e.manufacturer !== "Seeed Studio").map((e) => C`
                 <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
               `)}
             </optgroup>
@@ -3676,7 +3639,7 @@ var Z = (e, t) => {
         <div class="control">
           <label for="palette">Palette</label>
           <select id="palette" .value=${e.palette} @change=${this.changePalette}>
-            ${(e.displayId === "custom" ? Object.keys(R) : t.palettes).map((e) => C`<option value=${e}>${R[e]}</option>`)}
+            ${(e.displayId === "custom" ? Object.keys(nt) : t.palettes).map((e) => C`<option value=${e}>${nt[e]}</option>`)}
           </select>
         </div>
         <div class="control">
@@ -3725,9 +3688,9 @@ var Z = (e, t) => {
         <div class="device-summary">
           <span class="step-kicker">Step 2 · Widgets</span>
           <strong>${this.displayName(this.project)}</strong>
-          <span>${e.width}×${e.height} · ${R[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
+          <span>${e.width}×${e.height} · ${nt[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
-        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Qe)} Edit device & layout</ha-button>
+        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Ze)} Edit device & layout</ha-button>
       </div>
     `;
 	}

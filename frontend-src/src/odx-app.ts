@@ -200,7 +200,7 @@ export class OdxApp extends LitElement {
     if (!this.store.projects.length) return ''
     return this.project.regions
       .flatMap((region) => {
-        if (region.widget?.type === 'entity-state') {
+        if (region.widget?.type === 'sensor') {
           return [String(region.widget.config.entity ?? '')]
         }
         if (region.widget?.type === 'weather') {

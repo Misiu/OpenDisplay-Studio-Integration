@@ -29,8 +29,8 @@ def project_payload() -> dict:
                 "rowSpan": 1,
                 "columnSpan": 1,
                 "widget": {
-                    "type": "entity-state",
-                    "version": "0.5.0",
+                    "type": "sensor",
+                    "version": "0.6.0",
                     "config": {"entity": "sensor.office"},
                 },
             },
