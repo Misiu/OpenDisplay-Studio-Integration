@@ -897,6 +897,7 @@ export class OdxApp extends LitElement {
                   style=${styleMap({
                     '--grid-columns': String(project.grid.columns),
                     '--grid-rows': String(project.grid.rows),
+                    '--preview-gap': `${previewGap}px`,
                     width: `${pixels.width}px`,
                     height: `${pixels.height}px`,
                   })}
@@ -911,7 +912,6 @@ export class OdxApp extends LitElement {
                         style=${styleMap({
                           '--grid-columns': String(project.grid.columns),
                           '--grid-rows': String(project.grid.rows),
-                          '--preview-gap': `${previewGap}px`,
                         })}
                       >${project.regions.map((region) => this.renderScreenRegion(region))}</div>
                       ${this.renderMergeLayer()}

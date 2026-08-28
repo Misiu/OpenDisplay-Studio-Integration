@@ -6,7 +6,7 @@ import logging
 
 DOMAIN = "opendisplay_studio"
 NAME = "OpenDisplay Studio"
-INTEGRATION_VERSION = "0.8.1"
+INTEGRATION_VERSION = "0.8.2"
 
 API_VERSION = 2
 MIN_RENDERER_VERSION = "0.6.0"

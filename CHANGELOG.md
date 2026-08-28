@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.8.2
+
+- Keep the interactive region-composition grid aligned with the rendered
+  region overlay at high grid densities such as 12 × 8.
+
 ## 0.8.1
 
 - Keep the selected display background visible while composing regions by

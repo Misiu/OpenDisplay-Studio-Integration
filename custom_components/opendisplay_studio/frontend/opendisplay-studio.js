@@ -1626,8 +1626,8 @@ var Le = {
   }
 
   .display-screen.live-preview .merge-layer {
-    inset: var(--preview-gap);
-    gap: var(--preview-gap);
+    inset: var(--preview-gap, clamp(3px, 0.5cqw, 7px));
+    gap: var(--preview-gap, clamp(2px, 0.36cqw, 5px));
   }
 
   .display-screen[data-palette='bw'] {
@@ -4160,6 +4160,7 @@ var Z = (e, t) => {
                   style=${I({
 			"--grid-columns": String(e.grid.columns),
 			"--grid-rows": String(e.grid.rows),
+			"--preview-gap": `${i}px`,
 			width: `${n.width}px`,
 			height: `${n.height}px`
 		})}
@@ -4170,8 +4171,7 @@ var Z = (e, t) => {
                         class="preview-overlay"
                         style=${I({
 			"--grid-columns": String(e.grid.columns),
-			"--grid-rows": String(e.grid.rows),
-			"--preview-gap": `${i}px`
+			"--grid-rows": String(e.grid.rows)
 		})}
                       >${e.regions.map((e) => this.renderScreenRegion(e))}</div>
                       ${this.renderMergeLayer()}

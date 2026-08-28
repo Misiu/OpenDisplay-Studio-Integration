@@ -32,4 +32,10 @@ describe('layout editor styles', () => {
       /\.workspace\.rail-collapsed\s*{[^}]*grid-template-columns:\s*48px minmax\(480px,\s*1fr\) 328px/s,
     )
   })
+
+  it('keeps the interactive merge grid bounded when preview variables are unavailable', () => {
+    expect(appStyles.cssText).toMatch(
+      /\.display-screen\.live-preview \.merge-layer\s*{[^}]*inset:\s*var\(--preview-gap,\s*clamp\([^}]*gap:\s*var\(--preview-gap,\s*clamp\(/s,
+    )
+  })
 })
