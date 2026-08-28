@@ -1,7 +1,7 @@
 import './index.css'
 import './odx-app'
 import type { HomeAssistant, ScreenProject } from './types'
-import { createId } from './services/layout'
+import { createId, isActiveRegion, layoutSpacing, regionAppearance } from './services/layout'
 
 if (!customElements.get('ha-form')) {
   customElements.define('ha-form', class DemoHaForm extends HTMLElement {
@@ -66,18 +66,19 @@ if (!customElements.get('ha-form')) {
 
 const now = new Date().toISOString()
 const demoEntityHtml = (project: ScreenProject): string => {
-  const gap = Math.max(3, Math.min(10, Math.round(Math.min(project.width, project.height) / 60)))
+  const spacing = layoutSpacing(project)
   const background = project.background
     ? '<div class="demo-background" aria-hidden="true"></div>'
     : ''
-  const regions = project.regions.map((region) => {
+  const regions = project.regions.filter(isActiveRegion).map((region) => {
+    const appearance = regionAppearance(region)
     const entity = String(region.widget?.config.entity ?? '')
     const content = region.widget?.type === 'sensor'
       ? `<div class="item demo-sensor"><strong>Kitchen temperature</strong><div class="demo-sensor__reading"><span>♨</span><span class="demo-sensor__value">21.4</span><span>°C</span></div><footer><span>${entity}</span><time>08:15</time></footer></div>`
       : ''
-    return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan}">${content}</section>`
+    return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan};background:${appearance.showBackground ? '#fff' : 'transparent'};border:${appearance.showBorder ? '1px solid #111' : '0'}">${content}</section>`
   }).join('')
-  return `<main class="screen studio-screen"><style>.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${gap}px;gap:${gap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
+  return `<main class="screen studio-screen"><style>.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${spacing.screenPadding}px;gap:${spacing.regionGap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
 }
 
 const demoPreviewImage = (project: ScreenProject): string => {
@@ -101,6 +102,8 @@ let projects: ScreenProject[] = [
     orientation: 'landscape',
     palette: 'bw',
     grid: { columns: 3, rows: 2 },
+    screenPadding: 8,
+    regionGap: 8,
     regions: [
       {
         id: 'temperature',

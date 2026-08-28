@@ -22,6 +22,7 @@ MAX_PROJECTS = 100
 MAX_REGIONS = 256
 MAX_NAME_LENGTH = 100
 MAX_TEXT_LENGTH = 4_096
+MAX_LAYOUT_SPACING = 128
 PALETTES = {"bw", "gray4", "gray16", "bwr", "bwy", "bwry", "spectra6"}
 DISPLAY_THEMES = {"light", "dark"}
 FONT_FAMILIES = {"default", "classic", "trmnl"}
@@ -275,6 +276,23 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
             "rowSpan": row_span,
             "columnSpan": column_span,
         }
+        appearance = region.get("appearance", {})
+        if not isinstance(appearance, dict):
+            raise ProjectValidationError("region.appearance must be an object")
+        show_background = appearance.get("showBackground", False)
+        show_border = appearance.get("showBorder", False)
+        if not isinstance(show_background, bool):
+            raise ProjectValidationError(
+                "region.appearance.showBackground must be a boolean"
+            )
+        if not isinstance(show_border, bool):
+            raise ProjectValidationError(
+                "region.appearance.showBorder must be a boolean"
+            )
+        normalized_region["appearance"] = {
+            "showBackground": show_background,
+            "showBorder": show_border,
+        }
         label = region.get("label")
         if isinstance(label, str) and label.strip():
             normalized_region["label"] = label.strip()[:MAX_NAME_LENGTH]
@@ -339,6 +357,33 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
     display_id = value.get("displayId", "custom")
     if not isinstance(display_id, str) or len(display_id) > 100:
         raise ProjectValidationError("displayId is invalid")
+    active_regions = [
+        region
+        for region in normalized_regions
+        if region.get("label")
+        or region.get("widget")
+        or region["rowSpan"] > 1
+        or region["columnSpan"] > 1
+    ]
+    full_canvas = (
+        len(active_regions) == 1
+        and active_regions[0]["row"] == 1
+        and active_regions[0]["column"] == 1
+        and active_regions[0]["rowSpan"] == rows
+        and active_regions[0]["columnSpan"] == columns
+    )
+    default_spacing = (
+        0 if full_canvas else max(3, min(10, round(min(width, height) / 60)))
+    )
+    screen_padding = _integer(
+        value.get("screenPadding", default_spacing),
+        "screenPadding",
+        0,
+        MAX_LAYOUT_SPACING,
+    )
+    region_gap = _integer(
+        value.get("regionGap", default_spacing), "regionGap", 0, MAX_LAYOUT_SPACING
+    )
     normalized_project: Project = {
         "schemaVersion": 1,
         "name": name,
@@ -353,6 +398,8 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
         "orientation": orientation,
         "palette": palette,
         "grid": {"columns": columns, "rows": rows},
+        "screenPadding": screen_padding,
+        "regionGap": region_gap,
         "regions": normalized_regions,
     }
     if background is not None:

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.9.0
+
+- Treat the logical grid as an editor aid and render only explicitly composed
+  regions, leaving all inactive cells open to the display background.
+- Add independent per-region controls for a transparent or opaque surface and
+  an optional border; transparent regions also suppress the widget root
+  background.
+- Add display-level Screen padding and Region gap controls in native output
+  pixels and use the same geometry in Studio previews and final Renderer
+  output.
+
 ## 0.8.2
 
 - Keep the interactive region-composition grid aligned with the rendered

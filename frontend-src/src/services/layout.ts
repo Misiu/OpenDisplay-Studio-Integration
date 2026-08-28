@@ -4,9 +4,40 @@ import type {
   GridRegion,
   GridSize,
   Orientation,
+  RegionAppearance,
+  ScreenProject,
 } from '../types'
 
 let fallbackSequence = 0
+
+export const DEFAULT_REGION_APPEARANCE: RegionAppearance = { showBackground: false, showBorder: false }
+
+export const isActiveRegion = (region: GridRegion): boolean =>
+  Boolean(region.label || region.widget || region.rowSpan > 1 || region.columnSpan > 1)
+
+export const clampLayoutSpacing = (value: number): number =>
+  Math.max(0, Math.min(128, Math.round(Number.isFinite(value) ? value : 0)))
+
+export const defaultLayoutSpacing = (width: number, height: number, grid: GridSize, regions: GridRegion[]): number => {
+  const active = regions.filter(isActiveRegion)
+  const fullCanvas = active.length === 1
+    && active[0].row === 1 && active[0].column === 1
+    && active[0].rowSpan === grid.rows && active[0].columnSpan === grid.columns
+  return fullCanvas ? 0 : Math.max(3, Math.min(10, Math.round(Math.min(width, height) / 60)))
+}
+
+export const layoutSpacing = (project: ScreenProject): { screenPadding: number, regionGap: number } => {
+  const fallback = defaultLayoutSpacing(project.width, project.height, project.grid, project.regions)
+  return {
+    screenPadding: Number.isInteger(project.screenPadding) ? clampLayoutSpacing(project.screenPadding) : fallback,
+    regionGap: Number.isInteger(project.regionGap) ? clampLayoutSpacing(project.regionGap) : fallback,
+  }
+}
+
+export const regionAppearance = (region: GridRegion): RegionAppearance => ({
+  ...DEFAULT_REGION_APPEARANCE,
+  ...region.appearance,
+})
 
 export const createId = (webCrypto: Crypto | undefined = globalThis.crypto): string => {
   if (typeof webCrypto?.randomUUID === 'function') return webCrypto.randomUUID()
@@ -33,6 +64,7 @@ export const createRegions = (grid: GridSize): GridRegion[] => {
         column,
         rowSpan: 1,
         columnSpan: 1,
+        appearance: { ...DEFAULT_REGION_APPEARANCE },
       })
     }
   }
@@ -74,7 +106,8 @@ export const mergeRegions = (
 
   if (requestedArea !== coveredArea || inside.length === 0) return null
 
-  const preservedWidget = inside.find((region) => region.widget)?.widget
+  const preservedRegion = inside.find((region) => region.widget) ?? inside[0]
+  const preservedWidget = preservedRegion.widget
   const insideIds = new Set(inside.map((region) => region.id))
   return [
     ...regions.filter((region) => !insideIds.has(region.id)),
@@ -84,6 +117,7 @@ export const mergeRegions = (
       column,
       rowSpan: rowEnd - row + 1,
       columnSpan: columnEnd - column + 1,
+      appearance: { ...regionAppearance(preservedRegion) },
       widget: preservedWidget,
     },
   ]
@@ -104,6 +138,7 @@ export const splitRegion = (
           column: region.column,
           rowSpan: 1,
           columnSpan: 1,
+          appearance: { ...regionAppearance(target) },
         }
       : region)
   }
@@ -121,6 +156,7 @@ export const splitRegion = (
         column,
         rowSpan: 1,
         columnSpan: 1,
+        appearance: { ...regionAppearance(target) },
       })
     }
   }

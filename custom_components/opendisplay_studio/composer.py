@@ -126,8 +126,11 @@ STUDIO_STYLES = """
   .studio-background{display:block;flex:none;object-position:var(--studio-background-position)}
   .studio-background-layer:not(.studio-background-layer--manual) .studio-background{width:100%;height:100%;object-fit:var(--studio-background-fit)}
   .studio-background-layer--manual .studio-background{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;transform:scale(var(--studio-background-scale));transform-origin:var(--studio-background-position)}
-  .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-gap);gap:var(--studio-gap);box-sizing:border-box}
+  .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-screen-padding);gap:var(--studio-region-gap);box-sizing:border-box}
   .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--framework-semantic-surface-bg-color,transparent);color:inherit;box-sizing:border-box;container-type:size;container-name:od-region}
+  .studio-region--transparent{background:transparent!important}
+  .studio-region--transparent>.item{background:transparent!important}
+  .studio-region--bordered{border:1px solid currentColor}
   .studio-region>.item{width:100%!important;height:100%!important;margin:0!important;padding:0!important}
 </style>
 """
@@ -239,22 +242,29 @@ def _screen_preferences(project: Project) -> str:
 
 
 def _region_size(
-    project: Project, region: dict[str, Any], *, gap: int
+    project: Project, region: dict[str, Any], *, gap: int, padding: int | None = None
 ) -> tuple[float, float]:
     """Calculate the physical CSS-pixel size of one grid region."""
     grid = project["grid"]
     project_width = int(project.get("width", 800))
     project_height = int(project.get("height", 480))
-    cell_width = (project_width - gap * (grid["columns"] + 1)) / grid["columns"]
-    cell_height = (project_height - gap * (grid["rows"] + 1)) / grid["rows"]
+    screen_padding = gap if padding is None else padding
+    cell_width = (
+        project_width - 2 * screen_padding - gap * (grid["columns"] - 1)
+    ) / grid["columns"]
+    cell_height = (
+        project_height - 2 * screen_padding - gap * (grid["rows"] - 1)
+    ) / grid["rows"]
     width = cell_width * region["columnSpan"] + gap * (region["columnSpan"] - 1)
     height = cell_height * region["rowSpan"] + gap * (region["rowSpan"] - 1)
     return width, height
 
 
-def _region_shape(project: Project, region: dict[str, Any], *, gap: int) -> str:
+def _region_shape(
+    project: Project, region: dict[str, Any], *, gap: int, padding: int | None = None
+) -> str:
     """Classify a region using its physical aspect ratio, not grid spans alone."""
-    width, height = _region_size(project, region, gap=gap)
+    width, height = _region_size(project, region, gap=gap, padding=padding)
     ratio = width / max(1, height)
     if ratio >= 1.55:
         return "wide"
@@ -318,6 +328,50 @@ def _resolve_widget_data(
     return data
 
 
+def _active_regions(project: Project) -> list[dict[str, Any]]:
+    """Return only regions explicitly composed on the logical grid."""
+    return [
+        region
+        for region in project["regions"]
+        if region.get("label")
+        or region.get("widget")
+        or region["rowSpan"] > 1
+        or region["columnSpan"] > 1
+    ]
+
+
+def _layout_spacing(
+    project: Project, active_regions: list[dict[str, Any]], width: int, height: int
+) -> tuple[int, int]:
+    """Resolve independent edge padding and inter-region gap values."""
+    grid = project["grid"]
+    full_canvas = (
+        len(active_regions) == 1
+        and active_regions[0]["row"] == 1
+        and active_regions[0]["column"] == 1
+        and active_regions[0]["rowSpan"] == grid["rows"]
+        and active_regions[0]["columnSpan"] == grid["columns"]
+    )
+    default_spacing = (
+        0 if full_canvas else max(3, min(10, round(min(width, height) / 60)))
+    )
+    return (
+        int(project.get("screenPadding", default_spacing)),
+        int(project.get("regionGap", default_spacing)),
+    )
+
+
+def _region_classes(region: dict[str, Any], shape: str) -> str:
+    """Build renderer-owned region surface classes."""
+    appearance = region.get("appearance", {})
+    classes = [f"studio-region studio-region--{shape}"]
+    if not appearance.get("showBackground", False):
+        classes.append("studio-region--transparent")
+    if appearance.get("showBorder", False):
+        classes.append("studio-region--bordered")
+    return " ".join(classes)
+
+
 async def async_compose_project(
     hass: HomeAssistant, project: Project
 ) -> ComposedProject:
@@ -346,17 +400,10 @@ async def async_compose_project(
     liquid_ms, fragments, allowed_asset_origins = _new_composition_state()
     width = int(project.get("width", 800))
     height = int(project.get("height", 480))
-    gap = max(3, min(10, round(min(width, height) / 60)))
     grid = project["grid"]
-    full_canvas = (
-        len(project["regions"]) == 1
-        and project["regions"][0]["row"] == 1
-        and project["regions"][0]["column"] == 1
-        and project["regions"][0]["rowSpan"] == grid["rows"]
-        and project["regions"][0]["columnSpan"] == grid["columns"]
-    )
-    layout_gap = 0 if full_canvas else gap
-    for region in project["regions"]:
+    active_regions = _active_regions(project)
+    screen_padding, region_gap = _layout_spacing(project, active_regions, width, height)
+    for region in active_regions:
         widget = region.get("widget")
         fragment = ""
         if widget is not None:
@@ -375,7 +422,11 @@ async def async_compose_project(
                     config=config,
                     data=data,
                     assets=registry.assets(widget_type),
-                    region={"shape": _region_shape(project, region, gap=layout_gap)},
+                    region={
+                        "shape": _region_shape(
+                            project, region, gap=region_gap, padding=screen_padding
+                        )
+                    },
                 )
             except LiquidError as err:
                 message = f"Could not render {widget_type} widget: {err}"
@@ -384,7 +435,9 @@ async def async_compose_project(
                 _assert_asset_permissions(fragment, widget_type, registry)
             )
             liquid_ms += (perf_counter() - liquid_started) * 1_000
-        region_width, region_height = _region_size(project, region, gap=layout_gap)
+        region_width, region_height = _region_size(
+            project, region, gap=region_gap, padding=screen_padding
+        )
         ratio = region_width / max(1, region_height)
         style = (
             f"grid-row:{region['row']} / span {region['rowSpan']};"
@@ -393,9 +446,10 @@ async def async_compose_project(
             f"--od-region-height:{region_height:.3f};"
             f"--od-region-aspect-ratio:{ratio:.6f};"
         )
-        shape = _region_shape(project, region, gap=layout_gap)
+        shape = _region_shape(project, region, gap=region_gap, padding=screen_padding)
+        region_classes = _region_classes(region, shape)
         fragments.append(
-            f'<section class="studio-region studio-region--{shape}" '
+            f'<section class="{region_classes}" '
             f'data-region-width="{region_width:.3f}" '
             f'data-region-height="{region_height:.3f}" '
             f'data-region-aspect-ratio="{ratio:.6f}" '
@@ -417,7 +471,8 @@ async def async_compose_project(
         f'<main class="screen {mode} {size}{portrait}{preference_classes} studio-screen" '
         f'style="--studio-width:{width}px;--studio-height:{height}px;'
         f"--screen-w:{width}px;--screen-h:{height}px;"
-        f'--studio-gap:{layout_gap}px">{STUDIO_STYLES}'
+        f"--studio-screen-padding:{screen_padding}px;"
+        f'--studio-region-gap:{region_gap}px">{STUDIO_STYLES}'
         f"{_background_markup(project, background_data_uri)}"
         f'<div class="view view--full">'
         f'<div class="studio-grid" style="grid-template-columns:'

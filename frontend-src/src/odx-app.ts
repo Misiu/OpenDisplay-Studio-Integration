@@ -27,10 +27,14 @@ import {
 } from './services/background'
 import { projectForPreview } from './services/preview'
 import {
+  clampLayoutSpacing,
   createId,
   createRegions,
   gridForOrientation,
+  isActiveRegion,
+  layoutSpacing,
   mergeRegions,
+  regionAppearance,
   regionContainsCell,
   rotateRegions,
   splitRegion,
@@ -534,6 +538,11 @@ export class OdxApp extends LitElement {
       : project)
   }
 
+  private changeLayoutSpacing(key: 'screenPadding' | 'regionGap', event: Event): void {
+    const value = clampLayoutSpacing(Number((event.currentTarget as HTMLInputElement).value))
+    this.updateLayoutDraft((project) => ({ ...project, [key]: value }))
+  }
+
   private changeOrientation(orientation: Orientation): void {
     if (orientation === this.canvasProject.orientation) return
     const grid = this.canvasProject.displayId === 'custom'
@@ -664,6 +673,14 @@ export class OdxApp extends LitElement {
         return { ...region, widget: { ...region.widget, config: { ...region.widget.config, [option.key]: value } } }
       }),
     }))
+  }
+
+  private updateRegionAppearance(key: 'showBackground' | 'showBorder', event: Event): void {
+    const value = (event.currentTarget as HTMLInputElement).checked
+    this.updateProject((project) => ({ ...project, regions: project.regions.map((region) =>
+      region.id === this.selectedRegionId
+        ? { ...region, appearance: { ...regionAppearance(region), [key]: value } }
+        : region) }))
   }
 
   private renderProjectRail(): TemplateResult {
@@ -807,9 +824,10 @@ export class OdxApp extends LitElement {
       .filter((item) => item.label || item.rowSpan > 1 || item.columnSpan > 1)
       .sort((first, second) => first.row - second.row || first.column - second.column)
     const label = isComposed ? region.label ?? regionLabel(composedRegions.findIndex((item) => item.id === region.id)) : `${region.column}.${region.row}`
+    const appearance = regionAppearance(region)
     return html`
       <section
-        class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
+        class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${appearance.showBackground ? 'region-background' : ''} ${appearance.showBorder ? 'region-border' : ''} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
         style=${styleMap({ gridColumn: `${region.column} / span ${region.columnSpan}`, gridRow: `${region.row} / span ${region.rowSpan}` })}
         aria-label=${layoutMode ? isComposed ? `Region ${label}` : `Grid cell ${label}` : definition ? `${definition.name} region` : 'Empty region'}
         aria-pressed=${layoutMode ? nothing : String(region.id === this.selectedRegionId)}
@@ -877,12 +895,8 @@ export class OdxApp extends LitElement {
     const display = this.canvasDisplay
     const pixels = { width: project.width, height: project.height }
     const exactPreview = Boolean(this.previewImageUrl || this.previewError)
-    const fullCanvas = project.regions.length === 1
-      && project.regions[0].row === 1
-      && project.regions[0].column === 1
-      && project.regions[0].rowSpan === project.grid.rows
-      && project.regions[0].columnSpan === project.grid.columns
-    const previewGap = fullCanvas ? 0 : Math.max(3, Math.min(10, Math.round(Math.min(pixels.width, pixels.height) / 60)))
+    const spacing = layoutSpacing(project)
+    const visibleRegions = this.editorMode === 'layout' ? project.regions : project.regions.filter(isActiveRegion)
     return html`
       <main class="canvas-area">
         <div class="canvas-stage">
@@ -897,7 +911,10 @@ export class OdxApp extends LitElement {
                   style=${styleMap({
                     '--grid-columns': String(project.grid.columns),
                     '--grid-rows': String(project.grid.rows),
-                    '--preview-gap': `${previewGap}px`,
+                    '--preview-padding': `${spacing.screenPadding}px`,
+                    '--preview-gap': `${spacing.regionGap}px`,
+                    '--layout-padding': `${spacing.screenPadding}px`,
+                    '--layout-gap': `${spacing.regionGap}px`,
                     width: `${pixels.width}px`,
                     height: `${pixels.height}px`,
                   })}
@@ -913,11 +930,11 @@ export class OdxApp extends LitElement {
                           '--grid-columns': String(project.grid.columns),
                           '--grid-rows': String(project.grid.rows),
                         })}
-                      >${project.regions.map((region) => this.renderScreenRegion(region))}</div>
+                      >${visibleRegions.map((region) => this.renderScreenRegion(region))}</div>
                       ${this.renderMergeLayer()}
                     `
                     : html`
-                      ${project.regions.map((region) => this.renderScreenRegion(region))}
+                      ${visibleRegions.map((region) => this.renderScreenRegion(region))}
                       ${this.renderMergeLayer()}
                     `}
                 </div>
@@ -1018,9 +1035,15 @@ export class OdxApp extends LitElement {
       <aside class="inspector"><div class="inspector-heading"><h2>Region settings</h2></div><div class="inspector-empty"><div><strong>Select a region</strong><p>Choose a region on the display to assign a widget and configure its data.</p></div></div></aside>
     `
     const definition = region.widget ? this.widgetDefinition(region.widget.type) : undefined
+    const appearance = regionAppearance(region)
     return html`
       <aside class="inspector">
         <div class="inspector-heading"><h2>Region settings</h2><span class="region-address">R${region.row}:C${region.column} · ${region.columnSpan}×${region.rowSpan}</span></div>
+        <section class="region-appearance" aria-labelledby="region-appearance-heading">
+          <div class="region-appearance-heading"><h3 id="region-appearance-heading">Appearance</h3><p>Applied to this region only.</p></div>
+          <div class="toggle-field"><label for="region-show-background">Show background</label><input id="region-show-background" class="toggle" type="checkbox" .checked=${appearance.showBackground} @change=${(event: Event) => this.updateRegionAppearance('showBackground', event)} /></div>
+          <div class="toggle-field"><label for="region-show-border">Show border</label><input id="region-show-border" class="toggle" type="checkbox" .checked=${appearance.showBorder} @change=${(event: Event) => this.updateRegionAppearance('showBorder', event)} /></div>
+        </section>
         <div class="widget-picker">
           ${this.widgetMetadata.map((widget) => html`
             <button class="widget-choice ${definition?.id === widget.id ? 'active' : ''}" @click=${() => this.assignWidget(widget.id)}>
@@ -1121,6 +1144,13 @@ export class OdxApp extends LitElement {
               </div>
             `
             : html`<p class="background-empty">No background image. The display uses its selected theme canvas.</p>`}
+        </section>
+        <section class="layout-section" aria-labelledby="spacing-heading">
+          <div class="layout-section-heading"><div><h3 id="spacing-heading">Region spacing</h3><p>Set spacing in native output pixels.</p></div></div>
+          <div class="spacing-grid">
+            <div class="field"><label class="field-label" for="screen-padding">Screen padding (px)</label><input id="screen-padding" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).screenPadding)} @change=${(event: Event) => this.changeLayoutSpacing('screenPadding', event)} /><p>Inset from the display edge.</p></div>
+            <div class="field"><label class="field-label" for="region-gap">Region gap (px)</label><input id="region-gap" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).regionGap)} @change=${(event: Event) => this.changeLayoutSpacing('regionGap', event)} /><p>Gutter between regions.</p></div>
+          </div>
         </section>
         <ha-form
           .hass=${this.hass}

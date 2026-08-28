@@ -16,6 +16,8 @@ describe('new project defaults', () => {
     expect(project.theme).toBe('light')
     expect(project.fontFamily).toBe('default')
     expect(project.textScale).toBe('regular')
+    expect(project.screenPadding).toBe(8)
+    expect(project.regionGap).toBe(8)
   })
 
   it('creates a new display as the Seeed 7.5-inch DIY EE04 profile', () => {

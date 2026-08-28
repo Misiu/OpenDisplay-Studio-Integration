@@ -61,6 +61,49 @@ def test_entity_tile_shape_uses_physical_region_ratio() -> None:
     )
 
 
+async def test_composer_skips_inactive_cells_and_applies_region_appearance(
+    hass,
+) -> None:
+    project = {
+        "palette": "bw",
+        "width": 800,
+        "height": 480,
+        "screenPadding": 20,
+        "regionGap": 12,
+        "grid": {"columns": 2, "rows": 1},
+        "regions": [
+            {
+                "id": "active",
+                "label": "A",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "appearance": {"showBackground": False, "showBorder": True},
+            },
+            {
+                "id": "inactive",
+                "row": 1,
+                "column": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+            },
+        ],
+    }
+
+    result = await async_compose_project(hass, project)
+
+    assert "studio-region--transparent studio-region--bordered" in result.html
+    assert (
+        ".studio-region--transparent>.item{background:transparent!important}"
+        in result.html
+    )
+    assert 'data-region-width="374.000"' in result.html
+    assert "inactive" not in result.html
+    assert "--studio-screen-padding:20px" in result.html
+    assert "--studio-region-gap:12px" in result.html
+
+
 def test_background_size_is_bounded_for_renderer_payload(tmp_path) -> None:
     image_path = tmp_path / "oversized.png"
     with image_path.open("wb") as file_handle:
@@ -138,7 +181,10 @@ async def test_sensor_requirements_are_deduplicated(hass) -> None:
     assert result.html.count(">sensor.office</span>") == 2
     assert "--studio-width:800px;--studio-height:480px" in result.html
     assert "--screen-w:800px;--screen-h:480px" in result.html
-    assert "border:1px solid" not in result.html
+    assert (
+        'class="studio-region studio-region--square studio-region--bordered"'
+        not in result.html
+    )
     assert 'data-region-width="388.000"' in result.html
 
 
@@ -442,7 +488,8 @@ async def test_weather_widget_renders_normalized_home_assistant_data(hass) -> No
     assert "od-weather" in result.html
     assert "12°" in result.html
     assert "08:15" in result.html
-    assert "--studio-gap:0px" in result.html
+    assert "--studio-screen-padding:0px" in result.html
+    assert "--studio-region-gap:0px" in result.html
     assert 'data-region-width="190.000"' in result.html
     assert 'data-region-height="228.000"' in result.html
 

@@ -1,11 +1,13 @@
 import type { ScreenProject } from '../types'
-import { createId, createRegions, gridForOrientation } from './layout'
+import { createId, createRegions, defaultLayoutSpacing, gridForOrientation } from './layout'
 import { DEFAULT_DISPLAY_PROFILE_ID, getDisplayProfile } from '../data/display-profiles'
 
 export const createProject = (name = 'Kitchen display', language = 'en'): ScreenProject => {
   const display = getDisplayProfile(DEFAULT_DISPLAY_PROFILE_ID)
   const orientation = 'landscape' as const
   const grid = gridForOrientation(display, orientation)
+  const regions = createRegions(grid)
+  const spacing = defaultLayoutSpacing(display.nativeWidth, display.nativeHeight, grid, regions)
   const now = new Date().toISOString()
   return {
     id: createId(),
@@ -22,7 +24,9 @@ export const createProject = (name = 'Kitchen display', language = 'en'): Screen
     width: display.nativeWidth,
     height: display.nativeHeight,
     grid,
-    regions: createRegions(grid),
+    screenPadding: spacing,
+    regionGap: spacing,
+    regions,
     createdAt: now,
     updatedAt: now,
   }

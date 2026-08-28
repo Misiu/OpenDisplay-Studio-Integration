@@ -926,8 +926,8 @@ export const appStyles = css`
     display: grid;
     grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
     grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
-    gap: clamp(2px, 0.36cqw, 5px);
-    padding: clamp(3px, 0.5cqw, 7px);
+    gap: var(--layout-gap, clamp(2px, 0.36cqw, 5px));
+    padding: var(--layout-padding, clamp(3px, 0.5cqw, 7px));
     color: var(--screen-ink);
     background: var(--screen-paper);
     container-type: inline-size;
@@ -969,7 +969,7 @@ export const appStyles = css`
     grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
     grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
     gap: var(--preview-gap);
-    padding: var(--preview-gap);
+    padding: var(--preview-padding);
     box-sizing: border-box;
   }
 
@@ -988,7 +988,7 @@ export const appStyles = css`
   }
 
   .display-screen.live-preview .merge-layer {
-    inset: var(--preview-gap, clamp(3px, 0.5cqw, 7px));
+    inset: var(--preview-padding, clamp(3px, 0.5cqw, 7px));
     gap: var(--preview-gap, clamp(2px, 0.36cqw, 5px));
   }
 
@@ -1061,10 +1061,22 @@ export const appStyles = css`
     position: relative;
     overflow: hidden;
     container-type: size;
-    border: max(1px, 0.14cqw) solid var(--screen-ink);
-    background: var(--screen-paper);
+    border: max(1px, 0.14cqw) solid transparent;
+    background: transparent;
     cursor: pointer;
     isolation: isolate;
+  }
+
+  .screen-region.region-background {
+    background: var(--screen-paper);
+  }
+
+  .screen-region.region-border {
+    border-color: var(--screen-ink);
+  }
+
+  .screen-region:not(.region-background) > .item {
+    background: transparent !important;
   }
 
   .screen-region:hover {
@@ -1091,6 +1103,7 @@ export const appStyles = css`
     place-items: center;
     border-style: dashed;
     color: var(--screen-muted);
+    border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
   }
 
   .screen-region.layout-region {
@@ -1105,6 +1118,38 @@ export const appStyles = css`
     place-items: center;
     gap: 0.25em;
     text-align: center;
+  }
+
+  .region-appearance {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding-block: 12px;
+    border-block: 1px solid var(--odx-line);
+  }
+
+  .region-appearance-heading h3,
+  .region-appearance-heading p,
+  .spacing-grid p {
+    margin: 0;
+  }
+
+  .region-appearance-heading h3 {
+    font-size: 13px;
+  }
+
+  .region-appearance-heading p,
+  .spacing-grid p {
+    margin-top: 3px;
+    color: var(--odx-muted);
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .spacing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .layout-region-copy strong {

@@ -3,6 +3,8 @@ import type { GridRegion } from '../types'
 import {
   createId,
   createRegions,
+  isActiveRegion,
+  layoutSpacing,
   mergeRegions,
   rotateRegions,
   splitRegion,
@@ -27,7 +29,29 @@ describe('layout service', () => {
 
     expect(regions).toHaveLength(10)
     expect(regions[0]).toMatchObject({ row: 1, column: 1, rowSpan: 1, columnSpan: 1 })
+    expect(regions[0].appearance).toEqual({ showBackground: false, showBorder: false })
     expect(regions[9]).toMatchObject({ row: 2, column: 5, rowSpan: 1, columnSpan: 1 })
+  })
+
+  it('treats grid cells as inactive until a region is composed', () => {
+    const cell = createRegions({ columns: 12, rows: 8 })[0]
+
+    expect(isActiveRegion(cell)).toBe(false)
+    expect(isActiveRegion({ ...cell, label: 'A' })).toBe(true)
+    expect(isActiveRegion({ ...cell, widget: { type: 'text', version: '0.5.0', config: {} } })).toBe(true)
+  })
+
+  it('keeps screen padding independent from the gap between regions', () => {
+    const project = {
+      width: 800,
+      height: 480,
+      grid: { columns: 12, rows: 8 },
+      regions: createRegions({ columns: 12, rows: 8 }),
+      screenPadding: 20,
+      regionGap: 6,
+    } as never
+
+    expect(layoutSpacing(project)).toEqual({ screenPadding: 20, regionGap: 6 })
   })
 
   it('merges only a completely covered rectangle', () => {

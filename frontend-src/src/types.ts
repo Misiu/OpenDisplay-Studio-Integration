@@ -77,6 +77,11 @@ export interface WidgetInstance {
   config: WidgetConfig
 }
 
+export interface RegionAppearance {
+  showBackground: boolean
+  showBorder: boolean
+}
+
 export interface GridRegion {
   id: string
   label?: string
@@ -84,6 +89,7 @@ export interface GridRegion {
   column: number
   rowSpan: number
   columnSpan: number
+  appearance?: RegionAppearance
   widget?: WidgetInstance
 }
 
@@ -103,6 +109,8 @@ export interface ScreenProject {
   width: number
   height: number
   grid: GridSize
+  screenPadding: number
+  regionGap: number
   regions: GridRegion[]
   background?: DisplayBackground
   createdAt: string

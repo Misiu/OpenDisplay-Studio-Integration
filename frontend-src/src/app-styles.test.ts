@@ -35,7 +35,7 @@ describe('layout editor styles', () => {
 
   it('keeps the interactive merge grid bounded when preview variables are unavailable', () => {
     expect(appStyles.cssText).toMatch(
-      /\.display-screen\.live-preview \.merge-layer\s*{[^}]*inset:\s*var\(--preview-gap,\s*clamp\([^}]*gap:\s*var\(--preview-gap,\s*clamp\(/s,
+      /\.display-screen\.live-preview \.merge-layer\s*{[^}]*inset:\s*var\(--preview-padding,\s*clamp\([^}]*gap:\s*var\(--preview-gap,\s*clamp\(/s,
     )
   })
 })

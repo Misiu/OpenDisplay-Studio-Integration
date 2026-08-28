@@ -114,6 +114,51 @@ def test_display_preferences_have_safe_defaults() -> None:
     assert result["theme"] == "light"
     assert result["fontFamily"] == "default"
     assert result["textScale"] == "regular"
+    assert result["screenPadding"] == 8
+    assert result["regionGap"] == 8
+    assert result["regions"][0]["appearance"] == {
+        "showBackground": False,
+        "showBorder": False,
+    }
+
+
+def test_region_appearance_and_layout_spacing_are_normalized() -> None:
+    payload = project_payload()
+    payload["screenPadding"] = 20
+    payload["regionGap"] = 6
+    payload["regions"][0]["appearance"] = {
+        "showBackground": False,
+        "showBorder": True,
+    }
+
+    result = validate_project(payload)
+
+    assert result["screenPadding"] == 20
+    assert result["regionGap"] == 6
+    assert result["regions"][0]["appearance"] == {
+        "showBackground": False,
+        "showBorder": True,
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"), [("screenPadding", -1), ("regionGap", 129)]
+)
+def test_layout_spacing_rejects_out_of_range_values(field: str, value: int) -> None:
+    payload = project_payload()
+    payload[field] = value
+
+    with pytest.raises(ProjectValidationError, match=field):
+        validate_project(payload)
+
+
+@pytest.mark.parametrize("field", ["showBackground", "showBorder"])
+def test_region_appearance_requires_boolean_values(field: str) -> None:
+    payload = project_payload()
+    payload["regions"][0]["appearance"] = {field: "yes"}
+
+    with pytest.raises(ProjectValidationError, match=field):
+        validate_project(payload)
 
 
 def test_display_background_is_normalized() -> None:
