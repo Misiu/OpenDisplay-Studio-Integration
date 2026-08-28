@@ -83,7 +83,7 @@ token. No LAN port configuration is shown on HA OS/Supervised.
 At every config-entry setup, a managed Renderer is checked through
 `AddonManager`. A missing App is scheduled for installation, a stopped App is
 scheduled to start, and Home Assistant retries the entry. A running App must
-also pass `/health` with API version 1 and report its pinned TRMNL Framework
+also pass `/health` with API version 2 and report its pinned TRMNL Framework
 version.
 
 The entry stores whether OpenDisplay Studio installed the Renderer. Removing
