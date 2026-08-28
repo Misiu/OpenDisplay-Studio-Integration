@@ -65,6 +65,7 @@ async def test_resolve_renders_and_publishes_temporary_png(hass) -> None:
     assert call["width"] == 800
     assert call["height"] == 480
     assert call["html"] == "<main>fresh</main>"
+    assert call["allowed_asset_origins"] == ()
 
 
 async def test_browse_exposes_ready_projects_only(hass) -> None:

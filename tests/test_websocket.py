@@ -63,6 +63,7 @@ async def test_preview_uses_renderer_and_returns_cached_png(hass) -> None:
         html="<main>same-html</main>",
         width=800,
         height=480,
+        allowed_asset_origins=(),
     )
     connection.send_error.assert_not_called()
     result = connection.send_result.call_args.args[1]

@@ -198,7 +198,7 @@ class OpenDisplayStudioConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_progress_done(next_step_id="finish_addon_setup")
 
     async def _async_start_addon_and_wait(self) -> None:
-        """Start if needed, then wait for discovery plus healthy API v1."""
+        """Start if needed, then wait for discovery plus healthy API v2."""
         manager = get_addon_manager(self.hass)
         addon_info = await manager.async_get_addon_info()
         if addon_info.state is not AddonState.RUNNING:

@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from dataclasses import dataclass
 from time import perf_counter
 from typing import Any
+from urllib.parse import urlsplit
 
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -25,10 +27,74 @@ class ComposedProject:
     data_ms: float
     liquid_ms: float
     compose_ms: float
+    allowed_asset_origins: tuple[str, ...] = ()
 
 
 class ProjectComposeError(Exception):
-    """Raised when current Home Assistant data cannot be resolved."""
+    """Raised when widget data or markup cannot be composed safely."""
+
+
+REMOTE_ASSET_PATTERNS = (
+    re.compile(
+        r"\b(?:src|srcset)\s*=\s*[\"']([^\"']*https?://[^\"']+)[\"']",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\burl\(\s*[\"']?(https?://[^\"')\s]+)[\"']?\s*\)", re.IGNORECASE),
+    re.compile(
+        r"<link\b[^>]*\bhref\s*=\s*[\"'](https?://[^\"']+)[\"']",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"@import\s+(?:url\(\s*)?[\"']?(https?://[^\"')\s;]+)[\"']?\s*\)?",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"<(?:image|use)\b[^>]*\bhref\s*=\s*[\"'](https?://[^\"']+)[\"']",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"<object\b[^>]*\bdata\s*=\s*[\"'](https?://[^\"']+)[\"']",
+        re.IGNORECASE,
+    ),
+)
+REMOTE_URL_PATTERN = re.compile(r"https?://[^\s,\"']+", re.IGNORECASE)
+
+
+def _assert_asset_permissions(
+    fragment: str, widget_type: str, registry: WidgetRegistry
+) -> set[str]:
+    """Return used, declared origins and reject undeclared remote assets."""
+    allowed = set(
+        definition(widget_type, registry)["permissions"]["network"]["allowedOrigins"]
+    )
+    used: set[str] = set()
+    for pattern in REMOTE_ASSET_PATTERNS:
+        for match in pattern.finditer(fragment):
+            for remote in REMOTE_URL_PATTERN.findall(match.group(1)):
+                parsed = urlsplit(remote)
+                port = parsed.port
+                host = parsed.hostname or ""
+                host_literal = f"[{host}]" if ":" in host else host
+                default_port = (parsed.scheme == "http" and port == 80) or (
+                    parsed.scheme == "https" and port == 443
+                )
+                port_suffix = (
+                    f":{port}" if port is not None and not default_port else ""
+                )
+                origin = f"{parsed.scheme}://{host_literal}{port_suffix}"
+                if origin not in allowed:
+                    message = (
+                        f"{widget_type} widget uses undeclared remote asset "
+                        f"origin: {origin}"
+                    )
+                    raise ProjectComposeError(message)
+                used.add(origin)
+    return used
+
+
+def _new_composition_state() -> tuple[float, list[str], set[str]]:
+    """Create typed mutable accumulators for one screen composition."""
+    return 0.0, [], set()
 
 
 STUDIO_STYLES = """
@@ -193,8 +259,7 @@ async def async_compose_project(
     resolved = dict(zip(provider_keys, provider_values, strict=True))
     data_ms = (perf_counter() - started) * 1_000
 
-    liquid_ms = 0.0
-    fragments: list[str] = []
+    liquid_ms, fragments, allowed_asset_origins = _new_composition_state()
     width = int(project.get("width", 800))
     height = int(project.get("height", 480))
     gap = max(3, min(10, round(min(width, height) / 60)))
@@ -225,11 +290,15 @@ async def async_compose_project(
                     registry.template(widget_type),
                     config=config,
                     data=data,
+                    assets=registry.assets(widget_type),
                     region={"shape": _region_shape(project, region, gap=layout_gap)},
                 )
             except LiquidError as err:
                 message = f"Could not render {widget_type} widget: {err}"
                 raise ProjectComposeError(message) from err
+            allowed_asset_origins.update(
+                _assert_asset_permissions(fragment, widget_type, registry)
+            )
             liquid_ms += (perf_counter() - liquid_started) * 1_000
         region_width, region_height = _region_size(project, region, gap=layout_gap)
         ratio = region_width / max(1, region_height)
@@ -271,4 +340,10 @@ async def async_compose_project(
         f"{body}</div></div></main>"
     )
     compose_ms = (perf_counter() - started) * 1_000
-    return ComposedProject(html, data_ms, liquid_ms, compose_ms)
+    return ComposedProject(
+        html,
+        data_ms,
+        liquid_ms,
+        compose_ms,
+        tuple(sorted(allowed_asset_origins)),
+    )

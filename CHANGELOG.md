@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.6.0
+
+- Resolve package-owned files from `widgets/<id>/assets` into bounded `data:`
+  URIs exposed to Liquid through the `assets` mapping.
+- Replace all Weather network images with locally bundled Material Design Icon
+  classes and require Renderer App 0.6.0.
+- Add package-level `permissions.network.allowedOrigins`; widgets remain
+  local-only by default and only origins actually used by a screen are passed
+  to Renderer API v2.
+
 ## 0.5.1
 
 - Replace the integration-owned Liquid subset with `trmnl-liquid-py` 0.1.0,
