@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { getRuntimeWidgetDefinition } from './registry'
+import { getRuntimeWidgetDefinition, getWidgetDefinition } from './registry'
 
 describe('runtime widget registry', () => {
+  it.each(['sensor', 'weather'])('offers independent footer controls for %s', (id) => {
+    const widget = getWidgetDefinition(id)
+
+    expect(widget?.defaults.showEntityId).toBe(true)
+    expect(widget?.defaults.showFooter).toBe(true)
+    expect(widget?.options.find((option) => option.key === 'showEntityId')?.selector).toEqual({ boolean: {} })
+    expect(widget?.options.find((option) => option.key === 'showFooter')?.selector).toEqual({ boolean: {} })
+  })
+
   it('creates a selectable definition for a backend-only widget package', () => {
     const widget = getRuntimeWidgetDefinition({
       id: 'air-quality',

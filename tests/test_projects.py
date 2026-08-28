@@ -75,7 +75,19 @@ def test_weather_widget_config_is_normalized() -> None:
             "showHumidity": False,
             "showFeelsLike": True,
             "showForecast": True,
+            "showEntityId": True,
+            "showFooter": True,
         },
+    }
+
+
+def test_sensor_footer_options_default_to_visible() -> None:
+    result = validate_project(project_payload())
+
+    assert result["regions"][0]["widget"]["config"] == {
+        "entity": "sensor.office",
+        "showEntityId": True,
+        "showFooter": True,
     }
 
 

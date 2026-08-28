@@ -6,7 +6,7 @@ import { weatherStyles } from './styles'
 
 export const weatherWidget: WidgetDefinition = {
   id: 'weather',
-  version: '0.5.0',
+  version: '0.6.1',
   name: 'Weather',
   description: 'Current conditions and a daily Home Assistant forecast.',
   icon: mdiWeatherPartlyCloudy,
@@ -16,6 +16,8 @@ export const weatherWidget: WidgetDefinition = {
     showHumidity: true,
     showFeelsLike: true,
     showForecast: true,
+    showEntityId: true,
+    showFooter: true,
   },
   options: [
     {
@@ -27,6 +29,8 @@ export const weatherWidget: WidgetDefinition = {
     { key: 'showHumidity', label: 'Show humidity', selector: { boolean: {} } },
     { key: 'showFeelsLike', label: 'Show feels like', selector: { boolean: {} } },
     { key: 'showForecast', label: 'Show forecast', selector: { boolean: {} } },
+    { key: 'showEntityId', label: 'Show entity ID', selector: { boolean: {} } },
+    { key: 'showFooter', label: 'Show footer', selector: { boolean: {} } },
   ],
   render: (config) => html`
     <div class="widget weather-widget-placeholder">

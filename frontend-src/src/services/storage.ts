@@ -1,11 +1,9 @@
 import type { ScreenProject } from '../types'
 import { createId, createRegions, gridForOrientation } from './layout'
-import { getDisplayProfile } from '../data/display-profiles'
-
-const DEFAULT_DISPLAY = 'solum-newton-pro-5-8'
+import { DEFAULT_DISPLAY_PROFILE_ID, getDisplayProfile } from '../data/display-profiles'
 
 export const createProject = (name = 'Kitchen display', language = 'en'): ScreenProject => {
-  const display = getDisplayProfile(DEFAULT_DISPLAY)
+  const display = getDisplayProfile(DEFAULT_DISPLAY_PROFILE_ID)
   const orientation = 'landscape' as const
   const grid = gridForOrientation(display, orientation)
   const now = new Date().toISOString()

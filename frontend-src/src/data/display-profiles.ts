@@ -15,6 +15,8 @@ const SOLUM_SOURCE =
   'https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro'
 const OPENDISPLAY_HARDWARE_SOURCE = 'https://opendisplay.org/what-hardware-to-buy.html'
 
+export const DEFAULT_DISPLAY_PROFILE_ID = 'opendisplay-seeed-7-5-diy'
+
 const readyHardware = (
   id: string,
   manufacturer: string,
@@ -153,7 +155,7 @@ export const DISPLAY_PROFILES: DisplayProfile[] = [
 
 export const getDisplayProfile = (id: string): DisplayProfile =>
   DISPLAY_PROFILES.find((profile) => profile.id === id) ??
-  DISPLAY_PROFILES.find((profile) => profile.id === 'solum-newton-pro-5-8') ??
+  DISPLAY_PROFILES.find((profile) => profile.id === DEFAULT_DISPLAY_PROFILE_ID) ??
   DISPLAY_PROFILES[0]
 
 export const getPixelSize = (

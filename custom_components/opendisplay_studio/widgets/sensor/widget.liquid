@@ -11,11 +11,15 @@
         </div>
       </div>
     </div>
+    {% if config.showFooter %}
     <div class="title_bar od-sensor__footer">
       <span class="mdi {{ sensor.icon }}" aria-hidden="true"></span>
       <h1 class="title">{{ sensor.updated_at }}</h1>
+      {% if config.showEntityId %}
       <span class="instance">{{ sensor.entity_id }}</span>
+      {% endif %}
     </div>
+    {% endif %}
   </section>
 </div>
 

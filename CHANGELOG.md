@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.7.1
+
+- Add independent Sensor and Weather options for hiding the entity label or
+  the complete footer while preserving entity update timestamps.
+- Default new displays to the Seeed Studio 7.5-inch DIY EE04 profile and keep
+  the device selector synchronized with the previewed profile.
+
 ## 0.7.0
 
 - Replace the bundled Entity State widget with the focused Sensor widget and

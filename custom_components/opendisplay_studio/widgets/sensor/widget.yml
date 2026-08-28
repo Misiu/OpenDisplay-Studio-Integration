@@ -1,6 +1,6 @@
 id: sensor
 name: Sensor
-version: "0.6.0"
+version: "0.6.1"
 description: Current value of a selected Home Assistant sensor.
 icon: mdi:gauge
 framework: 3.2.0
@@ -9,6 +9,8 @@ provider: provider.py
 
 defaults:
   entity: ""
+  showEntityId: true
+  showFooter: true
 
 fields:
   - key: entity
@@ -18,6 +20,14 @@ fields:
       entity:
         filter:
           domain: sensor
+  - key: showEntityId
+    label: Show entity ID
+    selector:
+      boolean: {}
+  - key: showFooter
+    label: Show footer
+    selector:
+      boolean: {}
 
 dataRequirements:
   - key: sensor

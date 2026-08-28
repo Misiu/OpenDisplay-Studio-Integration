@@ -641,24 +641,24 @@ export class OdxApp extends LitElement {
       <div class="device-toolbar layout-toolbar">
         <div class="control grow">
           <label for="device-model">Device model</label>
-          <select id="device-model" .value=${project.displayId === 'custom' ? 'custom' : display.id} @change=${this.changeDisplay}>
+          <select id="device-model" @change=${this.changeDisplay}>
             <optgroup label="SOLUM · Newton Pro">
               ${DISPLAY_PROFILES.filter((profile) => profile.family === 'Newton Pro').map((profile) => html`
-                <option value=${profile.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}${profile.freezer ? ' · mono' : ''}</option>
+                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}${profile.freezer ? ' · mono' : ''}</option>
               `)}
             </optgroup>
             <optgroup label="Seeed · ready to use">
               ${DISPLAY_PROFILES.filter((profile) => profile.family === 'OpenDisplay' && profile.manufacturer === 'Seeed Studio').map((profile) => html`
-                <option value=${profile.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
+                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
               `)}
             </optgroup>
             <optgroup label="Other OpenDisplay hardware">
               ${DISPLAY_PROFILES.filter((profile) => profile.family === 'OpenDisplay' && profile.manufacturer !== 'Seeed Studio').map((profile) => html`
-                <option value=${profile.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
+                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
               `)}
             </optgroup>
             <optgroup label="Custom hardware">
-              <option value="custom">Custom resolution</option>
+              <option value="custom" .selected=${project.displayId === 'custom'}>Custom resolution</option>
             </optgroup>
           </select>
         </div>

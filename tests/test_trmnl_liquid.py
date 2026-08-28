@@ -60,9 +60,13 @@ def test_weather_template_has_no_remote_assets() -> None:
 
 
 def test_sensor_template_fits_unitless_states_and_uses_weather_footer_order() -> None:
+    definition = DEFAULT_REGISTRY.definition("sensor")
     html = render(
         DEFAULT_REGISTRY.template("sensor"),
-        config={"entity": "sensor.air_quality_status"},
+        config={
+            **definition["defaults"],
+            "entity": "sensor.air_quality_status",
+        },
         data={
             "sensor": {
                 "entity_id": "sensor.air_quality_status",
@@ -80,6 +84,53 @@ def test_sensor_template_fits_unitless_states_and_uses_weather_footer_order() ->
     assert "od-sensor__reading--unitless" in html
     assert '<h1 class="title">08:18</h1>' in html
     assert '<span class="instance">sensor.air_quality_status</span>' in html
+
+
+@pytest.mark.parametrize("widget_type", ["sensor", "weather"])
+def test_widget_footer_and_entity_id_can_be_hidden_independently(
+    widget_type: str,
+) -> None:
+    definition = DEFAULT_REGISTRY.definition(widget_type)
+    data = {
+        "sensor": {
+            "entity_id": "sensor.office_temperature",
+            "name": "Office temperature",
+            "state": "21.7",
+            "unit": "°C",
+            "icon": "mdi-thermometer",
+            "updated_at": "13:08",
+        },
+        "weather": {
+            "entity_id": "weather.home",
+            "name": "Home forecast",
+            "condition_label": "Sunny",
+            "icon": "mdi-weather-sunny",
+            "temperature": "21",
+            "updated_at": "13:08",
+            "forecast": [],
+            "labels": {"weather": "Weather", "right_now": "Right now"},
+        },
+    }
+
+    without_entity_id = render(
+        DEFAULT_REGISTRY.template(widget_type),
+        config={**definition["defaults"], "showEntityId": False},
+        data={widget_type: data[widget_type]},
+        assets=DEFAULT_REGISTRY.assets(widget_type),
+        region={"shape": "square"},
+    )
+    assert 'class="title_bar' in without_entity_id
+    assert 'class="instance"' not in without_entity_id
+    assert "13:08" in without_entity_id
+
+    without_footer = render(
+        DEFAULT_REGISTRY.template(widget_type),
+        config={**definition["defaults"], "showFooter": False},
+        data={widget_type: data[widget_type]},
+        assets=DEFAULT_REGISTRY.assets(widget_type),
+        region={"shape": "square"},
+    )
+    assert 'class="title_bar' not in without_footer
 
 
 @pytest.mark.parametrize("widget_type", sorted(DEFAULT_REGISTRY.widget_types))

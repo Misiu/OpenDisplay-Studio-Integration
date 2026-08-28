@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, oe = (e, t) => !l(e, t), se = {
+}, h = (e, t) => !l(e, t), oe = {
 	attribute: !0,
 	type: String,
 	converter: m,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: oe
+	hasChanged: h
 };
 Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var h = class extends HTMLElement {
+var g = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = se) {
+	static createProperty(e, t = oe) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,7 +100,7 @@ var h = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? se;
+		return this.elementProperties.get(e) ?? oe;
 	}
 	static _$Ei() {
 		if (this.hasOwnProperty(p("elementProperties"))) return;
@@ -187,7 +187,7 @@ var h = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? oe)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? h)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,89 +251,89 @@ var h = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-h.elementStyles = [], h.shadowRootOptions = { mode: "open" }, h[p("elementProperties")] = /* @__PURE__ */ new Map(), h[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: h }), (f.reactiveElementVersions ??= []).push("2.1.2");
+g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[p("elementProperties")] = /* @__PURE__ */ new Map(), g[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: g }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var ce = globalThis, le = (e) => e, g = ce.trustedTypes, ue = g ? g.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, de = "$lit$", _ = `lit$${Math.random().toFixed(9).slice(2)}$`, fe = "?" + _, pe = `<${fe}>`, v = document, y = () => v.createComment(""), b = (e) => e === null || typeof e != "object" && typeof e != "function", me = Array.isArray, he = (e) => me(e) || typeof e?.[Symbol.iterator] == "function", ge = "[ 	\n\f\r]", x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${ge}(?:([^\\s"'>=/]+)(${ge}*=${ge}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, C = ((e) => (t, ...n) => ({
+var se = globalThis, ce = (e) => e, _ = se.trustedTypes, le = _ ? _.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ue = "$lit$", v = `lit$${Math.random().toFixed(9).slice(2)}$`, de = "?" + v, fe = `<${de}>`, y = document, b = () => y.createComment(""), x = (e) => e === null || typeof e != "object" && typeof e != "function", pe = Array.isArray, me = (e) => pe(e) || typeof e?.[Symbol.iterator] == "function", S = "[ 	\n\f\r]", C = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, he = /-->/g, ge = />/g, w = RegExp(`>|${S}(?:([^\\s"'>=/]+)(${S}*=${S}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), _e = /'/g, ve = /"/g, ye = /^(?:script|style|textarea|title)$/i, T = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), w = Symbol.for("lit-noChange"), T = Symbol.for("lit-nothing"), Se = /* @__PURE__ */ new WeakMap(), E = v.createTreeWalker(v, 129);
-function Ce(e, t) {
-	if (!me(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return ue === void 0 ? t : ue.createHTML(t);
+}))(1), E = Symbol.for("lit-noChange"), D = Symbol.for("lit-nothing"), be = /* @__PURE__ */ new WeakMap(), O = y.createTreeWalker(y, 129);
+function xe(e, t) {
+	if (!pe(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return le === void 0 ? t : le.createHTML(t);
 }
-var we = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = x;
+var Se = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = C;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === x ? c[1] === "!--" ? o = _e : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = S) : (xe.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = S) : o = ve : o === S ? c[0] === ">" ? (o = i ?? x, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? S : c[3] === "\"" ? be : ye) : o === be || o === ye ? o = S : o === _e || o === ve ? o = x : (o = S, i = void 0);
-		let d = o === S && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === x ? n + pe : l >= 0 ? (r.push(s), n.slice(0, l) + de + n.slice(l) + _ + d) : n + _ + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === C ? c[1] === "!--" ? o = he : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = w) : (ye.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = w) : o = ge : o === w ? c[0] === ">" ? (o = i ?? C, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? w : c[3] === "\"" ? ve : _e) : o === ve || o === _e ? o = w : o === he || o === ge ? o = C : (o = w, i = void 0);
+		let d = o === w && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === C ? n + fe : l >= 0 ? (r.push(s), n.slice(0, l) + ue + n.slice(l) + v + d) : n + v + (l === -2 ? t : d);
 	}
-	return [Ce(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, D = class e {
+	return [xe(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, k = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = we(t, n);
-		if (this.el = e.createElement(l, r), E.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = Se(t, n);
+		if (this.el = e.createElement(l, r), O.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = E.nextNode()) !== null && c.length < s;) {
+		for (; (i = O.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(de)) {
-					let t = u[o++], n = i.getAttribute(e).split(_), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(ue)) {
+					let t = u[o++], n = i.getAttribute(e).split(v), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? Ee : r[1] === "?" ? De : r[1] === "@" ? Oe : A
+						ctor: r[1] === "." ? we : r[1] === "?" ? Te : r[1] === "@" ? Ee : M
 					}), i.removeAttribute(e);
-				} else e.startsWith(_) && (c.push({
+				} else e.startsWith(v) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (xe.test(i.tagName)) {
-					let e = i.textContent.split(_), t = e.length - 1;
+				if (ye.test(i.tagName)) {
+					let e = i.textContent.split(v), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = g ? g.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], y()), E.nextNode(), c.push({
+						i.textContent = _ ? _.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], b()), O.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], y());
+						i.append(e[t], b());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === fe) c.push({
+				if (i.data === de) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(_, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(v, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += _.length - 1;
+					}), e += v.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = v.createElement("template");
+		let n = y.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function O(e, t, n = e, r) {
-	if (t === w) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = b(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = O(e, i._$AS(e, t.values), i, r)), t;
+function A(e, t, n = e, r) {
+	if (t === E) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = x(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = A(e, i._$AS(e, t.values), i, r)), t;
 }
-var Te = class {
+var Ce = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var Te = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? v).importNode(t, !0);
-		E.currentNode = r;
-		let i = E.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? y).importNode(t, !0);
+		O.currentNode = r;
+		let i = O.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new k(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ke(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new j(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new De(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = E.nextNode(), a++);
+			a !== s?.index && (i = O.nextNode(), a++);
 		}
-		return E.currentNode = v, r;
+		return O.currentNode = y, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, k = class e {
+}, j = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = T, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = D, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var Te = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = O(this, e, t), b(e) ? e === T || e == null || e === "" ? (this._$AH !== T && this._$AR(), this._$AH = T) : e !== this._$AH && e !== w && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = A(this, e, t), x(e) ? e === D || e == null || e === "" ? (this._$AH !== D && this._$AR(), this._$AH = D) : e !== this._$AH && e !== E && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? me(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var Te = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== T && b(this._$AH) ? this._$AA.nextSibling.data = e : this.T(v.createTextNode(e)), this._$AH = e;
+		this._$AH !== D && x(this._$AH) ? this._$AA.nextSibling.data = e : this.T(y.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = D.createElement(Ce(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = k.createElement(xe(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new Te(r, this), n = e.u(this.options);
+			let e = new Ce(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = Se.get(e.strings);
-		return t === void 0 && Se.set(e.strings, t = new D(e)), t;
+		let t = be.get(e.strings);
+		return t === void 0 && be.set(e.strings, t = new k(e)), t;
 	}
 	k(t) {
-		me(this._$AH) || (this._$AH = [], this._$AR());
+		pe(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(y()), this.O(y()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(b()), this.O(b()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = le(e).nextSibling;
-			le(e).remove(), e = t;
+			let t = ce(e).nextSibling;
+			ce(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, A = class {
+}, M = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var Te = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = T, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = T;
+		this.type = 1, this._$AH = D, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = D;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = O(this, e, t, 0), a = !b(e) || e !== this._$AH && e !== w, a && (this._$AH = e);
+		if (i === void 0) e = A(this, e, t, 0), a = !x(e) || e !== this._$AH && e !== E, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = O(this, r[n + o], t, o), s === w && (s = this._$AH[o]), a ||= !b(s) || s !== this._$AH[o], s === T ? e = T : e !== T && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = A(this, r[n + o], t, o), s === E && (s = this._$AH[o]), a ||= !x(s) || s !== this._$AH[o], s === D ? e = D : e !== D && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === T ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === D ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, Ee = class extends A {
+}, we = class extends M {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === T ? void 0 : e;
+		this.element[this.name] = e === D ? void 0 : e;
 	}
-}, De = class extends A {
+}, Te = class extends M {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== T);
+		this.element.toggleAttribute(this.name, !!e && e !== D);
 	}
-}, Oe = class extends A {
+}, Ee = class extends M {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = O(this, e, t, 0) ?? T) === w) return;
-		let n = this._$AH, r = e === T && n !== T || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== T && (n === T || r);
+		if ((e = A(this, e, t, 0) ?? D) === E) return;
+		let n = this._$AH, r = e === D && n !== D || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== D && (n === D || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, ke = class {
+}, De = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var Te = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		O(this, e);
+		A(this, e);
 	}
-}, Ae = ce.litHtmlPolyfillSupport;
-Ae?.(D, k), (ce.litHtmlVersions ??= []).push("3.3.3");
-var je = (e, t, n) => {
+}, Oe = se.litHtmlPolyfillSupport;
+Oe?.(k, j), (se.litHtmlVersions ??= []).push("3.3.3");
+var ke = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new k(t.insertBefore(y(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new j(t.insertBefore(b(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, j = globalThis, M = class extends h {
+}, Ae = globalThis, N = class extends g {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var je = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = je(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ke(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,25 +502,25 @@ var je = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return w;
+		return E;
 	}
 };
-M._$litElement$ = !0, M.finalized = !0, j.litElementHydrateSupport?.({ LitElement: M });
-var Me = j.litElementPolyfillSupport;
-Me?.({ LitElement: M }), (j.litElementVersions ??= []).push("4.2.2");
+N._$litElement$ = !0, N.finalized = !0, Ae.litElementHydrateSupport?.({ LitElement: N });
+var je = Ae.litElementPolyfillSupport;
+je?.({ LitElement: N }), (Ae.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var Ne = (e) => (t, n) => {
+var Me = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, Pe = {
+}, Ne = {
 	attribute: !0,
 	type: String,
 	converter: m,
 	reflect: !1,
-	hasChanged: oe
-}, Fe = (e = Pe, t, n) => {
+	hasChanged: h
+}, Pe = (e = Ne, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -543,16 +543,16 @@ var Ne = (e) => (t, n) => {
 	}
 	throw Error("Unsupported decorator location: " + r);
 };
-function Ie(e) {
-	return (t, n) => typeof n == "object" ? Fe(e, t, n) : ((e, t, n) => {
+function Fe(e) {
+	return (t, n) => typeof n == "object" ? Pe(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/state.js
-function N(e) {
-	return Ie({
+function P(e) {
+	return Fe({
 		...e,
 		state: !0,
 		attribute: !1
@@ -560,10 +560,10 @@ function N(e) {
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/base.js
-var Le = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
+var Ie = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/query.js
-function P(e, t) {
+function F(e, t) {
 	return (n, r, i) => {
 		let a = (t) => t.renderRoot?.querySelector(e) ?? null;
 		if (t) {
@@ -578,29 +578,29 @@ function P(e, t) {
 					}
 				};
 			})();
-			return Le(n, r, { get() {
+			return Ie(n, r, { get() {
 				let n = e.call(this);
 				return n === void 0 && (n = a(this), (n !== null || this.hasUpdated) && t.call(this, n)), n;
 			} });
 		}
-		return Le(n, r, { get() {
+		return Ie(n, r, { get() {
 			return a(this);
 		} });
 	};
 }
 //#endregion
 //#region node_modules/lit-html/directive.js
-var Re = {
+var Le = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, ze = (e) => (...t) => ({
+}, Re = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Be = class {
+}), ze = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -614,9 +614,9 @@ var Re = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, Ve = "important", He = " !" + Ve, F = ze(class extends Be {
+}, Be = "important", Ve = " !" + Be, I = Re(class extends ze {
 	constructor(e) {
-		if (super(e), e.type !== Re.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
+		if (super(e), e.type !== Le.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
 	}
 	render(e) {
 		return Object.keys(e).reduce((t, n) => {
@@ -632,13 +632,13 @@ var Re = {
 			let r = t[e];
 			if (r != null) {
 				this.ft.add(e);
-				let t = typeof r == "string" && r.endsWith(He);
-				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? Ve : "") : n[e] = r;
+				let t = typeof r == "string" && r.endsWith(Ve);
+				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? Be : "") : n[e] = r;
 			}
 		}
-		return w;
+		return E;
 	}
-}), Ue = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", We = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", Ge = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Ke = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", qe = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", Je = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", Ye = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Xe = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Ze = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", Qe = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", $e = o`
+}), He = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", Ue = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", We = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Ge = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", Ke = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", qe = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", Je = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Ye = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Xe = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", Ze = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", Qe = o`
   :host {
     --odx-blue: var(--primary-color, #03a9f4);
     --odx-blue-strong: #0086c5;
@@ -2207,9 +2207,9 @@ var Re = {
       transition-duration: 0.01ms !important;
     }
   }
-`, I = "https://opendisplay.org/firmware/toolbox/index.html";
-`${I}`, `${I}`, `${I}`, `${I}`;
-var et = (e) => e <= 1.6 ? {
+`, L = "https://opendisplay.org/firmware/toolbox/index.html";
+`${L}`, `${L}`, `${L}`, `${L}`;
+var $e = (e) => e <= 1.6 ? {
 	landscape: {
 		columns: 1,
 		rows: 1
@@ -2263,7 +2263,7 @@ var et = (e) => e <= 1.6 ? {
 		columns: 3,
 		rows: 3
 	}
-}, L = (e, t, n, r, i, a, o) => ({
+}, R = (e, t, n, r, i, a, o) => ({
 	id: `custom-${e}`,
 	manufacturer: "Custom",
 	family: "Custom",
@@ -2274,34 +2274,34 @@ var et = (e) => e <= 1.6 ? {
 	nativeOrientation: r >= i ? "landscape" : "portrait",
 	palettes: a === "bw" ? ["bw"] : ["bw", a],
 	defaultPalette: a,
-	grid: et(n),
-	source: I,
+	grid: $e(n),
+	source: L,
 	connectorPins: o,
 	toolboxId: e
-}), tt = [
-	L("ep154-200x200", "1.54″ Monochrome · 200×200", 1.54, 200, 200, "bw", [24]),
-	L("ep154-152x152", "1.54″ B/W/R · 152×152", 1.54, 152, 152, "bwr", [24]),
-	L("ep154yr-200x200", "1.54″ B/W/R/Y · 200×200", 1.54, 200, 200, "bwry", [24]),
-	L("ep213-122x250", "2.13″ Monochrome · 122×250", 2.13, 122, 250, "bw", [24]),
-	L("ep213r-122x250", "2.13″ B/W/R/Y · 122×250", 2.13, 122, 250, "bwry", [24]),
-	L("ep266yr-184x360", "2.66″ B/W/R/Y · 184×360", 2.66, 184, 360, "bwry", [24]),
-	L("ep29-128x296", "2.9″ Flexible monochrome · 128×296", 2.9, 128, 296, "bw", [24]),
-	L("ep29r-128x296", "2.9″ B/W/R/Y · 128×296", 2.9, 128, 296, "bwry", [24]),
-	L("ep29yr-168x384", "2.9″ B/W/R/Y · 168×384", 2.9, 168, 384, "bwry", [24]),
-	L("ep35yr-184x384", "3.5″ B/W/R/Y · 184×384", 3.5, 184, 384, "bwry", [24]),
-	L("ep397-800x480", "3.97″ Monochrome · 800×480", 3.97, 800, 480, "bw", [24]),
-	L("ep397-800x480-4gray", "3.97″ 4-level grayscale · 800×480", 3.97, 800, 480, "gray4", [24]),
-	L("ep397yr-800x480", "3.97″ B/W/R/Y · 800×480", 3.97, 800, 480, "bwry", [24]),
-	L("ep42-400x300", "4.2″ Monochrome · 400×300", 4.2, 400, 300, "bw", [24]),
-	L("ep42yr-400x300", "4.2″ B/W/R/Y · 400×300", 4.2, 400, 300, "bwry", [24]),
-	L("ep426-800x480", "4.26″ Monochrome · 800×480", 4.26, 800, 480, "bw", [24]),
-	L("ep426-800x480-4g", "4.26″ 4-level grayscale · 800×480", 4.26, 800, 480, "gray4", [24]),
-	L("ep583-648x480", "5.83″ Monochrome · 648×480", 5.83, 648, 480, "bw", [24]),
-	L("ep75-800x480", "7.5″ Monochrome · 800×480", 7.5, 800, 480, "bw", [24]),
-	L("ep75-800x480-4gray", "7.5″ 4-level grayscale · 800×480", 7.5, 800, 480, "gray4", [24]),
-	L("ep73-spectra-800x480", "7.3″ Spectra 6 · 800×480", 7.3, 800, 480, "spectra6", [50]),
-	L("ep75-bwry-800x480", "7.5″ B/W/R/Y · 800×480", 7.5, 800, 480, "bwry", [24])
-], nt = {
+}), et = [
+	R("ep154-200x200", "1.54″ Monochrome · 200×200", 1.54, 200, 200, "bw", [24]),
+	R("ep154-152x152", "1.54″ B/W/R · 152×152", 1.54, 152, 152, "bwr", [24]),
+	R("ep154yr-200x200", "1.54″ B/W/R/Y · 200×200", 1.54, 200, 200, "bwry", [24]),
+	R("ep213-122x250", "2.13″ Monochrome · 122×250", 2.13, 122, 250, "bw", [24]),
+	R("ep213r-122x250", "2.13″ B/W/R/Y · 122×250", 2.13, 122, 250, "bwry", [24]),
+	R("ep266yr-184x360", "2.66″ B/W/R/Y · 184×360", 2.66, 184, 360, "bwry", [24]),
+	R("ep29-128x296", "2.9″ Flexible monochrome · 128×296", 2.9, 128, 296, "bw", [24]),
+	R("ep29r-128x296", "2.9″ B/W/R/Y · 128×296", 2.9, 128, 296, "bwry", [24]),
+	R("ep29yr-168x384", "2.9″ B/W/R/Y · 168×384", 2.9, 168, 384, "bwry", [24]),
+	R("ep35yr-184x384", "3.5″ B/W/R/Y · 184×384", 3.5, 184, 384, "bwry", [24]),
+	R("ep397-800x480", "3.97″ Monochrome · 800×480", 3.97, 800, 480, "bw", [24]),
+	R("ep397-800x480-4gray", "3.97″ 4-level grayscale · 800×480", 3.97, 800, 480, "gray4", [24]),
+	R("ep397yr-800x480", "3.97″ B/W/R/Y · 800×480", 3.97, 800, 480, "bwry", [24]),
+	R("ep42-400x300", "4.2″ Monochrome · 400×300", 4.2, 400, 300, "bw", [24]),
+	R("ep42yr-400x300", "4.2″ B/W/R/Y · 400×300", 4.2, 400, 300, "bwry", [24]),
+	R("ep426-800x480", "4.26″ Monochrome · 800×480", 4.26, 800, 480, "bw", [24]),
+	R("ep426-800x480-4g", "4.26″ 4-level grayscale · 800×480", 4.26, 800, 480, "gray4", [24]),
+	R("ep583-648x480", "5.83″ Monochrome · 648×480", 5.83, 648, 480, "bw", [24]),
+	R("ep75-800x480", "7.5″ Monochrome · 800×480", 7.5, 800, 480, "bw", [24]),
+	R("ep75-800x480-4gray", "7.5″ 4-level grayscale · 800×480", 7.5, 800, 480, "gray4", [24]),
+	R("ep73-spectra-800x480", "7.3″ Spectra 6 · 800×480", 7.3, 800, 480, "spectra6", [50]),
+	R("ep75-bwry-800x480", "7.5″ B/W/R/Y · 800×480", 7.5, 800, 480, "bwry", [24])
+], tt = {
 	bw: "Monochrome · black / white",
 	gray4: "Grayscale · 4 levels",
 	gray16: "Grayscale · 16 levels",
@@ -2309,7 +2309,7 @@ var et = (e) => e <= 1.6 ? {
 	bwy: "Black / white / yellow",
 	bwry: "Black / white / red / yellow",
 	spectra6: "Spectra 6 · B/W/R/Y/B/G"
-}, rt = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", R = "https://opendisplay.org/what-hardware-to-buy.html", z = (e, t, n, r, i, a, o, s, c, l) => ({
+}, nt = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", z = "https://opendisplay.org/what-hardware-to-buy.html", rt = "opendisplay-seeed-7-5-diy", B = (e, t, n, r, i, a, o, s, c, l) => ({
 	id: e,
 	manufacturer: t,
 	family: "OpenDisplay",
@@ -2324,8 +2324,8 @@ var et = (e) => e <= 1.6 ? {
 		landscape: c,
 		portrait: l
 	},
-	source: R
-}), B = (e, t, n, r, i, a, o, s = !1) => ({
+	source: z
+}), V = (e, t, n, r, i, a, o, s = !1) => ({
 	id: e,
 	manufacturer: "SOLUM",
 	family: "Newton Pro",
@@ -2341,170 +2341,170 @@ var et = (e) => e <= 1.6 ? {
 		portrait: o
 	},
 	freezer: s,
-	source: rt
-}), V = [
-	B("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
+	source: nt
+}), H = [
+	V("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
 		columns: 1,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 1
 	}),
-	B("solum-newton-pro-1-6-h", "Newton Pro 1.6″ H", 1.6, 200, 200, {
+	V("solum-newton-pro-1-6-h", "Newton Pro 1.6″ H", 1.6, 200, 200, {
 		columns: 1,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 1
 	}),
-	B("solum-newton-pro-2-2", "Newton Pro 2.2″", 2.2, 296, 160, {
+	V("solum-newton-pro-2-2", "Newton Pro 2.2″", 2.2, 296, 160, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}),
-	B("solum-newton-pro-2-2-f", "Newton Pro 2.2″ Freezer", 2.2, 296, 160, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}, !0),
-	B("solum-newton-pro-2-6", "Newton Pro 2.6″", 2.6, 360, 184, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}),
-	B("solum-newton-pro-2-6-f", "Newton Pro 2.6″ Freezer", 2.6, 360, 184, {
+	V("solum-newton-pro-2-2-f", "Newton Pro 2.2″ Freezer", 2.2, 296, 160, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}, !0),
-	B("solum-newton-pro-2-7", "Newton Pro 2.7″", 2.7, 300, 200, {
+	V("solum-newton-pro-2-6", "Newton Pro 2.6″", 2.6, 360, 184, {
 		columns: 2,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 2
 	}),
-	B("solum-newton-pro-2-9", "Newton Pro 2.9″", 2.9, 384, 168, {
+	V("solum-newton-pro-2-6-f", "Newton Pro 2.6″ Freezer", 2.6, 360, 184, {
+		columns: 2,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 2
+	}, !0),
+	V("solum-newton-pro-2-7", "Newton Pro 2.7″", 2.7, 300, 200, {
+		columns: 2,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 2
+	}),
+	V("solum-newton-pro-2-9", "Newton Pro 2.9″", 2.9, 384, 168, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}),
-	B("solum-newton-pro-2-9-f", "Newton Pro 2.9″ Freezer", 2.9, 384, 168, {
+	V("solum-newton-pro-2-9-f", "Newton Pro 2.9″ Freezer", 2.9, 384, 168, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}, !0),
-	B("solum-newton-pro-3-45", "Newton Pro 3.5″ · 3.45 panel", 3.45, 480, 224, {
+	V("solum-newton-pro-3-45", "Newton Pro 3.5″ · 3.45 panel", 3.45, 480, 224, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}),
-	B("solum-newton-pro-3-45-f", "Newton Pro 3.5″ Freezer · 3.45 panel", 3.45, 480, 224, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}, !0),
-	B("solum-newton-pro-3-52", "Newton Pro 3.5″ · 3.52 panel", 3.52, 384, 180, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}),
-	B("solum-newton-pro-3-52-f", "Newton Pro 3.5″ Freezer · 3.52 panel", 3.52, 384, 180, {
+	V("solum-newton-pro-3-45-f", "Newton Pro 3.5″ Freezer · 3.45 panel", 3.45, 480, 224, {
 		columns: 3,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 3
 	}, !0),
-	B("solum-newton-pro-4-2", "Newton Pro 4.2″", 4.2, 400, 300, {
+	V("solum-newton-pro-3-52", "Newton Pro 3.5″ · 3.52 panel", 3.52, 384, 180, {
+		columns: 3,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 3
+	}),
+	V("solum-newton-pro-3-52-f", "Newton Pro 3.5″ Freezer · 3.52 panel", 3.52, 384, 180, {
+		columns: 3,
+		rows: 1
+	}, {
+		columns: 1,
+		rows: 3
+	}, !0),
+	V("solum-newton-pro-4-2", "Newton Pro 4.2″", 4.2, 400, 300, {
 		columns: 2,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 2
 	}),
-	B("solum-newton-pro-4-3", "Newton Pro 4.3″", 4.3, 522, 152, {
+	V("solum-newton-pro-4-3", "Newton Pro 4.3″", 4.3, 522, 152, {
 		columns: 4,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 4
 	}),
-	B("solum-newton-pro-4-5", "Newton Pro 4.5″", 4.5, 480, 176, {
+	V("solum-newton-pro-4-5", "Newton Pro 4.5″", 4.5, 480, 176, {
 		columns: 4,
 		rows: 1
 	}, {
 		columns: 1,
 		rows: 4
 	}),
-	B("solum-newton-pro-5-8", "Newton Pro 5.8″", 5.8, 792, 272, {
+	V("solum-newton-pro-5-8", "Newton Pro 5.8″", 5.8, 792, 272, {
 		columns: 4,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 4
 	}),
-	B("solum-newton-pro-5-8-f", "Newton Pro 5.8″ Freezer", 5.8, 792, 272, {
+	V("solum-newton-pro-5-8-f", "Newton Pro 5.8″ Freezer", 5.8, 792, 272, {
 		columns: 4,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 4
 	}, !0),
-	B("solum-newton-pro-6-1", "Newton Pro 6.1″", 6.1, 648, 480, {
+	V("solum-newton-pro-6-1", "Newton Pro 6.1″", 6.1, 648, 480, {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	B("solum-newton-pro-7-5", "Newton Pro 7.5″", 7.5, 480, 800, {
+	V("solum-newton-pro-7-5", "Newton Pro 7.5″", 7.5, 480, 800, {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	B("solum-newton-pro-9-7", "Newton Pro 9.7″", 9.7, 672, 960, {
+	V("solum-newton-pro-9-7", "Newton Pro 9.7″", 9.7, 672, 960, {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	B("solum-newton-pro-11-6", "Newton Pro 11.6″", 11.6, 640, 960, {
+	V("solum-newton-pro-11-6", "Newton Pro 11.6″", 11.6, 640, 960, {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	B("solum-newton-pro-12-2", "Newton Pro 12.2″", 12.2, 768, 960, {
+	V("solum-newton-pro-12-2", "Newton Pro 12.2″", 12.2, 768, 960, {
 		columns: 4,
 		rows: 4
 	}, {
 		columns: 4,
 		rows: 4
 	}),
-	z("opendisplay-e1001", "Seeed Studio", "reTerminal E1001 7.5″", 7.5, 800, 480, ["bw"], "bw", {
+	B("opendisplay-e1001", "Seeed Studio", "reTerminal E1001 7.5″", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
@@ -2532,7 +2532,7 @@ var et = (e) => e <= 1.6 ? {
 				rows: 3
 			}
 		},
-		source: R
+		source: z
 	},
 	{
 		id: "opendisplay-e1002",
@@ -2555,7 +2555,7 @@ var et = (e) => e <= 1.6 ? {
 				rows: 3
 			}
 		},
-		source: R
+		source: z
 	},
 	{
 		id: "opendisplay-e1003",
@@ -2582,58 +2582,58 @@ var et = (e) => e <= 1.6 ? {
 				rows: 4
 			}
 		},
-		source: R
+		source: z
 	},
-	z("opendisplay-e1004", "Seeed Studio", "reTerminal E1004 13.3″ Spectra 6", 13.3, 1200, 1600, ["bw", "spectra6"], "spectra6", {
+	B("opendisplay-e1004", "Seeed Studio", "reTerminal E1004 13.3″ Spectra 6", 13.3, 1200, 1600, ["bw", "spectra6"], "spectra6", {
 		columns: 4,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 4
 	}),
-	z("opendisplay-xiao-7-5", "Seeed Studio", "XIAO 7.5″ ePaper kit", 7.5, 800, 480, ["bw"], "bw", {
+	B("opendisplay-xiao-7-5", "Seeed Studio", "XIAO 7.5″ ePaper kit", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	z("opendisplay-seeed-7-5-diy", "Seeed Studio", "7.5″ DIY · EE04", 7.5, 800, 480, ["bw"], "bw", {
+	B("opendisplay-seeed-7-5-diy", "Seeed Studio", "7.5″ DIY · EE04", 7.5, 800, 480, ["bw"], "bw", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	z("opendisplay-4-26-mono-kit", "OpenDisplay", "OpenDisplay 4.26″ Mono Kit", 4.26, 800, 480, ["bw"], "bw", {
+	B("opendisplay-4-26-mono-kit", "OpenDisplay", "OpenDisplay 4.26″ Mono Kit", 4.26, 800, 480, ["bw"], "bw", {
 		columns: 2,
 		rows: 2
 	}, {
 		columns: 2,
 		rows: 2
 	}),
-	z("opendisplay-7-3-color-kit", "OpenDisplay", "OpenDisplay 7.3″ Color Kit", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
+	B("opendisplay-7-3-color-kit", "OpenDisplay", "OpenDisplay 7.3″ Color Kit", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	z("opendisplay-waveshare-photopainter", "Waveshare", "ESP32-S3 PhotoPainter 7.3″", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
+	B("opendisplay-waveshare-photopainter", "Waveshare", "ESP32-S3 PhotoPainter 7.3″", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
 		columns: 3,
 		rows: 3
 	}, {
 		columns: 3,
 		rows: 3
 	}),
-	...tt
-], H = (e) => V.find((t) => t.id === e) ?? V.find((e) => e.id === "solum-newton-pro-5-8") ?? V[0], it = (e, t) => e.nativeOrientation === t ? {
+	...et
+], U = (e) => H.find((t) => t.id === e) ?? H.find((e) => e.id === "opendisplay-seeed-7-5-diy") ?? H[0], it = (e, t) => e.nativeOrientation === t ? {
 	width: e.nativeWidth,
 	height: e.nativeHeight
 } : {
 	width: e.nativeHeight,
 	height: e.nativeWidth
-}, at = 0, U = (e = globalThis.crypto) => {
+}, at = 0, W = (e = globalThis.crypto) => {
 	if (typeof e?.randomUUID == "function") return e.randomUUID();
 	if (e) {
 		let t = e.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
@@ -2642,10 +2642,10 @@ var et = (e) => e <= 1.6 ? {
 		return `${n.slice(0, 8)}-${n.slice(8, 12)}-${n.slice(12, 16)}-${n.slice(16, 20)}-${n.slice(20)}`;
 	}
 	return at += 1, `odx-${Date.now().toString(36)}-${at.toString(36)}`;
-}, W = (e) => {
+}, G = (e) => {
 	let t = [];
 	for (let n = 1; n <= e.rows; n += 1) for (let r = 1; r <= e.columns; r += 1) t.push({
-		id: U(),
+		id: W(),
 		row: n,
 		column: r,
 		rowSpan: 1,
@@ -2657,7 +2657,7 @@ var et = (e) => e <= 1.6 ? {
 	if ((a - r + 1) * (o - i + 1) !== s.reduce((e, t) => e + t.rowSpan * t.columnSpan, 0) || s.length === 0) return null;
 	let c = s.find((e) => e.widget)?.widget, l = new Set(s.map((e) => e.id));
 	return [...e.filter((e) => !l.has(e.id)), {
-		id: U(),
+		id: W(),
 		row: r,
 		column: i,
 		rowSpan: a - r + 1,
@@ -2668,7 +2668,7 @@ var et = (e) => e <= 1.6 ? {
 	let n = e.find((e) => e.id === t);
 	if (!n || n.rowSpan === 1 && n.columnSpan === 1 && !n.label) return e;
 	if (n.rowSpan === 1 && n.columnSpan === 1) return e.map((e) => e.id === t ? {
-		id: U(),
+		id: W(),
 		row: e.row,
 		column: e.column,
 		rowSpan: 1,
@@ -2676,7 +2676,7 @@ var et = (e) => e <= 1.6 ? {
 	} : e);
 	let r = [];
 	for (let e = n.row; e < n.row + n.rowSpan; e += 1) for (let t = n.column; t < n.column + n.columnSpan; t += 1) r.push({
-		id: U(),
+		id: W(),
 		row: e,
 		column: t,
 		rowSpan: 1,
@@ -2695,10 +2695,10 @@ var et = (e) => e <= 1.6 ? {
 	column: e.row,
 	rowSpan: e.columnSpan,
 	columnSpan: e.rowSpan
-}) : W(n), G = (e, t) => ({ ...e.grid[t] }), ut = "solum-newton-pro-5-8", dt = (e = "Kitchen display", t = "en") => {
-	let n = H(ut), r = "landscape", i = G(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
+}) : G(n), ut = (e, t) => ({ ...e.grid[t] }), dt = (e = "Kitchen display", t = "en") => {
+	let n = U(rt), r = "landscape", i = ut(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
 	return {
-		id: U(),
+		id: W(),
 		schemaVersion: 1,
 		name: e,
 		status: "draft",
@@ -2712,15 +2712,15 @@ var et = (e) => e <= 1.6 ? {
 		width: n.nativeWidth,
 		height: n.nativeHeight,
 		grid: i,
-		regions: W(i),
+		regions: G(i),
 		createdAt: a,
 		updatedAt: a
 	};
-}, K = (e, t) => String(e[t] ?? ""), ft = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => C`
+}, K = (e, t) => String(e[t] ?? ""), ft = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => T`
   <svg class="widget-icon" viewBox="0 0 24 24" role="img" aria-label=${t}>
     <path d=${e}></path>
   </svg>
-`, J = (e) => C`
+`, J = (e) => T`
   <svg slot="start" class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path d=${e}></path>
   </svg>
@@ -2730,7 +2730,7 @@ var et = (e) => e <= 1.6 ? {
 		version: "0.5.0",
 		name: "Calendar",
 		description: "An agenda from one or more calendar entities.",
-		icon: Ue,
+		icon: He,
 		styles: o`
   .event-list {
     min-height: 0;
@@ -2842,15 +2842,15 @@ var et = (e) => e <= 1.6 ? {
 					"Family lunch"
 				]
 			].slice(0, n);
-			return C`
+			return T`
       <div class="widget calendar-widget ${t.compact ? "compact" : ""}">
         <div class="widget-heading">
-          <span>${q(Ue)}</span>
+          <span>${q(He)}</span>
           <strong>${K(e, "title")}</strong>
           <span class="widget-kicker">${ft(e, "days")} days</span>
         </div>
         <div class="event-list">
-          ${r.map(([e, t, n]) => C`
+          ${r.map(([e, t, n]) => T`
               <div class="event-row">
                 <span class="event-day">${e}</span>
                 <span class="event-time">${t}</span>
@@ -2864,10 +2864,10 @@ var et = (e) => e <= 1.6 ? {
 	},
 	{
 		id: "sensor",
-		version: "0.6.0",
+		version: "0.6.1",
 		name: "Sensor",
 		description: "Current value of a selected Home Assistant sensor.",
-		icon: Je,
+		icon: qe,
 		styles: o`
   .sensor-widget {
     justify-content: space-between;
@@ -2901,18 +2901,34 @@ var et = (e) => e <= 1.6 ? {
     line-height: 1;
   }
 `,
-		defaults: { entity: "" },
-		options: [{
-			key: "entity",
-			label: "Sensor entity",
-			required: !0,
-			selector: { entity: { filter: { domain: "sensor" } } }
-		}],
-		render: (e) => C`
+		defaults: {
+			entity: "",
+			showEntityId: !0,
+			showFooter: !0
+		},
+		options: [
+			{
+				key: "entity",
+				label: "Sensor entity",
+				required: !0,
+				selector: { entity: { filter: { domain: "sensor" } } }
+			},
+			{
+				key: "showEntityId",
+				label: "Show entity ID",
+				selector: { boolean: {} }
+			},
+			{
+				key: "showFooter",
+				label: "Show footer",
+				selector: { boolean: {} }
+			}
+		],
+		render: (e) => T`
     <div class="widget sensor-widget">
       <span class="sensor-name">${K(e, "entity") || "Choose a sensor"}</span>
       <div class="sensor-reading">
-        ${q(Je, "Sensor")}
+        ${q(qe, "Sensor")}
         <strong>Live data</strong>
       </div>
     </div>
@@ -2923,7 +2939,7 @@ var et = (e) => e <= 1.6 ? {
 		version: "0.5.0",
 		name: "Text",
 		description: "A simple message or heading.",
-		icon: qe,
+		icon: Ke,
 		styles: o`
   .note-widget {
     justify-content: center;
@@ -3003,7 +3019,7 @@ var et = (e) => e <= 1.6 ? {
 				]
 			}
 		],
-		render: (e) => C`
+		render: (e) => T`
     <div class="widget note-widget align-${K(e, "align")}">
       <span class="note-eyebrow">${K(e, "title")}</span>
       <strong>${K(e, "text")}</strong>
@@ -3012,10 +3028,10 @@ var et = (e) => e <= 1.6 ? {
 	},
 	{
 		id: "weather",
-		version: "0.5.0",
+		version: "0.6.1",
 		name: "Weather",
 		description: "Current conditions and a daily Home Assistant forecast.",
-		icon: Qe,
+		icon: Ze,
 		styles: o`
   .weather-widget-placeholder {
     align-items: center;
@@ -3045,7 +3061,9 @@ var et = (e) => e <= 1.6 ? {
 			weather: "",
 			showHumidity: !0,
 			showFeelsLike: !0,
-			showForecast: !0
+			showForecast: !0,
+			showEntityId: !0,
+			showFooter: !0
 		},
 		options: [
 			{
@@ -3068,11 +3086,21 @@ var et = (e) => e <= 1.6 ? {
 				key: "showForecast",
 				label: "Show forecast",
 				selector: { boolean: {} }
+			},
+			{
+				key: "showEntityId",
+				label: "Show entity ID",
+				selector: { boolean: {} }
+			},
+			{
+				key: "showFooter",
+				label: "Show footer",
+				selector: { boolean: {} }
 			}
 		],
-		render: (e) => C`
+		render: (e) => T`
     <div class="widget weather-widget-placeholder">
-      ${q(Qe, "Weather")}
+      ${q(Ze, "Weather")}
       <strong>Weather</strong>
       <span>${K(e, "weather") || "Choose a weather entity"}</span>
     </div>
@@ -3096,7 +3124,7 @@ var et = (e) => e <= 1.6 ? {
 		defaults: e.defaults,
 		options: e.fields,
 		styles: o``,
-		render: () => C`
+		render: () => T`
       <div class="empty-region-copy">
         <ha-icon .icon=${e.icon}></ha-icon>
         <strong>${e.name}</strong>
@@ -3171,20 +3199,20 @@ var Z = (e, t) => {
 	let t = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		...structuredClone(e),
-		id: U(),
+		id: W(),
 		name: `${e.name} copy`,
 		createdAt: t,
 		updatedAt: t,
 		regions: e.regions.map((e) => ({
 			...structuredClone(e),
-			id: U()
+			id: W()
 		}))
 	};
 }, Q = (e) => {
 	let t = e + 1, n = "";
 	for (; t > 0;) --t, n = String.fromCharCode(65 + t % 26) + n, t = Math.floor(t / 26);
 	return n;
-}, $ = class extends M {
+}, $ = class extends N {
 	constructor(...e) {
 		super(...e), this.store = {
 			schemaVersion: 1,
@@ -3194,7 +3222,7 @@ var Z = (e, t) => {
 	}
 	static {
 		this.styles = [
-			$e,
+			Qe,
 			gt,
 			...ht
 		];
@@ -3218,7 +3246,7 @@ var Z = (e, t) => {
 		return this.layoutDraft ?? this.project;
 	}
 	get canvasDisplay() {
-		return H(this.canvasProject.displayId);
+		return U(this.canvasProject.displayId);
 	}
 	get canvasPixels() {
 		return {
@@ -3227,7 +3255,7 @@ var Z = (e, t) => {
 		};
 	}
 	displayName(e) {
-		return e.displayId === "custom" ? "Custom display" : H(e.displayId).name;
+		return e.displayId === "custom" ? "Custom display" : U(e.displayId).name;
 	}
 	get selectedRegion() {
 		return this.project.regions.find((e) => e.id === this.selectedRegionId);
@@ -3401,7 +3429,7 @@ var Z = (e, t) => {
 		})), this.renameDialog?.close(), this.showToast("Name updated"));
 	}
 	applyDisplayProfile(e, t) {
-		let n = H(e), r = G(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : W(r).map((e, t) => ({
+		let n = U(e), r = ut(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
 			...e,
 			widget: a[t]
 		})), s = it(n, this.canvasProject.orientation);
@@ -3460,7 +3488,7 @@ var Z = (e, t) => {
 		let t = this.canvasProject.displayId === "custom" ? {
 			columns: this.canvasProject.grid.rows,
 			rows: this.canvasProject.grid.columns
-		} : G(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = lt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
+		} : ut(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = lt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
 			width: this.canvasProject.height,
 			height: this.canvasProject.width
 		} : it(this.canvasDisplay, e);
@@ -3483,7 +3511,7 @@ var Z = (e, t) => {
 		let n = Math.max(1, Math.min(24, Number(t.currentTarget.value))), r = {
 			...this.canvasProject.grid,
 			[e]: n
-		}, i = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), a = W(r).map((e, t) => ({
+		}, i = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), a = G(r).map((e, t) => ({
 			...e,
 			widget: i[t]
 		}));
@@ -3575,7 +3603,7 @@ var Z = (e, t) => {
 		}));
 	}
 	renderProjectRail() {
-		return C`
+		return T`
       <aside class="project-rail" aria-label="Saved displays">
         <div class="rail-heading"><h2>Displays</h2><button class="text-button" @click=${this.addProject}>+ New</button></div>
         <div class="project-list">
@@ -3584,49 +3612,49 @@ var Z = (e, t) => {
 				width: e.width,
 				height: e.height
 			};
-			return C`
+			return T`
               <button class="project-card ${e.id === this.project.id ? "active" : ""}" @click=${() => this.selectProject(e.id)}>
-                <span class="mini-screen" style=${F({ "--mini-aspect": String(t.width / t.height) })}>${e.grid.columns}×${e.grid.rows}</span>
-                <span class="project-card-copy"><strong>${e.name}</strong><span>${this.displayName(e)} · ${e.status === "ready" ? "Ready" : "Draft"}</span>${e.status === "ready" ? C`<code>media-source://opendisplay_studio/${e.id}</code>` : T}</span>
+                <span class="mini-screen" style=${I({ "--mini-aspect": String(t.width / t.height) })}>${e.grid.columns}×${e.grid.rows}</span>
+                <span class="project-card-copy"><strong>${e.name}</strong><span>${this.displayName(e)} · ${e.status === "ready" ? "Ready" : "Draft"}</span>${e.status === "ready" ? T`<code>media-source://opendisplay_studio/${e.id}</code>` : D}</span>
               </button>
             `;
 		})}
         </div>
         <div class="rail-footer">Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
         <div class="rail-actions" aria-label="Project actions">
-          <button class="rail-action danger" @click=${this.deleteProject}>${q(Ke)} Delete</button>
+          <button class="rail-action danger" @click=${this.deleteProject}>${q(Ge)} Delete</button>
         </div>
       </aside>
     `;
 	}
 	renderToolbar() {
 		let e = this.canvasProject, t = this.canvasDisplay;
-		return C`
+		return T`
       <div class="device-toolbar layout-toolbar">
         <div class="control grow">
           <label for="device-model">Device model</label>
-          <select id="device-model" .value=${e.displayId === "custom" ? "custom" : t.id} @change=${this.changeDisplay}>
+          <select id="device-model" @change=${this.changeDisplay}>
             <optgroup label="SOLUM · Newton Pro">
-              ${V.filter((e) => e.family === "Newton Pro").map((e) => C`
-                <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}${e.freezer ? " · mono" : ""}</option>
+              ${H.filter((e) => e.family === "Newton Pro").map((e) => T`
+                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}${e.freezer ? " · mono" : ""}</option>
               `)}
             </optgroup>
             <optgroup label="Seeed · ready to use">
-              ${V.filter((e) => e.family === "OpenDisplay" && e.manufacturer === "Seeed Studio").map((e) => C`
-                <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
+              ${H.filter((e) => e.family === "OpenDisplay" && e.manufacturer === "Seeed Studio").map((e) => T`
+                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
               `)}
             </optgroup>
             <optgroup label="Other OpenDisplay hardware">
-              ${V.filter((e) => e.family === "OpenDisplay" && e.manufacturer !== "Seeed Studio").map((e) => C`
-                <option value=${e.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
+              ${H.filter((e) => e.family === "OpenDisplay" && e.manufacturer !== "Seeed Studio").map((e) => T`
+                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
               `)}
             </optgroup>
             <optgroup label="Custom hardware">
-              <option value="custom">Custom resolution</option>
+              <option value="custom" .selected=${e.displayId === "custom"}>Custom resolution</option>
             </optgroup>
           </select>
         </div>
-        ${e.displayId === "custom" ? C`
+        ${e.displayId === "custom" ? T`
           <div class="control custom-control">
             <label for="custom-width">Width</label>
             <input id="custom-width" type="number" min="64" max="4096" .value=${String(e.width)} @change=${(e) => this.changeCustomSize("width", e)} />
@@ -3635,11 +3663,11 @@ var Z = (e, t) => {
             <label for="custom-height">Height</label>
             <input id="custom-height" type="number" min="64" max="4096" .value=${String(e.height)} @change=${(e) => this.changeCustomSize("height", e)} />
           </div>
-        ` : T}
+        ` : D}
         <div class="control">
           <label for="palette">Palette</label>
           <select id="palette" .value=${e.palette} @change=${this.changePalette}>
-            ${(e.displayId === "custom" ? Object.keys(nt) : t.palettes).map((e) => C`<option value=${e}>${nt[e]}</option>`)}
+            ${(e.displayId === "custom" ? Object.keys(tt) : t.palettes).map((e) => T`<option value=${e}>${tt[e]}</option>`)}
           </select>
         </div>
         <div class="control">
@@ -3683,23 +3711,23 @@ var Z = (e, t) => {
 			width: this.project.width,
 			height: this.project.height
 		};
-		return C`
+		return T`
       <div class="device-toolbar widget-toolbar">
         <div class="device-summary">
           <span class="step-kicker">Step 2 · Widgets</span>
           <strong>${this.displayName(this.project)}</strong>
-          <span>${e.width}×${e.height} · ${nt[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
+          <span>${e.width}×${e.height} · ${tt[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
-        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Ze)} Edit device & layout</ha-button>
+        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Xe)} Edit device & layout</ha-button>
       </div>
     `;
 	}
 	renderScreenRegion(e) {
 		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !r && !!(this.previewImageUrl || this.previewError), a = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, o = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), s = a ? e.label ?? Q(o.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`;
-		return C`
+		return T`
       <section
         class="screen-region ${r ? "layout-region" : e.widget ? "" : "empty"} ${i ? "preview-region" : ""} ${!r && e.id === this.selectedRegionId ? "selected" : ""}"
-        style=${F({
+        style=${I({
 			gridColumn: `${e.column} / span ${e.columnSpan}`,
 			gridRow: `${e.row} / span ${e.rowSpan}`
 		})}
@@ -3711,26 +3739,26 @@ var Z = (e, t) => {
 			r && this.splitSelectedRegion(e.id);
 		}}
       >
-        ${i ? T : r ? a ? C`<div class="layout-region-copy composed"><strong>${s}</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>` : T : t && e.widget ? t.render(e.widget.config, {
+        ${i ? D : r ? a ? T`<div class="layout-region-copy composed"><strong>${s}</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>` : D : t && e.widget ? t.render(e.widget.config, {
 			compact: n,
 			palette: this.project.palette
-		}) : C`<div class="empty-region-copy"><strong>Add widget</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>`}
+		}) : T`<div class="empty-region-copy"><strong>Add widget</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>`}
       </section>
     `;
 	}
 	renderMergeLayer() {
-		if (this.editorMode !== "layout") return C``;
+		if (this.editorMode !== "layout") return T``;
 		let e = Array.from({ length: this.canvasProject.grid.columns * this.canvasProject.grid.rows }, (e, t) => ({
 			row: Math.floor(t / this.canvasProject.grid.columns) + 1,
 			column: t % this.canvasProject.grid.columns + 1
 		})), t = this.mergeHover ?? this.mergeAnchor, n = !!(this.mergeAnchor && t && this.selectionContainsComposedRegion(this.mergeAnchor, t));
-		return C`
+		return T`
       <div class="merge-layer active" aria-label="Region composition grid" @pointerleave=${() => {
 			this.mergeHover = void 0;
 		}}>
         ${e.map((e) => {
 			let r = this.canvasProject.regions.find((t) => ot(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
-			return C`
+			return T`
             <button
               class="merge-cell ${i ? "occupied" : ""} ${a ? "preview" : ""} ${n && a ? "invalid" : ""} ${this.mergeAnchor?.row === e.row && this.mergeAnchor?.column === e.column ? "anchor" : ""}"
               aria-label=${i ? `Existing region at column ${e.column}, row ${e.row}; double-click to remove` : `Grid cell column ${e.column}, row ${e.row}`}
@@ -3741,7 +3769,7 @@ var Z = (e, t) => {
               @dblclick=${(e) => {
 				e.preventDefault(), e.stopPropagation(), i && r && this.splitSelectedRegion(r.id);
 			}}
-            >${i ? T : `${e.column}.${e.row}`}</button>
+            >${i ? D : `${e.column}.${e.row}`}</button>
           `;
 		})}
       </div>
@@ -3752,7 +3780,7 @@ var Z = (e, t) => {
 			width: e.width,
 			height: e.height
 		};
-		return C`
+		return T`
       <main class="canvas-area">
         <div class="canvas-stage">
           <div class="screen-meta"><span>${e.displayId === "custom" ? "CUSTOM DISPLAY" : `${t.manufacturer} · ${t.diagonal}″`}</span><code>${n.width} × ${n.height} px</code></div>
@@ -3763,24 +3791,24 @@ var Z = (e, t) => {
                   id="display-screen"
                   class="display-screen ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? "live-preview" : ""}"
                   data-palette=${e.palette}
-                  style=${F({
+                  style=${I({
 			"--grid-columns": String(e.grid.columns),
 			"--grid-rows": String(e.grid.rows),
 			width: `${n.width}px`,
 			height: `${n.height}px`
 		})}
                 >
-                  ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? C`
-                      ${this.previewImageUrl ? C`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />` : C`<ha-alert class="preview-failure" alert-type="error" .title=${"Exact preview unavailable"}>${this.previewError}</ha-alert>`}
+                  ${this.editorMode === "widgets" && (this.previewImageUrl || this.previewError) ? T`
+                      ${this.previewImageUrl ? T`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />` : T`<ha-alert class="preview-failure" alert-type="error" .title=${"Exact preview unavailable"}>${this.previewError}</ha-alert>`}
                       <div
                         class="preview-overlay"
-                        style=${F({
+                        style=${I({
 			"--grid-columns": String(e.grid.columns),
 			"--grid-rows": String(e.grid.rows),
 			"--preview-gap": `${Math.max(3, Math.min(10, Math.round(Math.min(n.width, n.height) / 60)))}px`
 		})}
                       >${e.regions.map((e) => this.renderScreenRegion(e))}</div>
-                    ` : C`
+                    ` : T`
                       ${e.regions.map((e) => this.renderScreenRegion(e))}
                       ${this.renderMergeLayer()}
                     `}
@@ -3788,14 +3816,14 @@ var Z = (e, t) => {
               </div>
             </div>
           </div>
-          ${this.editorMode === "layout" ? this.mergeAnchor ? C`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : C`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : C`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.` : "Select a region to configure its content."}</div>`}
+          ${this.editorMode === "layout" ? this.mergeAnchor ? T`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : T`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : T`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.` : "Select a region to configure its content."}</div>`}
         </div>
       </main>
     `;
 	}
 	renderOption(e) {
 		let t = this.selectedRegion?.widget, n = t?.config[e.key] ?? (t ? this.widgetDefinition(t.type)?.defaults[e.key] : void 0), r = e.selector ?? (e.type === "calendar" ? { entity: { filter: { domain: "calendar" } } } : e.type === "entities" ? { entity: { multiple: !0 } } : e.type === "entity" ? { entity: {} } : void 0);
-		return r ? C`
+		return r ? T`
         <ha-form
           .hass=${this.hass}
           .data=${{ [e.key]: n ?? "" }}
@@ -3807,24 +3835,24 @@ var Z = (e, t) => {
 		}]}
           @value-changed=${(t) => this.updateWidgetValue(e, t.detail.value[e.key])}
         ></ha-form>
-      ` : e.type === "toggle" ? C`
+      ` : e.type === "toggle" ? T`
       <div class="toggle-field"><label for=${`option-${e.key}`}>${e.label}</label><input id=${`option-${e.key}`} class="toggle" type="checkbox" .checked=${!!n} @change=${(t) => this.updateWidgetOption(e, t)} /></div>
-    ` : e.type === "select" ? C`
+    ` : e.type === "select" ? T`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
         <select id=${`option-${e.key}`} .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}>
-          ${e.options?.map((e) => C`<option value=${e.value}>${e.label}</option>`)}
+          ${e.options?.map((e) => T`<option value=${e.value}>${e.label}</option>`)}
         </select>
       </div>
-    ` : e.type === "text" && e.multiline ? C`
+    ` : e.type === "text" && e.multiline ? T`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
         <textarea id=${`option-${e.key}`} rows="4" .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}></textarea>
       </div>
-    ` : C`
+    ` : T`
       <div class="field">
         <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <input id=${`option-${e.key}`} type=${e.type} .value=${String(n ?? "")} min=${e.min ?? T} max=${e.max ?? T} step=${e.step ?? T} @change=${(t) => this.updateWidgetOption(e, t)} />
+        <input id=${`option-${e.key}`} type=${e.type} .value=${String(n ?? "")} min=${e.min ?? D} max=${e.max ?? D} step=${e.step ?? D} @change=${(t) => this.updateWidgetOption(e, t)} />
       </div>
     `;
 	}
@@ -3846,22 +3874,22 @@ var Z = (e, t) => {
 	}
 	renderInspector() {
 		let e = this.selectedRegion;
-		if (!e) return C`
+		if (!e) return T`
       <aside class="inspector"><div class="inspector-heading"><h2>Region settings</h2></div><div class="inspector-empty"><div><strong>Select a region</strong><p>Choose a region on the display to assign a widget and configure its data.</p></div></div></aside>
     `;
 		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0;
-		return C`
+		return T`
       <aside class="inspector">
         <div class="inspector-heading"><h2>Region settings</h2><span class="region-address">R${e.row}:C${e.column} · ${e.columnSpan}×${e.rowSpan}</span></div>
         <div class="widget-picker">
-          ${this.widgetMetadata.map((e) => C`
+          ${this.widgetMetadata.map((e) => T`
             <button class="widget-choice ${t?.id === e.id ? "active" : ""}" @click=${() => this.assignWidget(e.id)}>
-              ${Y(e.id) ? q(Y(e.id).icon) : C`<ha-icon .icon=${e.icon}></ha-icon>`}
+              ${Y(e.id) ? q(Y(e.id).icon) : T`<ha-icon .icon=${e.icon}></ha-icon>`}
               <strong>${e.name}</strong><span>${e.description}</span>
             </button>
           `)}
         </div>
-        ${t ? C`<div class="option-form">${t.options.map((e) => this.renderOption(e))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${J(Ke)} Remove widget</ha-button></div>` : C`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
+        ${t ? T`<div class="option-form">${t.options.map((e) => this.renderOption(e))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${J(Ge)} Remove widget</ha-button></div>` : T`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
       </aside>
     `;
 	}
@@ -3870,7 +3898,7 @@ var Z = (e, t) => {
 			width: e.width,
 			height: e.height
 		};
-		return C`
+		return T`
       <aside class="inspector layout-guide">
         <span class="step-kicker">Step 1 · Device & layout</span>
         <h2>Prepare the canvas</h2>
@@ -3908,7 +3936,7 @@ var Z = (e, t) => {
     `;
 	}
 	renderRenameDialog() {
-		return C`
+		return T`
       <dialog id="rename-dialog"><div class="dialog-body">
         <h2>Rename display</h2><p>Use a name that describes where this display will be installed.</p>
         <div class="field"><label class="field-label" for="display-name">Display name</label><input id="display-name" type="text" .value=${this.renameDraft} @input=${(e) => {
@@ -3921,12 +3949,12 @@ var Z = (e, t) => {
     `;
 	}
 	renderWelcome() {
-		return C`
+		return T`
       <div class="app-shell welcome-shell">
         <header class="topbar welcome-topbar">
           <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
           <span class="welcome-topline">Device-accurate e-paper composition</span>
-          <ha-button size="s" variant="brand" @click=${this.addProject}>${J(Ye)} New display</ha-button>
+          <ha-button size="s" variant="brand" @click=${this.addProject}>${J(Je)} New display</ha-button>
         </header>
         <div class="workspace welcome-workspace">
           <aside class="project-rail empty-rail" aria-label="Saved displays">
@@ -3940,7 +3968,7 @@ var Z = (e, t) => {
               <h1>Design an e-paper screen that fits the device.</h1>
               <p>Choose a verified display, compose its native-pixel layout, then add widgets and export the exact screen as PNG or JPG.</p>
               <div class="welcome-actions">
-                <ha-button size="l" variant="brand" @click=${this.addProject}>${J(Ye)} Create your first display</ha-button>
+                <ha-button size="l" variant="brand" @click=${this.addProject}>${J(Je)} Create your first display</ha-button>
               </div>
               <dl class="welcome-facts">
                 <div><dt>1</dt><dd><strong>Select hardware</strong><span>Model, palette and orientation</span></dd></div>
@@ -3962,11 +3990,11 @@ var Z = (e, t) => {
           </main>
         </div>
       </div>
-      ${this.toastMessage ? C`<div class="toast" role="status">${this.toastMessage}</div>` : T}
+      ${this.toastMessage ? T`<div class="toast" role="status">${this.toastMessage}</div>` : D}
     `;
 	}
 	render() {
-		return this.loading ? C`<div class="loading-state"><ha-circular-progress active></ha-circular-progress><p>Loading OpenDisplay Studio…</p></div>` : this.loadError ? C`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><ha-button @click=${this.loadProjects}>Retry</ha-button></div>` : this.store.projects.length === 0 ? this.renderWelcome() : C`
+		return this.loading ? T`<div class="loading-state"><ha-circular-progress active></ha-circular-progress><p>Loading OpenDisplay Studio…</p></div>` : this.loadError ? T`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><ha-button @click=${this.loadProjects}>Retry</ha-button></div>` : this.store.projects.length === 0 ? this.renderWelcome() : T`
       <div class="app-shell">
         <header class="topbar">
           <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
@@ -3979,9 +4007,9 @@ var Z = (e, t) => {
             </div>
           </div>
           <div class="top-actions">
-            ${this.editorMode === "layout" ? C`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${J(We)} Apply layout</ha-button>` : C`
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${J(Xe)} Rename</ha-button>
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${J(Ge)} Duplicate</ha-button>
+            ${this.editorMode === "layout" ? T`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${J(Ue)} Apply layout</ha-button>` : T`
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${J(Ye)} Rename</ha-button>
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${J(We)} Duplicate</ha-button>
                   <ha-button size="s" variant=${this.project.status === "ready" ? "neutral" : "brand"} @click=${() => this.setProjectStatus(this.project.status === "ready" ? "draft" : "ready")}>${this.project.status === "ready" ? "Move to Draft" : "Mark Ready"}</ha-button>
                 `}
           </div>
@@ -3993,10 +4021,10 @@ var Z = (e, t) => {
         </div>
       </div>
       ${this.renderRenameDialog()}
-      ${this.toastMessage ? C`<div class="toast" role="status">${this.toastMessage}</div>` : T}
+      ${this.toastMessage ? T`<div class="toast" role="status">${this.toastMessage}</div>` : D}
     `;
 	}
 };
-X([Ie({ attribute: !1 })], $.prototype, "hass", void 0), X([N()], $.prototype, "store", void 0), X([N()], $.prototype, "selectedRegionId", void 0), X([N()], $.prototype, "mergeAnchor", void 0), X([N()], $.prototype, "mergeHover", void 0), X([N()], $.prototype, "toastMessage", void 0), X([N()], $.prototype, "loading", void 0), X([N()], $.prototype, "saving", void 0), X([N()], $.prototype, "loadError", void 0), X([N()], $.prototype, "renameDraft", void 0), X([N()], $.prototype, "editorMode", void 0), X([N()], $.prototype, "layoutDraft", void 0), X([N()], $.prototype, "widgetMetadata", void 0), X([N()], $.prototype, "previewImageUrl", void 0), X([N()], $.prototype, "previewLoading", void 0), X([N()], $.prototype, "previewError", void 0), X([N()], $.prototype, "previewTimings", void 0), X([P(".preview-boundary")], $.prototype, "previewBoundary", void 0), X([P(".screen-fit")], $.prototype, "screenFit", void 0), X([P(".screen-bezel")], $.prototype, "screenBezel", void 0), X([P("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = X([Ne("opendisplay-studio-panel")], $);
+X([Fe({ attribute: !1 })], $.prototype, "hass", void 0), X([P()], $.prototype, "store", void 0), X([P()], $.prototype, "selectedRegionId", void 0), X([P()], $.prototype, "mergeAnchor", void 0), X([P()], $.prototype, "mergeHover", void 0), X([P()], $.prototype, "toastMessage", void 0), X([P()], $.prototype, "loading", void 0), X([P()], $.prototype, "saving", void 0), X([P()], $.prototype, "loadError", void 0), X([P()], $.prototype, "renameDraft", void 0), X([P()], $.prototype, "editorMode", void 0), X([P()], $.prototype, "layoutDraft", void 0), X([P()], $.prototype, "widgetMetadata", void 0), X([P()], $.prototype, "previewImageUrl", void 0), X([P()], $.prototype, "previewLoading", void 0), X([P()], $.prototype, "previewError", void 0), X([P()], $.prototype, "previewTimings", void 0), X([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), X([F(".screen-fit")], $.prototype, "screenFit", void 0), X([F(".screen-bezel")], $.prototype, "screenBezel", void 0), X([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = X([Me("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OdxApp };

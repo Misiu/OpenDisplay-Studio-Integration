@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_DISPLAY_PROFILE_ID,
   DISPLAY_PROFILES,
   getDisplayProfile,
   getPixelSize,
@@ -42,8 +43,14 @@ describe('display profiles', () => {
     expect(getPixelSize(profile, 'landscape')).toEqual({ width: 800, height: 480 })
   })
 
-  it('falls back to the default Newton Pro 5.8 profile', () => {
-    expect(getDisplayProfile('missing').id).toBe('solum-newton-pro-5-8')
+  it('falls back to the default Seeed 7.5-inch DIY EE04 profile', () => {
+    const profile = getDisplayProfile('missing')
+
+    expect(profile.id).toBe(DEFAULT_DISPLAY_PROFILE_ID)
+    expect(profile.name).toBe('7.5″ DIY · EE04')
+    expect(profile.defaultPalette).toBe('bw')
+    expect(profile.grid.landscape).toEqual({ columns: 3, rows: 3 })
+    expect(getPixelSize(profile, 'landscape')).toEqual({ width: 800, height: 480 })
   })
 
   it('includes the supported Seeed ready-to-use devices', () => {
