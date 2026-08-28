@@ -214,6 +214,10 @@ export const appStyles = css`
     grid-template-columns: 220px minmax(480px, 1fr) 328px;
   }
 
+  .workspace.rail-collapsed {
+    grid-template-columns: 48px minmax(480px, 1fr) 328px;
+  }
+
   .welcome-topbar {
     grid-template-columns: 220px minmax(0, 1fr) auto;
   }
@@ -489,12 +493,18 @@ export const appStyles = css`
   }
 
   .project-rail {
+    min-width: 0;
     overflow: hidden;
     border-right: 1px solid var(--odx-line);
     padding: 18px 12px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .project-rail.collapsed {
+    padding-inline: 7px;
+    align-items: center;
   }
 
   .rail-heading,
@@ -512,6 +522,45 @@ export const appStyles = css`
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .rail-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ha-space-1, 4px);
+  }
+
+  .project-rail.collapsed .rail-heading,
+  .project-rail.collapsed .rail-heading-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rail-toggle {
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--odx-line);
+    border-radius: 8px;
+    background: var(--odx-surface);
+    color: var(--odx-muted);
+    cursor: pointer;
+  }
+
+  .rail-toggle:hover,
+  .rail-toggle:focus-visible {
+    border-color: var(--odx-blue);
+    color: var(--odx-blue-strong);
+    outline: 2px solid color-mix(in srgb, var(--odx-blue) 34%, transparent);
+    outline-offset: 1px;
+  }
+
+  .rail-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .text-button {
@@ -935,7 +984,7 @@ export const appStyles = css`
   }
 
   .preview-overlay .screen-region.layout-region {
-    background: color-mix(in srgb, var(--screen-paper) 34%, transparent);
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
   }
 
   .display-screen.live-preview .merge-layer {
@@ -1048,7 +1097,7 @@ export const appStyles = css`
     display: grid;
     place-items: center;
     border-style: solid;
-    background: color-mix(in srgb, var(--screen-accent) 7%, var(--screen-paper));
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
   }
 
   .layout-region-copy {
@@ -1104,7 +1153,7 @@ export const appStyles = css`
   .merge-cell {
     appearance: none;
     border: max(1px, 0.15cqw) dashed color-mix(in srgb, var(--screen-ink) 50%, transparent);
-    background: color-mix(in srgb, var(--screen-paper) 76%, transparent);
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
     cursor: crosshair;
     color: var(--screen-muted);
     font: 700 clamp(7px, 1.5cqw, 12px)/1 ui-monospace, Consolas, monospace;
@@ -1149,15 +1198,31 @@ export const appStyles = css`
   }
 
   .inspector {
+    min-width: 0;
     border-left: 1px solid var(--odx-line);
     padding: 18px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .layout-guide {
     display: flex;
     flex-direction: column;
     gap: var(--ha-space-3, 12px);
+  }
+
+  .layout-guide > *,
+  .layout-section,
+  .background-settings,
+  .background-fieldset,
+  .background-media-form {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .background-media-form {
+    display: block;
+    overflow: hidden;
   }
 
   .layout-guide h2 {
@@ -1275,6 +1340,7 @@ export const appStyles = css`
   }
 
   .background-mode-grid {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ha-space-2, 8px);
@@ -1291,6 +1357,7 @@ export const appStyles = css`
   }
 
   .background-mode-grid button {
+    min-width: 0;
     min-height: 36px;
     font-size: 12px;
     font-weight: 700;
@@ -1345,6 +1412,10 @@ export const appStyles = css`
 
   .background-scale {
     gap: 6px;
+  }
+
+  .background-scale p {
+    overflow-wrap: anywhere;
   }
 
   .inspector-heading {
@@ -1609,6 +1680,10 @@ export const appStyles = css`
     }
 
     .workspace {
+      grid-template-columns: 1fr;
+    }
+
+    .workspace.rail-collapsed {
       grid-template-columns: 1fr;
     }
 

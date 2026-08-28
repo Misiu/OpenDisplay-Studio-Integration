@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.8.1
+
+- Keep the selected display background visible while composing regions by
+  rendering layout previews without widget surfaces and applying translucent
+  editing overlays locally.
+- Prevent long Home Assistant Media identifiers from widening the layout
+  inspector and show a concise media title when metadata is unavailable.
+- Add an accessible collapse control for the saved-display rail to provide
+  more working space without changing the display canvas.
+
 ## 0.8.0
 
 - Add display backgrounds selected through Home Assistant Media with Stretch,

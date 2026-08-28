@@ -3,6 +3,8 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
 import {
   mdiCheck,
+  mdiChevronLeft,
+  mdiChevronRight,
   mdiContentCopy,
   mdiDeleteOutline,
   mdiPlus,
@@ -19,9 +21,11 @@ import {
 import {
   BACKGROUND_ANCHORS,
   BACKGROUND_MODES,
+  backgroundMediaForForm,
   clampBackgroundScale,
   createDisplayBackground,
 } from './services/background'
+import { projectForPreview } from './services/preview'
 import {
   createId,
   createRegions,
@@ -113,6 +117,7 @@ export class OdxApp extends LitElement {
   @state() private previewLoading = false
   @state() private previewError = ''
   @state() private previewTimings?: ComposePreviewResponse['timings']
+  @state() private projectRailCollapsed = false
 
   @query('.preview-boundary') private previewBoundary?: HTMLElement
   @query('.screen-fit') private screenFit?: HTMLElement
@@ -242,7 +247,7 @@ export class OdxApp extends LitElement {
     try {
       const response = await this.hass.callWS<ComposePreviewResponse>({
         type: 'opendisplay_studio/compose_preview',
-        project,
+        project: projectForPreview(project, this.editorMode === 'layout'),
       })
       if (revision !== this.previewRevision) return
       this.previewImageUrl = response.imageUrl
@@ -663,9 +668,22 @@ export class OdxApp extends LitElement {
 
   private renderProjectRail(): TemplateResult {
     return html`
-      <aside class="project-rail" aria-label="Saved displays">
-        <div class="rail-heading"><h2>Displays</h2><button class="text-button" @click=${this.addProject}>+ New</button></div>
-        <div class="project-list">
+      <aside id="project-library" class="project-rail ${this.projectRailCollapsed ? 'collapsed' : ''}" aria-label="Saved displays">
+        <div class="rail-heading">
+          ${this.projectRailCollapsed ? nothing : html`<h2>Displays</h2>`}
+          <div class="rail-heading-actions">
+            ${this.projectRailCollapsed ? nothing : html`<button class="text-button" @click=${this.addProject}>+ New</button>`}
+            <button
+              class="rail-toggle"
+              aria-controls="project-library"
+              aria-expanded=${!this.projectRailCollapsed}
+              aria-label=${this.projectRailCollapsed ? 'Expand displays panel' : 'Collapse displays panel'}
+              title=${this.projectRailCollapsed ? 'Expand displays panel' : 'Collapse displays panel'}
+              @click=${() => { this.projectRailCollapsed = !this.projectRailCollapsed }}
+            >${renderIcon(this.projectRailCollapsed ? mdiChevronRight : mdiChevronLeft)}</button>
+          </div>
+        </div>
+        <div class="project-list" ?hidden=${this.projectRailCollapsed}>
           ${this.store.projects.map((project) => {
             const size = { width: project.width, height: project.height }
             return html`
@@ -676,8 +694,8 @@ export class OdxApp extends LitElement {
             `
           })}
         </div>
-        <div class="rail-footer">Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
-        <div class="rail-actions" aria-label="Project actions">
+        <div class="rail-footer" ?hidden=${this.projectRailCollapsed}>Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
+        <div class="rail-actions" aria-label="Project actions" ?hidden=${this.projectRailCollapsed}>
           <button class="rail-action danger" @click=${this.deleteProject}>${renderIcon(mdiDeleteOutline)} Delete</button>
         </div>
       </aside>
@@ -1041,13 +1059,13 @@ export class OdxApp extends LitElement {
               ? html`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>`
               : nothing}
           </div>
-          <ha-form
+          <ha-form class="background-media-form"
             .hass=${this.hass}
-            .data=${{ backgroundMedia: project.background?.media }}
+            .data=${{ backgroundMedia: project.background ? backgroundMediaForForm(project.background.media) : undefined }}
             .schema=${[{
               name: 'backgroundMedia',
               label: 'Background image',
-              selector: { media: { accept: ['image/*'] } },
+              selector: { media: { accept: ['image/*'], hide_content_type: true } },
             }]}
             .computeLabel=${() => 'Background image'}
             .computeHelper=${() => 'Home Assistant Media images only'}
@@ -1211,7 +1229,7 @@ export class OdxApp extends LitElement {
                 `}
           </div>
         </header>
-        <div class="workspace">
+        <div class="workspace ${this.projectRailCollapsed ? 'rail-collapsed' : ''}">
           ${this.renderProjectRail()}
           <section class="editor">${this.editorMode === 'layout' ? this.renderToolbar() : this.renderWidgetToolbar()}${this.renderCanvas()}</section>
           ${this.editorMode === 'layout' ? this.renderLayoutGuide() : this.renderInspector()}

@@ -11,3 +11,25 @@ describe('editor selection styles', () => {
     expect(appStyles.cssText).toMatch(/\.screen-region:focus-visible\s*{[^}]*var\(--odx-blue\)/s)
   })
 })
+
+describe('layout editor styles', () => {
+  it('keeps regions translucent so the display background stays visible', () => {
+    expect(appStyles.cssText).toMatch(
+      /\.preview-overlay \.screen-region\.layout-region\s*{[^}]*var\(--screen-paper\) 50%/s,
+    )
+    expect(appStyles.cssText).toMatch(
+      /\.merge-cell\s*{[^}]*var\(--screen-paper\) 50%/s,
+    )
+  })
+
+  it('contains long media values inside the inspector', () => {
+    expect(appStyles.cssText).toMatch(/\.inspector\s*{[^}]*min-width:\s*0[^}]*overflow-x:\s*hidden/s)
+    expect(appStyles.cssText).toMatch(/\.background-media-form\s*{[^}]*overflow:\s*hidden/s)
+  })
+
+  it('supports a compact project rail without shrinking the canvas', () => {
+    expect(appStyles.cssText).toMatch(
+      /\.workspace\.rail-collapsed\s*{[^}]*grid-template-columns:\s*48px minmax\(480px,\s*1fr\) 328px/s,
+    )
+  })
+})

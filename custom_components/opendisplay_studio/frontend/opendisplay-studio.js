@@ -638,7 +638,7 @@ var Le = {
 		}
 		return E;
 	}
-}), He = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", Ue = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", We = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Ge = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", Ke = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", qe = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", Je = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Ye = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Xe = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", Ze = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", Qe = o`
+}), He = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", Ue = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", We = "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z", Ge = "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z", Ke = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", qe = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", Je = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", Ye = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", Xe = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", Ze = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", Qe = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", $e = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", et = o`
   :host {
     --odx-blue: var(--primary-color, #03a9f4);
     --odx-blue-strong: #0086c5;
@@ -850,6 +850,10 @@ var Le = {
     min-height: 0;
     display: grid;
     grid-template-columns: 220px minmax(480px, 1fr) 328px;
+  }
+
+  .workspace.rail-collapsed {
+    grid-template-columns: 48px minmax(480px, 1fr) 328px;
   }
 
   .welcome-topbar {
@@ -1127,12 +1131,18 @@ var Le = {
   }
 
   .project-rail {
+    min-width: 0;
     overflow: hidden;
     border-right: 1px solid var(--odx-line);
     padding: 18px 12px;
     display: flex;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .project-rail.collapsed {
+    padding-inline: 7px;
+    align-items: center;
   }
 
   .rail-heading,
@@ -1150,6 +1160,45 @@ var Le = {
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+  }
+
+  .rail-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ha-space-1, 4px);
+  }
+
+  .project-rail.collapsed .rail-heading,
+  .project-rail.collapsed .rail-heading-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rail-toggle {
+    appearance: none;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--odx-line);
+    border-radius: 8px;
+    background: var(--odx-surface);
+    color: var(--odx-muted);
+    cursor: pointer;
+  }
+
+  .rail-toggle:hover,
+  .rail-toggle:focus-visible {
+    border-color: var(--odx-blue);
+    color: var(--odx-blue-strong);
+    outline: 2px solid color-mix(in srgb, var(--odx-blue) 34%, transparent);
+    outline-offset: 1px;
+  }
+
+  .rail-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .text-button {
@@ -1573,7 +1622,7 @@ var Le = {
   }
 
   .preview-overlay .screen-region.layout-region {
-    background: color-mix(in srgb, var(--screen-paper) 34%, transparent);
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
   }
 
   .display-screen.live-preview .merge-layer {
@@ -1686,7 +1735,7 @@ var Le = {
     display: grid;
     place-items: center;
     border-style: solid;
-    background: color-mix(in srgb, var(--screen-accent) 7%, var(--screen-paper));
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
   }
 
   .layout-region-copy {
@@ -1742,7 +1791,7 @@ var Le = {
   .merge-cell {
     appearance: none;
     border: max(1px, 0.15cqw) dashed color-mix(in srgb, var(--screen-ink) 50%, transparent);
-    background: color-mix(in srgb, var(--screen-paper) 76%, transparent);
+    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
     cursor: crosshair;
     color: var(--screen-muted);
     font: 700 clamp(7px, 1.5cqw, 12px)/1 ui-monospace, Consolas, monospace;
@@ -1787,15 +1836,31 @@ var Le = {
   }
 
   .inspector {
+    min-width: 0;
     border-left: 1px solid var(--odx-line);
     padding: 18px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .layout-guide {
     display: flex;
     flex-direction: column;
     gap: var(--ha-space-3, 12px);
+  }
+
+  .layout-guide > *,
+  .layout-section,
+  .background-settings,
+  .background-fieldset,
+  .background-media-form {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .background-media-form {
+    display: block;
+    overflow: hidden;
   }
 
   .layout-guide h2 {
@@ -1913,6 +1978,7 @@ var Le = {
   }
 
   .background-mode-grid {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ha-space-2, 8px);
@@ -1929,6 +1995,7 @@ var Le = {
   }
 
   .background-mode-grid button {
+    min-width: 0;
     min-height: 36px;
     font-size: 12px;
     font-weight: 700;
@@ -1983,6 +2050,10 @@ var Le = {
 
   .background-scale {
     gap: 6px;
+  }
+
+  .background-scale p {
+    overflow-wrap: anywhere;
   }
 
   .inspector-heading {
@@ -2250,6 +2321,10 @@ var Le = {
       grid-template-columns: 1fr;
     }
 
+    .workspace.rail-collapsed {
+      grid-template-columns: 1fr;
+    }
+
     .workspace.welcome-workspace {
       grid-template-columns: 1fr;
     }
@@ -2357,7 +2432,7 @@ var Le = {
   }
 `, L = "https://opendisplay.org/firmware/toolbox/index.html";
 `${L}`, `${L}`, `${L}`, `${L}`;
-var $e = (e) => e <= 1.6 ? {
+var tt = (e) => e <= 1.6 ? {
 	landscape: {
 		columns: 1,
 		rows: 1
@@ -2422,11 +2497,11 @@ var $e = (e) => e <= 1.6 ? {
 	nativeOrientation: r >= i ? "landscape" : "portrait",
 	palettes: a === "bw" ? ["bw"] : ["bw", a],
 	defaultPalette: a,
-	grid: $e(n),
+	grid: tt(n),
 	source: L,
 	connectorPins: o,
 	toolboxId: e
-}), et = [
+}), nt = [
 	R("ep154-200x200", "1.54″ Monochrome · 200×200", 1.54, 200, 200, "bw", [24]),
 	R("ep154-152x152", "1.54″ B/W/R · 152×152", 1.54, 152, 152, "bwr", [24]),
 	R("ep154yr-200x200", "1.54″ B/W/R/Y · 200×200", 1.54, 200, 200, "bwry", [24]),
@@ -2449,7 +2524,7 @@ var $e = (e) => e <= 1.6 ? {
 	R("ep75-800x480-4gray", "7.5″ 4-level grayscale · 800×480", 7.5, 800, 480, "gray4", [24]),
 	R("ep73-spectra-800x480", "7.3″ Spectra 6 · 800×480", 7.3, 800, 480, "spectra6", [50]),
 	R("ep75-bwry-800x480", "7.5″ B/W/R/Y · 800×480", 7.5, 800, 480, "bwry", [24])
-], tt = {
+], rt = {
 	bw: "Monochrome · black / white",
 	gray4: "Grayscale · 4 levels",
 	gray16: "Grayscale · 16 levels",
@@ -2457,7 +2532,7 @@ var $e = (e) => e <= 1.6 ? {
 	bwy: "Black / white / yellow",
 	bwry: "Black / white / red / yellow",
 	spectra6: "Spectra 6 · B/W/R/Y/B/G"
-}, nt = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", z = "https://opendisplay.org/what-hardware-to-buy.html", rt = "opendisplay-seeed-7-5-diy", B = (e, t, n, r, i, a, o, s, c, l) => ({
+}, it = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", z = "https://opendisplay.org/what-hardware-to-buy.html", at = "opendisplay-seeed-7-5-diy", B = (e, t, n, r, i, a, o, s, c, l) => ({
 	id: e,
 	manufacturer: t,
 	family: "OpenDisplay",
@@ -2489,7 +2564,7 @@ var $e = (e) => e <= 1.6 ? {
 		portrait: o
 	},
 	freezer: s,
-	source: nt
+	source: it
 }), H = [
 	V("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
 		columns: 1,
@@ -2774,14 +2849,14 @@ var $e = (e) => e <= 1.6 ? {
 		columns: 3,
 		rows: 3
 	}),
-	...et
-], U = (e) => H.find((t) => t.id === e) ?? H.find((e) => e.id === "opendisplay-seeed-7-5-diy") ?? H[0], it = (e, t) => e.nativeOrientation === t ? {
+	...nt
+], U = (e) => H.find((t) => t.id === e) ?? H.find((e) => e.id === "opendisplay-seeed-7-5-diy") ?? H[0], ot = (e, t) => e.nativeOrientation === t ? {
 	width: e.nativeWidth,
 	height: e.nativeHeight
 } : {
 	width: e.nativeHeight,
 	height: e.nativeWidth
-}, at = [
+}, st = [
 	{
 		value: "stretch",
 		label: "Stretch"
@@ -2798,7 +2873,7 @@ var $e = (e) => e <= 1.6 ? {
 		value: "manual",
 		label: "Manual"
 	}
-], ot = [
+], ct = [
 	{
 		value: "top-left",
 		label: "Top left"
@@ -2835,12 +2910,31 @@ var $e = (e) => e <= 1.6 ? {
 		value: "bottom-right",
 		label: "Bottom right"
 	}
-], st = (e) => ({
+], lt = (e) => ({
 	media: e,
 	mode: "contain",
 	anchor: "center",
 	scale: 100
-}), ct = (e) => Number.isFinite(e) ? Math.max(1, Math.min(400, Math.round(e))) : 100, lt = 0, W = (e = globalThis.crypto) => {
+}), ut = (e) => {
+	if (e.metadata?.title) return e.metadata.title;
+	if (e.media_content_id.startsWith("media-source://image_upload/")) return "Home Assistant image";
+	let t = e.media_content_id.split("/").at(-1);
+	if (!t) return "Background image";
+	try {
+		return decodeURIComponent(t);
+	} catch {
+		return t;
+	}
+}, dt = (e) => ({
+	...e,
+	metadata: {
+		...e.metadata,
+		title: ut(e)
+	}
+}), ft = (e) => Number.isFinite(e) ? Math.max(1, Math.min(400, Math.round(e))) : 100, pt = (e, t) => t ? {
+	...e,
+	regions: []
+} : e, mt = 0, W = (e = globalThis.crypto) => {
 	if (typeof e?.randomUUID == "function") return e.randomUUID();
 	if (e) {
 		let t = e.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
@@ -2848,7 +2942,7 @@ var $e = (e) => e <= 1.6 ? {
 		let n = Array.from(t, (e) => e.toString(16).padStart(2, "0")).join("");
 		return `${n.slice(0, 8)}-${n.slice(8, 12)}-${n.slice(12, 16)}-${n.slice(16, 20)}-${n.slice(20)}`;
 	}
-	return lt += 1, `odx-${Date.now().toString(36)}-${lt.toString(36)}`;
+	return mt += 1, `odx-${Date.now().toString(36)}-${mt.toString(36)}`;
 }, G = (e) => {
 	let t = [];
 	for (let n = 1; n <= e.rows; n += 1) for (let r = 1; r <= e.columns; r += 1) t.push({
@@ -2859,7 +2953,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: 1
 	});
 	return t;
-}, ut = (e, t) => t.row >= e.row && t.row < e.row + e.rowSpan && t.column >= e.column && t.column < e.column + e.columnSpan, dt = (e, t, n) => {
+}, ht = (e, t) => t.row >= e.row && t.row < e.row + e.rowSpan && t.column >= e.column && t.column < e.column + e.columnSpan, gt = (e, t, n) => {
 	let r = Math.min(t.row, n.row), i = Math.min(t.column, n.column), a = Math.max(t.row, n.row), o = Math.max(t.column, n.column), s = e.filter((e) => e.row >= r && e.column >= i && e.row + e.rowSpan - 1 <= a && e.column + e.columnSpan - 1 <= o);
 	if ((a - r + 1) * (o - i + 1) !== s.reduce((e, t) => e + t.rowSpan * t.columnSpan, 0) || s.length === 0) return null;
 	let c = s.find((e) => e.widget)?.widget, l = new Set(s.map((e) => e.id));
@@ -2871,7 +2965,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: o - i + 1,
 		widget: c
 	}];
-}, ft = (e, t) => {
+}, _t = (e, t) => {
 	let n = e.find((e) => e.id === t);
 	if (!n || n.rowSpan === 1 && n.columnSpan === 1 && !n.label) return e;
 	if (n.rowSpan === 1 && n.columnSpan === 1) return e.map((e) => e.id === t ? {
@@ -2890,7 +2984,7 @@ var $e = (e) => e <= 1.6 ? {
 		columnSpan: 1
 	});
 	return [...e.filter((e) => e.id !== t), ...r];
-}, pt = (e, t, n, r) => t.columns === n.rows && t.rows === n.columns ? e.map((e) => r === "clockwise" ? {
+}, vt = (e, t, n, r) => t.columns === n.rows && t.rows === n.columns ? e.map((e) => r === "clockwise" ? {
 	...e,
 	row: e.column,
 	column: t.rows - e.row - e.rowSpan + 2,
@@ -2902,8 +2996,8 @@ var $e = (e) => e <= 1.6 ? {
 	column: e.row,
 	rowSpan: e.columnSpan,
 	columnSpan: e.rowSpan
-}) : G(n), mt = (e, t) => ({ ...e.grid[t] }), ht = (e = "Kitchen display", t = "en") => {
-	let n = U(rt), r = "landscape", i = mt(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
+}) : G(n), yt = (e, t) => ({ ...e.grid[t] }), bt = (e = "Kitchen display", t = "en") => {
+	let n = U(at), r = "landscape", i = yt(n, r), a = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		id: W(),
 		schemaVersion: 1,
@@ -2923,7 +3017,7 @@ var $e = (e) => e <= 1.6 ? {
 		createdAt: a,
 		updatedAt: a
 	};
-}, K = (e, t) => String(e[t] ?? ""), gt = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => T`
+}, K = (e, t) => String(e[t] ?? ""), xt = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => T`
   <svg class="widget-icon" viewBox="0 0 24 24" role="img" aria-label=${t}>
     <path d=${e}></path>
   </svg>
@@ -2931,7 +3025,7 @@ var $e = (e) => e <= 1.6 ? {
   <svg slot="start" class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
     <path d=${e}></path>
   </svg>
-`, _t = [
+`, St = [
 	{
 		id: "calendar",
 		version: "0.5.0",
@@ -3054,7 +3148,7 @@ var $e = (e) => e <= 1.6 ? {
         <div class="widget-heading">
           <span>${q(He)}</span>
           <strong>${K(e, "title")}</strong>
-          <span class="widget-kicker">${gt(e, "days")} days</span>
+          <span class="widget-kicker">${xt(e, "days")} days</span>
         </div>
         <div class="event-list">
           ${r.map(([e, t, n]) => T`
@@ -3074,7 +3168,7 @@ var $e = (e) => e <= 1.6 ? {
 		version: "0.6.1",
 		name: "Sensor",
 		description: "Current value of a selected Home Assistant sensor.",
-		icon: qe,
+		icon: Ye,
 		styles: o`
   .sensor-widget {
     justify-content: space-between;
@@ -3135,7 +3229,7 @@ var $e = (e) => e <= 1.6 ? {
     <div class="widget sensor-widget">
       <span class="sensor-name">${K(e, "entity") || "Choose a sensor"}</span>
       <div class="sensor-reading">
-        ${q(qe, "Sensor")}
+        ${q(Ye, "Sensor")}
         <strong>Live data</strong>
       </div>
     </div>
@@ -3146,7 +3240,7 @@ var $e = (e) => e <= 1.6 ? {
 		version: "0.5.0",
 		name: "Text",
 		description: "A simple message or heading.",
-		icon: Ke,
+		icon: Je,
 		styles: o`
   .note-widget {
     justify-content: center;
@@ -3238,7 +3332,7 @@ var $e = (e) => e <= 1.6 ? {
 		version: "0.6.1",
 		name: "Weather",
 		description: "Current conditions and a daily Home Assistant forecast.",
-		icon: Ze,
+		icon: $e,
 		styles: o`
   .weather-widget-placeholder {
     align-items: center;
@@ -3307,13 +3401,13 @@ var $e = (e) => e <= 1.6 ? {
 		],
 		render: (e) => T`
     <div class="widget weather-widget-placeholder">
-      ${q(Ze, "Weather")}
+      ${q($e, "Weather")}
       <strong>Weather</strong>
       <span>${K(e, "weather") || "Choose a weather entity"}</span>
     </div>
   `
 	}
-], Y = (e) => _t.find((t) => t.id === e), vt = (e) => {
+], Y = (e) => St.find((t) => t.id === e), Ct = (e) => {
 	let t = Y(e.id);
 	return t ? {
 		...t,
@@ -3339,7 +3433,7 @@ var $e = (e) => e <= 1.6 ? {
       </div>
     `
 	};
-}, yt = _t.map((e) => e.styles), bt = o`
+}, wt = St.map((e) => e.styles), Tt = o`
   .widget {
     width: 100%;
     height: 100%;
@@ -3402,7 +3496,7 @@ var Z = (e, t) => {
 		if (typeof n.code == "string" && n.code) return `${t} (${n.code})`;
 	}
 	return t;
-}, xt = (e) => {
+}, Et = (e) => {
 	let t = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		...structuredClone(e),
@@ -3425,13 +3519,13 @@ var Z = (e, t) => {
 			schemaVersion: 1,
 			activeProjectId: "",
 			projects: []
-		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewImageUrl = "", this.previewLoading = !1, this.previewError = "", this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
+		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewImageUrl = "", this.previewLoading = !1, this.previewError = "", this.projectRailCollapsed = !1, this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
 	}
 	static {
 		this.styles = [
-			Qe,
-			bt,
-			...yt
+			et,
+			Tt,
+			...wt
 		];
 	}
 	firstUpdated() {
@@ -3469,7 +3563,7 @@ var Z = (e, t) => {
 	}
 	widgetDefinition(e) {
 		let t = Y(e), n = this.widgetMetadata.find((t) => t.id === e);
-		return n ? vt(n) : t;
+		return n ? Ct(n) : t;
 	}
 	updatePreviewScale() {
 		if (!this.previewBoundary || !this.screenFit || !this.screenBezel) return;
@@ -3496,7 +3590,7 @@ var Z = (e, t) => {
 		try {
 			let n = await this.hass.callWS({
 				type: "opendisplay_studio/compose_preview",
-				project: e
+				project: pt(e, this.editorMode === "layout")
 			});
 			if (t !== this.previewRevision) return;
 			this.previewImageUrl = n.imageUrl, this.previewTimings = n.timings;
@@ -3583,7 +3677,7 @@ var Z = (e, t) => {
 	}
 	async addProject() {
 		try {
-			let e = ht(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
+			let e = bt(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
 				type: "opendisplay_studio/create_project",
 				project: e
 			})).project;
@@ -3597,7 +3691,7 @@ var Z = (e, t) => {
 		}
 	}
 	async duplicateProject() {
-		let e = xt(this.project), t = (await this.hass.callWS({
+		let e = Et(this.project), t = (await this.hass.callWS({
 			type: "opendisplay_studio/create_project",
 			project: e
 		})).project;
@@ -3636,10 +3730,10 @@ var Z = (e, t) => {
 		})), this.renameDialog?.close(), this.showToast("Name updated"));
 	}
 	applyDisplayProfile(e, t) {
-		let n = U(e), r = mt(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
+		let n = U(e), r = yt(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : G(r).map((e, t) => ({
 			...e,
 			widget: a[t]
-		})), s = it(n, this.canvasProject.orientation);
+		})), s = ot(n, this.canvasProject.orientation);
 		this.updateLayoutDraft((i) => ({
 			...i,
 			displayId: e,
@@ -3697,7 +3791,7 @@ var Z = (e, t) => {
 			background: t?.media_content_id ? e.background ? {
 				...e.background,
 				media: t
-			} : st(t) : void 0
+			} : lt(t) : void 0
 		}));
 	}
 	clearBackground() {
@@ -3725,7 +3819,7 @@ var Z = (e, t) => {
 		} : t);
 	}
 	changeBackgroundScale(e) {
-		let t = ct(Number(e.currentTarget.value));
+		let t = ft(Number(e.currentTarget.value));
 		this.updateLayoutDraft((e) => e.background ? {
 			...e,
 			background: {
@@ -3739,10 +3833,10 @@ var Z = (e, t) => {
 		let t = this.canvasProject.displayId === "custom" ? {
 			columns: this.canvasProject.grid.rows,
 			rows: this.canvasProject.grid.columns
-		} : mt(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = pt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
+		} : yt(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = vt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
 			width: this.canvasProject.height,
 			height: this.canvasProject.width
-		} : it(this.canvasDisplay, e);
+		} : ot(this.canvasDisplay, e);
 		this.updateLayoutDraft((n) => ({
 			...n,
 			orientation: e,
@@ -3781,7 +3875,7 @@ var Z = (e, t) => {
 		});
 	}
 	selectMergeCell(e) {
-		let t = this.canvasProject.regions.find((t) => ut(t, e));
+		let t = this.canvasProject.regions.find((t) => ht(t, e));
 		if (t && (t.label || t.rowSpan > 1 || t.columnSpan > 1)) return;
 		if (!this.mergeAnchor) {
 			this.mergeAnchor = e, this.mergeHover = e;
@@ -3791,7 +3885,7 @@ var Z = (e, t) => {
 			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Remove the existing region before drawing across it");
 			return;
 		}
-		let n = dt(this.canvasProject.regions, this.mergeAnchor, e);
+		let n = gt(this.canvasProject.regions, this.mergeAnchor, e);
 		if (!n) {
 			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("The selected rectangle crosses an existing merged region");
 			return;
@@ -3811,7 +3905,7 @@ var Z = (e, t) => {
 		let t = this.canvasProject.regions.find((t) => t.id === e);
 		!t || t.rowSpan === 1 && t.columnSpan === 1 && !t.label || (this.updateLayoutDraft((t) => ({
 			...t,
-			regions: ft(t.regions, e)
+			regions: _t(t.regions, e)
 		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Region removed"));
 	}
 	assignWidget(e) {
@@ -3855,9 +3949,24 @@ var Z = (e, t) => {
 	}
 	renderProjectRail() {
 		return T`
-      <aside class="project-rail" aria-label="Saved displays">
-        <div class="rail-heading"><h2>Displays</h2><button class="text-button" @click=${this.addProject}>+ New</button></div>
-        <div class="project-list">
+      <aside id="project-library" class="project-rail ${this.projectRailCollapsed ? "collapsed" : ""}" aria-label="Saved displays">
+        <div class="rail-heading">
+          ${this.projectRailCollapsed ? D : T`<h2>Displays</h2>`}
+          <div class="rail-heading-actions">
+            ${this.projectRailCollapsed ? D : T`<button class="text-button" @click=${this.addProject}>+ New</button>`}
+            <button
+              class="rail-toggle"
+              aria-controls="project-library"
+              aria-expanded=${!this.projectRailCollapsed}
+              aria-label=${this.projectRailCollapsed ? "Expand displays panel" : "Collapse displays panel"}
+              title=${this.projectRailCollapsed ? "Expand displays panel" : "Collapse displays panel"}
+              @click=${() => {
+			this.projectRailCollapsed = !this.projectRailCollapsed;
+		}}
+            >${q(this.projectRailCollapsed ? Ge : We)}</button>
+          </div>
+        </div>
+        <div class="project-list" ?hidden=${this.projectRailCollapsed}>
           ${this.store.projects.map((e) => {
 			let t = {
 				width: e.width,
@@ -3871,9 +3980,9 @@ var Z = (e, t) => {
             `;
 		})}
         </div>
-        <div class="rail-footer">Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
-        <div class="rail-actions" aria-label="Project actions">
-          <button class="rail-action danger" @click=${this.deleteProject}>${q(Ge)} Delete</button>
+        <div class="rail-footer" ?hidden=${this.projectRailCollapsed}>Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
+        <div class="rail-actions" aria-label="Project actions" ?hidden=${this.projectRailCollapsed}>
+          <button class="rail-action danger" @click=${this.deleteProject}>${q(qe)} Delete</button>
         </div>
       </aside>
     `;
@@ -3918,7 +4027,7 @@ var Z = (e, t) => {
         <div class="control">
           <label for="palette">Palette</label>
           <select id="palette" .value=${e.palette} @change=${this.changePalette}>
-            ${(e.displayId === "custom" ? Object.keys(tt) : t.palettes).map((e) => T`<option value=${e}>${tt[e]}</option>`)}
+            ${(e.displayId === "custom" ? Object.keys(rt) : t.palettes).map((e) => T`<option value=${e}>${rt[e]}</option>`)}
           </select>
         </div>
         <div class="control">
@@ -3967,9 +4076,9 @@ var Z = (e, t) => {
         <div class="device-summary">
           <span class="step-kicker">Step 2 · Widgets</span>
           <strong>${this.displayName(this.project)}</strong>
-          <span>${e.width}×${e.height} · ${tt[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
+          <span>${e.width}×${e.height} · ${rt[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
         </div>
-        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Xe)} Edit device & layout</ha-button>
+        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(Qe)} Edit device & layout</ha-button>
       </div>
     `;
 	}
@@ -4014,7 +4123,7 @@ var Z = (e, t) => {
 			this.mergeHover = void 0;
 		}}>
         ${e.map((e) => {
-			let r = this.canvasProject.regions.find((t) => ut(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
+			let r = this.canvasProject.regions.find((t) => ht(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
 			return T`
             <button
               class="merge-cell ${i ? "occupied" : ""} ${a ? "preview" : ""} ${n && a ? "invalid" : ""} ${this.mergeAnchor?.row === e.row && this.mergeAnchor?.column === e.column ? "anchor" : ""}"
@@ -4148,7 +4257,7 @@ var Z = (e, t) => {
             </button>
           `)}
         </div>
-        ${t ? T`<div class="option-form">${t.options.map((e) => this.renderOption(e))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${J(Ge)} Remove widget</ha-button></div>` : T`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
+        ${t ? T`<div class="option-form">${t.options.map((e) => this.renderOption(e))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${J(qe)} Remove widget</ha-button></div>` : T`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
       </aside>
     `;
 	}
@@ -4173,13 +4282,16 @@ var Z = (e, t) => {
             <div><h3 id="background-heading">Display background</h3><p>Choose an image stored in Home Assistant Media.</p></div>
             ${e.background ? T`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>` : D}
           </div>
-          <ha-form
+          <ha-form class="background-media-form"
             .hass=${this.hass}
-            .data=${{ backgroundMedia: e.background?.media }}
+            .data=${{ backgroundMedia: e.background ? dt(e.background.media) : void 0 }}
             .schema=${[{
 			name: "backgroundMedia",
 			label: "Background image",
-			selector: { media: { accept: ["image/*"] } }
+			selector: { media: {
+				accept: ["image/*"],
+				hide_content_type: !0
+			} }
 		}]}
             .computeLabel=${() => "Background image"}
             .computeHelper=${() => "Home Assistant Media images only"}
@@ -4190,7 +4302,7 @@ var Z = (e, t) => {
                 <fieldset class="background-fieldset">
                   <legend>Image fit</legend>
                   <div class="background-mode-grid">
-                    ${at.map((t) => T`
+                    ${st.map((t) => T`
                       <button
                         class=${e.background?.mode === t.value ? "active" : ""}
                         aria-pressed=${e.background?.mode === t.value}
@@ -4202,7 +4314,7 @@ var Z = (e, t) => {
                 <fieldset class="background-fieldset" ?disabled=${e.background.mode === "stretch"}>
                   <legend>Position</legend>
                   <div class="background-anchor-grid">
-                    ${ot.map((t) => T`
+                    ${ct.map((t) => T`
                       <button
                         class=${e.background?.anchor === t.value ? "active" : ""}
                         aria-label=${t.label}
@@ -4278,7 +4390,7 @@ var Z = (e, t) => {
         <header class="topbar welcome-topbar">
           <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
           <span class="welcome-topline">Device-accurate e-paper composition</span>
-          <ha-button size="s" variant="brand" @click=${this.addProject}>${J(Je)} New display</ha-button>
+          <ha-button size="s" variant="brand" @click=${this.addProject}>${J(Xe)} New display</ha-button>
         </header>
         <div class="workspace welcome-workspace">
           <aside class="project-rail empty-rail" aria-label="Saved displays">
@@ -4292,7 +4404,7 @@ var Z = (e, t) => {
               <h1>Design an e-paper screen that fits the device.</h1>
               <p>Choose a verified display, compose its native-pixel layout, then add widgets and export the exact screen as PNG or JPG.</p>
               <div class="welcome-actions">
-                <ha-button size="l" variant="brand" @click=${this.addProject}>${J(Je)} Create your first display</ha-button>
+                <ha-button size="l" variant="brand" @click=${this.addProject}>${J(Xe)} Create your first display</ha-button>
               </div>
               <dl class="welcome-facts">
                 <div><dt>1</dt><dd><strong>Select hardware</strong><span>Model, palette and orientation</span></dd></div>
@@ -4332,13 +4444,13 @@ var Z = (e, t) => {
           </div>
           <div class="top-actions">
             ${this.editorMode === "layout" ? T`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${J(Ue)} Apply layout</ha-button>` : T`
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${J(Ye)} Rename</ha-button>
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${J(We)} Duplicate</ha-button>
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${J(Ze)} Rename</ha-button>
+                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${J(Ke)} Duplicate</ha-button>
                   <ha-button size="s" variant=${this.project.status === "ready" ? "neutral" : "brand"} @click=${() => this.setProjectStatus(this.project.status === "ready" ? "draft" : "ready")}>${this.project.status === "ready" ? "Move to Draft" : "Mark Ready"}</ha-button>
                 `}
           </div>
         </header>
-        <div class="workspace">
+        <div class="workspace ${this.projectRailCollapsed ? "rail-collapsed" : ""}">
           ${this.renderProjectRail()}
           <section class="editor">${this.editorMode === "layout" ? this.renderToolbar() : this.renderWidgetToolbar()}${this.renderCanvas()}</section>
           ${this.editorMode === "layout" ? this.renderLayoutGuide() : this.renderInspector()}
@@ -4349,6 +4461,6 @@ var Z = (e, t) => {
     `;
 	}
 };
-X([Fe({ attribute: !1 })], $.prototype, "hass", void 0), X([P()], $.prototype, "store", void 0), X([P()], $.prototype, "selectedRegionId", void 0), X([P()], $.prototype, "mergeAnchor", void 0), X([P()], $.prototype, "mergeHover", void 0), X([P()], $.prototype, "toastMessage", void 0), X([P()], $.prototype, "loading", void 0), X([P()], $.prototype, "saving", void 0), X([P()], $.prototype, "loadError", void 0), X([P()], $.prototype, "renameDraft", void 0), X([P()], $.prototype, "editorMode", void 0), X([P()], $.prototype, "layoutDraft", void 0), X([P()], $.prototype, "widgetMetadata", void 0), X([P()], $.prototype, "previewImageUrl", void 0), X([P()], $.prototype, "previewLoading", void 0), X([P()], $.prototype, "previewError", void 0), X([P()], $.prototype, "previewTimings", void 0), X([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), X([F(".screen-fit")], $.prototype, "screenFit", void 0), X([F(".screen-bezel")], $.prototype, "screenBezel", void 0), X([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = X([Me("opendisplay-studio-panel")], $);
+X([Fe({ attribute: !1 })], $.prototype, "hass", void 0), X([P()], $.prototype, "store", void 0), X([P()], $.prototype, "selectedRegionId", void 0), X([P()], $.prototype, "mergeAnchor", void 0), X([P()], $.prototype, "mergeHover", void 0), X([P()], $.prototype, "toastMessage", void 0), X([P()], $.prototype, "loading", void 0), X([P()], $.prototype, "saving", void 0), X([P()], $.prototype, "loadError", void 0), X([P()], $.prototype, "renameDraft", void 0), X([P()], $.prototype, "editorMode", void 0), X([P()], $.prototype, "layoutDraft", void 0), X([P()], $.prototype, "widgetMetadata", void 0), X([P()], $.prototype, "previewImageUrl", void 0), X([P()], $.prototype, "previewLoading", void 0), X([P()], $.prototype, "previewError", void 0), X([P()], $.prototype, "previewTimings", void 0), X([P()], $.prototype, "projectRailCollapsed", void 0), X([F(".preview-boundary")], $.prototype, "previewBoundary", void 0), X([F(".screen-fit")], $.prototype, "screenFit", void 0), X([F(".screen-bezel")], $.prototype, "screenBezel", void 0), X([F("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = X([Me("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OdxApp };

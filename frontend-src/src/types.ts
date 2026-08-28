@@ -19,6 +19,10 @@ export type BackgroundAnchor =
 export interface MediaSelectorValue {
   media_content_id: string
   media_content_type: string
+  metadata?: {
+    title?: string
+    thumbnail?: string | null
+  }
 }
 
 export interface DisplayBackground {

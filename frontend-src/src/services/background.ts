@@ -31,6 +31,26 @@ export const createDisplayBackground = (media: MediaSelectorValue): DisplayBackg
   scale: 100,
 })
 
+const mediaTitle = (media: MediaSelectorValue): string => {
+  if (media.metadata?.title) return media.metadata.title
+  if (media.media_content_id.startsWith('media-source://image_upload/')) return 'Home Assistant image'
+  const segment = media.media_content_id.split('/').at(-1)
+  if (!segment) return 'Background image'
+  try {
+    return decodeURIComponent(segment)
+  } catch {
+    return segment
+  }
+}
+
+export const backgroundMediaForForm = (media: MediaSelectorValue): MediaSelectorValue => ({
+  ...media,
+  metadata: {
+    ...media.metadata,
+    title: mediaTitle(media),
+  },
+})
+
 export const clampBackgroundScale = (value: number): number => {
   if (!Number.isFinite(value)) return 100
   return Math.max(1, Math.min(400, Math.round(value)))
