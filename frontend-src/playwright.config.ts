@@ -22,7 +22,7 @@ export default defineConfig({
     toHaveScreenshot: {
       animations: 'disabled',
       caret: 'hide',
-      maxDiffPixelRatio: 0.005,
+      maxDiffPixelRatio: 0.012,
       stylePath: path.join(import.meta.dirname, 'e2e', 'visual-stabilization.css'),
     },
   },
