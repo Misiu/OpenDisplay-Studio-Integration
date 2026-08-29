@@ -1,5 +1,5 @@
 import type { ScreenProject } from '../types'
-import { createId, createRegions, defaultLayoutSpacing, gridForOrientation } from './layout'
+import { createId, createRegions, defaultLayoutSpacing, defaultRegionBorderRadius, gridForOrientation } from './layout'
 import { DEFAULT_DISPLAY_PROFILE_ID, getDisplayProfile } from '../data/display-profiles'
 
 export const createProject = (name = 'Kitchen display', language = 'en'): ScreenProject => {
@@ -26,6 +26,7 @@ export const createProject = (name = 'Kitchen display', language = 'en'): Screen
     grid,
     screenPadding: spacing,
     regionGap: spacing,
+    regionBorderRadius: defaultRegionBorderRadius(display.nativeWidth, display.nativeHeight),
     regions,
     createdAt: now,
     updatedAt: now,

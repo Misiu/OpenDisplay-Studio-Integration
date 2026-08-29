@@ -3,8 +3,15 @@
 from unittest.mock import AsyncMock, patch
 
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
 
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
+from custom_components.opendisplay_studio.widgets.hero_weather.provider import (
+    HeroWeatherDataProvider,
+)
+from custom_components.opendisplay_studio.widgets.section_title.provider import (
+    SectionTitleDataProvider,
+)
 from custom_components.opendisplay_studio.widgets.sensor.provider import (
     _sensor_icon,
 )
@@ -276,3 +283,50 @@ async def test_weather_provider_keeps_current_conditions_when_forecast_fails(
     assert current["temperature"] == 12
     assert current["humidity"] == 88
     assert current["forecast"] == []
+
+
+async def test_section_title_provider_formats_the_display_language(hass) -> None:
+    provider = SectionTitleDataProvider()
+    current = dt_util.parse_datetime("2026-08-25T09:00:00+02:00")
+    assert current is not None
+
+    with patch(
+        "custom_components.opendisplay_studio.widgets.section_title.provider.dt_util.now",
+        return_value=current,
+    ):
+        english = await provider.async_resolve(hass, {"current"}, "en")
+        polish = await provider.async_resolve(hass, {"current"}, "pl")
+
+    assert english == {"weekday": "TUESDAY", "date": "25 AUG 2026"}
+    assert polish["weekday"] == "WTOREK"
+    assert polish["date"] == "25 SIE 2026"
+
+
+async def test_hero_weather_provider_returns_current_and_daily_range(hass) -> None:
+    hass.states.async_set(
+        "weather.home",
+        "partlycloudy",
+        {"temperature": 23, "temperature_unit": "°C"},
+    )
+    service_response = {
+        "weather.home": {"forecast": [{"temperature": 27, "templow": 16}]}
+    }
+
+    with patch.object(
+        type(hass.services),
+        "async_call",
+        AsyncMock(return_value=service_response),
+    ):
+        result = await HeroWeatherDataProvider().async_resolve(
+            hass, {"weather.home"}, "pl"
+        )
+
+    current = result.values["weather.home"]
+    assert current == {
+        "entity_id": "weather.home",
+        "temperature": 23,
+        "temperature_unit": "°C",
+        "condition": "częściowe zachmurzenie",
+        "high": 27,
+        "low": 16,
+    }

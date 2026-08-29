@@ -10,9 +10,23 @@ from custom_components.opendisplay_studio.const import DOMAIN
 from custom_components.opendisplay_studio.projects import validate_project
 from custom_components.opendisplay_studio.widgets import (
     BUILTIN_WIDGET_DIRECTORY,
+    DEFAULT_REGISTRY,
     WidgetPackageError,
     WidgetRegistry,
 )
+
+
+def test_new_dashboard_widgets_are_self_contained_packages() -> None:
+    section = DEFAULT_REGISTRY.definition("section-title")
+    hero = DEFAULT_REGISTRY.definition("hero-weather")
+
+    assert section["fields"][0]["selector"] == {"opendisplay_color": {}}
+    assert section["dataRequirements"][0]["provider"] == "section_title"
+    assert hero["fields"][0]["selector"]["entity"]["filter"]["domain"] == ("weather")
+    assert hero["dataRequirements"][0]["provider"] == "hero_weather"
+    assert DEFAULT_REGISTRY.provider("section-title", "section_title")
+    assert DEFAULT_REGISTRY.provider("hero-weather", "hero_weather")
+
 
 QUOTE_MANIFEST = """
 id: quote

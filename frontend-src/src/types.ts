@@ -80,6 +80,7 @@ export interface WidgetInstance {
 export interface RegionAppearance {
   showBackground: boolean
   showBorder: boolean
+  borderRadius: number | null
 }
 
 export interface GridRegion {
@@ -111,6 +112,7 @@ export interface ScreenProject {
   grid: GridSize
   screenPadding: number
   regionGap: number
+  regionBorderRadius: number
   regions: GridRegion[]
   background?: DisplayBackground
   createdAt: string

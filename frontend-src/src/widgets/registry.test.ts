@@ -63,4 +63,11 @@ describe('runtime widget registry', () => {
     expect(widget.name).toBe('Weather package')
     expect(widget.defaults).toEqual({ weather: 'weather.home' })
   })
+
+  it.each(['section-title', 'hero-weather'])('registers the %s dashboard widget', (id) => {
+    const widget = getWidgetDefinition(id)
+
+    expect(widget).toBeDefined()
+    expect(widget?.options.some((option) => option.selector && 'opendisplay_color' in option.selector)).toBe(true)
+  })
 })

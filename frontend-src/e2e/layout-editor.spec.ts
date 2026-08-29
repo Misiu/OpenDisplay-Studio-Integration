@@ -47,6 +47,7 @@ test.describe('layout editor', () => {
     await setAndCommit(page.locator('#background-scale'), '50')
     await setAndCommit(page.locator('#screen-padding'), '20')
     await setAndCommit(page.locator('#region-gap'), '6')
+    await setAndCommit(page.locator('#region-border-radius-default'), '18')
     await page.getByRole('textbox', { name: 'Display language' }).fill('pl')
     await page.getByRole('textbox', { name: 'Display language' }).press('Tab')
 
@@ -68,6 +69,7 @@ test.describe('layout editor', () => {
       language: 'pl',
       screenPadding: 20,
       regionGap: 6,
+      regionBorderRadius: 18,
       background: {
         media: { media_content_id: backgroundUri },
         mode: 'manual',

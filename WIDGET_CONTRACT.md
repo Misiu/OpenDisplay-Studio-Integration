@@ -107,6 +107,21 @@ fields:
           domain: weather
 ```
 
+OpenDisplay Studio also provides one platform selector for output-aware color
+choices. It exposes exactly the colors available in the active display palette
+and normalizes stale values when the palette changes:
+
+```yaml
+fields:
+  - key: accentColor
+    label: Accent color
+    selector:
+      opendisplay_color: {}
+```
+
+The persisted value is a lowercase CSS hex color. Widget packages remain
+independent of display models and must not provide their own device lists.
+
 A requirement maps a configuration source to a key in the Liquid context:
 
 ```yaml
@@ -158,6 +173,12 @@ the TRMNL light or dark screen mode, `fontFamily` selects the default, classic,
 or TRMNL family, and `textScale` selects small, regular, large, or extra-large
 framework typography. These settings must remain outside widget configuration
 so every package shares one predictable display environment.
+
+Region surfaces are composer-owned. `showBackground`, `showBorder`, and corner
+radius are applied outside the Liquid fragment, which keeps transparent widgets
+transparent in CLI, exact preview, Media Source, and physical output. Each
+display defines a default corner radius in native output pixels; a region may
+inherit it or override it, including an explicit zero for square corners.
 
 `--screen-w` and `--screen-h` describe the physical device. Responsive widget
 decisions use the actual CSS region container dimensions, never names such as

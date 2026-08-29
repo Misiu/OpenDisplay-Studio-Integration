@@ -4,9 +4,13 @@ import { calendarWidget } from './calendar/widget'
 import { sensorWidget } from './sensor/widget'
 import { textNoteWidget } from './text-note/widget'
 import { weatherWidget } from './weather/widget'
+import { heroWeatherWidget } from './hero-weather/widget'
+import { sectionTitleWidget } from './section-title/widget'
 
 export const WIDGETS = [
   calendarWidget,
+  heroWeatherWidget,
+  sectionTitleWidget,
   sensorWidget,
   textNoteWidget,
   weatherWidget,

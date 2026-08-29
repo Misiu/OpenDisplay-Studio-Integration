@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.9.5
+
+- Add self-contained Section Title and Hero Weather widgets with English and
+  Polish localization, Home Assistant weather data, and palette-aware colors.
+- Add palette color selectors whose available choices follow the selected
+  display capabilities instead of exposing unsupported colors.
+- Add display-level corner radius and optional per-region overrides, applying
+  the same clipped geometry in the editor, live preview, and final render.
+- Expand unit, editor, and cross-platform visual regression coverage for the
+  new widgets, palette selection, and rounded region rendering.
+
 ## 0.9.0
 
 - Treat the logical grid as an editor aid and render only explicitly composed

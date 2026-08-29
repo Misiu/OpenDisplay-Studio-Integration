@@ -10,7 +10,8 @@ Home Assistant data.
 
 Open **OpenDisplay Studio** in the Home Assistant sidebar to create predefined
 or custom displays, edit their logical grids, compose rectangular regions, and
-assign Entity State, Calendar, Weather, or Text widgets. Weather configuration
+assign Sensor, Calendar, Weather, Hero Weather, Section Title, or Text widgets.
+Weather configuration
 uses Home Assistant's native entity selector and renders current conditions plus
 the selected entity's daily forecast. Project configuration is stored with Home
 Assistant's versioned `Store`; browser `localStorage` is not used.

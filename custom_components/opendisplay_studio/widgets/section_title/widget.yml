@@ -1,0 +1,30 @@
+id: section-title
+name: Section Title
+version: "0.1.0"
+description: Localized weekday and date heading for a dashboard section.
+icon: mdi:calendar-today
+framework: 3.2.0
+template: widget.liquid
+provider: provider.py
+
+defaults:
+  source: current
+  weekdayColor: "#000000"
+  dateColor: "#d22626"
+
+fields:
+  - key: weekdayColor
+    label: Weekday color
+    selector:
+      opendisplay_color: {}
+  - key: dateColor
+    label: Date color
+    selector:
+      opendisplay_color: {}
+
+dataRequirements:
+  - key: sectionTitle
+    provider: section_title
+    configKey: source
+    cardinality: one
+    optional: true

@@ -1,0 +1,1 @@
+"""Section Title widget package."""

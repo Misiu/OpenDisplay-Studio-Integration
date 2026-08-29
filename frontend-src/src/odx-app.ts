@@ -27,6 +27,7 @@ import {
 } from './services/background'
 import { projectForPreview } from './services/preview'
 import {
+  clampRegionBorderRadius,
   clampLayoutSpacing,
   createId,
   createRegions,
@@ -35,10 +36,12 @@ import {
   layoutSpacing,
   mergeRegions,
   regionAppearance,
+  resolvedRegionBorderRadius,
   regionContainsCell,
   rotateRegions,
   splitRegion,
 } from './services/layout'
+import { paletteColors, resolvePaletteColor } from './services/palette'
 import { createProject } from './services/storage'
 import type {
   BootstrapResponse,
@@ -486,7 +489,21 @@ export class OdxApp extends LitElement {
 
   private changePalette(event: Event): void {
     const palette = (event.currentTarget as HTMLSelectElement).value as PaletteId
-    this.updateLayoutDraft((project) => ({ ...project, palette }))
+    this.updateLayoutDraft((project) => ({
+      ...project,
+      palette,
+      regions: project.regions.map((region) => {
+        if (!region.widget) return region
+        const definition = this.widgetDefinition(region.widget.type)
+        if (!definition) return region
+        const config = { ...region.widget.config }
+        for (const option of definition.options) {
+          if (!option.selector || !('opendisplay_color' in option.selector)) continue
+          config[option.key] = resolvePaletteColor(palette, config[option.key] ?? definition.defaults[option.key])
+        }
+        return { ...region, widget: { ...region.widget, config } }
+      }),
+    }))
   }
 
   private changeTheme(theme: DisplayTheme): void {
@@ -541,6 +558,11 @@ export class OdxApp extends LitElement {
   private changeLayoutSpacing(key: 'screenPadding' | 'regionGap', event: Event): void {
     const value = clampLayoutSpacing(Number((event.currentTarget as HTMLInputElement).value))
     this.updateLayoutDraft((project) => ({ ...project, [key]: value }))
+  }
+
+  private changeDisplayRegionBorderRadius(event: Event): void {
+    const regionBorderRadius = clampRegionBorderRadius(Number((event.currentTarget as HTMLInputElement).value))
+    this.updateLayoutDraft((project) => ({ ...project, regionBorderRadius }))
   }
 
   private changeOrientation(orientation: Orientation): void {
@@ -644,7 +666,19 @@ export class OdxApp extends LitElement {
       ...project,
       regions: project.regions.map((region) =>
         region.id === this.selectedRegionId
-          ? { ...region, widget: { type: definition.id, version: definition.version, config: { ...definition.defaults } } }
+          ? {
+              ...region,
+              widget: {
+                type: definition.id,
+                version: definition.version,
+                config: Object.fromEntries(Object.entries(definition.defaults).map(([key, value]) => {
+                  const option = definition.options.find((item) => item.key === key)
+                  return [key, option?.selector && 'opendisplay_color' in option.selector
+                    ? resolvePaletteColor(project.palette, value)
+                    : value]
+                })),
+              },
+            }
           : region,
       ),
     }))
@@ -680,6 +714,15 @@ export class OdxApp extends LitElement {
     this.updateProject((project) => ({ ...project, regions: project.regions.map((region) =>
       region.id === this.selectedRegionId
         ? { ...region, appearance: { ...regionAppearance(region), [key]: value } }
+        : region) }))
+  }
+
+  private updateRegionBorderRadius(event: Event): void {
+    const raw = (event.currentTarget as HTMLInputElement).value.trim()
+    const borderRadius = raw === '' ? null : clampRegionBorderRadius(Number(raw))
+    this.updateProject((project) => ({ ...project, regions: project.regions.map((region) =>
+      region.id === this.selectedRegionId
+        ? { ...region, appearance: { ...regionAppearance(region), borderRadius } }
         : region) }))
   }
 
@@ -825,10 +868,15 @@ export class OdxApp extends LitElement {
       .sort((first, second) => first.row - second.row || first.column - second.column)
     const label = isComposed ? region.label ?? regionLabel(composedRegions.findIndex((item) => item.id === region.id)) : `${region.column}.${region.row}`
     const appearance = regionAppearance(region)
+    const borderRadius = resolvedRegionBorderRadius(this.canvasProject, region)
     return html`
       <section
         class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${appearance.showBackground ? 'region-background' : ''} ${appearance.showBorder ? 'region-border' : ''} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
-        style=${styleMap({ gridColumn: `${region.column} / span ${region.columnSpan}`, gridRow: `${region.row} / span ${region.rowSpan}` })}
+        style=${styleMap({
+          gridColumn: `${region.column} / span ${region.columnSpan}`,
+          gridRow: `${region.row} / span ${region.rowSpan}`,
+          borderRadius: `${borderRadius}px`,
+        })}
         aria-label=${layoutMode ? isComposed ? `Region ${label}` : `Grid cell ${label}` : definition ? `${definition.name} region` : 'Empty region'}
         aria-pressed=${layoutMode ? nothing : String(region.id === this.selectedRegionId)}
         role=${layoutMode ? nothing : 'button'}
@@ -969,6 +1017,30 @@ export class OdxApp extends LitElement {
           : option.type === 'entity'
             ? { entity: {} }
             : undefined)
+    if (selector && 'opendisplay_color' in selector) {
+      const selected = resolvePaletteColor(this.project.palette, value)
+      return html`
+        <fieldset class="palette-color-field">
+          <legend>${option.label}</legend>
+          <div class="palette-color-options">
+            ${paletteColors(this.project.palette).map((color) => html`
+              <label title=${color.label}>
+                <input
+                  type="radio"
+                  name=${`option-${option.key}`}
+                  value=${color.value}
+                  .checked=${selected === color.value}
+                  @change=${() => this.updateWidgetValue(option, color.value)}
+                />
+                <span class="palette-color-swatch" style=${styleMap({ backgroundColor: color.value })}></span>
+                <span>${color.label}</span>
+              </label>
+            `)}
+          </div>
+          ${option.help ? html`<p>${option.help}</p>` : nothing}
+        </fieldset>
+      `
+    }
     if (selector) {
       return html`
         <ha-form
@@ -1043,6 +1115,11 @@ export class OdxApp extends LitElement {
           <div class="region-appearance-heading"><h3 id="region-appearance-heading">Appearance</h3><p>Applied to this region only.</p></div>
           <div class="toggle-field"><label for="region-show-background">Show background</label><input id="region-show-background" class="toggle" type="checkbox" .checked=${appearance.showBackground} @change=${(event: Event) => this.updateRegionAppearance('showBackground', event)} /></div>
           <div class="toggle-field"><label for="region-show-border">Show border</label><input id="region-show-border" class="toggle" type="checkbox" .checked=${appearance.showBorder} @change=${(event: Event) => this.updateRegionAppearance('showBorder', event)} /></div>
+          <div class="field region-radius-field">
+            <label class="field-label" for="region-border-radius">Corner radius (px)</label>
+            <input id="region-border-radius" type="number" min="0" max="128" step="1" placeholder=${String(this.project.regionBorderRadius)} .value=${appearance.borderRadius === null ? '' : String(appearance.borderRadius)} @change=${this.updateRegionBorderRadius} />
+            <p>Leave empty to use the display default (${this.project.regionBorderRadius} px).</p>
+          </div>
         </section>
         <div class="widget-picker">
           ${this.widgetMetadata.map((widget) => html`
@@ -1150,6 +1227,7 @@ export class OdxApp extends LitElement {
           <div class="spacing-grid">
             <div class="field"><label class="field-label" for="screen-padding">Screen padding (px)</label><input id="screen-padding" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).screenPadding)} @change=${(event: Event) => this.changeLayoutSpacing('screenPadding', event)} /><p>Inset from the display edge.</p></div>
             <div class="field"><label class="field-label" for="region-gap">Region gap (px)</label><input id="region-gap" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).regionGap)} @change=${(event: Event) => this.changeLayoutSpacing('regionGap', event)} /><p>Gutter between regions.</p></div>
+            <div class="field"><label class="field-label" for="region-border-radius-default">Default corner radius (px)</label><input id="region-border-radius-default" type="number" min="0" max="128" step="1" .value=${String(project.regionBorderRadius)} @change=${this.changeDisplayRegionBorderRadius} /><p>Inherited by regions without an override.</p></div>
           </div>
         </section>
         <ha-form

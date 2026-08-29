@@ -7,7 +7,7 @@ export interface TestRegion {
   column: number
   rowSpan: number
   columnSpan: number
-  appearance?: { showBackground: boolean, showBorder: boolean }
+  appearance?: { showBackground: boolean, showBorder: boolean, borderRadius: number | null }
   widget?: { type: string, version: string, config: Record<string, unknown> }
 }
 
@@ -27,6 +27,7 @@ export interface TestProject {
   grid: { columns: number, rows: number }
   screenPadding: number
   regionGap: number
+  regionBorderRadius: number
   regions: TestRegion[]
   background?: {
     media: { media_content_id: string }

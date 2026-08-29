@@ -127,7 +127,7 @@ STUDIO_STYLES = """
   .studio-background-layer:not(.studio-background-layer--manual) .studio-background{width:100%;height:100%;object-fit:var(--studio-background-fit)}
   .studio-background-layer--manual .studio-background{width:auto!important;height:auto!important;max-width:none!important;max-height:none!important;transform:scale(var(--studio-background-scale));transform-origin:var(--studio-background-position)}
   .studio-grid{display:grid;width:100%;height:100%;padding:var(--studio-screen-padding);gap:var(--studio-region-gap);box-sizing:border-box}
-  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--framework-semantic-surface-bg-color,transparent);color:inherit;box-sizing:border-box;container-type:size;container-name:od-region}
+  .studio-region{position:relative;min-width:0;min-height:0;overflow:hidden;border-radius:var(--studio-region-radius,0);background:var(--framework-semantic-surface-bg-color,transparent);color:inherit;box-sizing:border-box;container-type:size;container-name:od-region}
   .studio-region--transparent{background:transparent!important}
   .studio-region--transparent>.item{background:transparent!important}
   .studio-region--bordered{border:1px solid currentColor}
@@ -372,6 +372,19 @@ def _region_classes(region: dict[str, Any], shape: str) -> str:
     return " ".join(classes)
 
 
+def _region_border_radius(project: Project, region: dict[str, Any]) -> int:
+    """Resolve a region override or the display-wide corner radius."""
+    appearance = region.get("appearance", {})
+    override = appearance.get("borderRadius")
+    if isinstance(override, int) and not isinstance(override, bool):
+        return max(0, min(128, override))
+    width = int(project.get("width", 800))
+    height = int(project.get("height", 480))
+    fallback = max(4, min(24, round(min(width, height) / 40)))
+    configured = project.get("regionBorderRadius", fallback)
+    return max(0, min(128, int(configured)))
+
+
 async def async_compose_project(
     hass: HomeAssistant, project: Project
 ) -> ComposedProject:
@@ -445,6 +458,7 @@ async def async_compose_project(
             f"--od-region-width:{region_width:.3f};"
             f"--od-region-height:{region_height:.3f};"
             f"--od-region-aspect-ratio:{ratio:.6f};"
+            f"--studio-region-radius:{_region_border_radius(project, region)}px;"
         )
         shape = _region_shape(project, region, gap=region_gap, padding=screen_padding)
         region_classes = _region_classes(region, shape)

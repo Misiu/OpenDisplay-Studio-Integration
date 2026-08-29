@@ -7,6 +7,7 @@ import {
   layoutSpacing,
   mergeRegions,
   rotateRegions,
+  resolvedRegionBorderRadius,
   splitRegion,
 } from './layout'
 
@@ -29,7 +30,7 @@ describe('layout service', () => {
 
     expect(regions).toHaveLength(10)
     expect(regions[0]).toMatchObject({ row: 1, column: 1, rowSpan: 1, columnSpan: 1 })
-    expect(regions[0].appearance).toEqual({ showBackground: false, showBorder: false })
+    expect(regions[0].appearance).toEqual({ showBackground: false, showBorder: false, borderRadius: null })
     expect(regions[9]).toMatchObject({ row: 2, column: 5, rowSpan: 1, columnSpan: 1 })
   })
 
@@ -52,6 +53,19 @@ describe('layout service', () => {
     } as never
 
     expect(layoutSpacing(project)).toEqual({ screenPadding: 20, regionGap: 6 })
+  })
+
+  it('inherits display corner radius and permits a square region override', () => {
+    const project = {
+      width: 800,
+      height: 480,
+      regionBorderRadius: 14,
+    } as never
+    const inherited = { id: 'a', row: 1, column: 1, rowSpan: 1, columnSpan: 1 }
+    const square = { ...inherited, appearance: { showBackground: false, showBorder: true, borderRadius: 0 } }
+
+    expect(resolvedRegionBorderRadius(project, inherited)).toBe(14)
+    expect(resolvedRegionBorderRadius(project, square)).toBe(0)
   })
 
   it('merges only a completely covered rectangle', () => {

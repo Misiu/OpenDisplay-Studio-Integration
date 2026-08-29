@@ -16,6 +16,10 @@ from custom_components.opendisplay_studio.composer import (
     async_compose_project,
 )
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY, definition
+from custom_components.opendisplay_studio.widgets.hero_weather.provider import (
+    HeroWeatherLocalizer,
+    HeroWeatherResult,
+)
 from custom_components.opendisplay_studio.widgets.weather.provider import (
     WeatherLocalizer,
 )
@@ -102,6 +106,123 @@ async def test_composer_skips_inactive_cells_and_applies_region_appearance(
     assert "inactive" not in result.html
     assert "--studio-screen-padding:20px" in result.html
     assert "--studio-region-gap:12px" in result.html
+    assert "--studio-region-radius:12px" in result.html
+    assert "border-radius:var(--studio-region-radius,0)" in result.html
+
+
+async def test_region_corner_radius_override_wins_over_display_default(hass) -> None:
+    project = {
+        "palette": "bw",
+        "width": 800,
+        "height": 480,
+        "regionBorderRadius": 16,
+        "grid": {"columns": 2, "rows": 1},
+        "regions": [
+            {
+                "id": "rounded",
+                "label": "A",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "appearance": {"borderRadius": 7},
+            },
+            {
+                "id": "inherited",
+                "label": "B",
+                "row": 1,
+                "column": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+            },
+        ],
+    }
+
+    result = await async_compose_project(hass, project)
+
+    assert result.html.count("--studio-region-radius:7px") == 1
+    assert result.html.count("--studio-region-radius:16px") == 1
+
+
+async def test_section_title_and_hero_weather_compose_as_transparent_widgets(
+    hass,
+) -> None:
+    project = {
+        "palette": "bwry",
+        "width": 800,
+        "height": 480,
+        "grid": {"columns": 2, "rows": 1},
+        "regions": [
+            {
+                "id": "title",
+                "label": "A",
+                "row": 1,
+                "column": 1,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "section-title",
+                    "version": "0.1.0",
+                    "config": {
+                        "source": "current",
+                        "weekdayColor": "#000000",
+                        "dateColor": "#d22626",
+                    },
+                },
+            },
+            {
+                "id": "hero",
+                "label": "B",
+                "row": 1,
+                "column": 2,
+                "rowSpan": 1,
+                "columnSpan": 1,
+                "widget": {
+                    "type": "hero-weather",
+                    "version": "0.1.0",
+                    "config": {
+                        "weather": "weather.home",
+                        "primaryColor": "#000000",
+                        "accentColor": "#d22626",
+                    },
+                },
+            },
+        ],
+    }
+    hero_result = HeroWeatherResult(
+        values={
+            "weather.home": {
+                "temperature": 23,
+                "temperature_unit": "°C",
+                "condition": "Partly cloudy",
+                "high": 27,
+                "low": 16,
+            }
+        },
+        localizer=HeroWeatherLocalizer(
+            labels={"unavailable": "Unavailable"}, conditions={}
+        ),
+    )
+    with (
+        patch.object(
+            DEFAULT_REGISTRY.provider("section-title", "section_title"),
+            "async_resolve",
+            AsyncMock(return_value={"weekday": "MONDAY", "date": "25 AUG 2025"}),
+        ),
+        patch.object(
+            DEFAULT_REGISTRY.provider("hero-weather", "hero_weather"),
+            "async_resolve",
+            AsyncMock(return_value=hero_result),
+        ),
+    ):
+        result = await async_compose_project(hass, project)
+
+    assert "MONDAY" in result.html
+    assert "25 AUG 2025" in result.html
+    assert "Partly cloudy" in result.html
+    assert "↑ 27°" in result.html
+    assert "↓ 16°" in result.html
+    assert result.html.count(' studio-region--transparent"') == 2
 
 
 def test_background_size_is_bounded_for_renderer_payload(tmp_path) -> None:

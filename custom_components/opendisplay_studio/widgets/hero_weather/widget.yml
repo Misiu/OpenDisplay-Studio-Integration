@@ -1,0 +1,38 @@
+id: hero-weather
+name: Hero Weather
+version: "0.1.0"
+description: Large current temperature, condition, and today's minimum and maximum.
+icon: mdi:weather-partly-cloudy
+framework: 3.2.0
+template: widget.liquid
+provider: provider.py
+
+defaults:
+  weather: ""
+  primaryColor: "#000000"
+  accentColor: "#d22626"
+
+fields:
+  - key: weather
+    label: Weather entity
+    required: true
+    selector:
+      entity:
+        filter:
+          domain: weather
+  - key: primaryColor
+    label: Primary color
+    selector:
+      opendisplay_color: {}
+  - key: accentColor
+    label: Accent color
+    selector:
+      opendisplay_color: {}
+
+dataRequirements:
+  - key: heroWeather
+    provider: hero_weather
+    configKey: weather
+    cardinality: one
+    optional: false
+    forecastType: daily

@@ -71,6 +71,12 @@ HTML to preview and Media Source. Widgets do not own or duplicate these
 settings; they react to the framework variables and their physical region
 container.
 
+Screen padding, region gap, and the default region corner radius are also
+project-level native-pixel settings. Region appearance can override the corner
+radius and independently enable a surface background or border. The composer,
+not a widget template, owns this box model so an installed widget cannot make
+preview and final output disagree about transparency or clipping.
+
 Display backgrounds are also project-level presentation. The panel stores the
 Home Assistant media selector value together with fit mode, nine-point anchor,
 and scale. `stretch`, `contain`, and `cover` map to deterministic object-fit

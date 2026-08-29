@@ -1071,6 +1071,10 @@ export const appStyles = css`
     isolation: isolate;
   }
 
+  .screen-region > * {
+    max-width: 100%;
+  }
+
   .screen-region.region-background {
     background: var(--screen-paper);
   }
@@ -1134,7 +1138,9 @@ export const appStyles = css`
 
   .region-appearance-heading h3,
   .region-appearance-heading p,
-  .spacing-grid p {
+  .spacing-grid p,
+  .region-radius-field p,
+  .palette-color-field p {
     margin: 0;
   }
 
@@ -1143,7 +1149,9 @@ export const appStyles = css`
   }
 
   .region-appearance-heading p,
-  .spacing-grid p {
+  .spacing-grid p,
+  .region-radius-field p,
+  .palette-color-field p {
     margin-top: 3px;
     color: var(--odx-muted);
     font-size: 11px;
@@ -1154,6 +1162,57 @@ export const appStyles = css`
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .palette-color-field {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .palette-color-field legend {
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .palette-color-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
+    gap: 7px;
+  }
+
+  .palette-color-options label {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+    padding: 7px;
+    border: 1px solid var(--odx-line);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+
+  .palette-color-options label:has(input:checked) {
+    border-color: var(--odx-blue);
+    box-shadow: inset 0 0 0 1px var(--odx-blue);
+    background: var(--odx-blue-soft);
+  }
+
+  .palette-color-options input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .palette-color-swatch {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border: 1px solid color-mix(in srgb, var(--primary-text-color) 28%, transparent);
+    border-radius: 50%;
   }
 
   .layout-region-copy strong {

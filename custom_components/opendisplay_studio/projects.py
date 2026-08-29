@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import STORAGE_KEY, STORAGE_VERSION
+from .palette import PALETTE_COLORS, normalize_palette_color
 from .widgets import DEFAULT_REGISTRY, WidgetRegistry
 
 type Project = dict[str, Any]
@@ -23,7 +24,8 @@ MAX_REGIONS = 256
 MAX_NAME_LENGTH = 100
 MAX_TEXT_LENGTH = 4_096
 MAX_LAYOUT_SPACING = 128
-PALETTES = {"bw", "gray4", "gray16", "bwr", "bwy", "bwry", "spectra6"}
+MAX_REGION_BORDER_RADIUS = 128
+PALETTES = set(PALETTE_COLORS)
 DISPLAY_THEMES = {"light", "dark"}
 FONT_FAMILIES = {"default", "classic", "trmnl"}
 TEXT_SCALES = {"small", "regular", "large", "xlarge"}
@@ -116,7 +118,9 @@ def _validate_background(value: object) -> dict[str, Any] | None:
     }
 
 
-def _validate_widget(value: object, registry: WidgetRegistry) -> dict[str, Any] | None:
+def _validate_widget(
+    value: object, registry: WidgetRegistry, palette: str
+) -> dict[str, Any] | None:
     if value is None:
         return None
     if not isinstance(value, dict):
@@ -174,6 +178,8 @@ def _validate_widget(value: object, registry: WidgetRegistry) -> dict[str, Any] 
             isinstance(selector, dict) and "boolean" in selector
         ):
             normalized_config[key] = bool(item)
+        elif isinstance(selector, dict) and "opendisplay_color" in selector:
+            normalized_config[key] = normalize_palette_color(palette, item)
         elif field_type == "number":
             if isinstance(item, bool) or not isinstance(item, int | float):
                 message = f"{widget_type} {key} must be numeric"
@@ -281,6 +287,7 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
             raise ProjectValidationError("region.appearance must be an object")
         show_background = appearance.get("showBackground", False)
         show_border = appearance.get("showBorder", False)
+        border_radius = appearance.get("borderRadius")
         if not isinstance(show_background, bool):
             raise ProjectValidationError(
                 "region.appearance.showBackground must be a boolean"
@@ -289,14 +296,22 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
             raise ProjectValidationError(
                 "region.appearance.showBorder must be a boolean"
             )
+        if border_radius is not None:
+            border_radius = _integer(
+                border_radius,
+                "region.appearance.borderRadius",
+                0,
+                MAX_REGION_BORDER_RADIUS,
+            )
         normalized_region["appearance"] = {
             "showBackground": show_background,
             "showBorder": show_border,
+            "borderRadius": border_radius,
         }
         label = region.get("label")
         if isinstance(label, str) and label.strip():
             normalized_region["label"] = label.strip()[:MAX_NAME_LENGTH]
-        widget = _validate_widget(region.get("widget"), registry)
+        widget = _validate_widget(region.get("widget"), registry, palette)
         if widget is not None:
             normalized_region["widget"] = widget
         normalized_regions.append(normalized_region)
@@ -384,6 +399,13 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
     region_gap = _integer(
         value.get("regionGap", default_spacing), "regionGap", 0, MAX_LAYOUT_SPACING
     )
+    default_border_radius = max(4, min(24, round(min(width, height) / 40)))
+    region_border_radius = _integer(
+        value.get("regionBorderRadius", default_border_radius),
+        "regionBorderRadius",
+        0,
+        MAX_REGION_BORDER_RADIUS,
+    )
     normalized_project: Project = {
         "schemaVersion": 1,
         "name": name,
@@ -400,6 +422,7 @@ def validate_project(value: object, registry: WidgetRegistry | None = None) -> P
         "grid": {"columns": columns, "rows": rows},
         "screenPadding": screen_padding,
         "regionGap": region_gap,
+        "regionBorderRadius": region_border_radius,
         "regions": normalized_regions,
     }
     if background is not None:

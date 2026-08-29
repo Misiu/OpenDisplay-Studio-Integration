@@ -10,13 +10,23 @@ import type {
 
 let fallbackSequence = 0
 
-export const DEFAULT_REGION_APPEARANCE: RegionAppearance = { showBackground: false, showBorder: false }
+export const DEFAULT_REGION_APPEARANCE: RegionAppearance = {
+  showBackground: false,
+  showBorder: false,
+  borderRadius: null,
+}
 
 export const isActiveRegion = (region: GridRegion): boolean =>
   Boolean(region.label || region.widget || region.rowSpan > 1 || region.columnSpan > 1)
 
 export const clampLayoutSpacing = (value: number): number =>
   Math.max(0, Math.min(128, Math.round(Number.isFinite(value) ? value : 0)))
+
+export const clampRegionBorderRadius = (value: number): number =>
+  Math.max(0, Math.min(128, Math.round(Number.isFinite(value) ? value : 0)))
+
+export const defaultRegionBorderRadius = (width: number, height: number): number =>
+  Math.max(4, Math.min(24, Math.round(Math.min(width, height) / 40)))
 
 export const defaultLayoutSpacing = (width: number, height: number, grid: GridSize, regions: GridRegion[]): number => {
   const active = regions.filter(isActiveRegion)
@@ -38,6 +48,14 @@ export const regionAppearance = (region: GridRegion): RegionAppearance => ({
   ...DEFAULT_REGION_APPEARANCE,
   ...region.appearance,
 })
+
+export const resolvedRegionBorderRadius = (project: ScreenProject, region: GridRegion): number => {
+  const override = regionAppearance(region).borderRadius
+  if (override !== null) return clampRegionBorderRadius(override)
+  return Number.isInteger(project.regionBorderRadius)
+    ? clampRegionBorderRadius(project.regionBorderRadius)
+    : defaultRegionBorderRadius(project.width, project.height)
+}
 
 export const createId = (webCrypto: Crypto | undefined = globalThis.crypto): string => {
   if (typeof webCrypto?.randomUUID === 'function') return webCrypto.randomUUID()

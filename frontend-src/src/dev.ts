@@ -8,7 +8,7 @@ import robotoRegularUrl from '@fontsource/roboto/files/roboto-latin-400-normal.w
 import robotoBoldUrl from '@fontsource/roboto/files/roboto-latin-700-normal.woff2?inline'
 import './odx-app'
 import type { HomeAssistant, ScreenProject } from './types'
-import { createId, isActiveRegion, layoutSpacing, regionAppearance } from './services/layout'
+import { createId, isActiveRegion, layoutSpacing, regionAppearance, resolvedRegionBorderRadius } from './services/layout'
 import { WIDGETS } from './widgets/registry'
 
 if (!customElements.get('ha-button')) {
@@ -105,12 +105,17 @@ const demoEntityHtml = (project: ScreenProject): string => {
   const regions = project.regions.filter(isActiveRegion).map((region) => {
     const appearance = regionAppearance(region)
     const entity = String(region.widget?.config.entity ?? '')
-    const content = region.widget?.type === 'sensor'
+    const widget = region.widget
+    const content = widget?.type === 'sensor'
       ? `<div class="item demo-sensor"><strong>Kitchen temperature</strong><div class="demo-sensor__reading"><span>♨</span><span class="demo-sensor__value">21.4</span><span>°C</span></div><footer><span>${entity}</span><time>08:15</time></footer></div>`
-      : ''
-    return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan};background:${appearance.showBackground ? '#fff' : 'transparent'};border:${appearance.showBorder ? '1px solid #111' : '0'}">${content}</section>`
+      : widget?.type === 'section-title'
+        ? `<div class="demo-section-title" style="--weekday:${String(widget.config.weekdayColor)};--date:${String(widget.config.dateColor)}"><strong>MONDAY</strong><span>25 AUG 2025</span></div>`
+        : widget?.type === 'hero-weather'
+          ? `<div class="demo-hero-weather" style="--primary:${String(widget.config.primaryColor)};--accent:${String(widget.config.accentColor)}"><div><strong>23°</strong><span>PARTLY CLOUDY</span></div><aside><b>↑ 27°</b><span>↓ 16°</span></aside></div>`
+          : ''
+    return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan};border-radius:${resolvedRegionBorderRadius(project, region)}px;background:${appearance.showBackground ? '#fff' : 'transparent'};border:${appearance.showBorder ? '1px solid #111' : '0'}">${content}</section>`
   }).join('')
-  return `<main class="screen studio-screen"><style>@font-face{font-family:DemoRoboto;src:url("${robotoRegularUrl}") format("woff2");font-weight:400}@font-face{font-family:DemoRoboto;src:url("${robotoBoldUrl}") format("woff2");font-weight:700}.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden;font-family:DemoRoboto,sans-serif}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${spacing.screenPadding}px;gap:${spacing.regionGap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
+  return `<main class="screen studio-screen"><style>@font-face{font-family:DemoRoboto;src:url("${robotoRegularUrl}") format("woff2");font-weight:400}@font-face{font-family:DemoRoboto;src:url("${robotoBoldUrl}") format("woff2");font-weight:700}.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden;font-family:DemoRoboto,sans-serif}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${spacing.screenPadding}px;gap:${spacing.regionGap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}.demo-section-title{display:flex;width:100%;height:100%;flex-direction:column;justify-content:center;padding:8%;box-sizing:border-box}.demo-section-title strong{color:var(--weekday);font-size:42px;line-height:.95}.demo-section-title span{color:var(--date);font-size:26px;font-weight:700}.demo-hero-weather{display:grid;width:100%;height:100%;grid-template-columns:1fr auto;align-items:center;gap:20px;padding:8%;box-sizing:border-box;color:var(--primary);text-align:center}.demo-hero-weather>div{display:flex;flex-direction:column}.demo-hero-weather strong{font-size:112px;line-height:.8}.demo-hero-weather>div span{font-size:24px;font-weight:700}.demo-hero-weather aside{display:flex;flex-direction:column;gap:12px;font-size:28px;font-weight:700}.demo-hero-weather aside b{color:var(--accent)}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
 }
 
 const demoPreviewImage = (project: ScreenProject): string => {
@@ -136,6 +141,7 @@ const demoProject: ScreenProject =
     grid: { columns: 3, rows: 2 },
     screenPadding: 8,
     regionGap: 8,
+    regionBorderRadius: 12,
     regions: [
       {
         id: 'temperature',

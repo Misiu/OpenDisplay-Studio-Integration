@@ -53,3 +53,24 @@ test('layout inspector remains usable at a narrower desktop viewport', async ({ 
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
   await expect(page.locator('opendisplay-studio-panel')).toHaveScreenshot('narrow-layout-inspector.png')
 })
+
+test('section title and hero weather reproduce the dashboard hierarchy', async ({ page }) => {
+  await openStudio(page)
+  await waitForPreview(page)
+  await openLayoutEditor(page)
+  await page.locator('#device-model').selectOption('custom')
+  await page.locator('#palette').selectOption('bwry')
+  await page.getByRole('button', { name: 'Apply layout' }).click()
+  await waitForPreview(page)
+
+  await page.getByRole('button', { name: 'Sensor region' }).click()
+  await page.locator('.widget-choice').filter({ hasText: 'Section Title' }).click()
+  await waitForPreview(page)
+  await page.getByRole('button', { name: 'Calendar region' }).click()
+  await page.locator('.widget-choice').filter({ hasText: 'Hero Weather' }).click()
+  await page.getByRole('textbox', { name: 'Weather entity' }).fill('weather.home')
+  await page.getByRole('textbox', { name: 'Weather entity' }).press('Tab')
+  await waitForPreview(page)
+
+  await expect(page.locator('opendisplay-studio-panel')).toHaveScreenshot('dashboard-title-hero.png')
+})

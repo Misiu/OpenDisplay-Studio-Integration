@@ -116,9 +116,11 @@ def test_display_preferences_have_safe_defaults() -> None:
     assert result["textScale"] == "regular"
     assert result["screenPadding"] == 8
     assert result["regionGap"] == 8
+    assert result["regionBorderRadius"] == 12
     assert result["regions"][0]["appearance"] == {
         "showBackground": False,
         "showBorder": False,
+        "borderRadius": None,
     }
 
 
@@ -126,19 +128,65 @@ def test_region_appearance_and_layout_spacing_are_normalized() -> None:
     payload = project_payload()
     payload["screenPadding"] = 20
     payload["regionGap"] = 6
+    payload["regionBorderRadius"] = 14
     payload["regions"][0]["appearance"] = {
         "showBackground": False,
         "showBorder": True,
+        "borderRadius": 6,
     }
 
     result = validate_project(payload)
 
     assert result["screenPadding"] == 20
     assert result["regionGap"] == 6
+    assert result["regionBorderRadius"] == 14
     assert result["regions"][0]["appearance"] == {
         "showBackground": False,
         "showBorder": True,
+        "borderRadius": 6,
     }
+
+
+def test_palette_aware_widget_colors_follow_the_display_palette() -> None:
+    payload = project_payload()
+    payload["regions"][0]["widget"] = {
+        "type": "section-title",
+        "version": "0.1.0",
+        "config": {
+            "weekdayColor": "#ffffff",
+            "dateColor": "#d22626",
+        },
+    }
+
+    monochrome = validate_project(payload)
+    assert monochrome["regions"][0]["widget"]["config"]["weekdayColor"] == ("#ffffff")
+    assert monochrome["regions"][0]["widget"]["config"]["dateColor"] == ("#000000")
+
+    payload["palette"] = "bwry"
+    color = validate_project(payload)
+    assert color["regions"][0]["widget"]["config"]["dateColor"] == "#d22626"
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("regionBorderRadius", 129), ("regionBorderRadius", -1)],
+)
+def test_display_corner_radius_rejects_out_of_range_values(
+    field: str, value: int
+) -> None:
+    payload = project_payload()
+    payload[field] = value
+
+    with pytest.raises(ProjectValidationError, match=field):
+        validate_project(payload)
+
+
+def test_region_corner_radius_rejects_out_of_range_values() -> None:
+    payload = project_payload()
+    payload["regions"][0]["appearance"] = {"borderRadius": 129}
+
+    with pytest.raises(ProjectValidationError, match="borderRadius"):
+        validate_project(payload)
 
 
 @pytest.mark.parametrize(
