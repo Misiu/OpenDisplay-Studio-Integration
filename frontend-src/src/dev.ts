@@ -2,6 +2,10 @@ import './index.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
+import '@fontsource/roboto-mono/400.css'
+import '@fontsource/roboto-mono/700.css'
+import robotoRegularUrl from '@fontsource/roboto/files/roboto-latin-400-normal.woff2?inline'
+import robotoBoldUrl from '@fontsource/roboto/files/roboto-latin-700-normal.woff2?inline'
 import './odx-app'
 import type { HomeAssistant, ScreenProject } from './types'
 import { createId, isActiveRegion, layoutSpacing, regionAppearance } from './services/layout'
@@ -106,7 +110,7 @@ const demoEntityHtml = (project: ScreenProject): string => {
       : ''
     return `<section class="studio-region" style="grid-row:${region.row}/span ${region.rowSpan};grid-column:${region.column}/span ${region.columnSpan};background:${appearance.showBackground ? '#fff' : 'transparent'};border:${appearance.showBorder ? '1px solid #111' : '0'}">${content}</section>`
   }).join('')
-  return `<main class="screen studio-screen"><style>.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${spacing.screenPadding}px;gap:${spacing.regionGap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
+  return `<main class="screen studio-screen"><style>@font-face{font-family:DemoRoboto;src:url("${robotoRegularUrl}") format("woff2");font-weight:400}@font-face{font-family:DemoRoboto;src:url("${robotoBoldUrl}") format("woff2");font-weight:700}.studio-screen{position:relative;width:${project.width}px;height:${project.height}px;background:#fff;overflow:hidden;font-family:DemoRoboto,sans-serif}.demo-background{position:absolute;inset:0;background:linear-gradient(155deg,transparent 0 40%,#aeb8ae 40% 42%,transparent 42%),linear-gradient(25deg,#dfe8df 0 35%,#77917c 35% 60%,#304b38 60% 100%)}.studio-grid{position:relative;display:grid;width:100%;height:100%;padding:${spacing.screenPadding}px;gap:${spacing.regionGap}px;box-sizing:border-box}.studio-region{min-width:0;min-height:0;border:1px solid #111;container-type:size;overflow:hidden}.demo-sensor{display:grid;width:100%;height:100%;grid-template-rows:auto 1fr auto;box-sizing:border-box;padding:12px}.demo-sensor__reading{display:flex;align-items:center;justify-content:center;gap:18px}.demo-sensor__value{font-size:68px}.demo-sensor footer{display:flex;justify-content:space-between;padding:4px 6px;background:#ddd;font-size:11px}</style>${background}<div class="studio-grid" style="grid-template-columns:repeat(${project.grid.columns},minmax(0,1fr));grid-template-rows:repeat(${project.grid.rows},minmax(0,1fr))">${regions}</div></main>`
 }
 
 const demoPreviewImage = (project: ScreenProject): string => {

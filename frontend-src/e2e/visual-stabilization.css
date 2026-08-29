@@ -1,0 +1,20 @@
+:host {
+  font-family: Roboto, sans-serif !important;
+}
+
+.brand-mark,
+.workflow b,
+.empty-library-count,
+.welcome-facts dt,
+.welcome-device-meta,
+.welcome-region > span,
+.welcome-palette span,
+.mini-screen,
+.grid-badge,
+.screen-meta code,
+.layout-region-copy span,
+.merge-cell,
+.region-address,
+.project-card-copy code {
+  font-family: 'Roboto Mono', monospace !important;
+}

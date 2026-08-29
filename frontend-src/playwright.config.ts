@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
@@ -22,6 +23,7 @@ export default defineConfig({
       animations: 'disabled',
       caret: 'hide',
       maxDiffPixelRatio: 0.005,
+      stylePath: path.join(import.meta.dirname, 'e2e', 'visual-stabilization.css'),
     },
   },
   projects: [
