@@ -12,4 +12,3 @@ test('shows exact preview failures without hiding editable regions', async ({ pa
   await expect(page.getByText('Demo renderer failed').first()).toBeVisible()
   await expect(page.getByRole('button', { name: 'Sensor region' })).toBeVisible()
 })
-

@@ -53,4 +53,3 @@ test('layout inspector remains usable at a narrower desktop viewport', async ({ 
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
   await expect(page.locator('opendisplay-studio-panel')).toHaveScreenshot('narrow-layout-inspector.png')
 })
-
