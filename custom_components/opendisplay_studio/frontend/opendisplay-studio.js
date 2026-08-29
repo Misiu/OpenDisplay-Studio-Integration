@@ -665,6 +665,10 @@ var Be = {
     box-sizing: border-box;
   }
 
+  [hidden] {
+    display: none !important;
+  }
+
   button,
   input,
   select {

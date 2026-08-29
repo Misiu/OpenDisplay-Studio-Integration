@@ -1,7 +1,35 @@
 import './index.css'
+import '@fontsource/roboto/400.css'
+import '@fontsource/roboto/500.css'
+import '@fontsource/roboto/700.css'
 import './odx-app'
 import type { HomeAssistant, ScreenProject } from './types'
 import { createId, isActiveRegion, layoutSpacing, regionAppearance } from './services/layout'
+import { WIDGETS } from './widgets/registry'
+
+if (!customElements.get('ha-button')) {
+  customElements.define('ha-button', class DemoHaButton extends HTMLElement {
+    connectedCallback(): void {
+      if (this.shadowRoot) return
+      const root = this.attachShadow({ mode: 'open' })
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.style.cssText = [
+        'min-height:36px',
+        'padding:0 14px',
+        'border:1px solid #758087',
+        'border-radius:18px',
+        'background:#fff',
+        'color:#182026',
+        'font:500 14px Roboto,sans-serif',
+        'cursor:pointer',
+      ].join(';')
+      const slot = document.createElement('slot')
+      button.append(slot)
+      root.append(button)
+    }
+  })
+}
 
 if (!customElements.get('ha-form')) {
   customElements.define('ha-form', class DemoHaForm extends HTMLElement {
@@ -64,7 +92,7 @@ if (!customElements.get('ha-form')) {
   })
 }
 
-const now = new Date().toISOString()
+const now = '2026-08-29T12:00:00.000Z'
 const demoEntityHtml = (project: ScreenProject): string => {
   const spacing = layoutSpacing(project)
   const background = project.background
@@ -86,7 +114,7 @@ const demoPreviewImage = (project: ScreenProject): string => {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-let projects: ScreenProject[] = [
+const demoProject: ScreenProject =
   {
     id: '4a34c31e',
     schemaVersion: 1,
@@ -147,16 +175,38 @@ let projects: ScreenProject[] = [
     ],
     createdAt: now,
     updatedAt: now,
-  },
-]
+  }
+
+const scenario = new URLSearchParams(window.location.search).get('scenario') ?? 'default'
+let projects: ScreenProject[] = scenario === 'empty' ? [] : [structuredClone(demoProject)]
+const calls: Array<Record<string, unknown>> = []
+const widgets = WIDGETS.map((widget) => ({
+  id: widget.id,
+  version: widget.version,
+  name: widget.name,
+  description: widget.description,
+  icon: widget.icon,
+  defaults: structuredClone(widget.defaults),
+  fields: structuredClone(widget.options),
+  dataRequirements: [],
+}))
 
 const hass: HomeAssistant = {
   language: 'en',
+  states: {
+    'sensor.kitchen_temperature': {
+      state: '21.4',
+      last_updated: '2026-08-29T11:58:00.000Z',
+    },
+  },
   async callWS<T>(message: Record<string, unknown>): Promise<T> {
+    calls.push(structuredClone(message))
     if (message.type === 'opendisplay_studio/bootstrap') {
-      return { projects, widgets: [] } as T
+      if (scenario === 'bootstrap-error') throw new Error('Demo bootstrap failed')
+      return { projects, widgets } as T
     }
     if (message.type === 'opendisplay_studio/compose_preview') {
+      if (scenario === 'preview-error') throw new Error('Demo renderer failed')
       return {
         imageUrl: demoPreviewImage(message.project as ScreenProject),
         timings: { data: 0.4, liquid: 0.7, compose: 1.6, renderer: 4.2, pipeline: 5.8 },
@@ -182,3 +232,17 @@ const hass: HomeAssistant = {
 
 const panel = document.querySelector('opendisplay-studio-panel') as HTMLElement & { hass: HomeAssistant }
 panel.hass = hass
+
+declare global {
+  interface Window {
+    __ODX_E2E__: {
+      calls: () => Array<Record<string, unknown>>
+      projects: () => ScreenProject[]
+    }
+  }
+}
+
+window.__ODX_E2E__ = {
+  calls: () => structuredClone(calls),
+  projects: () => structuredClone(projects),
+}

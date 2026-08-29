@@ -27,6 +27,10 @@ export const appStyles = css`
     box-sizing: border-box;
   }
 
+  [hidden] {
+    display: none !important;
+  }
+
   button,
   input,
   select {

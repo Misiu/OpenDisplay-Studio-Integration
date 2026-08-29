@@ -7,3 +7,5 @@ htmlcov/
 *.pyc
 .DS_Store
 frontend-src/node_modules/
+frontend-src/playwright-report/
+frontend-src/test-results/
