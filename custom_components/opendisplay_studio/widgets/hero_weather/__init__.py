@@ -1,1 +1,0 @@
-"""Hero Weather widget package."""

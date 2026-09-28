@@ -1,1 +1,0 @@
-"""Sensor widget package."""

@@ -1,4 +1,4 @@
-"""Persistent screen project model for OpenDisplay Studio."""
+"""Persistent freeform project model for OpenDisplay Studio."""
 
 from __future__ import annotations
 
@@ -14,523 +14,367 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import STORAGE_KEY, STORAGE_VERSION
-from .palette import PALETTE_COLORS, normalize_palette_color
-from .widgets import DEFAULT_REGISTRY, WidgetRegistry
+from .palette import PALETTE_COLORS, SUPPORTED_COLORS
+from .widgets import WidgetRegistry
 
 type Project = dict[str, Any]
 
 MAX_PROJECTS = 100
-MAX_REGIONS = 256
+MAX_ITEMS = 256
 MAX_NAME_LENGTH = 100
-MAX_TEXT_LENGTH = 4_096
-MAX_LAYOUT_SPACING = 128
-MAX_REGION_BORDER_RADIUS = 128
-PALETTES = set(PALETTE_COLORS)
-DISPLAY_THEMES = {"light", "dark"}
-FONT_FAMILIES = {"default", "classic", "trmnl"}
-TEXT_SCALES = {"small", "regular", "large", "xlarge"}
-BACKGROUND_MODES = {"stretch", "contain", "cover", "manual"}
-BACKGROUND_ANCHORS = {
-    "top-left",
-    "top-center",
-    "top-right",
-    "center-left",
-    "center",
-    "center-right",
-    "bottom-left",
-    "bottom-center",
-    "bottom-right",
-}
+MAX_TEXT_LENGTH = 4096
 LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
-WIDGET_VERSION_PATTERN = re.compile(
-    r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$"
-)
+PALETTES = frozenset(PALETTE_COLORS)
+COLORS = SUPPORTED_COLORS | {"accent", "transparent"}
 
 
 class ProjectValidationError(ValueError):
     """A project submitted by the frontend is invalid."""
 
 
-def _invalid(message: str) -> ProjectValidationError:
-    return ProjectValidationError(message)
-
-
 def _integer(value: object, name: str, minimum: int, maximum: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
-        message = f"{name} must be an integer"
-        raise _invalid(message)
+        raise ProjectValidationError(f"{name} must be an integer")
     if not minimum <= value <= maximum:
-        message = f"{name} must be between {minimum} and {maximum}"
-        raise _invalid(message)
+        raise ProjectValidationError(f"{name} must be between {minimum} and {maximum}")
     return value
 
 
 def _string(value: object, name: str, maximum: int = MAX_TEXT_LENGTH) -> str:
     if not isinstance(value, str):
-        message = f"{name} must be a string"
-        raise _invalid(message)
+        raise ProjectValidationError(f"{name} must be a string")
     result = value.strip()
     if not result or len(result) > maximum:
-        message = f"{name} must contain 1-{maximum} characters"
-        raise _invalid(message)
+        raise ProjectValidationError(f"{name} must contain 1-{maximum} characters")
     return result
 
 
-def _widget_version(value: object) -> str:
-    """Validate one semantic widget version."""
-    if isinstance(value, str) and WIDGET_VERSION_PATTERN.fullmatch(value):
-        return value
-    raise ProjectValidationError("widget.version must be a semantic version")
+def _boolean(value: object, name: str) -> bool:
+    if not isinstance(value, bool):
+        raise ProjectValidationError(f"{name} must be a boolean")
+    return value
 
 
-def _validate_background(value: object) -> dict[str, Any] | None:
-    """Validate a display background selected through Home Assistant media."""
-    if value is None:
+def _color(value: object, name: str, *, allow_none: bool = False) -> str | None:
+    if allow_none and (value is None or value == "transparent"):
         return None
-    if not isinstance(value, dict):
-        raise ProjectValidationError("background must be an object")
-    media = value.get("media")
-    if not isinstance(media, dict):
-        raise ProjectValidationError("background.media must be an object")
-    media_content_id = _string(
-        media.get("media_content_id"), "background.media.media_content_id"
-    )
-    media_content_type = _string(
-        media.get("media_content_type"), "background.media.media_content_type", 100
-    ).lower()
-    if not media_content_type.startswith("image/"):
-        raise ProjectValidationError("background media must be an image")
-    mode = value.get("mode", "contain")
-    if mode not in BACKGROUND_MODES:
-        raise ProjectValidationError("background.mode is invalid")
-    anchor = value.get("anchor", "center")
-    if anchor not in BACKGROUND_ANCHORS:
-        raise ProjectValidationError("background.anchor is invalid")
-    scale = _integer(value.get("scale", 100), "background.scale", 1, 400)
+    if not isinstance(value, str) or value not in COLORS - {"transparent"}:
+        raise ProjectValidationError(f"{name} is not a supported palette color")
+    return value
+
+
+def _item_state(value: dict[str, Any]) -> dict[str, Any]:
     return {
-        "media": {
-            "media_content_id": media_content_id,
-            "media_content_type": media_content_type,
-        },
-        "mode": mode,
-        "anchor": anchor,
-        "scale": scale,
+        "id": _string(value.get("id"), "item.id", 64),
+        "locked": _boolean(value.get("locked", False), "item.locked"),
+        "hidden": _boolean(value.get("hidden", False), "item.hidden"),
     }
 
 
-def _validate_widget(
-    value: object, registry: WidgetRegistry, palette: str
-) -> dict[str, Any] | None:
-    if value is None:
-        return None
+def _validate_frame(value: object, width: int, height: int) -> dict[str, int]:
     if not isinstance(value, dict):
-        raise ProjectValidationError("widget must be an object")
-    widget_type = _string(value.get("type"), "widget.type", 50)
-    if widget_type not in registry.widget_types:
-        message = f"Unsupported widget type: {widget_type}"
-        raise _invalid(message)
-    config = value.get("config", {})
+        raise ProjectValidationError("widget frame must be an object")
+    x = _integer(value.get("x"), "frame.x", 0, width - 1)
+    y = _integer(value.get("y"), "frame.y", 0, height - 1)
+    frame_width = _integer(value.get("width"), "frame.width", 1, width)
+    frame_height = _integer(value.get("height"), "frame.height", 1, height)
+    if x + frame_width > width or y + frame_height > height:
+        raise ProjectValidationError("widget frame exceeds the display")
+    return {"x": x, "y": y, "width": frame_width, "height": frame_height}
+
+
+def _validate_widget_item(
+    value: dict[str, Any], registry: WidgetRegistry, width: int, height: int
+) -> dict[str, Any]:
+    widget = value.get("widget")
+    if not isinstance(widget, dict):
+        raise ProjectValidationError("widget item requires widget")
+    widget_type = _string(widget.get("type"), "widget.type", 64)
+    definition = registry.definition(widget_type)
+    version = _string(
+        widget.get("version", definition["version"]), "widget.version", 64
+    )
+    config = widget.get("config", {})
     if not isinstance(config, dict):
         raise ProjectValidationError("widget.config must be an object")
-    widget_definition = registry.definition(widget_type)
-    allowed_keys = set(widget_definition["defaults"])
-    allowed_keys.update(
-        field["key"]
-        for field in widget_definition["fields"]
-        if isinstance(field.get("key"), str)
-    )
-    unknown_keys = set(config) - allowed_keys
-    if unknown_keys:
-        message = (
-            f"{widget_type} widget has unknown configuration: "
-            f"{', '.join(sorted(str(key) for key in unknown_keys))}"
-        )
-        raise ProjectValidationError(message)
-    merged_config = {**widget_definition["defaults"], **config}
-    normalized_config: dict[str, str | int | float | bool | list[str]] = {}
-    for key, item in merged_config.items():
-        if not isinstance(key, str) or not key or len(key) > 64:
-            raise ProjectValidationError("widget configuration key is invalid")
-        scalar = isinstance(item, str | int | float | bool) and not isinstance(
-            item, complex
-        )
-        string_list = isinstance(item, list) and all(
-            isinstance(value, str) and len(value) <= MAX_TEXT_LENGTH for value in item
-        )
-        if not scalar and not string_list:
-            message = f"widget configuration '{key}' is invalid"
-            raise _invalid(message)
-        if isinstance(item, str) and len(item) > MAX_TEXT_LENGTH:
-            message = f"widget configuration '{key}' is too long"
-            raise _invalid(message)
-        if isinstance(item, list):
-            normalized_config[key] = [str(value) for value in item]
-        else:
-            normalized_config[key] = item
-    for field in widget_definition["fields"]:
-        key = field.get("key")
-        if not isinstance(key, str) or key not in normalized_config:
-            continue
-        item = normalized_config[key]
-        field_type = field.get("type")
-        selector = field.get("selector")
-        if field_type == "toggle" or (
-            isinstance(selector, dict) and "boolean" in selector
-        ):
-            normalized_config[key] = bool(item)
-        elif isinstance(selector, dict) and "opendisplay_color" in selector:
-            normalized_config[key] = normalize_palette_color(palette, item)
-        elif field_type == "number":
-            if isinstance(item, bool) or not isinstance(item, int | float):
-                message = f"{widget_type} {key} must be numeric"
-                raise ProjectValidationError(message)
-            minimum = field.get("min")
-            maximum = field.get("max")
-            if isinstance(minimum, int | float) and item < minimum:
-                message = f"{widget_type} {key} is too small"
-                raise ProjectValidationError(message)
-            if isinstance(maximum, int | float) and item > maximum:
-                message = f"{widget_type} {key} is too large"
-                raise ProjectValidationError(message)
-        elif field_type == "select":
-            allowed = {
-                option.get("value")
-                for option in field.get("options", [])
-                if isinstance(option, dict)
-            }
-            if item not in allowed:
-                normalized_config[key] = widget_definition["defaults"].get(key, "")
+    layout = value.get("layout", {})
+    if not isinstance(layout, dict):
+        raise ProjectValidationError("widget layout must be an object")
     return {
-        "type": widget_type,
-        "version": _widget_version(value.get("version", widget_definition["version"])),
-        "config": normalized_config,
+        **_item_state(value),
+        "kind": "widget",
+        "widget": {"type": widget_type, "version": version, "config": deepcopy(config)},
+        "frame": _validate_frame(value.get("frame"), width, height),
+        "layout": {
+            "padding": _integer(layout.get("padding", 0), "layout.padding", 0, 128)
+        },
     }
 
 
-def validate_project(value: object, registry: WidgetRegistry | None = None) -> Project:
-    """Validate and normalize a complete project payload."""
-    registry = registry or DEFAULT_REGISTRY
+def _validate_box_primitive(
+    primitive: dict[str, Any], width: int, height: int, primitive_type: str
+) -> dict[str, Any]:
+    x_start = _integer(primitive.get("x_start"), "primitive.x_start", 0, width - 1)
+    x_end = _integer(primitive.get("x_end"), "primitive.x_end", 0, width - 1)
+    y_start = _integer(primitive.get("y_start"), "primitive.y_start", 0, height - 1)
+    y_end = _integer(primitive.get("y_end"), "primitive.y_end", 0, height - 1)
+    if primitive_type != "line" and (x_end <= x_start or y_end <= y_start):
+        raise ProjectValidationError(
+            f"{primitive_type} must have positive width and height"
+        )
+    if primitive_type == "line" and x_start == x_end and y_start == y_end:
+        raise ProjectValidationError("line must have two distinct points")
+    return {
+        "type": primitive_type,
+        "x_start": x_start,
+        "y_start": y_start,
+        "x_end": x_end,
+        "y_end": y_end,
+    }
+
+
+def _validate_primitive_item(
+    value: dict[str, Any], width: int, height: int
+) -> dict[str, Any]:
+    primitive = value.get("primitive")
+    if not isinstance(primitive, dict):
+        raise ProjectValidationError("primitive item requires primitive")
+    primitive_type = primitive.get("type")
+    result: dict[str, Any] = {**_item_state(value), "kind": "primitive"}
+    normalized: dict[str, Any]
+    if primitive_type == "text":
+        normalized = {
+            "type": "text",
+            "value": _string(primitive.get("value"), "primitive.value"),
+            "x": _integer(primitive.get("x"), "primitive.x", 0, width - 1),
+            "y": _integer(primitive.get("y"), "primitive.y", 0, height - 1),
+            "size": _integer(primitive.get("size", 24), "primitive.size", 6, 256),
+            "color": _color(primitive.get("color", "black"), "primitive.color"),
+        }
+    elif primitive_type in {"rectangle", "ellipse"}:
+        normalized = _validate_box_primitive(primitive, width, height, primitive_type)
+        normalized.update(
+            {
+                "fill": _color(
+                    primitive.get("fill"), "primitive.fill", allow_none=True
+                ),
+                "outline": _color(
+                    primitive.get("outline", "black"), "primitive.outline"
+                ),
+                "width": _integer(primitive.get("width", 1), "primitive.width", 0, 32),
+            }
+        )
+    elif primitive_type == "line":
+        normalized = _validate_box_primitive(primitive, width, height, primitive_type)
+        normalized.update(
+            {
+                "fill": _color(primitive.get("fill", "black"), "primitive.fill"),
+                "width": _integer(primitive.get("width", 2), "primitive.width", 1, 32),
+                "dashed": _boolean(primitive.get("dashed", False), "primitive.dashed"),
+            }
+        )
+    elif primitive_type == "circle":
+        normalized = {
+            "type": "circle",
+            "x": _integer(primitive.get("x"), "primitive.x", 0, width - 1),
+            "y": _integer(primitive.get("y"), "primitive.y", 0, height - 1),
+            "radius": _integer(
+                primitive.get("radius", 32), "primitive.radius", 1, min(width, height)
+            ),
+            "fill": _color(primitive.get("fill"), "primitive.fill", allow_none=True),
+            "outline": _color(primitive.get("outline", "black"), "primitive.outline"),
+            "width": _integer(primitive.get("width", 2), "primitive.width", 0, 32),
+        }
+    elif primitive_type == "icon":
+        normalized = {
+            "type": "icon",
+            "value": _string(primitive.get("value"), "primitive.value", 128),
+            "x": _integer(primitive.get("x"), "primitive.x", 0, width - 1),
+            "y": _integer(primitive.get("y"), "primitive.y", 0, height - 1),
+            "size": _integer(primitive.get("size", 48), "primitive.size", 8, 256),
+            "color": _color(primitive.get("color", "black"), "primitive.color"),
+            "anchor": "lt",
+        }
+    elif primitive_type == "qrcode":
+        normalized = {
+            "type": "qrcode",
+            "data": _string(primitive.get("data"), "primitive.data"),
+            "x": _integer(primitive.get("x"), "primitive.x", 0, width - 1),
+            "y": _integer(primitive.get("y"), "primitive.y", 0, height - 1),
+            "boxsize": _integer(
+                primitive.get("boxsize", 3), "primitive.boxsize", 1, 16
+            ),
+            "border": _integer(primitive.get("border", 1), "primitive.border", 0, 8),
+            "color": _color(primitive.get("color", "black"), "primitive.color"),
+            "bgcolor": _color(primitive.get("bgcolor", "white"), "primitive.bgcolor"),
+        }
+    elif primitive_type == "progress_bar":
+        normalized = _validate_box_primitive(primitive, width, height, primitive_type)
+        direction = primitive.get("direction", "right")
+        if direction not in {"right", "left", "up", "down"}:
+            raise ProjectValidationError("primitive.direction is invalid")
+        normalized.update(
+            {
+                "progress": _integer(
+                    primitive.get("progress", 50), "primitive.progress", 0, 100
+                ),
+                "direction": direction,
+                "background": _color(
+                    primitive.get("background", "white"), "primitive.background"
+                ),
+                "fill": _color(primitive.get("fill", "accent"), "primitive.fill"),
+                "outline": _color(
+                    primitive.get("outline", "black"), "primitive.outline"
+                ),
+                "width": _integer(primitive.get("width", 1), "primitive.width", 0, 32),
+                "show_percentage": _boolean(
+                    primitive.get("show_percentage", True), "primitive.show_percentage"
+                ),
+            }
+        )
+    else:
+        raise ProjectValidationError(f"Unsupported primitive type: {primitive_type}")
+    result["primitive"] = normalized
+    return result
+
+
+def validate_project(value: object, registry: WidgetRegistry) -> Project:
+    """Normalize one complete v3 freeform project."""
     if not isinstance(value, dict):
         raise ProjectValidationError("project must be an object")
-    name = _string(value.get("name"), "name", MAX_NAME_LENGTH)
-    width = _integer(value.get("width"), "width", 64, 4_096)
-    height = _integer(value.get("height"), "height", 64, 4_096)
-    orientation = value.get("orientation", "landscape")
-    if orientation not in {"landscape", "portrait"}:
-        raise ProjectValidationError("orientation is invalid")
-    palette = value.get("palette", "bw")
+    if value.get("schemaVersion") != 3:
+        raise ProjectValidationError("schemaVersion must be 3")
+    display = value.get("display")
+    if not isinstance(display, dict):
+        raise ProjectValidationError("display must be an object")
+    width = _integer(display.get("width"), "display.width", 64, 4096)
+    height = _integer(display.get("height"), "display.height", 64, 4096)
+    palette = display.get("palette")
     if palette not in PALETTES:
-        raise ProjectValidationError("palette is invalid")
+        raise ProjectValidationError("display.palette is invalid")
+    padding = _integer(display.get("padding", 0), "display.padding", 0, 1024)
+    if padding * 2 >= min(width, height):
+        raise ProjectValidationError("display.padding leaves no working area")
+    snap_size = _integer(display.get("snapSize", 5), "display.snapSize", 1, 256)
+    raw_items = value.get("items", [])
+    if not isinstance(raw_items, list) or len(raw_items) > MAX_ITEMS:
+        raise ProjectValidationError(f"items must contain at most {MAX_ITEMS} items")
+    items: list[dict[str, Any]] = []
+    item_ids: set[str] = set()
+    for raw_item in raw_items:
+        if not isinstance(raw_item, dict):
+            raise ProjectValidationError("every item must be an object")
+        if raw_item.get("kind") == "widget":
+            item = _validate_widget_item(raw_item, registry, width, height)
+        elif raw_item.get("kind") == "primitive":
+            item = _validate_primitive_item(raw_item, width, height)
+        else:
+            raise ProjectValidationError("item.kind must be widget or primitive")
+        if item["id"] in item_ids:
+            raise ProjectValidationError("item ids must be unique")
+        item_ids.add(item["id"])
+        items.append(item)
+    language = value.get("language", "en")
+    if not isinstance(language, str) or LANGUAGE_PATTERN.fullmatch(language) is None:
+        raise ProjectValidationError("language is invalid")
     status = value.get("status", "draft")
     if status not in {"draft", "ready"}:
-        raise ProjectValidationError("status is invalid")
-    language = value.get("language", "system")
-    if not isinstance(language, str) or (
-        language != "system" and LANGUAGE_PATTERN.fullmatch(language) is None
-    ):
-        raise ProjectValidationError("language is invalid")
-    theme = value.get("theme", "light")
-    if theme not in DISPLAY_THEMES:
-        raise ProjectValidationError("theme is invalid")
-    font_family = value.get("fontFamily", "default")
-    if font_family not in FONT_FAMILIES:
-        raise ProjectValidationError("fontFamily is invalid")
-    text_scale = value.get("textScale", "regular")
-    if text_scale not in TEXT_SCALES:
-        raise ProjectValidationError("textScale is invalid")
-    background = _validate_background(value.get("background"))
-    grid = value.get("grid")
-    if not isinstance(grid, dict):
-        raise ProjectValidationError("grid must be an object")
-    columns = _integer(grid.get("columns"), "grid.columns", 1, 24)
-    rows = _integer(grid.get("rows"), "grid.rows", 1, 24)
-    regions = value.get("regions", [])
-    if not isinstance(regions, list) or len(regions) > MAX_REGIONS:
-        message = f"regions must contain at most {MAX_REGIONS} items"
-        raise _invalid(message)
-
-    normalized_regions: list[dict[str, Any]] = []
-    occupied: set[tuple[int, int]] = set()
-    region_ids: set[str] = set()
-    for region in regions:
-        if not isinstance(region, dict):
-            raise ProjectValidationError("region must be an object")
-        region_id = _string(region.get("id"), "region.id", 64)
-        if region_id in region_ids:
-            raise ProjectValidationError("region IDs must be unique")
-        region_ids.add(region_id)
-        row = _integer(region.get("row"), "region.row", 1, rows)
-        column = _integer(region.get("column"), "region.column", 1, columns)
-        row_span = _integer(region.get("rowSpan"), "region.rowSpan", 1, rows)
-        column_span = _integer(
-            region.get("columnSpan"), "region.columnSpan", 1, columns
-        )
-        if row + row_span - 1 > rows or column + column_span - 1 > columns:
-            raise ProjectValidationError("region extends beyond the logical grid")
-        cells = {
-            (cell_row, cell_column)
-            for cell_row in range(row, row + row_span)
-            for cell_column in range(column, column + column_span)
-        }
-        if occupied & cells:
-            raise ProjectValidationError("regions cannot overlap")
-        occupied |= cells
-        normalized_region: dict[str, Any] = {
-            "id": region_id,
-            "row": row,
-            "column": column,
-            "rowSpan": row_span,
-            "columnSpan": column_span,
-        }
-        appearance = region.get("appearance", {})
-        if not isinstance(appearance, dict):
-            raise ProjectValidationError("region.appearance must be an object")
-        show_background = appearance.get("showBackground", False)
-        show_border = appearance.get("showBorder", False)
-        border_radius = appearance.get("borderRadius")
-        if not isinstance(show_background, bool):
-            raise ProjectValidationError(
-                "region.appearance.showBackground must be a boolean"
-            )
-        if not isinstance(show_border, bool):
-            raise ProjectValidationError(
-                "region.appearance.showBorder must be a boolean"
-            )
-        if border_radius is not None:
-            border_radius = _integer(
-                border_radius,
-                "region.appearance.borderRadius",
-                0,
-                MAX_REGION_BORDER_RADIUS,
-            )
-        normalized_region["appearance"] = {
-            "showBackground": show_background,
-            "showBorder": show_border,
-            "borderRadius": border_radius,
-        }
-        label = region.get("label")
-        if isinstance(label, str) and label.strip():
-            normalized_region["label"] = label.strip()[:MAX_NAME_LENGTH]
-        widget = _validate_widget(region.get("widget"), registry, palette)
-        if widget is not None:
-            normalized_region["widget"] = widget
-        normalized_regions.append(normalized_region)
-
-    if status == "ready":
-        for region in normalized_regions:
-            widget = region.get("widget")
-            if widget is None:
-                continue
-            widget_definition = registry.definition(widget["type"])
-            config = widget["config"]
-            for requirement in widget_definition["dataRequirements"]:
-                if requirement.get("optional"):
-                    continue
-                config_key = requirement.get("configKey")
-                field: dict[str, Any] = next(
-                    (
-                        item
-                        for item in widget_definition["fields"]
-                        if item.get("key") == config_key
-                    ),
-                    {},
-                )
-                label = str(field.get("label", config_key or "data source")).lower()
-                source_value = (
-                    config.get(config_key) if isinstance(config_key, str) else None
-                )
-                sources = (
-                    source_value
-                    if isinstance(source_value, list)
-                    else [source_value]
-                    if source_value
-                    else []
-                )
-                expected_domain = (
-                    "calendar" if field.get("type") == "calendar" else None
-                )
-                selector = field.get("selector")
-                if isinstance(selector, dict):
-                    entity_selector = selector.get("entity")
-                    if isinstance(entity_selector, dict):
-                        selector_filter = entity_selector.get("filter")
-                        if isinstance(selector_filter, dict):
-                            domain = selector_filter.get("domain")
-                            if isinstance(domain, str):
-                                expected_domain = domain
-                if sources and (
-                    expected_domain is None
-                    or all(
-                        str(source).startswith(f"{expected_domain}.")
-                        for source in sources
-                    )
-                ):
-                    continue
-                message = f"Ready {widget['type']} widgets require {label}"
-                raise ProjectValidationError(message)
-
-    display_id = value.get("displayId", "custom")
-    if not isinstance(display_id, str) or len(display_id) > 100:
-        raise ProjectValidationError("displayId is invalid")
-    active_regions = [
-        region
-        for region in normalized_regions
-        if region.get("label")
-        or region.get("widget")
-        or region["rowSpan"] > 1
-        or region["columnSpan"] > 1
-    ]
-    full_canvas = (
-        len(active_regions) == 1
-        and active_regions[0]["row"] == 1
-        and active_regions[0]["column"] == 1
-        and active_regions[0]["rowSpan"] == rows
-        and active_regions[0]["columnSpan"] == columns
-    )
-    default_spacing = (
-        0 if full_canvas else max(3, min(10, round(min(width, height) / 60)))
-    )
-    screen_padding = _integer(
-        value.get("screenPadding", default_spacing),
-        "screenPadding",
-        0,
-        MAX_LAYOUT_SPACING,
-    )
-    region_gap = _integer(
-        value.get("regionGap", default_spacing), "regionGap", 0, MAX_LAYOUT_SPACING
-    )
-    default_border_radius = max(4, min(24, round(min(width, height) / 40)))
-    region_border_radius = _integer(
-        value.get("regionBorderRadius", default_border_radius),
-        "regionBorderRadius",
-        0,
-        MAX_REGION_BORDER_RADIUS,
-    )
-    normalized_project: Project = {
-        "schemaVersion": 1,
-        "name": name,
+        raise ProjectValidationError("status must be draft or ready")
+    normalized: Project = {
+        "schemaVersion": 3,
+        "name": _string(value.get("name"), "name", MAX_NAME_LENGTH),
         "status": status,
         "language": language,
-        "theme": theme,
-        "fontFamily": font_family,
-        "textScale": text_scale,
-        "displayId": display_id or "custom",
-        "width": width,
-        "height": height,
-        "orientation": orientation,
-        "palette": palette,
-        "grid": {"columns": columns, "rows": rows},
-        "screenPadding": screen_padding,
-        "regionGap": region_gap,
-        "regionBorderRadius": region_border_radius,
-        "regions": normalized_regions,
+        "display": {
+            "profileId": display.get("profileId")
+            if isinstance(display.get("profileId"), str)
+            else None,
+            "width": width,
+            "height": height,
+            "palette": palette,
+            "background": _color(
+                display.get("background", "white"), "display.background"
+            ),
+            "padding": padding,
+            "snapSize": snap_size,
+        },
+        "items": items,
     }
-    if background is not None:
-        normalized_project["background"] = background
-    return normalized_project
+    for key in ("id", "createdAt", "updatedAt"):
+        if key in value:
+            normalized[key] = value[key]
+    return normalized
 
 
 class ProjectStore:
-    """Home Assistant-native authoritative project storage."""
+    """Serialize project mutations and persist them through HA Store."""
 
-    def __init__(
-        self, hass: HomeAssistant, registry: WidgetRegistry | None = None
-    ) -> None:
-        """Initialize the versioned Store."""
-        self._store: Store[dict[str, Any]] = Store(
-            hass, STORAGE_VERSION, STORAGE_KEY, atomic_writes=True
-        )
+    def __init__(self, hass: HomeAssistant, registry: WidgetRegistry) -> None:
+        self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, STORAGE_KEY)
+        self._registry = registry
         self._projects: dict[str, Project] = {}
         self._lock = asyncio.Lock()
-        self._default_language = hass.config.language
-        self._registry = registry or DEFAULT_REGISTRY
-
-    def _resolve_language(self, project: Project) -> Project:
-        """Pin legacy projects to the Home Assistant system language."""
-        if project["language"] == "system":
-            project["language"] = self._default_language
-        return project
 
     async def async_load(self) -> None:
-        """Load projects and discard malformed legacy entries safely."""
-        data = await self._store.async_load() or {}
-        raw_projects = data.get("projects", [])
-        if not isinstance(raw_projects, list):
+        """Load only native v3 records; older experiments are unsupported."""
+        data = await self._store.async_load() or {"projects": []}
+        projects = data.get("projects", [])
+        if not isinstance(projects, list):
             return
-        for raw in raw_projects:
+        for value in projects:
             try:
-                normalized = self._resolve_language(
-                    validate_project(raw, self._registry)
-                )
-                project_id = _string(raw.get("id"), "id", 64)
+                project = validate_project(value, self._registry)
             except ProjectValidationError:
                 continue
-            normalized.update(
-                {
-                    "id": project_id,
-                    "createdAt": raw.get("createdAt", _now()),
-                    "updatedAt": raw.get("updatedAt", _now()),
-                }
-            )
-            self._projects[project_id] = normalized
+            project_id = project.get("id")
+            if isinstance(project_id, str):
+                self._projects[project_id] = project
 
     def list(self, *, ready_only: bool = False) -> list[Project]:
-        """Return detached projects, sorted by name."""
-        projects: Iterable[Project] = self._projects.values()
+        values: Iterable[Project] = self._projects.values()
         if ready_only:
-            projects = (item for item in projects if item["status"] == "ready")
-        return sorted(
-            (deepcopy(item) for item in projects),
-            key=lambda item: item["name"].casefold(),
-        )
+            values = (project for project in values if project["status"] == "ready")
+        return deepcopy(sorted(values, key=lambda project: project["name"].casefold()))
 
     def get(self, project_id: str) -> Project | None:
-        """Return a detached project by immutable ID."""
         project = self._projects.get(project_id)
         return deepcopy(project) if project is not None else None
 
     async def async_create(self, value: object) -> Project:
-        """Create a project with server-owned identity and timestamps."""
-        normalized = self._resolve_language(validate_project(value, self._registry))
         async with self._lock:
             if len(self._projects) >= MAX_PROJECTS:
-                message = f"At most {MAX_PROJECTS} projects are allowed"
-                raise _invalid(message)
-            project_id = uuid4().hex
-            now = _now()
-            normalized.update({"id": project_id, "createdAt": now, "updatedAt": now})
-            self._projects[project_id] = normalized
+                raise ProjectValidationError("project limit reached")
+            project = validate_project(value, self._registry)
+            project_id = str(uuid4())
+            now = datetime.now(UTC).isoformat()
+            project.update({"id": project_id, "createdAt": now, "updatedAt": now})
+            self._projects[project_id] = project
             await self._async_save()
-        return deepcopy(normalized)
+            return deepcopy(project)
 
     async def async_update(self, project_id: str, value: object) -> Project:
-        """Replace editable fields while preserving stable identity."""
-        normalized = self._resolve_language(validate_project(value, self._registry))
         async with self._lock:
-            existing = self._projects.get(project_id)
-            if existing is None:
+            current = self._projects.get(project_id)
+            if current is None:
                 raise KeyError(project_id)
-            normalized.update(
+            project = validate_project(value, self._registry)
+            project.update(
                 {
                     "id": project_id,
-                    "createdAt": existing["createdAt"],
-                    "updatedAt": _now(),
+                    "createdAt": current["createdAt"],
+                    "updatedAt": datetime.now(UTC).isoformat(),
                 }
             )
-            self._projects[project_id] = normalized
+            self._projects[project_id] = project
             await self._async_save()
-        return deepcopy(normalized)
+            return deepcopy(project)
 
     async def async_delete(self, project_id: str) -> None:
-        """Delete a project."""
         async with self._lock:
-            if self._projects.pop(project_id, None) is None:
+            if project_id not in self._projects:
                 raise KeyError(project_id)
+            del self._projects[project_id]
             await self._async_save()
 
     async def _async_save(self) -> None:
         await self._store.async_save({"projects": list(self._projects.values())})
-
-
-def _now() -> str:
-    return datetime.now(UTC).isoformat()

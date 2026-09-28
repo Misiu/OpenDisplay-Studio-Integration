@@ -1,7 +1,7 @@
 {
   "domain": "opendisplay_studio",
   "name": "OpenDisplay Studio",
-  "after_dependencies": ["calendar", "hassio", "weather"],
+  "after_dependencies": [],
   "codeowners": ["@Misiu"],
   "config_flow": true,
   "dependencies": ["http", "media_source", "panel_custom", "websocket_api"],
@@ -9,7 +9,7 @@
   "integration_type": "service",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Misiu/OpenDisplay-Studio-Integration/issues",
-  "requirements": ["trmnl-liquid-py==0.1.0"],
+  "requirements": ["odl-renderer==0.5.12"],
   "single_config_entry": true,
-  "version": "0.9.5"
+  "version": "3.0.6"
 }

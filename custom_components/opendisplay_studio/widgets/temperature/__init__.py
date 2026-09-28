@@ -1,0 +1,1 @@
+"""Temperature widget package."""

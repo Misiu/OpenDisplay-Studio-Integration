@@ -17,6 +17,7 @@ export default defineConfig({
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    permissions: ['clipboard-read', 'clipboard-write'],
   },
   expect: {
     toHaveScreenshot: {
@@ -39,7 +40,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev:e2e',
     url: 'http://127.0.0.1:4173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 })

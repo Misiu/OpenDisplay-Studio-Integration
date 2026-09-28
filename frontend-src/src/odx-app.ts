@@ -1,1356 +1,823 @@
 import { LitElement, html, nothing, type PropertyValues, type TemplateResult } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import { styleMap } from 'lit/directives/style-map.js'
-import {
-  mdiCheck,
-  mdiChevronLeft,
-  mdiChevronRight,
-  mdiContentCopy,
-  mdiDeleteOutline,
-  mdiPlus,
-  mdiRenameOutline,
-  mdiTuneVariant,
-} from '@mdi/js'
 import { appStyles } from './app-styles'
-import {
-  DISPLAY_PROFILES,
-  PALETTE_LABELS,
-  getDisplayProfile,
-  getPixelSize,
-} from './data/display-profiles'
-import {
-  BACKGROUND_ANCHORS,
-  BACKGROUND_MODES,
-  backgroundMediaForForm,
-  clampBackgroundScale,
-  createDisplayBackground,
-} from './services/background'
-import { projectForPreview } from './services/preview'
-import {
-  clampRegionBorderRadius,
-  clampLayoutSpacing,
-  createId,
-  createRegions,
-  gridForOrientation,
-  isActiveRegion,
-  layoutSpacing,
-  mergeRegions,
-  regionAppearance,
-  resolvedRegionBorderRadius,
-  regionContainsCell,
-  rotateRegions,
-  splitRegion,
-} from './services/layout'
-import { paletteColors, resolvePaletteColor } from './services/palette'
-import { createProject } from './services/storage'
-import type {
-  BootstrapResponse,
-  BackgroundAnchor,
-  BackgroundMode,
-  CellCoordinate,
-  ComposePreviewResponse,
-  DisplayTheme,
-  FontFamily,
-  GridRegion,
-  HomeAssistant,
-  MediaSelectorValue,
-  Orientation,
-  PaletteId,
-  PersistedState,
-  ScreenProject,
-  TextScale,
-  WidgetDefinition,
-  WidgetConfigValue,
-  WidgetOption,
-} from './types'
-import { getRuntimeWidgetDefinition, getWidgetDefinition, widgetStyles } from './widgets/registry'
-import { renderButtonIcon, renderIcon } from './widgets/shared'
-import { sharedWidgetStyles } from './widgets/shared-styles'
+import { filterCatalog } from './catalog'
+import { DISPLAY_PROFILES, PALETTE_COLORS, PALETTE_LABELS, profileById } from './display-profiles'
+import { createId } from './ids'
+import { createPrimitive } from './primitives'
+import { alignIntrinsicBounds, RESIZE_HANDLES, resizeBounds, type ResizeHandle } from './resize'
+import type { BootstrapResponse, ComposePreviewResponse, HaFormSchema, HomeAssistant, ItemBounds, PaletteId, Primitive, PrimitiveDefinition, PrimitiveItem, ScreenProject, StudioItem, WidgetDefinition, WidgetItem } from './types'
 
-const errorMessage = (error: unknown, fallback: string): string => {
-  if (error instanceof Error && error.message) return error.message
-  if (typeof error === 'string' && error) return error
-  if (error && typeof error === 'object') {
-    const response = error as Record<string, unknown>
-    if (typeof response.message === 'string' && response.message) return response.message
-    if (typeof response.body === 'string' && response.body) return response.body
-    if (typeof response.code === 'string' && response.code) return `${fallback} (${response.code})`
-  }
-  return fallback
-}
+const clone = <T>(value: T): T => structuredClone(value)
+const clamp = (value: number, minimum: number, maximum: number): number => Math.max(minimum, Math.min(maximum, value))
+const snap = (value: number, size: number, origin = 0): number => origin + Math.round((value - origin) / size) * size
+const messageFrom = (error: unknown, fallback: string): string => error instanceof Error && error.message ? error.message : typeof error === 'string' && error ? error : fallback
 
-const cloneProject = (project: ScreenProject): ScreenProject => {
-  const now = new Date().toISOString()
+type BoxPrimitive = Extract<Primitive, { x_start: number; y_start: number; x_end: number; y_end: number }>
+const isBoxPrimitive = (primitive: Primitive): primitive is BoxPrimitive => 'x_start' in primitive
+const primitiveNames: Record<Primitive['type'], string> = { text: 'Text', rectangle: 'Rectangle', line: 'Line', circle: 'Circle', ellipse: 'Ellipse', icon: 'Icon', qrcode: 'QR code', progress_bar: 'Progress bar' }
+const primitiveIcons: Record<Primitive['type'], string> = { text: 'mdi:format-text', rectangle: 'mdi:rectangle-outline', line: 'mdi:vector-line', circle: 'mdi:circle-outline', ellipse: 'mdi:ellipse-outline', icon: 'mdi:star-outline', qrcode: 'mdi:qrcode', progress_bar: 'mdi:progress-helper' }
+const resizeHandleNames: Record<ResizeHandle, string> = { nw: 'north west', n: 'north', ne: 'north east', e: 'east', se: 'south east', s: 'south', sw: 'south west', w: 'west' }
+
+const freshProject = (language: string, profileId = DISPLAY_PROFILES[0].id): ScreenProject => {
+  const profile = profileById(profileId)
   return {
-    ...structuredClone(project),
-    id: createId(),
-    name: `${project.name} copy`,
-    createdAt: now,
-    updatedAt: now,
-    regions: project.regions.map((region) => ({ ...structuredClone(region), id: createId() })),
+    id: '', schemaVersion: 3, name: 'New dashboard', status: 'draft', language: language || 'en',
+    display: { profileId: profile.id, width: profile.width, height: profile.height, palette: profile.defaultPalette, background: 'white', padding: 0, snapSize: 5 },
+    items: [], createdAt: '', updatedAt: '',
   }
 }
 
-const regionLabel = (index: number): string => {
-  let value = index + 1
-  let label = ''
-  while (value > 0) {
-    value -= 1
-    label = String.fromCharCode(65 + (value % 26)) + label
-    value = Math.floor(value / 26)
-  }
-  return label
+const primitiveBounds = (primitive: Primitive): ItemBounds => {
+  if (isBoxPrimitive(primitive)) return { x: Math.min(primitive.x_start, primitive.x_end), y: Math.min(primitive.y_start, primitive.y_end), width: Math.abs(primitive.x_end - primitive.x_start) + 1, height: Math.abs(primitive.y_end - primitive.y_start) + 1 }
+  if (primitive.type === 'circle') return { x: primitive.x - primitive.radius, y: primitive.y - primitive.radius, width: primitive.radius * 2 + 1, height: primitive.radius * 2 + 1 }
+  if (primitive.type === 'qrcode') { const size = (21 + primitive.border * 2) * primitive.boxsize; return { x: primitive.x, y: primitive.y, width: size, height: size } }
+  if (primitive.type === 'icon') return { x: primitive.x, y: primitive.y, width: primitive.size, height: primitive.size }
+  return { x: primitive.x, y: primitive.y, width: Math.max(primitive.size, Math.round(primitive.value.length * primitive.size * .62)), height: Math.max(1, Math.round(primitive.size * 1.25)) }
 }
 
-type EditorMode = 'layout' | 'widgets'
+const itemBounds = (item: StudioItem): ItemBounds => item.kind === 'widget' ? item.frame : primitiveBounds(item.primitive)
+interface PointerEdit { itemId: string; mode: 'move' | 'resize'; resizeHandle?: ResizeHandle; startX: number; startY: number; original: StudioItem; beforeProject: ScreenProject; changed: boolean }
+interface PanelResize { startX: number; startWidth: number }
+interface CatalogPointerDrag { value: string; startX: number; startY: number; currentX: number; currentY: number; grabOffsetX: number; grabOffsetY: number; previewWidth: number; previewHeight: number; active: boolean }
+interface LayerPointerDrag { itemId: string; startX: number; startY: number; active: boolean }
+interface LayerDropTarget { itemId: string; edge: 'before' | 'after' }
 
 @customElement('opendisplay-studio-panel')
-export class OdxApp extends LitElement {
-  @property({ attribute: false }) public hass!: HomeAssistant
+export class OpenDisplayStudioPanel extends LitElement {
+  static styles = appStyles
+  @property({ attribute: false }) public hass?: HomeAssistant
 
-  @state() private store: PersistedState = { schemaVersion: 1, activeProjectId: '', projects: [] }
-  @state() private selectedRegionId = ''
-  @state() private mergeAnchor?: CellCoordinate
-  @state() private mergeHover?: CellCoordinate
-  @state() private toastMessage = ''
+  @state() private projects: ScreenProject[] = []
+  @state() private integrationVersion = ''
+  @state() private widgets: WidgetDefinition[] = []
+  @state() private primitives: PrimitiveDefinition[] = []
+  @state() private current?: ScreenProject
+  @state() private selectedItemId = ''
+  @state() private query = ''
+  @state() private preview?: ComposePreviewResponse
   @state() private loading = true
   @state() private saving = false
-  @state() private loadError = ''
-  @state() private renameDraft = ''
-  @state() private editorMode: EditorMode = 'widgets'
-  @state() private layoutDraft?: ScreenProject
-  @state() private widgetMetadata: BootstrapResponse['widgets'] = []
-  @state() private previewImageUrl = ''
-  @state() private previewLoading = false
-  @state() private previewError = ''
-  @state() private previewTimings?: ComposePreviewResponse['timings']
-  @state() private projectRailCollapsed = false
+  @state() private dirty = false
+  @state() private draggingCatalog = false
+  @state() private draggingLayerId = ''
+  @state() private catalogDragPosition?: { x: number; y: number }
+  @state() private layerDropTarget?: LayerDropTarget
+  @state() private undoCount = 0
+  @state() private redoCount = 0
+  @state() private pendingDeleteItemId = ''
+  @state() private error = ''
+  @state() private leftCollapsed = false
+  @state() private rightCollapsed = false
+  @state() private inspectorWidth = 350
+  @state() private zoom = 1
+  @state() private panX = 0
+  @state() private panY = 0
+  @state() private snapEnabled = true
+  @state() private newDashboardOpen = false
+  @state() private newDashboard = freshProject('en')
+  @state() private yamlCopyState: 'idle' | 'copied' | 'failed' = 'idle'
 
-  @query('.preview-boundary') private previewBoundary?: HTMLElement
-  @query('.screen-fit') private screenFit?: HTMLElement
-  @query('.screen-bezel') private screenBezel?: HTMLElement
-  @query('#rename-dialog') private renameDialog?: HTMLDialogElement
-
-  private toastTimer?: number
-  private previewResizeObserver?: ResizeObserver
-  private saveRevision = 0
-  private previewRevision = 0
   private previewTimer?: number
-  private entityStateSignature = ''
+  private yamlCopyTimer?: number
+  private previewRequest = 0
+  private panelResize?: PanelResize
+  private pointerEdit?: PointerEdit
+  private catalogPointerDrag?: CatalogPointerDrag
+  private layerPointerDrag?: LayerPointerDrag
+  private bootstrapStarted = false
+  private suppressCatalogClick = false
+  private undoStack: ScreenProject[] = []
+  private redoStack: ScreenProject[] = []
 
-  static styles = [appStyles, sharedWidgetStyles, ...widgetStyles]
+  @query('.properties') private propertiesPanel?: HTMLElement
 
-  protected firstUpdated(): void {
-    this.previewResizeObserver = new ResizeObserver(() => this.updatePreviewScale())
-    if (this.previewBoundary) this.previewResizeObserver.observe(this.previewBoundary)
-    this.updatePreviewScale()
-    void this.loadProjects()
+  connectedCallback(): void {
+    super.connectedCallback()
+    window.addEventListener('keydown', this.onHistoryKeyDown)
   }
-
-  protected updated(changedProperties: PropertyValues<this>): void {
-    if (this.previewBoundary) this.previewResizeObserver?.observe(this.previewBoundary)
-    this.updatePreviewScale()
-    if (changedProperties.has('hass')) {
-      const signature = this.currentEntityStateSignature()
-      if (signature !== this.entityStateSignature) {
-        this.entityStateSignature = signature
-        this.schedulePreview()
-      }
-    }
+  protected firstUpdated(): void { this.ensureBootstrap() }
+  protected updated(changed: PropertyValues<this>): void {
+    if (changed.has('hass')) this.ensureBootstrap()
   }
-
   disconnectedCallback(): void {
     super.disconnectedCallback()
-    this.previewResizeObserver?.disconnect()
     if (this.previewTimer) window.clearTimeout(this.previewTimer)
+    if (this.yamlCopyTimer) window.clearTimeout(this.yamlCopyTimer)
+    window.removeEventListener('pointermove', this.onPointerMove)
+    window.removeEventListener('pointerup', this.onPointerUp)
+    window.removeEventListener('pointermove', this.onCatalogPointerMove)
+    window.removeEventListener('pointerup', this.onCatalogPointerUp)
+    window.removeEventListener('pointercancel', this.onCatalogPointerCancel)
+    window.removeEventListener('pointermove', this.onLayerPointerMove)
+    window.removeEventListener('pointerup', this.onLayerPointerUp)
+    window.removeEventListener('pointercancel', this.onLayerPointerCancel)
+    window.removeEventListener('pointermove', this.onPanelResizeMove)
+    window.removeEventListener('pointerup', this.onPanelResizeEnd)
+    window.removeEventListener('keydown', this.onHistoryKeyDown)
   }
 
-  private get project(): ScreenProject {
-    return this.store.projects.find((item) => item.id === this.store.activeProjectId) ?? this.store.projects[0]
+  private ensureBootstrap(): void {
+    if (!this.hass || this.bootstrapStarted) return
+    this.bootstrapStarted = true
+    void this.bootstrap()
   }
-
-  private get canvasProject(): ScreenProject {
-    return this.layoutDraft ?? this.project
-  }
-
-  private get canvasDisplay() {
-    return getDisplayProfile(this.canvasProject.displayId)
-  }
-
-  private get canvasPixels(): { width: number; height: number } {
-    return { width: this.canvasProject.width, height: this.canvasProject.height }
-  }
-
-  private displayName(project: ScreenProject): string {
-    return project.displayId === 'custom' ? 'Custom display' : getDisplayProfile(project.displayId).name
-  }
-
-  private get selectedRegion(): GridRegion | undefined {
-    return this.project.regions.find((region) => region.id === this.selectedRegionId)
-  }
-
-  private widgetDefinition(widgetId: string): WidgetDefinition | undefined {
-    const local = getWidgetDefinition(widgetId)
-    const backend = this.widgetMetadata.find((item) => item.id === widgetId)
-    if (!backend) return local
-    return getRuntimeWidgetDefinition(backend)
-  }
-
-  private updatePreviewScale(): void {
-    if (!this.previewBoundary || !this.screenFit || !this.screenBezel) return
-    const pixels = this.canvasPixels
-    const frameWidth = pixels.width + 24
-    const frameHeight = pixels.height + 24
-    const scale = Math.max(0.05, Math.min(
-      2,
-      this.previewBoundary.clientWidth / frameWidth,
-      this.previewBoundary.clientHeight / frameHeight,
-    ))
-    this.screenFit.style.width = `${frameWidth * scale}px`
-    this.screenFit.style.height = `${frameHeight * scale}px`
-    this.screenBezel.style.width = `${frameWidth}px`
-    this.screenBezel.style.height = `${frameHeight}px`
-    this.screenBezel.style.transform = `scale(${scale})`
-  }
-
-  private persist(store: PersistedState): void {
-    this.store = store
-  }
-
-  private currentEntityStateSignature(): string {
-    if (!this.store.projects.length) return ''
-    return this.project.regions
-      .flatMap((region) => {
-        if (region.widget?.type === 'sensor') {
-          return [String(region.widget.config.entity ?? '')]
-        }
-        if (region.widget?.type === 'weather') {
-          return [String(region.widget.config.weather ?? '')]
-        }
-        return []
-      })
-      .filter(Boolean)
-      .sort()
-      .map((entityId) => {
-        const state = this.hass.states?.[entityId]
-        return `${entityId}:${state?.state ?? ''}:${state?.last_updated ?? ''}`
-      })
-      .join('|')
-  }
-
-  private schedulePreview(delay = 250): void {
-    if (!this.store.projects.length) return
-    if (this.previewTimer) window.clearTimeout(this.previewTimer)
-    this.previewTimer = window.setTimeout(() => {
-      this.previewTimer = undefined
-      void this.composePreview(this.canvasProject)
-    }, delay)
-  }
-
-  private async composePreview(project: ScreenProject): Promise<void> {
-    const revision = ++this.previewRevision
-    this.previewLoading = true
-    this.previewError = ''
+  private async bootstrap(): Promise<void> {
+    const hass = this.hass
+    if (!hass) return
+    this.loading = true; this.error = ''
     try {
-      const response = await this.hass.callWS<ComposePreviewResponse>({
-        type: 'opendisplay_studio/compose_preview',
-        project: projectForPreview(project, this.editorMode === 'layout'),
-      })
-      if (revision !== this.previewRevision) return
-      this.previewImageUrl = response.imageUrl
-      this.previewTimings = response.timings
-    } catch (error) {
-      if (revision !== this.previewRevision) return
-      this.previewImageUrl = ''
-      this.previewError = errorMessage(error, 'Could not compose live preview')
-      if (this.previewError.startsWith('Renderer App is not connected')) {
-        this.schedulePreview(1500)
-      }
-    } finally {
-      if (revision === this.previewRevision) this.previewLoading = false
-    }
+      const data = await hass.callWS<BootstrapResponse>({ type: 'opendisplay_studio/bootstrap' })
+      this.integrationVersion = data.version; this.projects = data.projects; this.widgets = data.widgets; this.primitives = data.primitives
+      this.current = this.projects[0] ? clone(this.projects[0]) : undefined
+      this.clearHistory()
+      this.newDashboard = freshProject(hass.language)
+      if (this.current) { await this.composePreview(); await this.updateComplete; requestAnimationFrame(() => this.fitCanvas()) }
+    } catch (error) { this.error = messageFrom(error, 'Could not load OpenDisplay Studio') } finally { this.loading = false }
   }
 
-  private previewImageFailed(): void {
-    this.previewImageUrl = ''
-    this.previewError = 'Renderer preview image could not be loaded'
+  private openNewDashboard(): void {
+    this.newDashboard = freshProject(this.hass?.language ?? 'en')
+    this.newDashboardOpen = true
   }
-
-  private async loadProjects(): Promise<void> {
-    this.loading = true
-    this.loadError = ''
+  private updateNewDashboard(field: string, value: string): void {
+    const next = clone(this.newDashboard)
+    if (field === 'profileId') {
+      const profile = profileById(value); next.display.profileId = profile.id; next.display.width = profile.width; next.display.height = profile.height; next.display.palette = profile.defaultPalette
+    } else if (field === 'name') next.name = value
+    else if (field === 'palette') next.display.palette = value as PaletteId
+    else if (field === 'background') next.display.background = value
+    else if (field === 'width' || field === 'height' || field === 'padding' || field === 'snapSize') next.display[field] = Math.max(field === 'snapSize' ? 1 : 0, Math.round(Number(value) || 0))
+    this.newDashboard = next
+  }
+  private async createProject(): Promise<void> {
+    if (!this.hass) return
+    this.saving = true; this.error = ''
     try {
-      const response = await this.hass.callWS<BootstrapResponse>({ type: 'opendisplay_studio/bootstrap' })
-      this.store = {
-        schemaVersion: 1,
-        activeProjectId: response.projects[0]?.id ?? '',
-        projects: response.projects,
-      }
-      this.widgetMetadata = response.widgets
-      this.schedulePreview(0)
-    } catch (error) {
-      this.loadError = errorMessage(error, 'Unable to load projects')
-    } finally {
-      this.loading = false
-    }
+      const result = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/create_project', project: this.newDashboard })
+      this.projects = [...this.projects, result.project]; this.current = clone(result.project); this.selectedItemId = ''; this.dirty = false; this.newDashboardOpen = false
+      this.clearHistory()
+      await this.composePreview(); await this.updateComplete; this.resetCanvas(); requestAnimationFrame(() => this.fitCanvas())
+    } catch (error) { this.error = messageFrom(error, 'Could not create the dashboard') } finally { this.saving = false }
   }
-
-  private async saveProject(project: ScreenProject): Promise<void> {
-    const revision = ++this.saveRevision
-    this.saving = true
+  private async saveProject(): Promise<void> {
+    if (!this.hass || !this.current) return
+    this.saving = true; this.error = ''
     try {
-      const response = await this.hass.callWS<{ project: ScreenProject }>({
-        type: 'opendisplay_studio/update_project',
-        project_id: project.id,
-        project,
-      })
-      if (revision === this.saveRevision) {
-        this.store = {
-          ...this.store,
-          projects: this.store.projects.map((item) => item.id === response.project.id ? response.project : item),
-        }
-        this.schedulePreview()
-      }
-    } catch (error) {
-      this.showToast(errorMessage(error, 'Could not save project'))
-    } finally {
-      if (revision === this.saveRevision) this.saving = false
-    }
+      const result = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/update_project', project_id: this.current.id, project: this.current })
+      this.current = clone(result.project); this.projects = this.projects.map(project => project.id === result.project.id ? result.project : project); this.dirty = false
+    } catch (error) { this.error = messageFrom(error, 'Could not save the dashboard') } finally { this.saving = false }
   }
-
-  private updateProject(updater: (project: ScreenProject) => ScreenProject): void {
-    const projects = this.store.projects.map((project) =>
-      project.id === this.store.activeProjectId
-        ? { ...updater(project), updatedAt: new Date().toISOString() }
-        : project,
-    )
-    this.persist({ ...this.store, projects })
-    const updated = projects.find((project) => project.id === this.store.activeProjectId)
-    if (updated) {
-      void this.saveProject(updated)
-      this.schedulePreview()
-    }
-  }
-
-  private updateLayoutDraft(updater: (project: ScreenProject) => ScreenProject): void {
-    if (!this.layoutDraft) return
-    this.layoutDraft = updater(this.layoutDraft)
-    this.schedulePreview()
-  }
-
-  private openLayoutEditor(): void {
-    this.layoutDraft = structuredClone(this.project)
-    this.editorMode = 'layout'
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.previewImageUrl = ''
-    this.schedulePreview(0)
-  }
-
-  private cancelLayoutEditor(): void {
-    this.layoutDraft = undefined
-    this.editorMode = 'widgets'
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.previewImageUrl = ''
-    this.schedulePreview(0)
-  }
-
-  private applyLayoutEditor(): void {
-    if (!this.layoutDraft) return
-    const draft = this.layoutDraft
-    this.updateProject(() => draft)
-    this.layoutDraft = undefined
-    this.editorMode = 'widgets'
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.selectedRegionId = ''
-    this.showToast('Device and layout updated')
-    this.schedulePreview(0)
-  }
-
-  private showToast(message: string): void {
-    this.toastMessage = message
-    if (this.toastTimer) window.clearTimeout(this.toastTimer)
-    this.toastTimer = window.setTimeout(() => {
-      this.toastMessage = ''
-    }, 2600)
-  }
-
-  private selectProject(projectId: string): void {
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.layoutDraft = undefined
-    this.editorMode = 'widgets'
-    this.persist({ ...this.store, activeProjectId: projectId })
-    this.previewImageUrl = ''
-    this.schedulePreview(0)
-  }
-
-  private async addProject(): Promise<void> {
-    try {
-      const draft = createProject(
-        `Untitled display ${this.store.projects.length + 1}`,
-        this.hass.language,
-      )
-      const response = await this.hass.callWS<{ project: ScreenProject }>({
-        type: 'opendisplay_studio/create_project',
-        project: draft,
-      })
-      const project = response.project
-      this.persist({ ...this.store, activeProjectId: project.id, projects: [...this.store.projects, project] })
-      this.selectedRegionId = ''
-      this.layoutDraft = structuredClone(project)
-      this.editorMode = 'layout'
-      this.showToast('Display created')
-      this.schedulePreview(0)
-    } catch (error) {
-      this.showToast(errorMessage(error, 'Could not create display'))
-    }
-  }
-
-  private async duplicateProject(): Promise<void> {
-    const draft = cloneProject(this.project)
-    const response = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/create_project', project: draft })
-    const project = response.project
-    this.persist({ ...this.store, activeProjectId: project.id, projects: [...this.store.projects, project] })
-    this.selectedRegionId = ''
-    this.previewImageUrl = ''
-    this.schedulePreview(0)
-    this.showToast('Display duplicated')
-  }
-
   private async deleteProject(): Promise<void> {
-    await this.hass.callWS({ type: 'opendisplay_studio/delete_project', project_id: this.project.id })
-    const projects = this.store.projects.filter((project) => project.id !== this.project.id)
-    this.persist({ ...this.store, activeProjectId: projects[0]?.id ?? '', projects })
-    this.selectedRegionId = ''
-    this.layoutDraft = undefined
-    this.editorMode = 'widgets'
-    this.previewImageUrl = ''
-    this.schedulePreview(0)
-    this.showToast('Display deleted')
+    if (!this.hass || !this.current) return
+    const id = this.current.id
+    try {
+      await this.hass.callWS({ type: 'opendisplay_studio/delete_project', project_id: id })
+      this.projects = this.projects.filter(project => project.id !== id); this.current = this.projects[0] ? clone(this.projects[0]) : undefined; this.selectedItemId = ''; this.preview = undefined; this.dirty = false
+      this.clearHistory()
+      if (this.current) await this.composePreview()
+    } catch (error) { this.error = messageFrom(error, 'Could not delete the dashboard') }
   }
-
-  private setProjectStatus(status: 'draft' | 'ready'): void {
-    this.updateProject((project) => ({ ...project, status }))
-    this.showToast(status === 'ready' ? 'Media Source is ready' : 'Project moved to Draft')
+  private selectProject(project: ScreenProject): void {
+    this.current = clone(project); this.selectedItemId = ''; this.dirty = false
+    this.clearHistory()
+    void this.composePreview().then(() => { this.resetCanvas(); requestAnimationFrame(() => this.fitCanvas()) })
   }
-
-  private openRenameDialog(): void {
-    this.renameDraft = this.project.name
-    this.renameDialog?.showModal()
+  private mutate(mutator: (project: ScreenProject) => void, preview = true, history = true): void {
+    if (!this.current) return
+    const before = clone(this.current); const next = clone(this.current); mutator(next)
+    if (JSON.stringify(next) === JSON.stringify(before)) return
+    if (history) this.recordHistory(before)
+    this.current = next; this.dirty = true
+    if (preview) this.schedulePreview()
   }
-
-  private saveProjectName(): void {
-    const name = this.renameDraft.trim()
-    if (!name) return
-    this.updateProject((project) => ({ ...project, name }))
-    this.renameDialog?.close()
-    this.showToast('Name updated')
+  private recordHistory(project: ScreenProject): void {
+    this.undoStack.push(clone(project))
+    if (this.undoStack.length > 100) this.undoStack.shift()
+    this.redoStack = []
+    this.syncHistoryState()
   }
-
-  private applyDisplayProfile(displayId: string, driverId?: string): void {
-    const profile = getDisplayProfile(displayId)
-    const grid = gridForOrientation(profile, this.canvasProject.orientation)
-    const sameGrid = grid.columns === this.canvasProject.grid.columns && grid.rows === this.canvasProject.grid.rows
-    const widgets = this.canvasProject.regions.flatMap((region) => region.widget ? [region.widget] : [])
-    const regions = sameGrid
-      ? this.canvasProject.regions
-      : createRegions(grid).map((region, index) => ({ ...region, widget: widgets[index] }))
-    const pixels = getPixelSize(profile, this.canvasProject.orientation)
-
-    this.updateLayoutDraft((project) => ({
-      ...project,
-      displayId,
-      driverId,
-      width: pixels.width,
-      height: pixels.height,
-      palette: profile.palettes.includes(project.palette) ? project.palette : profile.defaultPalette,
-      grid,
-      regions,
-    }))
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    if (!sameGrid) this.showToast('Grid adapted to the selected display')
+  private clearHistory(): void {
+    this.undoStack = []; this.redoStack = []; this.syncHistoryState()
   }
-
-  private changeDisplay(event: Event): void {
-    const displayId = (event.currentTarget as HTMLSelectElement).value
-    if (displayId === 'custom') {
-      this.updateLayoutDraft((project) => ({ ...project, displayId: 'custom', driverId: undefined }))
-      return
-    }
-    this.applyDisplayProfile(displayId)
+  private syncHistoryState(): void {
+    this.undoCount = this.undoStack.length; this.redoCount = this.redoStack.length
   }
-
-  private changePalette(event: Event): void {
-    const palette = (event.currentTarget as HTMLSelectElement).value as PaletteId
-    this.updateLayoutDraft((project) => ({
-      ...project,
-      palette,
-      regions: project.regions.map((region) => {
-        if (!region.widget) return region
-        const definition = this.widgetDefinition(region.widget.type)
-        if (!definition) return region
-        const config = { ...region.widget.config }
-        for (const option of definition.options) {
-          if (!option.selector || !('opendisplay_color' in option.selector)) continue
-          config[option.key] = resolvePaletteColor(palette, config[option.key] ?? definition.defaults[option.key])
-        }
-        return { ...region, widget: { ...region.widget, config } }
-      }),
-    }))
+  private undo = (): void => {
+    if (!this.current) return
+    const previous = this.undoStack.pop(); if (!previous) return
+    this.redoStack.push(clone(this.current)); this.current = clone(previous); this.dirty = true
+    if (this.selectedItemId && !this.current.items.some(item => item.id === this.selectedItemId)) this.selectedItemId = ''
+    this.syncHistoryState(); this.schedulePreview()
   }
-
-  private changeTheme(theme: DisplayTheme): void {
-    this.updateLayoutDraft((project) => ({ ...project, theme }))
+  private redo = (): void => {
+    if (!this.current) return
+    const next = this.redoStack.pop(); if (!next) return
+    this.undoStack.push(clone(this.current)); this.current = clone(next); this.dirty = true
+    if (this.selectedItemId && !this.current.items.some(item => item.id === this.selectedItemId)) this.selectedItemId = ''
+    this.syncHistoryState(); this.schedulePreview()
   }
-
-  private changeFontFamily(event: Event): void {
-    const fontFamily = (event.currentTarget as HTMLSelectElement).value as FontFamily
-    this.updateLayoutDraft((project) => ({ ...project, fontFamily }))
+  private onHistoryKeyDown = (event: KeyboardEvent): void => {
+    if (!event.ctrlKey && !event.metaKey) return
+    const editing = event.composedPath().some(target => target instanceof HTMLElement && (target.matches('input, textarea, select') || target.isContentEditable))
+    if (editing) return
+    const key = event.key.toLowerCase()
+    if (key === 'z' && event.shiftKey) { event.preventDefault(); this.redo(); return }
+    if (key === 'z') { event.preventDefault(); this.undo(); return }
+    if (key === 'y') { event.preventDefault(); this.redo() }
   }
-
-  private changeTextScale(event: Event): void {
-    const textScale = (event.currentTarget as HTMLSelectElement).value as TextScale
-    this.updateLayoutDraft((project) => ({ ...project, textScale }))
-  }
-
-  private changeBackgroundMedia(event: CustomEvent<{ value: { backgroundMedia?: MediaSelectorValue } }>): void {
-    const media = event.detail.value.backgroundMedia
-    this.updateLayoutDraft((project) => ({
-      ...project,
-      background: media?.media_content_id
-        ? project.background
-          ? { ...project.background, media }
-          : createDisplayBackground(media)
-        : undefined,
-    }))
-  }
-
-  private clearBackground(): void {
-    this.updateLayoutDraft((project) => ({ ...project, background: undefined }))
-  }
-
-  private changeBackgroundMode(mode: BackgroundMode): void {
-    this.updateLayoutDraft((project) => project.background
-      ? { ...project, background: { ...project.background, mode } }
-      : project)
-  }
-
-  private changeBackgroundAnchor(anchor: BackgroundAnchor): void {
-    this.updateLayoutDraft((project) => project.background
-      ? { ...project, background: { ...project.background, anchor } }
-      : project)
-  }
-
-  private changeBackgroundScale(event: Event): void {
-    const scale = clampBackgroundScale(Number((event.currentTarget as HTMLInputElement).value))
-    this.updateLayoutDraft((project) => project.background
-      ? { ...project, background: { ...project.background, scale } }
-      : project)
-  }
-
-  private changeLayoutSpacing(key: 'screenPadding' | 'regionGap', event: Event): void {
-    const value = clampLayoutSpacing(Number((event.currentTarget as HTMLInputElement).value))
-    this.updateLayoutDraft((project) => ({ ...project, [key]: value }))
-  }
-
-  private changeDisplayRegionBorderRadius(event: Event): void {
-    const regionBorderRadius = clampRegionBorderRadius(Number((event.currentTarget as HTMLInputElement).value))
-    this.updateLayoutDraft((project) => ({ ...project, regionBorderRadius }))
-  }
-
-  private changeOrientation(orientation: Orientation): void {
-    if (orientation === this.canvasProject.orientation) return
-    const grid = this.canvasProject.displayId === 'custom'
-      ? { columns: this.canvasProject.grid.rows, rows: this.canvasProject.grid.columns }
-      : gridForOrientation(this.canvasDisplay, orientation)
-    const direction = orientation === 'portrait' ? 'clockwise' : 'counterclockwise'
-    const regions = rotateRegions(this.canvasProject.regions, this.canvasProject.grid, grid, direction)
-    const pixels = this.canvasProject.displayId === 'custom'
-      ? { width: this.canvasProject.height, height: this.canvasProject.width }
-      : getPixelSize(this.canvasDisplay, orientation)
-    this.updateLayoutDraft((project) => ({ ...project, orientation, grid, regions, ...pixels }))
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-  }
-
-  private changeCustomSize(key: 'width' | 'height', event: Event): void {
-    const value = Math.max(64, Math.min(4096, Number((event.currentTarget as HTMLInputElement).value)))
-    this.updateLayoutDraft((project) => ({ ...project, [key]: value }))
-  }
-
-  private changeGrid(key: 'columns' | 'rows', event: Event): void {
-    const value = Math.max(1, Math.min(24, Number((event.currentTarget as HTMLInputElement).value)))
-    const grid = { ...this.canvasProject.grid, [key]: value }
-    const widgets = this.canvasProject.regions.flatMap((region) => region.widget ? [region.widget] : [])
-    const regions = createRegions(grid).map((region, index) => ({ ...region, widget: widgets[index] }))
-    this.updateLayoutDraft((project) => ({ ...project, grid, regions }))
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-  }
-
-  private selectionContainsComposedRegion(first: CellCoordinate, second: CellCoordinate): boolean {
-    const rowStart = Math.min(first.row, second.row)
-    const rowEnd = Math.max(first.row, second.row)
-    const columnStart = Math.min(first.column, second.column)
-    const columnEnd = Math.max(first.column, second.column)
-    return this.canvasProject.regions.some((region) => {
-      if (region.rowSpan === 1 && region.columnSpan === 1 && !region.label) return false
-      const regionRowEnd = region.row + region.rowSpan - 1
-      const regionColumnEnd = region.column + region.columnSpan - 1
-      return region.row <= rowEnd && regionRowEnd >= rowStart && region.column <= columnEnd && regionColumnEnd >= columnStart
+  private selectItemId(itemId: string): void {
+    if (this.selectedItemId === itemId) return
+    this.selectedItemId = itemId
+    void this.updateComplete.then(() => {
+      if (this.selectedItemId === itemId && this.propertiesPanel) this.propertiesPanel.scrollTop = 0
     })
   }
+  private schedulePreview(): void {
+    if (this.previewTimer) window.clearTimeout(this.previewTimer)
+    this.previewTimer = window.setTimeout(() => void this.composePreview(), 220)
+  }
+  private async composePreview(): Promise<void> {
+    if (!this.hass || !this.current) return
+    this.error = ''
+    const request = ++this.previewRequest
+    try {
+      const result = await this.hass.callWS<ComposePreviewResponse>({ type: 'opendisplay_studio/compose_preview', project: clone(this.current) })
+      if (request === this.previewRequest) { this.preview = result; this.yamlCopyState = 'idle' }
+    } catch (error) { this.error = messageFrom(error, 'Could not render the preview') }
+  }
+  private toggleReady(): void { this.mutate(project => { project.status = project.status === 'ready' ? 'draft' : 'ready' }, false) }
+  private updateName(event: Event): void { const value = (event.target as HTMLInputElement).value; this.mutate(project => { project.name = value }, false) }
 
-  private selectMergeCell(cell: CellCoordinate): void {
-    const occupyingRegion = this.canvasProject.regions.find((region) => regionContainsCell(region, cell))
-    if (occupyingRegion && (occupyingRegion.label || occupyingRegion.rowSpan > 1 || occupyingRegion.columnSpan > 1)) return
+  private workingArea(project = this.current): ItemBounds {
+    if (!project) return { x: 0, y: 0, width: 1, height: 1 }
+    const padding = project.display.padding
+    return { x: padding, y: padding, width: project.display.width - padding * 2, height: project.display.height - padding * 2 }
+  }
+  private snapValue(value: number, project = this.current): number {
+    if (!project || !this.snapEnabled) return Math.round(value)
+    return snap(value, project.display.snapSize, project.display.padding)
+  }
+  private startCatalogPointerDrag(event: PointerEvent, value: string): void {
+    if (event.button !== 0) return
+    event.preventDefault()
+    const sourceRect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+    this.catalogPointerDrag = {
+      value,
+      startX: event.clientX,
+      startY: event.clientY,
+      currentX: event.clientX,
+      currentY: event.clientY,
+      grabOffsetX: event.clientX - sourceRect.left,
+      grabOffsetY: event.clientY - sourceRect.top,
+      previewWidth: sourceRect.width,
+      previewHeight: sourceRect.height,
+      active: false,
+    }
+    window.addEventListener('pointermove', this.onCatalogPointerMove)
+    window.addEventListener('pointerup', this.onCatalogPointerUp)
+    window.addEventListener('pointercancel', this.onCatalogPointerCancel)
+  }
+  private onCatalogPointerMove = (event: PointerEvent): void => {
+    const drag = this.catalogPointerDrag; if (!drag) return
+    if (!drag.active && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4) return
+    event.preventDefault(); drag.active = true; drag.currentX = event.clientX; drag.currentY = event.clientY
+    const hostRect = this.getBoundingClientRect()
+    this.draggingCatalog = true
+    this.catalogDragPosition = { x: event.clientX - hostRect.left - drag.grabOffsetX, y: event.clientY - hostRect.top - drag.grabOffsetY }
+  }
+  private onCatalogPointerUp = (event: PointerEvent): void => {
+    const drag = this.catalogPointerDrag
+    this.finishCatalogPointerDrag()
+    if (!drag?.active) return
+    this.suppressCatalogClick = true
+    this.dropCatalogItem(drag.value, event.clientX, event.clientY)
+    window.setTimeout(() => { this.suppressCatalogClick = false }, 0)
+  }
+  private onCatalogPointerCancel = (): void => { this.finishCatalogPointerDrag() }
+  private finishCatalogPointerDrag(): void {
+    this.catalogPointerDrag = undefined; this.draggingCatalog = false; this.catalogDragPosition = undefined
+    window.removeEventListener('pointermove', this.onCatalogPointerMove)
+    window.removeEventListener('pointerup', this.onCatalogPointerUp)
+    window.removeEventListener('pointercancel', this.onCatalogPointerCancel)
+  }
+  private dropCatalogItem(value: string, clientX: number, clientY: number): void {
+    if (!this.current) return
+    const [kind, type] = value.split(':')
+    const canvas = this.renderRoot.querySelector('.canvas') as HTMLElement | null
+    if (!canvas || !type) return
+    const rect = canvas.getBoundingClientRect()
+    if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return
+    const area = this.workingArea()
+    const x = clamp(this.snapValue((clientX - rect.left) / rect.width * this.current.display.width), area.x, area.x + area.width - 1)
+    const y = clamp(this.snapValue((clientY - rect.top) / rect.height * this.current.display.height), area.y, area.y + area.height - 1)
+    if (kind === 'widget') this.addWidget(type, x, y)
+    if (kind === 'primitive') this.addPrimitive(type, x, y)
+  }
+  private onCanvasDragOver(event: DragEvent): void { if (this.draggingCatalog) event.preventDefault() }
+  private onCanvasDrop(event: DragEvent): void { event.preventDefault() }
+  private addCatalogItem(value: string): void {
+    if (this.suppressCatalogClick || !this.current) return
+    const [kind, type] = value.split(':')
+    if (!type) return
+    const area = this.workingArea()
+    const cascade = (this.current.items.length * Math.max(this.current.display.snapSize, 5) * 3) % Math.max(1, Math.min(area.width, area.height) / 3)
+    const x = this.snapValue(area.x + Math.min(24 + cascade, Math.max(0, area.width - 1)))
+    const y = this.snapValue(area.y + Math.min(24 + cascade, Math.max(0, area.height - 1)))
+    if (kind === 'widget') this.addWidget(type, x, y)
+    if (kind === 'primitive') this.addPrimitive(type, x, y)
+  }
+  private addWidget(type: string, x: number, y: number): void {
+    if (!this.current) return
+    const definition = this.widgets.find(widget => widget.id === type)
+    if (!definition) return
+    const area = this.workingArea()
+    const width = Math.min(definition.layout.defaultSize?.width ?? 240, area.width)
+    const height = Math.min(definition.layout.defaultSize?.height ?? 144, area.height)
+    const item: WidgetItem = {
+      id: createId(), kind: 'widget', locked: false, hidden: false,
+      widget: { type, version: definition.version, config: clone(definition.defaults) },
+      frame: { x: clamp(Math.round(x - width / 2), area.x, area.x + area.width - width), y: clamp(Math.round(y - height / 2), area.y, area.y + area.height - height), width, height },
+      layout: { padding: 0 },
+    }
+    this.mutate(project => { project.items.push(item) }); this.selectItemId(item.id)
+  }
+  private addPrimitive(type: string, x: number, y: number): void {
+    if (!this.current) return
+    const primitive = createPrimitive(type.trim(), { x: Math.round(this.current.display.width / 2), y: Math.round(this.current.display.height / 2), displayWidth: this.current.display.width, displayHeight: this.current.display.height })
+    if (!primitive) { this.error = `Unsupported primitive type: ${type || '(empty)'}`; return }
+    const item: PrimitiveItem = { id: createId(), kind: 'primitive', locked: false, hidden: false, primitive }
+    const bounds = itemBounds(item)
+    this.translateItem(item, Math.round(x - (bounds.x + bounds.width / 2)), Math.round(y - (bounds.y + bounds.height / 2)))
+    this.constrainItem(item, this.current)
+    this.mutate(project => { project.items.push(item) }); this.selectItemId(item.id)
+  }
 
-    if (!this.mergeAnchor) {
-      this.mergeAnchor = cell
-      this.mergeHover = cell
+  private constrainItem(item: StudioItem, project: ScreenProject): void {
+    const area = this.workingArea(project); const bounds = itemBounds(item)
+    const dx = clamp(bounds.x, area.x, Math.max(area.x, area.x + area.width - bounds.width)) - bounds.x
+    const dy = clamp(bounds.y, area.y, Math.max(area.y, area.y + area.height - bounds.height)) - bounds.y
+    this.translateItem(item, dx, dy)
+    if (item.kind === 'widget') { item.frame.width = Math.min(item.frame.width, area.width); item.frame.height = Math.min(item.frame.height, area.height) }
+  }
+  private translateItem(item: StudioItem, dx: number, dy: number): void {
+    if (item.kind === 'widget') { item.frame.x += dx; item.frame.y += dy; return }
+    const primitive = item.primitive
+    if (isBoxPrimitive(primitive)) { primitive.x_start += dx; primitive.x_end += dx; primitive.y_start += dy; primitive.y_end += dy }
+    else if (primitive.type === 'circle') { primitive.x += dx; primitive.y += dy }
+    else { primitive.x += dx; primitive.y += dy }
+  }
+  private resizeItem(item: StudioItem, handle: ResizeHandle, dx: number, dy: number, shiftKey: boolean, project: ScreenProject): void {
+    const before = itemBounds(item)
+    let minimumWidth = 1
+    let minimumHeight = 1
+    let intrinsicAspect = false
+    if (item.kind === 'widget') {
+      const minimum = this.widgets.find(widget => widget.id === item.widget.type)?.layout.minSize ?? { width: 60, height: 48 }
+      minimumWidth = minimum.width
+      minimumHeight = minimum.height
+    } else if (item.primitive.type === 'circle') {
+      minimumWidth = minimumHeight = 3
+      intrinsicAspect = true
+    } else if (item.primitive.type === 'qrcode') {
+      minimumWidth = minimumHeight = 21 + item.primitive.border * 2
+      intrinsicAspect = true
+    } else if (item.primitive.type === 'icon') {
+      minimumWidth = minimumHeight = 8
+      intrinsicAspect = true
+    } else if (item.primitive.type === 'text') {
+      const minimumBounds = primitiveBounds({ ...item.primitive, size: 6 })
+      minimumWidth = minimumBounds.width
+      minimumHeight = minimumBounds.height
+      intrinsicAspect = true
+    } else if (item.primitive.type !== 'line') {
+      minimumWidth = minimumHeight = 2
+    }
+
+    const geometryHandle: ResizeHandle = intrinsicAspect
+      ? ({ n: 'ne', e: 'se', s: 'se', w: 'sw' } as Partial<Record<ResizeHandle, ResizeHandle>>)[handle] ?? handle
+      : handle
+
+    const requested = resizeBounds({
+      bounds: before,
+      handle: geometryHandle,
+      deltaX: dx,
+      deltaY: dy,
+      minimumWidth,
+      minimumHeight,
+      area: this.workingArea(project),
+      preserveAspect: shiftKey || intrinsicAspect,
+      snapSize: project.display.snapSize,
+      snapEnabled: this.snapEnabled,
+    })
+
+    if (item.kind === 'widget') {
+      item.frame = requested
       return
     }
-    if (this.selectionContainsComposedRegion(this.mergeAnchor, cell)) {
-      this.mergeAnchor = undefined
-      this.mergeHover = undefined
-      this.showToast('Remove the existing region before drawing across it')
+
+    const primitive = item.primitive
+    if (isBoxPrimitive(primitive)) {
+      const right = requested.x + requested.width - 1
+      const bottom = requested.y + requested.height - 1
+      if (primitive.type === 'line') {
+        const leftToRight = primitive.x_start <= primitive.x_end
+        const topToBottom = primitive.y_start <= primitive.y_end
+        primitive.x_start = leftToRight ? requested.x : right
+        primitive.x_end = leftToRight ? right : requested.x
+        primitive.y_start = topToBottom ? requested.y : bottom
+        primitive.y_end = topToBottom ? bottom : requested.y
+        if (primitive.x_start === primitive.x_end && primitive.y_start === primitive.y_end) {
+          primitive.x_end = Math.min(project.display.width - 1, primitive.x_start + 1)
+        }
+      } else {
+        primitive.x_start = requested.x
+        primitive.y_start = requested.y
+        primitive.x_end = right
+        primitive.y_end = bottom
+      }
       return
     }
-    const regions = mergeRegions(this.canvasProject.regions, this.mergeAnchor, cell)
-    if (!regions) {
-      this.mergeAnchor = undefined
-      this.mergeHover = undefined
-      this.showToast('The selected rectangle crosses an existing merged region')
+
+    if (primitive.type === 'circle') {
+      const radius = Math.max(1, Math.floor((Math.min(requested.width, requested.height) - 1) / 2))
+      const diameter = radius * 2 + 1
+      const aligned = alignIntrinsicBounds(requested, diameter, diameter, geometryHandle)
+      primitive.x = aligned.x + radius
+      primitive.y = aligned.y + radius
+      primitive.radius = radius
       return
     }
-    const previousIds = new Set(this.canvasProject.regions.map((region) => region.id))
-    const mergedRegion = regions.find((region) => !previousIds.has(region.id))
-    const existingComposedRegions = this.canvasProject.regions
-      .filter((region) => region.label || region.rowSpan > 1 || region.columnSpan > 1)
-      .sort((first, second) => first.row - second.row || first.column - second.column)
-    const usedLabels = new Set(existingComposedRegions.map((region, index) => region.label ?? regionLabel(index)))
-    let labelIndex = 0
-    while (usedLabels.has(regionLabel(labelIndex))) labelIndex += 1
-    const label = regionLabel(labelIndex)
-    const labeledRegions = regions.map((region) => region.id === mergedRegion?.id ? { ...region, label } : region)
-    this.updateLayoutDraft((project) => ({ ...project, regions: labeledRegions }))
-    this.selectedRegionId = mergedRegion?.id ?? ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.showToast(`Region ${label} created`)
+
+    if (primitive.type === 'qrcode') {
+      const modules = 21 + primitive.border * 2
+      primitive.boxsize = clamp(Math.floor(Math.min(requested.width, requested.height) / modules), 1, 16)
+      const size = modules * primitive.boxsize
+      const aligned = alignIntrinsicBounds(requested, size, size, geometryHandle)
+      primitive.x = aligned.x
+      primitive.y = aligned.y
+      return
+    }
+
+    if (primitive.type === 'icon') {
+      primitive.size = clamp(Math.floor(Math.min(requested.width, requested.height)), 8, 256)
+      const aligned = alignIntrinsicBounds(requested, primitive.size, primitive.size, geometryHandle)
+      primitive.x = aligned.x
+      primitive.y = aligned.y
+      return
+    }
+
+    primitive.size = clamp(Math.round(primitive.size * requested.width / Math.max(1, before.width)), 6, 256)
+    const actual = primitiveBounds(primitive)
+    const aligned = alignIntrinsicBounds(requested, actual.width, actual.height, geometryHandle)
+    primitive.x = aligned.x
+    primitive.y = aligned.y
+  }
+  private selectItem(event: PointerEvent, item: StudioItem, mode: 'move' | 'resize' = 'move', resizeHandle?: ResizeHandle): void {
+    event.stopPropagation(); event.preventDefault(); this.selectItemId(item.id)
+    if (item.locked) return
+    if (mode === 'resize' && !resizeHandle) return
+    this.pointerEdit = { itemId: item.id, mode, resizeHandle, startX: event.clientX, startY: event.clientY, original: clone(item), beforeProject: clone(this.current!), changed: false }
+    window.addEventListener('pointermove', this.onPointerMove); window.addEventListener('pointerup', this.onPointerUp)
+  }
+  private onPointerMove = (event: PointerEvent): void => {
+    if (!this.current || !this.pointerEdit) return
+    const canvas = this.renderRoot.querySelector('.canvas') as HTMLElement | null
+    if (!canvas) return
+    const edit = this.pointerEdit
+    if (!edit.changed && Math.hypot(event.clientX - edit.startX, event.clientY - edit.startY) < 3) return
+    edit.changed = true
+    const rect = canvas.getBoundingClientRect()
+    const dx = Math.round((event.clientX - edit.startX) / rect.width * this.current.display.width)
+    const dy = Math.round((event.clientY - edit.startY) / rect.height * this.current.display.height)
+    this.mutate(project => {
+      const index = project.items.findIndex(item => item.id === edit.itemId); if (index < 0) return
+      const original = clone(edit.original); if (original.locked) return
+      const area = this.workingArea(project); const before = itemBounds(original)
+      if (edit.mode === 'move') {
+        const nextX = clamp(this.snapValue(before.x + dx, project), area.x, Math.max(area.x, area.x + area.width - before.width))
+        const nextY = clamp(this.snapValue(before.y + dy, project), area.y, Math.max(area.y, area.y + area.height - before.height))
+        this.translateItem(original, nextX - before.x, nextY - before.y)
+      } else if (edit.resizeHandle) this.resizeItem(original, edit.resizeHandle, dx, dy, event.shiftKey, project)
+      project.items[index] = original
+    }, false, false)
+  }
+  private onPointerUp = (): void => {
+    const edit = this.pointerEdit
+    window.removeEventListener('pointermove', this.onPointerMove); window.removeEventListener('pointerup', this.onPointerUp); this.pointerEdit = undefined
+    if (edit?.changed) { this.recordHistory(edit.beforeProject); this.schedulePreview() }
   }
 
-  private splitSelectedRegion(regionId: string): void {
-    const region = this.canvasProject.regions.find((item) => item.id === regionId)
-    if (!region || (region.rowSpan === 1 && region.columnSpan === 1 && !region.label)) return
-    this.updateLayoutDraft((project) => ({ ...project, regions: splitRegion(project.regions, regionId) }))
-    this.selectedRegionId = ''
-    this.mergeAnchor = undefined
-    this.mergeHover = undefined
-    this.showToast('Region removed')
+  private updateWidgetConfig(event: CustomEvent<{ value: Record<string, unknown> }>): void {
+    this.mutate(project => { const item = project.items.find(candidate => candidate.id === this.selectedItemId); if (item?.kind === 'widget') item.widget.config = event.detail.value as WidgetItem['widget']['config'] })
+  }
+  private updatePrimitive(event: CustomEvent<{ value: Record<string, unknown> }>): void {
+    this.mutate(project => {
+      const item = project.items.find(candidate => candidate.id === this.selectedItemId); if (item?.kind !== 'primitive') return
+      const normalized = { ...item.primitive, ...event.detail.value } as Primitive
+      if ('fill' in normalized && normalized.fill === 'transparent') normalized.fill = null
+      item.primitive = normalized
+    })
+  }
+  private updateSelectedNumber(key: string, rawValue: string): void {
+    if (!this.current) return
+    const value = Math.round(Number(rawValue)); if (!Number.isFinite(value)) return
+    this.mutate(project => {
+      const item = project.items.find(candidate => candidate.id === this.selectedItemId); if (!item || item.locked) return
+      const area = this.workingArea(project)
+      if (item.kind === 'widget') {
+        if (key === 'padding') item.layout.padding = clamp(value, 0, 128)
+        if (key === 'x') item.frame.x = clamp(value, area.x, area.x + area.width - item.frame.width)
+        if (key === 'y') item.frame.y = clamp(value, area.y, area.y + area.height - item.frame.height)
+        if (key === 'width') item.frame.width = clamp(value, 1, area.x + area.width - item.frame.x)
+        if (key === 'height') item.frame.height = clamp(value, 1, area.y + area.height - item.frame.y)
+        return
+      }
+      const primitive = item.primitive
+      if (isBoxPrimitive(primitive)) {
+        if (key === 'x') { const width = primitive.x_end - primitive.x_start; primitive.x_start = clamp(value, area.x, area.x + area.width - width - 1); primitive.x_end = primitive.x_start + width }
+        if (key === 'y') { const height = primitive.y_end - primitive.y_start; primitive.y_start = clamp(value, area.y, area.y + area.height - height - 1); primitive.y_end = primitive.y_start + height }
+        if (key === 'width') primitive.x_end = clamp(primitive.x_start + Math.max(1, value) - 1, primitive.x_start + 1, area.x + area.width - 1)
+        if (key === 'height') primitive.y_end = clamp(primitive.y_start + Math.max(1, value) - 1, primitive.y_start + 1, area.y + area.height - 1)
+      } else if (primitive.type === 'circle') {
+        if (key === 'x') primitive.x = clamp(value, area.x + primitive.radius, area.x + area.width - primitive.radius)
+        if (key === 'y') primitive.y = clamp(value, area.y + primitive.radius, area.y + area.height - primitive.radius)
+        if (key === 'radius') primitive.radius = clamp(value, 1, Math.floor(Math.min(area.width, area.height) / 2))
+      } else {
+        if (key === 'x') primitive.x = clamp(value, area.x, area.x + area.width - 1)
+        if (key === 'y') primitive.y = clamp(value, area.y, area.y + area.height - 1)
+        if (key === 'size' && primitive.type !== 'qrcode') primitive.size = clamp(value, primitive.type === 'text' ? 6 : 8, 256)
+        if (key === 'boxsize' && primitive.type === 'qrcode') primitive.boxsize = clamp(value, 1, 16)
+      }
+    })
+  }
+  private updateDisplayNumber(key: 'width' | 'height' | 'padding' | 'snapSize', rawValue: string): void {
+    const value = Math.round(Number(rawValue)); if (!Number.isFinite(value)) return
+    this.mutate(project => {
+      if (key === 'width' || key === 'height') project.display[key] = clamp(value, 64, 4096)
+      if (key === 'padding') project.display.padding = clamp(value, 0, Math.floor((Math.min(project.display.width, project.display.height) - 1) / 2))
+      if (key === 'snapSize') project.display.snapSize = clamp(value, 1, 256)
+      project.items.forEach(item => this.constrainItem(item, project))
+    })
+  }
+  private updateProfile(value: string): void {
+    const profile = profileById(value)
+    this.mutate(project => { project.display.profileId = profile.id; project.display.width = profile.width; project.display.height = profile.height; project.display.palette = profile.defaultPalette; project.items.forEach(item => this.constrainItem(item, project)) })
+    requestAnimationFrame(() => this.fitCanvas())
+  }
+  private deleteSelected(): void {
+    if (!this.selectedItemId) return
+    this.pendingDeleteItemId = this.selectedItemId
   }
 
-  private assignWidget(widgetId: string): void {
-    const definition = this.widgetDefinition(widgetId)
-    if (!definition || !this.selectedRegion) return
-    this.updateProject((project) => ({
-      ...project,
-      regions: project.regions.map((region) =>
-        region.id === this.selectedRegionId
-          ? {
-              ...region,
-              widget: {
-                type: definition.id,
-                version: definition.version,
-                config: Object.fromEntries(Object.entries(definition.defaults).map(([key, value]) => {
-                  const option = definition.options.find((item) => item.key === key)
-                  return [key, option?.selector && 'opendisplay_color' in option.selector
-                    ? resolvePaletteColor(project.palette, value)
-                    : value]
-                })),
-              },
-            }
-          : region,
-      ),
-    }))
+  private itemName(item: StudioItem): string {
+    if (item.kind === 'primitive') return primitiveNames[item.primitive.type]
+    const definition = this.widgets.find(widget => widget.id === item.widget.type)
+    const title = item.widget.config.title
+    return typeof title === 'string' && title.trim() ? title : definition?.name ?? item.widget.type
+  }
+  private toggleItemState(itemId: string, key: 'locked' | 'hidden'): void {
+    this.mutate(project => { const item = project.items.find(candidate => candidate.id === itemId); if (item) item[key] = !item[key] })
+  }
+  private removeItem(itemId: string): void {
+    this.pendingDeleteItemId = itemId
+  }
+  private confirmDeleteItem(): void {
+    const itemId = this.pendingDeleteItemId; if (!itemId) return
+    this.pendingDeleteItemId = ''
+    this.mutate(project => { project.items = project.items.filter(item => item.id !== itemId) })
+    if (this.selectedItemId === itemId) this.selectItemId('')
+  }
+  private startLayerPointerDrag(event: PointerEvent, itemId: string): void {
+    if (event.button !== 0) return
+    event.stopPropagation(); event.preventDefault()
+    this.layerPointerDrag = { itemId, startX: event.clientX, startY: event.clientY, active: false }
+    window.addEventListener('pointermove', this.onLayerPointerMove)
+    window.addEventListener('pointerup', this.onLayerPointerUp)
+    window.addEventListener('pointercancel', this.onLayerPointerCancel)
+  }
+  private onLayerPointerMove = (event: PointerEvent): void => {
+    const drag = this.layerPointerDrag; if (!drag) return
+    if (!drag.active && Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < 4) return
+    event.preventDefault(); drag.active = true; this.draggingLayerId = drag.itemId
+    const target = this.shadowRoot?.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('.layer-row')
+    const targetId = target?.dataset.itemId
+    if (!target || !targetId || targetId === drag.itemId) { this.layerDropTarget = undefined; return }
+    const rect = target.getBoundingClientRect()
+    this.layerDropTarget = { itemId: targetId, edge: event.clientY < rect.top + rect.height / 2 ? 'before' : 'after' }
+  }
+  private onLayerPointerUp = (): void => {
+    const drag = this.layerPointerDrag; const target = this.layerDropTarget
+    this.finishLayerPointerDrag()
+    if (!drag?.active || !target || drag.itemId === target.itemId) return
+    this.mutate(project => {
+      const topFirst = [...project.items].reverse(); const from = topFirst.findIndex(item => item.id === drag.itemId)
+      if (from < 0) return
+      const [moved] = topFirst.splice(from, 1); const targetIndex = topFirst.findIndex(item => item.id === target.itemId)
+      if (targetIndex < 0) return
+      const insertionIndex = target.edge === 'before' ? targetIndex : targetIndex + 1
+      topFirst.splice(insertionIndex, 0, moved); project.items = topFirst.reverse()
+    })
+  }
+  private onLayerPointerCancel = (): void => { this.finishLayerPointerDrag() }
+  private finishLayerPointerDrag(): void {
+    this.layerPointerDrag = undefined; this.draggingLayerId = ''; this.layerDropTarget = undefined
+    window.removeEventListener('pointermove', this.onLayerPointerMove)
+    window.removeEventListener('pointerup', this.onLayerPointerUp)
+    window.removeEventListener('pointercancel', this.onLayerPointerCancel)
   }
 
-  private removeWidget(): void {
-    this.updateProject((project) => ({
-      ...project,
-      regions: project.regions.map((region) =>
-        region.id === this.selectedRegionId ? { ...region, widget: undefined } : region,
-      ),
-    }))
+  private startPanelResize(event: PointerEvent): void {
+    event.preventDefault(); this.panelResize = { startX: event.clientX, startWidth: this.inspectorWidth }
+    window.addEventListener('pointermove', this.onPanelResizeMove); window.addEventListener('pointerup', this.onPanelResizeEnd)
+  }
+  private onPanelResizeMove = (event: PointerEvent): void => { if (this.panelResize) this.inspectorWidth = clamp(this.panelResize.startWidth + this.panelResize.startX - event.clientX, 286, 560) }
+  private onPanelResizeEnd = (): void => { this.panelResize = undefined; window.removeEventListener('pointermove', this.onPanelResizeMove); window.removeEventListener('pointerup', this.onPanelResizeEnd) }
+  private onCanvasWheel(event: WheelEvent): void {
+    event.preventDefault()
+    if (event.shiftKey) this.zoom = clamp(this.zoom + (event.deltaY < 0 ? .1 : -.1), .25, 4)
+    else if (event.altKey) this.panX -= event.deltaY
+    else this.panY -= event.deltaY
+  }
+  private resetCanvas(): void { this.zoom = 1; this.panX = 0; this.panY = 0 }
+  private fitCanvas(): void {
+    if (!this.current) return
+    const stage = this.renderRoot.querySelector('.canvas-stage') as HTMLElement | null; if (!stage) return
+    const availableWidth = Math.max(100, stage.clientWidth - 96); const availableHeight = Math.max(100, stage.clientHeight - 96)
+    this.zoom = clamp(Math.min(availableWidth / this.current.display.width, availableHeight / this.current.display.height), .25, 3); this.panX = 0; this.panY = 0
   }
 
-  private updateWidgetOption(option: WidgetOption, event: Event): void {
-    const input = event.currentTarget as HTMLInputElement | HTMLSelectElement
-    const value = option.type === 'toggle'
-      ? (input as HTMLInputElement).checked
-      : option.type === 'number'
-        ? Number(input.value)
-        : input.value
-    this.updateProject((project) => ({
-      ...project,
-      regions: project.regions.map((region) => {
-        if (region.id !== this.selectedRegionId || !region.widget) return region
-        return { ...region, widget: { ...region.widget, config: { ...region.widget.config, [option.key]: value } } }
-      }),
-    }))
+  private async copyGeneratedYaml(): Promise<void> {
+    if (!this.preview?.yaml) return
+    if (this.yamlCopyTimer) window.clearTimeout(this.yamlCopyTimer)
+    try { await navigator.clipboard.writeText(this.preview.yaml); this.yamlCopyState = 'copied' } catch { this.yamlCopyState = 'failed' }
+    this.yamlCopyTimer = window.setTimeout(() => { this.yamlCopyState = 'idle' }, 2200)
   }
 
-  private updateRegionAppearance(key: 'showBackground' | 'showBorder', event: Event): void {
-    const value = (event.currentTarget as HTMLInputElement).checked
-    this.updateProject((project) => ({ ...project, regions: project.regions.map((region) =>
-      region.id === this.selectedRegionId
-        ? { ...region, appearance: { ...regionAppearance(region), [key]: value } }
-        : region) }))
+  private renderNewDashboardDialog(): TemplateResult | typeof nothing {
+    if (!this.newDashboardOpen) return nothing
+    const profile = profileById(this.newDashboard.display.profileId)
+    return html`<div class="dialog-scrim" @click=${(event: Event) => { if (event.target === event.currentTarget) this.newDashboardOpen = false }}><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="new-dashboard-title"><header><div><span class="eyebrow">Dashboard setup</span><h2 id="new-dashboard-title">Add dashboard</h2></div><button class="icon-button" aria-label="Close" @click=${() => { this.newDashboardOpen = false }}><ha-icon icon="mdi:close"></ha-icon></button></header><div class="dialog-grid"><label class="wide">Name<input aria-label="Dashboard name" .value=${this.newDashboard.name} @input=${(event: Event) => this.updateNewDashboard('name', (event.target as HTMLInputElement).value)}></label><label class="wide">Display type<select aria-label="Display type" .value=${this.newDashboard.display.profileId ?? ''} @change=${(event: Event) => this.updateNewDashboard('profileId', (event.target as HTMLSelectElement).value)}>${DISPLAY_PROFILES.map(entry => html`<option value=${entry.id}>${entry.manufacturer} · ${entry.name}</option>`)}</select></label><label>Width<input aria-label="New dashboard width" type="number" .disabled=${profile.id !== 'custom'} .value=${String(this.newDashboard.display.width)} @input=${(event: Event) => this.updateNewDashboard('width', (event.target as HTMLInputElement).value)}></label><label>Height<input aria-label="New dashboard height" type="number" .disabled=${profile.id !== 'custom'} .value=${String(this.newDashboard.display.height)} @input=${(event: Event) => this.updateNewDashboard('height', (event.target as HTMLInputElement).value)}></label><label class="wide">Colors<select aria-label="Dashboard colors" .value=${this.newDashboard.display.palette} @change=${(event: Event) => this.updateNewDashboard('palette', (event.target as HTMLSelectElement).value)}>${profile.palettes.map(palette => html`<option value=${palette}>${PALETTE_LABELS[palette]}</option>`)}</select></label><label>Outer padding<input aria-label="Dashboard padding" type="number" min="0" .value=${String(this.newDashboard.display.padding)} @input=${(event: Event) => this.updateNewDashboard('padding', (event.target as HTMLInputElement).value)}></label><label>Snap size<input aria-label="Dashboard snap size" type="number" min="1" .value=${String(this.newDashboard.display.snapSize)} @input=${(event: Event) => this.updateNewDashboard('snapSize', (event.target as HTMLInputElement).value)}></label></div><footer><ha-button appearance="plain" @click=${() => { this.newDashboardOpen = false }}>Cancel</ha-button><ha-button appearance="filled" .disabled=${this.saving || !this.newDashboard.name.trim()} @click=${this.createProject}>${this.saving ? 'Creating…' : 'Create dashboard'}</ha-button></footer></section></div>`
+  }
+  private renderDeleteDialog(): TemplateResult | typeof nothing {
+    if (!this.pendingDeleteItemId || !this.current) return nothing
+    const item = this.current.items.find(candidate => candidate.id === this.pendingDeleteItemId)
+    if (!item) return nothing
+    const name = this.itemName(item)
+    return html`<div class="dialog-scrim" @click=${(event: Event) => { if (event.target === event.currentTarget) this.pendingDeleteItemId = '' }}><section class="dialog confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-element-title"><header><div><span class="eyebrow">Confirm removal</span><h2 id="delete-element-title">Delete ${name}?</h2></div><button class="icon-button" aria-label="Close" @click=${() => { this.pendingDeleteItemId = '' }}><ha-icon icon="mdi:close"></ha-icon></button></header><p>This removes the element from the dashboard. You can restore it with Undo.</p><footer><ha-button appearance="plain" @click=${() => { this.pendingDeleteItemId = '' }}>Cancel</ha-button><ha-button appearance="filled" class="confirm-delete" @click=${this.confirmDeleteItem}>Delete element</ha-button></footer></section></div>`
   }
 
-  private updateRegionBorderRadius(event: Event): void {
-    const raw = (event.currentTarget as HTMLInputElement).value.trim()
-    const borderRadius = raw === '' ? null : clampRegionBorderRadius(Number(raw))
-    this.updateProject((project) => ({ ...project, regions: project.regions.map((region) =>
-      region.id === this.selectedRegionId
-        ? { ...region, appearance: { ...regionAppearance(region), borderRadius } }
-        : region) }))
+  private renderToolbox(): TemplateResult {
+    if (this.leftCollapsed) return html`<aside class="panel panel-rail"><button class="icon-button" title="Expand element catalog" aria-label="Expand element catalog" @click=${() => { this.leftCollapsed = false }}><ha-icon icon="mdi:chevron-right"></ha-icon></button><span class="rail-label">Library</span></aside>`
+    const widgets = filterCatalog(this.widgets, this.query); const primitives = filterCatalog(this.primitives, this.query)
+    return html`<aside class="panel toolbox"><div class="panel-title"><div><span class="eyebrow">Library</span><h2>Elements</h2></div><button class="icon-button" title="Collapse element catalog" aria-label="Collapse element catalog" @click=${() => { this.leftCollapsed = true }}><ha-icon icon="mdi:chevron-left"></ha-icon></button></div><label class="search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" aria-label="Search widgets and primitives" placeholder="Search elements…" .value=${this.query} @input=${(event: Event) => { this.query = (event.target as HTMLInputElement).value }}></label><div class="catalog-scroll"><section class="catalog-section"><header><span>Widgets</span><span>${widgets.length}</span></header><div class="catalog-grid">${widgets.map(widget => { const value = `widget:${widget.id}`; return html`<button class="catalog-item" title=${`${widget.description} Click or drag to add.`} @click=${() => this.addCatalogItem(value)} @pointerdown=${(event: PointerEvent) => this.startCatalogPointerDrag(event, value)}><ha-icon .icon=${widget.icon}></ha-icon><strong>${widget.name}</strong><small>${widget.description}</small></button>` })}${!widgets.length ? html`<p class="empty-result">No matching widgets</p>` : nothing}</div></section><section class="catalog-section"><header><span>Primitives</span><span>${primitives.length}</span></header><div class="catalog-grid">${primitives.map(primitive => { const value = `primitive:${primitive.id}`; return html`<button class="catalog-item" title=${`${primitive.description} Click or drag to add.`} @click=${() => this.addCatalogItem(value)} @pointerdown=${(event: PointerEvent) => this.startCatalogPointerDrag(event, value)}><ha-icon .icon=${primitive.icon}></ha-icon><strong>${primitive.name}</strong><small>${primitive.description}</small></button>` })}${!primitives.length ? html`<p class="empty-result">No matching primitives</p>` : nothing}</div></section></div></aside>`
   }
 
-  private renderProjectRail(): TemplateResult {
+  private renderCatalogDragGhost(): TemplateResult | typeof nothing {
+    const drag = this.catalogPointerDrag
+    if (!drag?.active || !this.catalogDragPosition) return nothing
+    const [kind, type] = drag.value.split(':')
+    const entry = kind === 'widget'
+      ? this.widgets.find(widget => widget.id === type)
+      : this.primitives.find(primitive => primitive.id === type)
+    if (!entry) return nothing
     return html`
-      <aside id="project-library" class="project-rail ${this.projectRailCollapsed ? 'collapsed' : ''}" aria-label="Saved displays">
-        <div class="rail-heading">
-          ${this.projectRailCollapsed ? nothing : html`<h2>Displays</h2>`}
-          <div class="rail-heading-actions">
-            ${this.projectRailCollapsed ? nothing : html`<button class="text-button" @click=${this.addProject}>+ New</button>`}
-            <button
-              class="rail-toggle"
-              aria-controls="project-library"
-              aria-expanded=${!this.projectRailCollapsed}
-              aria-label=${this.projectRailCollapsed ? 'Expand displays panel' : 'Collapse displays panel'}
-              title=${this.projectRailCollapsed ? 'Expand displays panel' : 'Collapse displays panel'}
-              @click=${() => { this.projectRailCollapsed = !this.projectRailCollapsed }}
-            >${renderIcon(this.projectRailCollapsed ? mdiChevronRight : mdiChevronLeft)}</button>
-          </div>
-        </div>
-        <div class="project-list" ?hidden=${this.projectRailCollapsed}>
-          ${this.store.projects.map((project) => {
-            const size = { width: project.width, height: project.height }
-            return html`
-              <button class="project-card ${project.id === this.project.id ? 'active' : ''}" @click=${() => this.selectProject(project.id)}>
-                <span class="mini-screen" style=${styleMap({ '--mini-aspect': String(size.width / size.height) })}>${project.grid.columns}×${project.grid.rows}</span>
-                <span class="project-card-copy"><strong>${project.name}</strong><span>${this.displayName(project)} · ${project.status === 'ready' ? 'Ready' : 'Draft'}</span>${project.status === 'ready' ? html`<code>media-source://opendisplay_studio/${project.id}</code>` : nothing}</span>
-              </button>
-            `
-          })}
-        </div>
-        <div class="rail-footer" ?hidden=${this.projectRailCollapsed}>Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
-        <div class="rail-actions" aria-label="Project actions" ?hidden=${this.projectRailCollapsed}>
-          <button class="rail-action danger" @click=${this.deleteProject}>${renderIcon(mdiDeleteOutline)} Delete</button>
-        </div>
-      </aside>
-    `
-  }
-
-  private renderToolbar(): TemplateResult {
-    const project = this.canvasProject
-    const display = this.canvasDisplay
-    return html`
-      <div class="device-toolbar layout-toolbar">
-        <div class="control grow">
-          <label for="device-model">Device model</label>
-          <select id="device-model" @change=${this.changeDisplay}>
-            <optgroup label="SOLUM · Newton Pro">
-              ${DISPLAY_PROFILES.filter((profile) => profile.family === 'Newton Pro').map((profile) => html`
-                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}${profile.freezer ? ' · mono' : ''}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Seeed · ready to use">
-              ${DISPLAY_PROFILES.filter((profile) => profile.family === 'OpenDisplay' && profile.manufacturer === 'Seeed Studio').map((profile) => html`
-                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Other OpenDisplay hardware">
-              ${DISPLAY_PROFILES.filter((profile) => profile.family === 'OpenDisplay' && profile.manufacturer !== 'Seeed Studio').map((profile) => html`
-                <option value=${profile.id} .selected=${profile.id === display.id}>${profile.name} · ${profile.nativeWidth}×${profile.nativeHeight}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Custom hardware">
-              <option value="custom" .selected=${project.displayId === 'custom'}>Custom resolution</option>
-            </optgroup>
-          </select>
-        </div>
-        ${project.displayId === 'custom' ? html`
-          <div class="control custom-control">
-            <label for="custom-width">Width</label>
-            <input id="custom-width" type="number" min="64" max="4096" .value=${String(project.width)} @change=${(event: Event) => this.changeCustomSize('width', event)} />
-          </div>
-          <div class="control custom-control">
-            <label for="custom-height">Height</label>
-            <input id="custom-height" type="number" min="64" max="4096" .value=${String(project.height)} @change=${(event: Event) => this.changeCustomSize('height', event)} />
-          </div>
-        ` : nothing}
-        <div class="control">
-          <label for="palette">Palette</label>
-          <select id="palette" .value=${project.palette} @change=${this.changePalette}>
-            ${(project.displayId === 'custom' ? Object.keys(PALETTE_LABELS) as PaletteId[] : display.palettes).map((palette) => html`<option value=${palette}>${PALETTE_LABELS[palette]}</option>`)}
-          </select>
-        </div>
-        <div class="control">
-          <span class="field-label">Theme</span>
-          <div class="segment" role="group" aria-label="Display theme">
-            <button class=${project.theme === 'light' ? 'active' : ''} @click=${() => this.changeTheme('light')}>Light</button>
-            <button class=${project.theme === 'dark' ? 'active' : ''} @click=${() => this.changeTheme('dark')}>Dark</button>
-          </div>
-        </div>
-        <div class="control">
-          <label for="font-family">Font family</label>
-          <select id="font-family" .value=${project.fontFamily} @change=${this.changeFontFamily}>
-            <option value="default">Default</option>
-            <option value="classic">Classic</option>
-            <option value="trmnl">TRMNL</option>
-          </select>
-        </div>
-        <div class="control">
-          <label for="text-scale">Text scale</label>
-          <select id="text-scale" .value=${project.textScale} @change=${this.changeTextScale}>
-            <option value="small">Small</option>
-            <option value="regular">Regular</option>
-            <option value="large">Large</option>
-            <option value="xlarge">Extra large</option>
-          </select>
-        </div>
-        <div class="control">
-          <span class="field-label">Orientation</span>
-          <div class="segment" role="group" aria-label="Display orientation">
-            <button class=${project.orientation === 'landscape' ? 'active' : ''} @click=${() => this.changeOrientation('landscape')}>Landscape</button>
-            <button class=${project.orientation === 'portrait' ? 'active' : ''} @click=${() => this.changeOrientation('portrait')}>Portrait</button>
-          </div>
-        </div>
-        <div class="control"><label for="grid-columns">Columns</label><input id="grid-columns" type="number" min="1" max="24" .value=${String(project.grid.columns)} @change=${(event: Event) => this.changeGrid('columns', event)} /></div>
-        <div class="control"><label for="grid-rows">Rows</label><input id="grid-rows" type="number" min="1" max="24" .value=${String(project.grid.rows)} @change=${(event: Event) => this.changeGrid('rows', event)} /></div>
-      </div>
-    `
-  }
-
-  private renderWidgetToolbar(): TemplateResult {
-    const pixels = { width: this.project.width, height: this.project.height }
-    return html`
-      <div class="device-toolbar widget-toolbar">
-        <div class="device-summary">
-          <span class="step-kicker">Step 2 · Widgets</span>
-          <strong>${this.displayName(this.project)}</strong>
-          <span>${pixels.width}×${pixels.height} · ${PALETTE_LABELS[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
-        </div>
-        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${renderButtonIcon(mdiTuneVariant)} Edit device & layout</ha-button>
-      </div>
-    `
-  }
-
-  private renderScreenRegion(region: GridRegion): TemplateResult {
-    const definition = region.widget ? this.widgetDefinition(region.widget.type) : undefined
-    const compact = region.columnSpan === 1 || region.rowSpan === 1
-    const layoutMode = this.editorMode === 'layout'
-    const livePreview = !layoutMode && Boolean(this.previewImageUrl || this.previewError)
-    const isComposed = Boolean(region.label) || region.rowSpan > 1 || region.columnSpan > 1
-    const composedRegions = this.canvasProject.regions
-      .filter((item) => item.label || item.rowSpan > 1 || item.columnSpan > 1)
-      .sort((first, second) => first.row - second.row || first.column - second.column)
-    const label = isComposed ? region.label ?? regionLabel(composedRegions.findIndex((item) => item.id === region.id)) : `${region.column}.${region.row}`
-    const appearance = regionAppearance(region)
-    const borderRadius = resolvedRegionBorderRadius(this.canvasProject, region)
-    return html`
-      <section
-        class="screen-region ${layoutMode ? 'layout-region' : region.widget ? '' : 'empty'} ${appearance.showBackground ? 'region-background' : ''} ${appearance.showBorder ? 'region-border' : ''} ${livePreview ? 'preview-region' : ''} ${!layoutMode && region.id === this.selectedRegionId ? 'selected' : ''}"
-        style=${styleMap({
-          gridColumn: `${region.column} / span ${region.columnSpan}`,
-          gridRow: `${region.row} / span ${region.rowSpan}`,
-          borderRadius: `${borderRadius}px`,
-        })}
-        aria-label=${layoutMode ? isComposed ? `Region ${label}` : `Grid cell ${label}` : definition ? `${definition.name} region` : 'Empty region'}
-        aria-pressed=${layoutMode ? nothing : String(region.id === this.selectedRegionId)}
-        role=${layoutMode ? nothing : 'button'}
-        tabindex=${layoutMode ? nothing : 0}
-        @click=${() => { if (!layoutMode) this.selectedRegionId = region.id }}
-        @keydown=${(event: KeyboardEvent) => {
-          if (layoutMode || (event.key !== 'Enter' && event.key !== ' ')) return
-          event.preventDefault()
-          this.selectedRegionId = region.id
-        }}
-        @dblclick=${() => { if (layoutMode) this.splitSelectedRegion(region.id) }}
+      <div
+        class="catalog-drag-ghost"
+        data-catalog-value=${drag.value}
+        style=${styleMap({ left: `${this.catalogDragPosition.x}px`, top: `${this.catalogDragPosition.y}px`, width: `${drag.previewWidth}px`, height: `${drag.previewHeight}px` })}
       >
-        ${livePreview
-          ? nothing
-          : layoutMode
-          ? isComposed
-            ? html`<div class="layout-region-copy composed"><strong>${label}</strong><span>${region.columnSpan}×${region.rowSpan} region</span></div>`
-            : nothing
-          : definition && region.widget
-            ? definition.render(region.widget.config, { compact, palette: this.project.palette })
-            : html`<div class="empty-region-copy"><strong>Add widget</strong><span>${region.columnSpan}×${region.rowSpan} region</span></div>`}
-      </section>
-    `
-  }
-
-  private renderMergeLayer(): TemplateResult {
-    if (this.editorMode !== 'layout') return html``
-    const cells = Array.from({ length: this.canvasProject.grid.columns * this.canvasProject.grid.rows }, (_, index) => ({
-      row: Math.floor(index / this.canvasProject.grid.columns) + 1,
-      column: (index % this.canvasProject.grid.columns) + 1,
-    }))
-    const selectionEnd = this.mergeHover ?? this.mergeAnchor
-    const selectionInvalid = Boolean(this.mergeAnchor && selectionEnd && this.selectionContainsComposedRegion(this.mergeAnchor, selectionEnd))
-    return html`
-      <div class="merge-layer active" aria-label="Region composition grid" @pointerleave=${() => { this.mergeHover = undefined }}>
-        ${cells.map((cell) => {
-          const occupyingRegion = this.canvasProject.regions.find((region) => regionContainsCell(region, cell))
-          const occupied = Boolean(occupyingRegion && (occupyingRegion.label || occupyingRegion.rowSpan > 1 || occupyingRegion.columnSpan > 1))
-          const inSelection = Boolean(this.mergeAnchor && selectionEnd &&
-            cell.row >= Math.min(this.mergeAnchor.row, selectionEnd.row) &&
-            cell.row <= Math.max(this.mergeAnchor.row, selectionEnd.row) &&
-            cell.column >= Math.min(this.mergeAnchor.column, selectionEnd.column) &&
-            cell.column <= Math.max(this.mergeAnchor.column, selectionEnd.column))
-          return html`
-            <button
-              class="merge-cell ${occupied ? 'occupied' : ''} ${inSelection ? 'preview' : ''} ${selectionInvalid && inSelection ? 'invalid' : ''} ${this.mergeAnchor?.row === cell.row && this.mergeAnchor?.column === cell.column ? 'anchor' : ''}"
-              aria-label=${occupied ? `Existing region at column ${cell.column}, row ${cell.row}; double-click to remove` : `Grid cell column ${cell.column}, row ${cell.row}`}
-              @pointerenter=${() => { if (this.mergeAnchor) this.mergeHover = cell }}
-              @click=${() => this.selectMergeCell(cell)}
-              @dblclick=${(event: MouseEvent) => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (occupied && occupyingRegion) this.splitSelectedRegion(occupyingRegion.id)
-              }}
-            >${occupied ? nothing : `${cell.column}.${cell.row}`}</button>
-          `
-        })}
+        <ha-icon class="drag-type-icon" .icon=${entry.icon}></ha-icon>
+        <span>${entry.name}</span>
+        <ha-icon class="drag-add-icon" icon="mdi:plus"></ha-icon>
       </div>
     `
   }
 
-  private renderCanvas(): TemplateResult {
-    const project = this.canvasProject
-    const display = this.canvasDisplay
-    const pixels = { width: project.width, height: project.height }
-    const exactPreview = Boolean(this.previewImageUrl || this.previewError)
-    const spacing = layoutSpacing(project)
-    const visibleRegions = this.editorMode === 'layout' ? project.regions : project.regions.filter(isActiveRegion)
+  private renderDashboardTabs(): TemplateResult {
+    return html`<nav class="dashboard-tabs" aria-label="Dashboards">${this.projects.map(project => html`<button class=${project.id === this.current?.id ? 'dashboard-tab active' : 'dashboard-tab'} @click=${() => this.selectProject(project)}><ha-icon icon="mdi:monitor"></ha-icon><span>${project.name}</span><i class=${project.status} title=${project.status}></i></button>`)}<button class="add-tab" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon>Add dashboard</button><span class="tab-spacer"></span><div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div></nav>${this.renderCatalogDragGhost()}`
+  }
+  private renderCanvasItem(item: StudioItem, project: ScreenProject): TemplateResult {
+    const box = itemBounds(item)
+    const selected = item.id === this.selectedItemId
     return html`
-      <main class="canvas-area">
-        <div class="canvas-stage">
-          <div class="screen-meta"><span>${project.displayId === 'custom' ? 'CUSTOM DISPLAY' : `${display.manufacturer} · ${display.diagonal}″`}</span><code>${pixels.width} × ${pixels.height} px</code></div>
-          <div class="preview-boundary">
-            <div class="screen-fit">
-              <div class="screen-bezel">
-                <div
-                  id="display-screen"
-                  class="display-screen ${exactPreview ? 'live-preview' : ''}"
-                  data-palette=${project.palette}
-                  style=${styleMap({
-                    '--grid-columns': String(project.grid.columns),
-                    '--grid-rows': String(project.grid.rows),
-                    '--preview-padding': `${spacing.screenPadding}px`,
-                    '--preview-gap': `${spacing.regionGap}px`,
-                    '--layout-padding': `${spacing.screenPadding}px`,
-                    '--layout-gap': `${spacing.regionGap}px`,
-                    width: `${pixels.width}px`,
-                    height: `${pixels.height}px`,
-                  })}
-                >
-                  ${exactPreview
-                    ? html`
-                      ${this.previewImageUrl
-                        ? html`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />`
-                        : html`<ha-alert class="preview-failure" alert-type="error" .title=${'Exact preview unavailable'}>${this.previewError}</ha-alert>`}
-                      <div
-                        class="preview-overlay"
-                        style=${styleMap({
-                          '--grid-columns': String(project.grid.columns),
-                          '--grid-rows': String(project.grid.rows),
-                        })}
-                      >${visibleRegions.map((region) => this.renderScreenRegion(region))}</div>
-                      ${this.renderMergeLayer()}
-                    `
-                    : html`
-                      ${visibleRegions.map((region) => this.renderScreenRegion(region))}
-                      ${this.renderMergeLayer()}
-                    `}
-                </div>
-              </div>
+      <div
+        data-item-id=${item.id}
+        class=${`selection ${selected ? 'selected' : ''} ${item.locked ? 'locked' : ''} ${item.hidden ? 'hidden' : ''}`}
+        style=${styleMap({
+          left: `${box.x / project.display.width * 100}%`,
+          top: `${box.y / project.display.height * 100}%`,
+          width: `${box.width / project.display.width * 100}%`,
+          height: `${box.height / project.display.height * 100}%`,
+        })}
+        @pointerdown=${(event: PointerEvent) => this.selectItem(event, item)}
+      >
+        ${item.hidden ? html`<span class="hidden-label">Hidden</span>` : nothing}
+        ${item.locked ? html`<ha-icon class="lock-badge" icon="mdi:lock"></ha-icon>` : nothing}
+        ${selected ? html`<output class="selection-size" aria-live="off">${Math.round(box.width)} × ${Math.round(box.height)}</output>` : nothing}
+        ${selected && !item.locked ? RESIZE_HANDLES.map(handle => html`
+          <button
+            data-resize-handle=${handle}
+            class=${`resize-handle resize-${handle}`}
+            tabindex="-1"
+            aria-label=${`Resize ${this.itemName(item)} from ${resizeHandleNames[handle]}`}
+            @pointerdown=${(event: PointerEvent) => this.selectItem(event, item, 'resize', handle)}
+          ></button>
+        `) : nothing}
+      </div>
+    `
+  }
+  private renderCanvas(): TemplateResult {
+    const project = this.current!
+    const transform = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`
+    const area = this.workingArea(project)
+    return html`
+      <main class="workspace">
+        ${this.renderDashboardTabs()}
+        <div class="workspace-meta">
+          <span>${project.display.width} × ${project.display.height} px</span>
+          <span>${project.items.length} layers</span>
+          <span>Padding ${project.display.padding}px</span>
+          <button class=${this.snapEnabled ? 'tool-toggle active' : 'tool-toggle'} aria-pressed=${this.snapEnabled} @click=${() => { this.snapEnabled = !this.snapEnabled }}>
+            <ha-icon icon="mdi:magnet"></ha-icon><span>Snap ${project.display.snapSize}px</span>
+          </button>
+          <span class="zoom-readout">${Math.round(this.zoom * 100)}%</span>
+        </div>
+        <section class=${this.draggingCatalog ? 'canvas-stage accepting-drop' : 'canvas-stage'} @wheel=${this.onCanvasWheel} @dragover=${this.onCanvasDragOver} @drop=${this.onCanvasDrop}>
+          <div class="canvas-viewport" style=${styleMap({ transform })}>
+            <div class="canvas" style=${styleMap({ width: `${project.display.width}px`, height: `${project.display.height}px` })} @pointerdown=${() => this.selectItemId('')}>
+              ${this.preview ? html`<img draggable="false" src=${this.preview.imageUrl} alt="Authoritative rendered display preview">` : html`<div class="canvas-placeholder">Rendering…</div>`}
+              <div class="working-area" aria-hidden="true" style=${styleMap({ left: `${area.x / project.display.width * 100}%`, top: `${area.y / project.display.height * 100}%`, width: `${area.width / project.display.width * 100}%`, height: `${area.height / project.display.height * 100}%`, '--snap-size': `${project.display.snapSize * this.zoom}px` })}></div>
+              ${project.items.map(item => this.renderCanvasItem(item, project))}
             </div>
           </div>
-          ${this.editorMode === 'layout'
-            ? this.mergeAnchor
-              ? html`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>`
-              : html`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>`
-            : html`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError
-              ? this.previewError
-              : this.previewLoading
-                ? 'Refreshing current Home Assistant data…'
-                : this.previewTimings
-                  ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.`
-                  : 'Select a region to configure its content.'}</div>`}
-        </div>
+          <div class="zoom-controls"><button aria-label="Zoom out" @click=${() => { this.zoom = clamp(this.zoom - .25, .25, 4) }}>−</button>${[.5, 1, 2, 3].map(value => html`<button class=${this.zoom === value ? 'active' : ''} aria-label=${`${value}×`} @click=${() => { this.zoom = value }}>${value}×</button>`)}<button aria-label="Zoom in" @click=${() => { this.zoom = clamp(this.zoom + .25, .25, 4) }}>+</button><button aria-label="Reset" @click=${this.resetCanvas}>Reset</button><button aria-label="Fit" @click=${this.fitCanvas}>Fit</button></div>
+        </section>
       </main>
     `
   }
 
-  private renderOption(option: WidgetOption): TemplateResult {
-    const widget = this.selectedRegion?.widget
-    const value = widget?.config[option.key]
-      ?? (widget ? this.widgetDefinition(widget.type)?.defaults[option.key] : undefined)
-    const selector = option.selector
-      ?? (option.type === 'calendar'
-        ? { entity: { filter: { domain: 'calendar' } } }
-        : option.type === 'entities'
-          ? { entity: { multiple: true } }
-          : option.type === 'entity'
-            ? { entity: {} }
-            : undefined)
-    if (selector && 'opendisplay_color' in selector) {
-      const selected = resolvePaletteColor(this.project.palette, value)
-      return html`
-        <fieldset class="palette-color-field">
-          <legend>${option.label}</legend>
-          <div class="palette-color-options">
-            ${paletteColors(this.project.palette).map((color) => html`
-              <label title=${color.label}>
-                <input
-                  type="radio"
-                  name=${`option-${option.key}`}
-                  value=${color.value}
-                  .checked=${selected === color.value}
-                  @change=${() => this.updateWidgetValue(option, color.value)}
-                />
-                <span class="palette-color-swatch" style=${styleMap({ backgroundColor: color.value })}></span>
-                <span>${color.label}</span>
-              </label>
-            `)}
-          </div>
-          ${option.help ? html`<p>${option.help}</p>` : nothing}
-        </fieldset>
-      `
-    }
-    if (selector) {
-      return html`
-        <ha-form
-          .hass=${this.hass}
-          .data=${{ [option.key]: value ?? '' }}
-          .schema=${[{ name: option.key, label: option.label, required: option.required ?? false, selector }]}
-          .computeLabel=${() => option.label}
-          @value-changed=${(event: CustomEvent<{ value: Record<string, unknown> }>) => this.updateWidgetValue(option, event.detail.value[option.key])}
-        ></ha-form>
-      `
-    }
-    if (option.type === 'toggle') return html`
-      <div class="toggle-field"><label for=${`option-${option.key}`}>${option.label}</label><input id=${`option-${option.key}`} class="toggle" type="checkbox" .checked=${Boolean(value)} @change=${(event: Event) => this.updateWidgetOption(option, event)} /></div>
-    `
-    if (option.type === 'select') return html`
-      <div class="field">
-        <label class="field-label" for=${`option-${option.key}`}>${option.label}</label>
-        <select id=${`option-${option.key}`} .value=${String(value ?? '')} @change=${(event: Event) => this.updateWidgetOption(option, event)}>
-          ${option.options?.map((item) => html`<option value=${item.value}>${item.label}</option>`)}
-        </select>
-      </div>
-    `
-    if (option.type === 'text' && option.multiline) return html`
-      <div class="field">
-        <label class="field-label" for=${`option-${option.key}`}>${option.label}</label>
-        <textarea id=${`option-${option.key}`} rows="4" .value=${String(value ?? '')} @change=${(event: Event) => this.updateWidgetOption(option, event)}></textarea>
-      </div>
-    `
-    return html`
-      <div class="field">
-        <label class="field-label" for=${`option-${option.key}`}>${option.label}</label>
-        <input id=${`option-${option.key}`} type=${option.type} .value=${String(value ?? '')} min=${option.min ?? nothing} max=${option.max ?? nothing} step=${option.step ?? nothing} @change=${(event: Event) => this.updateWidgetOption(option, event)} />
-      </div>
-    `
+  private renderLayers(): TemplateResult {
+    const items = [...(this.current?.items ?? [])].reverse()
+    return html`<section class="layers"><header><div><span class="eyebrow">Structure</span><h2>Elements</h2></div><div class="layers-header-actions"><span class="count">${items.length}</span><button class="icon-button" title="Collapse inspector" aria-label="Collapse inspector" @click=${() => { this.rightCollapsed = true }}><ha-icon icon="mdi:chevron-right"></ha-icon></button></div></header><div class="layer-list">${items.length ? items.map(item => { const drop = this.layerDropTarget?.itemId === item.id ? `drop-${this.layerDropTarget.edge}` : ''; const name = this.itemName(item); return html`<div data-item-id=${item.id} class=${`layer-row ${item.id === this.selectedItemId ? 'active' : ''} ${item.hidden ? 'is-hidden' : ''} ${item.id === this.draggingLayerId ? 'dragging' : ''} ${drop}`} @click=${() => this.selectItemId(item.id)}><button class="drag" title="Reorder layer" aria-label=${`Reorder ${name}`} @pointerdown=${(event: PointerEvent) => this.startLayerPointerDrag(event, item.id)}><ha-icon icon="mdi:drag-vertical"></ha-icon></button><ha-icon class="layer-type-icon" .icon=${item.kind === 'widget' ? this.widgets.find(widget => widget.id === item.widget.type)?.icon ?? 'mdi:puzzle' : primitiveIcons[item.primitive.type]}></ha-icon><span><strong>${name}</strong><small>${item.kind === 'widget' ? 'Widget' : item.primitive.type}</small></span><div class="layer-actions"><button title=${item.hidden ? 'Show layer' : 'Hide layer'} aria-label=${item.hidden ? `Show ${name}` : `Hide ${name}`} @click=${(event: Event) => { event.stopPropagation(); this.toggleItemState(item.id, 'hidden') }}><ha-icon .icon=${item.hidden ? 'mdi:eye-off-outline' : 'mdi:eye-outline'}></ha-icon></button><button title=${item.locked ? 'Unlock position' : 'Lock position'} aria-label=${item.locked ? `Unlock ${name}` : `Lock ${name}`} @click=${(event: Event) => { event.stopPropagation(); this.toggleItemState(item.id, 'locked') }}><ha-icon .icon=${item.locked ? 'mdi:lock' : 'mdi:lock-open-variant-outline'}></ha-icon></button><button class="delete" title="Delete layer" aria-label=${`Delete ${name}`} @click=${(event: Event) => { event.stopPropagation(); this.removeItem(item.id) }}><ha-icon icon="mdi:delete-outline"></ha-icon></button></div></div>` }) : html`<p class="empty-layers">Drag widgets or primitives onto the canvas.</p>`}</div></section>`
   }
 
-  private updateWidgetValue(option: WidgetOption, value: unknown): void {
-    const normalizedValue: WidgetConfigValue = Array.isArray(value)
-      ? value.map((item) => String(item))
-      : typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
-        ? value
-        : String(value ?? '')
-    this.updateProject((project) => ({
-      ...project,
-      regions: project.regions.map((region) => {
-        if (region.id !== this.selectedRegionId || !region.widget) return region
-        return {
-          ...region,
-          widget: {
-            ...region.widget,
-            config: {
-              ...region.widget.config,
-              [option.key]: normalizedValue,
-            },
-          },
-        }
-      }),
-    }))
+  private numberField(label: string, value: number, key: string, minimum = 0, maximum = 4096, disabled = false): TemplateResult {
+    return html`<label class="number-field"><span>${label}</span><input data-field=${key} type="number" .value=${String(value)} min=${minimum} max=${maximum} .disabled=${disabled} @change=${(event: Event) => this.updateSelectedNumber(key, (event.target as HTMLInputElement).value)}></label>`
   }
-
+  private screenNumberField(label: string, value: number, key: 'width' | 'height' | 'padding' | 'snapSize', minimum: number, maximum: number): TemplateResult {
+    return html`<label class="number-field"><span>${label}</span><input aria-label=${label} type="number" .value=${String(value)} min=${minimum} max=${maximum} @change=${(event: Event) => this.updateDisplayNumber(key, (event.target as HTMLInputElement).value)}></label>`
+  }
+  private renderInspectorHeader(title: string, subtitle: string, icon: string): TemplateResult {
+    return html`<div class="inspector-title"><ha-icon .icon=${icon}></ha-icon><div><h2>${title}</h2><p>${subtitle}</p></div></div>`
+  }
+  private renderScreenInspector(): TemplateResult {
+    const project = this.current!; const profile = profileById(project.display.profileId)
+    return html`${this.renderInspectorHeader('Dashboard', 'Display and canvas settings', 'mdi:monitor')}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select .value=${project.display.profileId ?? 'custom'} @change=${(event: Event) => this.updateProfile((event.target as HTMLSelectElement).value)}>${DISPLAY_PROFILES.map(entry => html`<option value=${entry.id}>${entry.manufacturer} · ${entry.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField('Width', project.display.width, 'width', 64, 4096)}${this.screenNumberField('Height', project.display.height, 'height', 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select .value=${project.display.palette} @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value as PaletteId; this.mutate(current => { current.display.palette = value; if (!PALETTE_COLORS[value].includes(current.display.background)) current.display.background = 'white' }) }}>${(profile.id === 'custom' ? Object.keys(PALETTE_LABELS) as PaletteId[] : profile.palettes).map(palette => html`<option value=${palette}>${PALETTE_LABELS[palette]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value; this.mutate(current => { current.display.background = value }) }}>${PALETTE_COLORS[project.display.palette].map(color => html`<option value=${color} ?selected=${color === project.display.background}>${color[0].toUpperCase()}${color.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField('Outer padding', project.display.padding, 'padding', 0, 1024)}${this.screenNumberField('Snap size', project.display.snapSize, 'snapSize', 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`
+  }
+  private renderItemLayout(item: StudioItem): TemplateResult {
+    const disabled = item.locked
+    if (item.kind === 'widget') return html`<div class="field-grid">${this.numberField('X', item.frame.x, 'x', 0, this.current!.display.width, disabled)}${this.numberField('Y', item.frame.y, 'y', 0, this.current!.display.height, disabled)}${this.numberField('Width', item.frame.width, 'width', 1, this.current!.display.width, disabled)}${this.numberField('Height', item.frame.height, 'height', 1, this.current!.display.height, disabled)}</div>${this.numberField('Inner padding', item.layout.padding, 'padding', 0, 128, disabled)}`
+    const primitive = item.primitive
+    if (isBoxPrimitive(primitive)) return html`<div class="field-grid">${this.numberField('X', Math.min(primitive.x_start, primitive.x_end), 'x', 0, this.current!.display.width, disabled)}${this.numberField('Y', Math.min(primitive.y_start, primitive.y_end), 'y', 0, this.current!.display.height, disabled)}${this.numberField('Width', Math.abs(primitive.x_end - primitive.x_start) + 1, 'width', 1, this.current!.display.width, disabled)}${this.numberField('Height', Math.abs(primitive.y_end - primitive.y_start) + 1, 'height', 1, this.current!.display.height, disabled)}</div>`
+    if (primitive.type === 'circle') return html`<div class="field-grid">${this.numberField('Center X', primitive.x, 'x', 0, this.current!.display.width, disabled)}${this.numberField('Center Y', primitive.y, 'y', 0, this.current!.display.height, disabled)}${this.numberField('Radius', primitive.radius, 'radius', 1, Math.min(this.current!.display.width, this.current!.display.height), disabled)}</div>`
+    if (primitive.type === 'qrcode') return html`<div class="field-grid">${this.numberField('X', primitive.x, 'x', 0, this.current!.display.width, disabled)}${this.numberField('Y', primitive.y, 'y', 0, this.current!.display.height, disabled)}${this.numberField('Module size', primitive.boxsize, 'boxsize', 1, 16, disabled)}</div>`
+    return html`<div class="field-grid">${this.numberField('X', primitive.x, 'x', 0, this.current!.display.width, disabled)}${this.numberField('Y', primitive.y, 'y', 0, this.current!.display.height, disabled)}${this.numberField('Size', primitive.size, 'size', 6, 256, disabled)}</div>`
+  }
+  private primitiveAppearanceSchema(item: PrimitiveItem): HaFormSchema[] {
+    const type = item.primitive.type
+    const colors = [...PALETTE_COLORS[this.current?.display.palette ?? 'bw'], 'accent']
+    if (type === 'text') return [{ name: 'value', label: 'Text', selector: { text: {} } }, { name: 'color', label: 'Color', selector: { select: { options: colors } } }]
+    if (type === 'line') return [{ name: 'fill', label: 'Color', selector: { select: { options: colors } } }, { name: 'width', label: 'Line width', selector: { number: { min: 1, max: 32 } } }, { name: 'dashed', label: 'Dashed', selector: { boolean: {} } }]
+    if (type === 'icon') return [{ name: 'value', label: 'MDI icon name', selector: { text: {} } }, { name: 'color', label: 'Color', selector: { select: { options: colors } } }]
+    if (type === 'qrcode') return [{ name: 'data', label: 'Content', selector: { text: {} } }, { name: 'border', label: 'Quiet zone', selector: { number: { min: 0, max: 8 } } }, { name: 'color', label: 'Foreground', selector: { select: { options: colors } } }, { name: 'bgcolor', label: 'Background', selector: { select: { options: colors } } }]
+    if (type === 'progress_bar') return [{ name: 'progress', label: 'Progress', selector: { number: { min: 0, max: 100 } } }, { name: 'direction', label: 'Direction', selector: { select: { options: ['right', 'left', 'up', 'down'] } } }, { name: 'fill', label: 'Fill', selector: { select: { options: colors } } }, { name: 'background', label: 'Background', selector: { select: { options: colors } } }, { name: 'show_percentage', label: 'Show percentage', selector: { boolean: {} } }]
+    return [{ name: 'fill', label: 'Fill', selector: { select: { options: ['transparent', ...colors] } } }, { name: 'outline', label: 'Outline', selector: { select: { options: colors } } }, { name: 'width', label: 'Outline width', selector: { number: { min: 0, max: 32 } } }]
+  }
+  private renderItemInspector(item: StudioItem): TemplateResult {
+    const definition = item.kind === 'widget' ? this.widgets.find(widget => widget.id === item.widget.type) : undefined
+    const title = this.itemName(item); const subtitle = `${item.kind === 'widget' ? 'Widget' : 'ODL primitive'} · ${item.locked ? 'position locked' : 'editable'}`; const icon = item.kind === 'widget' ? (definition?.icon ?? 'mdi:puzzle') : primitiveIcons[item.primitive.type]
+    const primitiveData = item.kind === 'primitive' && 'fill' in item.primitive ? { ...item.primitive, fill: item.primitive.fill ?? 'transparent' } : item.kind === 'primitive' ? item.primitive : undefined
+    return html`${this.renderInspectorHeader(title, subtitle, icon)}${item.locked ? html`<div class="locked-notice"><span><ha-icon icon="mdi:lock"></ha-icon>Position is locked</span><button type="button" aria-label="Unlock element position" @click=${() => this.toggleItemState(item.id, 'locked')}>Unlock</button></div>` : nothing}<details class="inspector-section" open><summary>Layout</summary><div class="section-body">${this.renderItemLayout(item)}</div></details>${item.kind === 'widget' ? html`<details class="inspector-section" open><summary>Widget settings</summary><div class="section-body"><ha-form .hass=${this.hass} .data=${item.widget.config} .schema=${definition?.fields.map(field => ({ name: field.key, label: field.label, required: field.required, selector: field.selector })) ?? []} .computeLabel=${(entry: HaFormSchema) => entry.label} @value-changed=${this.updateWidgetConfig}></ha-form></div></details>` : html`<details class="inspector-section" open><summary>Appearance</summary><div class="section-body"><ha-form .hass=${this.hass} .data=${primitiveData} .schema=${this.primitiveAppearanceSchema(item)} .computeLabel=${(entry: HaFormSchema) => entry.label} @value-changed=${this.updatePrimitive}></ha-form></div></details>`}<div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteSelected}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Remove element</ha-button></div>${this.renderMetrics()}`
+  }
+  private renderMetrics(): TemplateResult | typeof nothing {
+    if (!this.preview) return nothing
+    const copyLabel = this.yamlCopyState === 'copied' ? 'Copied' : this.yamlCopyState === 'failed' ? 'Copy failed' : 'Copy YAML'; const copyIcon = this.yamlCopyState === 'copied' ? 'mdi:check' : this.yamlCopyState === 'failed' ? 'mdi:alert-circle-outline' : 'mdi:content-copy'
+    return html`${this.preview.warnings.map(warning => html`<ha-alert class="warning" alert-type="warning">${warning}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details><details class="inspector-section yaml"><summary>Generated ODL YAML</summary><div class="yaml-actions"><ha-button size="s" appearance="plain" aria-label="Copy generated ODL YAML" @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${copyIcon}></ha-icon>${copyLabel}</ha-button><output aria-live="polite">${this.yamlCopyState === 'copied' ? 'YAML copied to clipboard' : this.yamlCopyState === 'failed' ? 'Clipboard access failed' : ''}</output></div><pre>${this.preview.yaml}</pre></details>`
+  }
   private renderInspector(): TemplateResult {
-    const region = this.selectedRegion
-    if (!region) return html`
-      <aside class="inspector"><div class="inspector-heading"><h2>Region settings</h2></div><div class="inspector-empty"><div><strong>Select a region</strong><p>Choose a region on the display to assign a widget and configure its data.</p></div></div></aside>
-    `
-    const definition = region.widget ? this.widgetDefinition(region.widget.type) : undefined
-    const appearance = regionAppearance(region)
-    return html`
-      <aside class="inspector">
-        <div class="inspector-heading"><h2>Region settings</h2><span class="region-address">R${region.row}:C${region.column} · ${region.columnSpan}×${region.rowSpan}</span></div>
-        <section class="region-appearance" aria-labelledby="region-appearance-heading">
-          <div class="region-appearance-heading"><h3 id="region-appearance-heading">Appearance</h3><p>Applied to this region only.</p></div>
-          <div class="toggle-field"><label for="region-show-background">Show background</label><input id="region-show-background" class="toggle" type="checkbox" .checked=${appearance.showBackground} @change=${(event: Event) => this.updateRegionAppearance('showBackground', event)} /></div>
-          <div class="toggle-field"><label for="region-show-border">Show border</label><input id="region-show-border" class="toggle" type="checkbox" .checked=${appearance.showBorder} @change=${(event: Event) => this.updateRegionAppearance('showBorder', event)} /></div>
-          <div class="field region-radius-field">
-            <label class="field-label" for="region-border-radius">Corner radius (px)</label>
-            <input id="region-border-radius" type="number" min="0" max="128" step="1" placeholder=${String(this.project.regionBorderRadius)} .value=${appearance.borderRadius === null ? '' : String(appearance.borderRadius)} @change=${this.updateRegionBorderRadius} />
-            <p>Leave empty to use the display default (${this.project.regionBorderRadius} px).</p>
-          </div>
-        </section>
-        <div class="widget-picker">
-          ${this.widgetMetadata.map((widget) => html`
-            <button class="widget-choice ${definition?.id === widget.id ? 'active' : ''}" @click=${() => this.assignWidget(widget.id)}>
-              ${getWidgetDefinition(widget.id)
-                ? renderIcon(getWidgetDefinition(widget.id)!.icon)
-                : html`<ha-icon .icon=${widget.icon}></ha-icon>`}
-              <strong>${widget.name}</strong><span>${widget.description}</span>
-            </button>
-          `)}
-        </div>
-        ${definition
-          ? html`<div class="option-form">${definition.options.map((option) => this.renderOption(option))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${renderButtonIcon(mdiDeleteOutline)} Remove widget</ha-button></div>`
-          : html`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
-      </aside>
-    `
+    if (this.rightCollapsed) return html`<aside class="panel panel-rail right-rail"><button class="icon-button" title="Expand inspector" aria-label="Expand inspector" @click=${() => { this.rightCollapsed = false }}><ha-icon icon="mdi:chevron-left"></ha-icon></button><span class="rail-label">Layers</span></aside>`
+    const item = this.current?.items.find(candidate => candidate.id === this.selectedItemId)
+    return html`<aside class="panel inspector"><div class="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector" @pointerdown=${this.startPanelResize}></div>${this.renderLayers()}<section class="properties">${item ? this.renderItemInspector(item) : this.renderScreenInspector()}</section></aside>${this.renderDeleteDialog()}`
   }
 
-  private renderLayoutGuide(): TemplateResult {
-    const project = this.canvasProject
-    const pixels = { width: project.width, height: project.height }
-    return html`
-      <aside class="inspector layout-guide">
-        <span class="step-kicker">Step 1 · Device & layout</span>
-        <h2>Prepare the canvas</h2>
-        <p>Choose the hardware and palette, then compose regions before assigning widgets.</p>
-        <dl class="device-facts">
-          <div><dt>Device</dt><dd>${this.displayName(project)}</dd></div>
-          <div><dt>Output</dt><dd>${pixels.width} × ${pixels.height} px</dd></div>
-          <div><dt>Grid</dt><dd>${project.grid.columns} × ${project.grid.rows}</dd></div>
-          <div><dt>Regions</dt><dd>${project.regions.length}</dd></div>
-        </dl>
-        <section class="layout-section" aria-labelledby="background-heading">
-          <div class="layout-section-heading">
-            <div><h3 id="background-heading">Display background</h3><p>Choose an image stored in Home Assistant Media.</p></div>
-            ${project.background
-              ? html`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>`
-              : nothing}
-          </div>
-          <ha-form class="background-media-form"
-            .hass=${this.hass}
-            .data=${{ backgroundMedia: project.background ? backgroundMediaForForm(project.background.media) : undefined }}
-            .schema=${[{
-              name: 'backgroundMedia',
-              label: 'Background image',
-              selector: { media: { accept: ['image/*'], hide_content_type: true } },
-            }]}
-            .computeLabel=${() => 'Background image'}
-            .computeHelper=${() => 'Home Assistant Media images only'}
-            @value-changed=${this.changeBackgroundMedia}
-          ></ha-form>
-          ${project.background
-            ? html`
-              <div class="background-settings">
-                <fieldset class="background-fieldset">
-                  <legend>Image fit</legend>
-                  <div class="background-mode-grid">
-                    ${BACKGROUND_MODES.map((item) => html`
-                      <button
-                        class=${project.background?.mode === item.value ? 'active' : ''}
-                        aria-pressed=${project.background?.mode === item.value}
-                        @click=${() => this.changeBackgroundMode(item.value)}
-                      >${item.label}</button>
-                    `)}
-                  </div>
-                </fieldset>
-                <fieldset class="background-fieldset" ?disabled=${project.background.mode === 'stretch'}>
-                  <legend>Position</legend>
-                  <div class="background-anchor-grid">
-                    ${BACKGROUND_ANCHORS.map((item) => html`
-                      <button
-                        class=${project.background?.anchor === item.value ? 'active' : ''}
-                        aria-label=${item.label}
-                        title=${item.label}
-                        aria-pressed=${project.background?.anchor === item.value}
-                        ?disabled=${project.background?.mode === 'stretch'}
-                        @click=${() => this.changeBackgroundAnchor(item.value)}
-                      ><span></span></button>
-                    `)}
-                  </div>
-                </fieldset>
-                ${project.background.mode === 'manual'
-                  ? html`
-                    <div class="field background-scale">
-                      <label class="field-label" for="background-scale">Scale of original image (%)</label>
-                      <input
-                        id="background-scale"
-                        type="number"
-                        min="1"
-                        max="400"
-                        step="1"
-                        .value=${String(project.background.scale)}
-                        @change=${this.changeBackgroundScale}
-                      />
-                      <p>100% uses the image's natural pixel size. An 800 × 800 image at 50% renders as 400 × 400 px.</p>
-                    </div>
-                  `
-                  : nothing}
-              </div>
-            `
-            : html`<p class="background-empty">No background image. The display uses its selected theme canvas.</p>`}
-        </section>
-        <section class="layout-section" aria-labelledby="spacing-heading">
-          <div class="layout-section-heading"><div><h3 id="spacing-heading">Region spacing</h3><p>Set spacing in native output pixels.</p></div></div>
-          <div class="spacing-grid">
-            <div class="field"><label class="field-label" for="screen-padding">Screen padding (px)</label><input id="screen-padding" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).screenPadding)} @change=${(event: Event) => this.changeLayoutSpacing('screenPadding', event)} /><p>Inset from the display edge.</p></div>
-            <div class="field"><label class="field-label" for="region-gap">Region gap (px)</label><input id="region-gap" type="number" min="0" max="128" step="1" .value=${String(layoutSpacing(project).regionGap)} @change=${(event: Event) => this.changeLayoutSpacing('regionGap', event)} /><p>Gutter between regions.</p></div>
-            <div class="field"><label class="field-label" for="region-border-radius-default">Default corner radius (px)</label><input id="region-border-radius-default" type="number" min="0" max="128" step="1" .value=${String(project.regionBorderRadius)} @change=${this.changeDisplayRegionBorderRadius} /><p>Inherited by regions without an override.</p></div>
-          </div>
-        </section>
-        <ha-form
-          .hass=${this.hass}
-          .data=${{ language: project.language === 'system' ? this.hass.language : project.language }}
-          .schema=${[{
-            name: 'language',
-            label: 'Display language',
-            required: true,
-            selector: { language: { native_name: true } },
-          }]}
-          .computeLabel=${() => 'Display language'}
-          @value-changed=${(event: CustomEvent<{ value: { language?: string } }>) => {
-            const language = event.detail.value.language
-            if (language) this.updateLayoutDraft((draft) => ({ ...draft, language }))
-          }}
-        ></ha-form>
-        <p>The selected language is used by live preview, Media Source, and the physical display.</p>
-        <ol class="layout-instructions">
-          <li>Click the first corner of a new region.</li>
-          <li>Move across the grid and click the opposite corner.</li>
-          <li>Double-click an existing region to remove it.</li>
-        </ol>
-      </aside>
-    `
-  }
-
-  private renderRenameDialog(): TemplateResult {
-    return html`
-      <dialog id="rename-dialog"><div class="dialog-body">
-        <h2>Rename display</h2><p>Use a name that describes where this display will be installed.</p>
-        <div class="field"><label class="field-label" for="display-name">Display name</label><input id="display-name" type="text" .value=${this.renameDraft} @input=${(event: Event) => { this.renameDraft = (event.currentTarget as HTMLInputElement).value }} @keydown=${(event: KeyboardEvent) => { if (event.key === 'Enter') this.saveProjectName() }} /></div>
-        <div class="dialog-actions"><ha-button appearance="outlined" @click=${() => this.renameDialog?.close()}>Cancel</ha-button><ha-button variant="brand" @click=${this.saveProjectName}>Save name</ha-button></div>
-      </div></dialog>
-    `
-  }
-
-  private renderWelcome(): TemplateResult {
-    return html`
-      <div class="app-shell welcome-shell">
-        <header class="topbar welcome-topbar">
-          <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
-          <span class="welcome-topline">Device-accurate e-paper composition</span>
-          <ha-button size="s" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} New display</ha-button>
-        </header>
-        <div class="workspace welcome-workspace">
-          <aside class="project-rail empty-rail" aria-label="Saved displays">
-            <div class="rail-heading"><h2>Displays</h2><button class="text-button" @click=${this.addProject}>+ New</button></div>
-            <div class="empty-library"><span class="empty-library-count">0</span><strong>No displays yet</strong><p>Your saved screens will appear here.</p></div>
-            <div class="rail-footer">Stored securely by Home Assistant.</div>
-          </aside>
-          <main class="welcome-main">
-            <section class="welcome-copy">
-              <span class="step-kicker">Start with the hardware</span>
-              <h1>Design an e-paper screen that fits the device.</h1>
-              <p>Choose a verified display, compose its native-pixel layout, then add widgets and export the exact screen as PNG or JPG.</p>
-              <div class="welcome-actions">
-                <ha-button size="l" variant="brand" @click=${this.addProject}>${renderButtonIcon(mdiPlus)} Create your first display</ha-button>
-              </div>
-              <dl class="welcome-facts">
-                <div><dt>1</dt><dd><strong>Select hardware</strong><span>Model, palette and orientation</span></dd></div>
-                <div><dt>2</dt><dd><strong>Compose regions</strong><span>Device-aware native grid</span></dd></div>
-                <div><dt>3</dt><dd><strong>Add widgets</strong><span>Preview and export one surface</span></dd></div>
-              </dl>
-            </section>
-            <div class="welcome-visual" aria-hidden="true">
-              <div class="welcome-device-meta"><span>OPEN DISPLAY</span><code>800 × 480</code></div>
-              <div class="welcome-device">
-                <div class="welcome-screen">
-                  <div class="welcome-region welcome-region-a"><span>A</span><i></i><i></i></div>
-                  <div class="welcome-region welcome-region-b"><span>B</span><b>21°</b><small>HOME</small></div>
-                  <div class="welcome-region welcome-region-c"><span>C</span><em></em><em></em><em></em></div>
-                </div>
-              </div>
-              <div class="welcome-palette"><i></i><i></i><i></i><i></i><i></i><i></i><span>SPECTRA 6</span></div>
-            </div>
-          </main>
-        </div>
-      </div>
-      ${this.toastMessage ? html`<div class="toast" role="status">${this.toastMessage}</div>` : nothing}
-    `
-  }
-
-  render(): TemplateResult {
-    if (this.loading) return html`<div class="loading-state"><ha-circular-progress active></ha-circular-progress><p>Loading OpenDisplay Studio…</p></div>`
-    if (this.loadError) return html`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><ha-button @click=${this.loadProjects}>Retry</ha-button></div>`
-    if (this.store.projects.length === 0) return this.renderWelcome()
-    return html`
-      <div class="app-shell">
-        <header class="topbar">
-          <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
-          <div class="project-context">
-            <div class="project-title"><strong>${this.project.name}</strong><span class="autosave-state">${this.editorMode === 'layout' ? 'Changes not applied' : this.saving ? 'Saving…' : 'Saved in Home Assistant'}</span></div>
-            <div class="workflow" aria-label="Editor workflow">
-              <span class=${this.editorMode === 'layout' ? 'active' : 'complete'}><b>1</b> Device & layout</span>
-              <i aria-hidden="true"></i>
-              <span class=${this.editorMode === 'widgets' ? 'active' : ''}><b>2</b> Widgets</span>
-            </div>
-          </div>
-          <div class="top-actions">
-            ${this.editorMode === 'layout'
-              ? html`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${renderButtonIcon(mdiCheck)} Apply layout</ha-button>`
-              : html`
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${renderButtonIcon(mdiRenameOutline)} Rename</ha-button>
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${renderButtonIcon(mdiContentCopy)} Duplicate</ha-button>
-                  <ha-button size="s" variant=${this.project.status === 'ready' ? 'neutral' : 'brand'} @click=${() => this.setProjectStatus(this.project.status === 'ready' ? 'draft' : 'ready')}>${this.project.status === 'ready' ? 'Move to Draft' : 'Mark Ready'}</ha-button>
-                `}
-          </div>
-        </header>
-        <div class="workspace ${this.projectRailCollapsed ? 'rail-collapsed' : ''}">
-          ${this.renderProjectRail()}
-          <section class="editor">${this.editorMode === 'layout' ? this.renderToolbar() : this.renderWidgetToolbar()}${this.renderCanvas()}</section>
-          ${this.editorMode === 'layout' ? this.renderLayoutGuide() : this.renderInspector()}
-        </div>
-      </div>
-      ${this.renderRenameDialog()}
-      ${this.toastMessage ? html`<div class="toast" role="status">${this.toastMessage}</div>` : nothing}
-    `
+  protected render(): TemplateResult {
+    if (this.loading) return html`<div class="project-empty"><p>Loading OpenDisplay Studio…</p></div>`
+    if (!this.current) return html`<div class="project-empty"><section class="empty-card"><ha-icon icon="mdi:monitor-edit"></ha-icon><span class="eyebrow">OpenDisplay Studio</span><h1>Build your first dashboard</h1><p>Create an exact-size e-paper canvas and compose it from live widgets and ODL primitives.</p>${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}<ha-button appearance="filled" @click=${this.openNewDashboard}>Add dashboard</ha-button></section>${this.renderNewDashboardDialog()}</div>`
+    const layoutStyle = styleMap({ '--toolbox-width': this.leftCollapsed ? '48px' : '255px', '--inspector-width': this.rightCollapsed ? '48px' : `${this.inspectorWidth}px` })
+    return html`<div class="shell"><header class="topbar"><div class="brand"><strong>OpenDisplay Studio</strong><span>Layer-based ODL designer · v${this.integrationVersion}</span></div><input class="project-name" aria-label="Dashboard name" .value=${this.current.name} @input=${this.updateName}><span class="status ${this.current.status}">${this.current.status}</span><div class="actions"><ha-button appearance="plain" @click=${this.openNewDashboard}><ha-icon slot="start" icon="mdi:plus"></ha-icon>Add dashboard</ha-button><ha-button appearance="plain" @click=${this.toggleReady}>${this.current.status === 'ready' ? 'Set Draft' : 'Set Ready'}</ha-button><ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? 'Saving…' : 'Save'}</ha-button></div></header>${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}<div class="layout" style=${layoutStyle}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>${this.renderNewDashboardDialog()}</div>`
   }
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    'opendisplay-studio-panel': OdxApp
-  }
-}
+declare global { interface HTMLElementTagNameMap { 'opendisplay-studio-panel': OpenDisplayStudioPanel } }

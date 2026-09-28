@@ -29,11 +29,11 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: ee, getOwnPropertyNames: te, getOwnPropertySymbols: ne, getPrototypeOf: re } = Object, d = globalThis, ie = d.trustedTypes, ae = ie ? ie.emptyScript : "", oe = d.reactiveElementPolyfillSupport, f = (e, t) => e, p = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: f, getOwnPropertySymbols: p, getPrototypeOf: m } = Object, h = globalThis, g = h.trustedTypes, ee = g ? g.emptyScript : "", _ = h.reactiveElementPolyfillSupport, v = (e, t) => e, y = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? ae : null;
+				e = e ? ee : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -58,30 +58,30 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, se = (e, t) => !l(e, t), ce = {
+}, b = (e, t) => !l(e, t), x = {
 	attribute: !0,
 	type: String,
-	converter: p,
+	converter: y,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: se
+	hasChanged: b
 };
-Symbol.metadata ??= Symbol("metadata"), d.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var m = class extends HTMLElement {
+Symbol.metadata ??= Symbol("metadata"), h.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+var S = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = ce) {
+	static createProperty(e, t = x) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
 		}
 	}
 	static getPropertyDescriptor(e, t, n) {
-		let { get: r, set: i } = ee(this.prototype, e) ?? {
+		let { get: r, set: i } = d(this.prototype, e) ?? {
 			get() {
 				return this[t];
 			},
@@ -100,17 +100,17 @@ var m = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? ce;
+		return this.elementProperties.get(e) ?? x;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(f("elementProperties"))) return;
-		let e = re(this);
+		if (this.hasOwnProperty(v("elementProperties"))) return;
+		let e = m(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(f("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(f("properties"))) {
-			let e = this.properties, t = [...te(e), ...ne(e)];
+		if (this.hasOwnProperty(v("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(v("properties"))) {
+			let e = this.properties, t = [...f(e), ...p(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
 		let e = this[Symbol.metadata];
@@ -171,14 +171,14 @@ var m = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? p : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? y : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? p : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? y : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var m = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? se)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? b)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,89 +251,89 @@ var m = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-m.elementStyles = [], m.shadowRootOptions = { mode: "open" }, m[f("elementProperties")] = /* @__PURE__ */ new Map(), m[f("finalized")] = /* @__PURE__ */ new Map(), oe?.({ ReactiveElement: m }), (d.reactiveElementVersions ??= []).push("2.1.2");
+S.elementStyles = [], S.shadowRootOptions = { mode: "open" }, S[v("elementProperties")] = /* @__PURE__ */ new Map(), S[v("finalized")] = /* @__PURE__ */ new Map(), _?.({ ReactiveElement: S }), (h.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var h = globalThis, le = (e) => e, g = h.trustedTypes, ue = g ? g.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, de = "$lit$", _ = `lit$${Math.random().toFixed(9).slice(2)}$`, fe = "?" + _, pe = `<${fe}>`, v = document, y = () => v.createComment(""), b = (e) => e === null || typeof e != "object" && typeof e != "function", me = Array.isArray, he = (e) => me(e) || typeof e?.[Symbol.iterator] == "function", ge = "[ 	\n\f\r]", x = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${ge}(?:([^\\s"'>=/]+)(${ge}*=${ge}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, C = ((e) => (t, ...n) => ({
+var C = globalThis, te = (e) => e, w = C.trustedTypes, T = w ? w.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, E = "$lit$", D = `lit$${Math.random().toFixed(9).slice(2)}$`, ne = "?" + D, re = `<${ne}>`, O = document, k = () => O.createComment(""), A = (e) => e === null || typeof e != "object" && typeof e != "function", ie = Array.isArray, ae = (e) => ie(e) || typeof e?.[Symbol.iterator] == "function", oe = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, ce = />/g, M = RegExp(`>|${oe}(?:([^\\s"'>=/]+)(${oe}*=${oe}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), le = /'/g, ue = /"/g, de = /^(?:script|style|textarea|title)$/i, N = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), w = Symbol.for("lit-noChange"), T = Symbol.for("lit-nothing"), Se = /* @__PURE__ */ new WeakMap(), E = v.createTreeWalker(v, 129);
-function Ce(e, t) {
-	if (!me(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return ue === void 0 ? t : ue.createHTML(t);
+}))(1), P = Symbol.for("lit-noChange"), F = Symbol.for("lit-nothing"), fe = /* @__PURE__ */ new WeakMap(), I = O.createTreeWalker(O, 129);
+function pe(e, t) {
+	if (!ie(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return T === void 0 ? t : T.createHTML(t);
 }
-var we = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = x;
+var me = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = j;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === x ? c[1] === "!--" ? o = _e : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = S) : (xe.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = S) : o = ve : o === S ? c[0] === ">" ? (o = i ?? x, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? S : c[3] === "\"" ? be : ye) : o === be || o === ye ? o = S : o === _e || o === ve ? o = x : (o = S, i = void 0);
-		let ee = o === S && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === x ? n + pe : l >= 0 ? (r.push(s), n.slice(0, l) + de + n.slice(l) + _ + ee) : n + _ + (l === -2 ? t : ee);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === j ? c[1] === "!--" ? o = se : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = M) : (de.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = M) : o = ce : o === M ? c[0] === ">" ? (o = i ?? j, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? M : c[3] === "\"" ? ue : le) : o === ue || o === le ? o = M : o === se || o === ce ? o = j : (o = M, i = void 0);
+		let d = o === M && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === j ? n + re : l >= 0 ? (r.push(s), n.slice(0, l) + E + n.slice(l) + D + d) : n + D + (l === -2 ? t : d);
 	}
-	return [Ce(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, Te = class e {
+	return [pe(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, he = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = we(t, n);
-		if (this.el = e.createElement(l, r), E.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = me(t, n);
+		if (this.el = e.createElement(l, r), I.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = E.nextNode()) !== null && c.length < s;) {
+		for (; (i = I.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(de)) {
-					let t = u[o++], n = i.getAttribute(e).split(_), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(E)) {
+					let t = u[o++], n = i.getAttribute(e).split(D), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? Oe : r[1] === "?" ? ke : r[1] === "@" ? Ae : O
+						ctor: r[1] === "." ? ye : r[1] === "?" ? be : r[1] === "@" ? xe : ve
 					}), i.removeAttribute(e);
-				} else e.startsWith(_) && (c.push({
+				} else e.startsWith(D) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (xe.test(i.tagName)) {
-					let e = i.textContent.split(_), t = e.length - 1;
+				if (de.test(i.tagName)) {
+					let e = i.textContent.split(D), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = g ? g.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], y()), E.nextNode(), c.push({
+						i.textContent = w ? w.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], k()), I.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], y());
+						i.append(e[t], k());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === fe) c.push({
+				if (i.data === ne) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(_, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(D, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += _.length - 1;
+					}), e += D.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = v.createElement("template");
+		let n = O.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function D(e, t, n = e, r) {
-	if (t === w) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = b(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = D(e, i._$AS(e, t.values), i, r)), t;
+function L(e, t, n = e, r) {
+	if (t === P) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = A(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = L(e, i._$AS(e, t.values), i, r)), t;
 }
-var Ee = class {
+var ge = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var Ee = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? v).importNode(t, !0);
-		E.currentNode = r;
-		let i = E.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? O).importNode(t, !0);
+		I.currentNode = r;
+		let i = I.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new De(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new je(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new _e(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Se(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = E.nextNode(), a++);
+			a !== s?.index && (i = I.nextNode(), a++);
 		}
-		return E.currentNode = v, r;
+		return I.currentNode = O, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, De = class e {
+}, _e = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = T, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = F, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var Ee = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = D(this, e, t), b(e) ? e === T || e == null || e === "" ? (this._$AH !== T && this._$AR(), this._$AH = T) : e !== this._$AH && e !== w && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? he(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = L(this, e, t), A(e) ? e === F || e == null || e === "" ? (this._$AH !== F && this._$AR(), this._$AH = F) : e !== this._$AH && e !== P && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ae(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,36 +387,36 @@ var Ee = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== T && b(this._$AH) ? this._$AA.nextSibling.data = e : this.T(v.createTextNode(e)), this._$AH = e;
+		this._$AH !== F && A(this._$AH) ? this._$AA.nextSibling.data = e : this.T(O.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = Te.createElement(Ce(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = he.createElement(pe(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new Ee(r, this), n = e.u(this.options);
+			let e = new ge(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = Se.get(e.strings);
-		return t === void 0 && Se.set(e.strings, t = new Te(e)), t;
+		let t = fe.get(e.strings);
+		return t === void 0 && fe.set(e.strings, t = new he(e)), t;
 	}
 	k(t) {
-		me(this._$AH) || (this._$AH = [], this._$AR());
+		ie(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(y()), this.O(y()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(k()), this.O(k()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = le(e).nextSibling;
-			le(e).remove(), e = t;
+			let t = te(e).nextSibling;
+			te(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, O = class {
+}, ve = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var Ee = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = T, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = T;
+		this.type = 1, this._$AH = F, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = F;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = D(this, e, t, 0), a = !b(e) || e !== this._$AH && e !== w, a && (this._$AH = e);
+		if (i === void 0) e = L(this, e, t, 0), a = !A(e) || e !== this._$AH && e !== P, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = D(this, r[n + o], t, o), s === w && (s = this._$AH[o]), a ||= !b(s) || s !== this._$AH[o], s === T ? e = T : e !== T && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = L(this, r[n + o], t, o), s === P && (s = this._$AH[o]), a ||= !A(s) || s !== this._$AH[o], s === F ? e = F : e !== F && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === T ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === F ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, Oe = class extends O {
+}, ye = class extends ve {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === T ? void 0 : e;
+		this.element[this.name] = e === F ? void 0 : e;
 	}
-}, ke = class extends O {
+}, be = class extends ve {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== T);
+		this.element.toggleAttribute(this.name, !!e && e !== F);
 	}
-}, Ae = class extends O {
+}, xe = class extends ve {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = D(this, e, t, 0) ?? T) === w) return;
-		let n = this._$AH, r = e === T && n !== T || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== T && (n === T || r);
+		if ((e = L(this, e, t, 0) ?? F) === P) return;
+		let n = this._$AH, r = e === F && n !== F || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== F && (n === F || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, je = class {
+}, Se = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var Ee = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		D(this, e);
+		L(this, e);
 	}
-}, Me = h.litHtmlPolyfillSupport;
-Me?.(Te, De), (h.litHtmlVersions ??= []).push("3.3.3");
-var Ne = (e, t, n) => {
+}, Ce = C.litHtmlPolyfillSupport;
+Ce?.(he, _e), (C.litHtmlVersions ??= []).push("3.3.3");
+var we = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new De(t.insertBefore(y(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new _e(t.insertBefore(k(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Pe = globalThis, k = class extends m {
+}, Te = globalThis, R = class extends S {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var Ne = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ne(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = we(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,25 +502,25 @@ var Ne = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return w;
+		return P;
 	}
 };
-k._$litElement$ = !0, k.finalized = !0, Pe.litElementHydrateSupport?.({ LitElement: k });
-var Fe = Pe.litElementPolyfillSupport;
-Fe?.({ LitElement: k }), (Pe.litElementVersions ??= []).push("4.2.2");
+R._$litElement$ = !0, R.finalized = !0, Te.litElementHydrateSupport?.({ LitElement: R });
+var Ee = Te.litElementPolyfillSupport;
+Ee?.({ LitElement: R }), (Te.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var Ie = (e) => (t, n) => {
+var De = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, Le = {
+}, Oe = {
 	attribute: !0,
 	type: String,
-	converter: p,
+	converter: y,
 	reflect: !1,
-	hasChanged: se
-}, Re = (e = Le, t, n) => {
+	hasChanged: b
+}, ke = (e = Oe, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -543,16 +543,16 @@ var Ie = (e) => (t, n) => {
 	}
 	throw Error("Unsupported decorator location: " + r);
 };
-function ze(e) {
-	return (t, n) => typeof n == "object" ? Re(e, t, n) : ((e, t, n) => {
+function Ae(e) {
+	return (t, n) => typeof n == "object" ? ke(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/state.js
-function A(e) {
-	return ze({
+function z(e) {
+	return Ae({
 		...e,
 		state: !0,
 		attribute: !1
@@ -560,10 +560,10 @@ function A(e) {
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/base.js
-var Be = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
+var je = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/query.js
-function j(e, t) {
+function Me(e, t) {
 	return (n, r, i) => {
 		let a = (t) => t.renderRoot?.querySelector(e) ?? null;
 		if (t) {
@@ -578,29 +578,29 @@ function j(e, t) {
 					}
 				};
 			})();
-			return Be(n, r, { get() {
+			return je(n, r, { get() {
 				let n = e.call(this);
 				return n === void 0 && (n = a(this), (n !== null || this.hasUpdated) && t.call(this, n)), n;
 			} });
 		}
-		return Be(n, r, { get() {
+		return je(n, r, { get() {
 			return a(this);
 		} });
 	};
 }
 //#endregion
 //#region node_modules/lit-html/directive.js
-var Ve = {
+var Ne = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, He = (e) => (...t) => ({
+}, Pe = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Ue = class {
+}), Fe = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -614,9 +614,9 @@ var Ve = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, We = "important", Ge = " !" + We, M = He(class extends Ue {
+}, Ie = "important", Le = " !" + Ie, B = Pe(class extends Fe {
 	constructor(e) {
-		if (super(e), e.type !== Ve.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
+		if (super(e), e.type !== Ne.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
 	}
 	render(e) {
 		return Object.keys(e).reduce((t, n) => {
@@ -632,3187 +632,462 @@ var Ve = {
 			let r = t[e];
 			if (r != null) {
 				this.ft.add(e);
-				let t = typeof r == "string" && r.endsWith(Ge);
-				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? We : "") : n[e] = r;
+				let t = typeof r == "string" && r.endsWith(Le);
+				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? Ie : "") : n[e] = r;
 			}
 		}
-		return w;
+		return P;
 	}
-}), Ke = "M7 11H9V13H7V11M21 5V19C21 20.11 20.11 21 19 21H5C3.89 21 3 20.1 3 19V5C3 3.9 3.9 3 5 3H6V1H8V3H16V1H18V3H19C20.11 3 21 3.9 21 5M5 7H19V5H5V7M19 19V9H5V19H19M15 13V11H17V13H15M11 13V11H13V13H11M7 15H9V17H7V15M15 17V15H17V17H15M11 17V15H13V17H11Z", qe = "M7,10H12V15H7M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3Z", Je = "M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z", Ye = "M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z", Xe = "M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z", Ze = "M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z", Qe = "M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z", $e = "M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z", et = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z", tt = "M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z", nt = "M15 16L11 20H21V16H15M12.06 7.19L3 16.25V20H6.75L15.81 10.94L12.06 7.19M5.92 18H5V17.08L12.06 10L13 10.94L5.92 18M18.71 8.04C19.1 7.65 19.1 7 18.71 6.63L16.37 4.29C16.17 4.09 15.92 4 15.66 4C15.41 4 15.15 4.1 14.96 4.29L13.13 6.12L16.88 9.87L18.71 8.04Z", rt = "M8 13C6.14 13 4.59 14.28 4.14 16H2V18H4.14C4.59 19.72 6.14 21 8 21S11.41 19.72 11.86 18H22V16H11.86C11.41 14.28 9.86 13 8 13M8 19C6.9 19 6 18.1 6 17C6 15.9 6.9 15 8 15S10 15.9 10 17C10 18.1 9.1 19 8 19M19.86 6C19.41 4.28 17.86 3 16 3S12.59 4.28 12.14 6H2V8H12.14C12.59 9.72 14.14 11 16 11S19.41 9.72 19.86 8H22V6H19.86M16 9C14.9 9 14 8.1 14 7C14 5.9 14.9 5 16 5S18 5.9 18 7C18 8.1 17.1 9 16 9Z", it = "M12.74,5.47C15.1,6.5 16.35,9.03 15.92,11.46C17.19,12.56 18,14.19 18,16V16.17C18.31,16.06 18.65,16 19,16A3,3 0 0,1 22,19A3,3 0 0,1 19,22H6A4,4 0 0,1 2,18A4,4 0 0,1 6,14H6.27C5,12.45 4.6,10.24 5.5,8.26C6.72,5.5 9.97,4.24 12.74,5.47M11.93,7.3C10.16,6.5 8.09,7.31 7.31,9.07C6.85,10.09 6.93,11.22 7.41,12.13C8.5,10.83 10.16,10 12,10C12.7,10 13.38,10.12 14,10.34C13.94,9.06 13.18,7.86 11.93,7.3M13.55,3.64C13,3.4 12.45,3.23 11.88,3.12L14.37,1.82L15.27,4.71C14.76,4.29 14.19,3.93 13.55,3.64M6.09,4.44C5.6,4.79 5.17,5.19 4.8,5.63L4.91,2.82L7.87,3.5C7.25,3.71 6.65,4.03 6.09,4.44M18,9.71C17.91,9.12 17.78,8.55 17.59,8L19.97,9.5L17.92,11.73C18.03,11.08 18.05,10.4 18,9.71M3.04,11.3C3.11,11.9 3.24,12.47 3.43,13L1.06,11.5L3.1,9.28C3,9.93 2.97,10.61 3.04,11.3M19,18H16V16A4,4 0 0,0 12,12A4,4 0 0,0 8,16H6A2,2 0 0,0 4,18A2,2 0 0,0 6,20H19A1,1 0 0,0 20,19A1,1 0 0,0 19,18Z", at = o`
+}), Re = o`
   :host {
-    --odx-blue: var(--primary-color, #03a9f4);
-    --odx-blue-strong: #0086c5;
-    --odx-ink: var(--primary-text-color, #182026);
-    --odx-muted: var(--secondary-text-color, #66727a);
-    --odx-canvas: var(--primary-background-color, #f4f6f7);
-    --odx-surface: var(--card-background-color, #ffffff);
-    --odx-line: var(--divider-color, #dfe4e7);
-    --odx-warning: var(--warning-color, #f4a000);
-    --odx-danger: var(--error-color, #db4437);
-    --odx-selection: var(--error-color, #db4437);
-    --odx-radius: var(--ha-card-border-radius, 14px);
-    --odx-canvas-max-width: 880px;
-    --odx-canvas-max-height: 520px;
-    display: block;
-    min-width: 320px;
-    min-height: 100svh;
-    color: var(--odx-ink);
-    background: var(--odx-canvas);
-    font-family: Roboto, 'Segoe UI', system-ui, sans-serif;
-  }
-
-  * {
-    box-sizing: border-box;
-  }
-
-  [hidden] {
-    display: none !important;
-  }
-
-  button,
-  input,
-  select {
-    font: inherit;
-  }
-
-  button {
-    color: inherit;
-  }
-
-  .loading-state {
-    min-height: 70svh;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: var(--ha-space-4, 16px);
-    padding: var(--ha-space-6, 24px);
-  }
-
-  .loading-state ha-alert {
-    max-width: 560px;
-  }
-
-  .project-card-copy code {
-    display: block;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--odx-muted);
-    font-size: 10px;
-  }
-
-  .app-shell {
-    height: 100svh;
-    min-height: 100svh;
-    display: grid;
-    grid-template-rows: 64px minmax(0, 1fr);
-  }
-
-  .topbar {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 20px;
-    padding: 0 20px 0 14px;
-    border-bottom: 1px solid var(--odx-line);
-    background: color-mix(in srgb, var(--odx-surface) 96%, transparent);
-    position: sticky;
-    top: 0;
-    z-index: 30;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    min-width: 0;
-  }
-
-  .brand-mark {
-    width: 36px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-    background: var(--odx-ink);
-    color: var(--odx-surface);
-    border-radius: 10px 10px 10px 2px;
-    font: 800 12px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
-    letter-spacing: -0.04em;
-  }
-
-  .brand-copy {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .brand-copy strong {
-    font-size: 14px;
-    letter-spacing: -0.01em;
-  }
-
-  .brand-copy span {
-    font-size: 10px;
-    color: var(--odx-muted);
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-  }
-
-  .project-title {
-    min-width: 0;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-
-  .project-context {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ha-space-4, 16px);
-  }
-
-  .workflow {
-    display: flex;
-    align-items: center;
-    gap: var(--ha-space-2, 8px);
-    color: var(--odx-muted);
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .workflow span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .workflow b {
-    width: 22px;
-    height: 22px;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--odx-line);
-    border-radius: 50%;
-    background: var(--odx-surface);
-    font: 800 10px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .workflow .active {
-    color: var(--odx-blue-strong);
-  }
-
-  .workflow .active b,
-  .workflow .complete b {
-    border-color: var(--odx-blue);
-    background: color-mix(in srgb, var(--odx-blue) 13%, var(--odx-surface));
-  }
-
-  .workflow i {
-    width: 22px;
-    height: 1px;
-    background: var(--odx-line);
-  }
-
-  .project-title strong {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-size: 16px;
-  }
-
-  .autosave-state {
-    color: var(--odx-muted);
-    font-size: 12px;
-  }
-
-  .top-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .button-icon {
-    width: 1em;
-    height: 1em;
-    display: block;
-    flex: none;
-    fill: currentColor;
-  }
-
-  .export-actions {
-    flex: none;
-  }
-
-  .export-actions wa-dropdown {
-    display: inline-flex;
-  }
-
-  .workspace {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: 220px minmax(480px, 1fr) 328px;
-  }
-
-  .workspace.rail-collapsed {
-    grid-template-columns: 48px minmax(480px, 1fr) 328px;
-  }
-
-  .welcome-topbar {
-    grid-template-columns: 220px minmax(0, 1fr) auto;
-  }
-
-  .welcome-topline {
-    color: var(--odx-muted);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .workspace.welcome-workspace {
-    grid-template-columns: 220px minmax(0, 1fr);
-  }
-
-  .empty-rail {
-    min-height: 0;
-  }
-
-  .empty-library {
-    min-height: 0;
-    flex: 1 1 auto;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    padding: var(--ha-space-6, 24px) var(--ha-space-2, 8px);
-    color: var(--odx-muted);
-    text-align: center;
-  }
-
-  .empty-library-count {
-    width: 46px;
-    height: 30px;
-    margin-block-end: var(--ha-space-3, 12px);
-    display: grid;
-    place-items: center;
-    border: 2px solid var(--odx-ink);
-    background: var(--odx-surface);
-    color: var(--odx-ink);
-    font: 800 10px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .empty-library strong {
-    color: var(--odx-ink);
-    font-size: 13px;
-  }
-
-  .empty-library p {
-    max-width: 150px;
-    margin: 5px 0 0;
-    font-size: 11px;
-    line-height: 1.45;
-  }
-
-  .import-empty {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .welcome-main {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(360px, 1fr) minmax(380px, 1fr);
-    align-items: center;
-    gap: clamp(28px, 4vw, 56px);
-    overflow: auto;
-    padding: clamp(28px, 4vw, 64px);
-    background-color: var(--odx-canvas);
-    background-image: radial-gradient(circle, color-mix(in srgb, var(--odx-muted) 24%, transparent) 1px, transparent 1px);
-    background-size: 18px 18px;
-  }
-
-  .welcome-copy {
-    max-width: 560px;
-  }
-
-  .welcome-copy h1 {
-    max-width: 640px;
-    margin: var(--ha-space-3, 12px) 0 var(--ha-space-4, 16px);
-    color: var(--odx-ink);
-    font-size: clamp(34px, 4vw, 54px);
-    line-height: 0.98;
-    letter-spacing: -0.055em;
-  }
-
-  .welcome-copy > p {
-    max-width: 540px;
-    margin: 0;
-    color: var(--odx-muted);
-    font-size: 15px;
-    line-height: 1.65;
-  }
-
-  .welcome-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--ha-space-3, 12px);
-    margin-block: var(--ha-space-5, 20px) var(--ha-space-6, 24px);
-  }
-
-  .welcome-facts {
-    margin: 0;
-    display: grid;
-    gap: 0;
-    border-block: 1px solid var(--odx-line);
-  }
-
-  .welcome-facts div {
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
-    gap: var(--ha-space-3, 12px);
-    padding-block: var(--ha-space-3, 12px);
-    border-bottom: 1px solid var(--odx-line);
-  }
-
-  .welcome-facts div:last-child {
-    border-bottom: 0;
-  }
-
-  .welcome-facts dt {
-    color: var(--odx-blue-strong);
-    font: 800 11px/1.4 ui-monospace, Consolas, monospace;
-  }
-
-  .welcome-facts dd {
-    margin: 0;
-  }
-
-  .welcome-facts strong,
-  .welcome-facts span {
-    display: block;
-  }
-
-  .welcome-facts strong {
-    font-size: 12px;
-  }
-
-  .welcome-facts span {
-    margin-block-start: 3px;
-    color: var(--odx-muted);
-    font-size: 11px;
-  }
-
-  .welcome-visual {
-    width: min(100%, 720px);
-    justify-self: center;
-  }
-
-  .welcome-device-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-block-end: var(--ha-space-3, 12px);
-    color: var(--odx-muted);
-    font: 700 10px/1 ui-monospace, Consolas, monospace;
-    letter-spacing: 0.08em;
-  }
-
-  .welcome-device {
-    padding: clamp(10px, 1.6vw, 16px);
-    border-radius: clamp(14px, 2vw, 26px);
-    background: #25292c;
-    box-shadow: 0 24px 70px rgba(31, 43, 50, 0.24), 0 3px 9px rgba(31, 43, 50, 0.24);
-  }
-
-  .welcome-screen {
-    aspect-ratio: 5 / 3;
-    padding: 6px;
-    display: grid;
-    grid-template-columns: 1.4fr 0.6fr;
-    grid-template-rows: 1fr 0.62fr;
-    gap: 5px;
-    background: #fffdf4;
-  }
-
-  .welcome-region {
-    position: relative;
-    overflow: hidden;
-    border: 2px solid #111;
-    color: #111;
-    background: #fffdf4;
-  }
-
-  .welcome-region > span {
-    position: absolute;
-    inset-block-start: 7px;
-    inset-inline-start: 9px;
-    color: #c82723;
-    font: 800 10px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .welcome-region-a {
-    padding: 22% 10px 10px;
-  }
-
-  .welcome-region-a i {
-    display: block;
-    height: 3px;
-    margin-block-start: 12%;
-    background: #c82723;
-    transform: rotate(-5deg);
-  }
-
-  .welcome-region-a i:last-child {
-    width: 68%;
-    margin-inline-start: 20%;
-    background: #285995;
-    transform: rotate(7deg);
-  }
-
-  .welcome-region-b {
-    display: grid;
-    place-content: center;
-    text-align: center;
-  }
-
-  .welcome-region-b b {
-    font-size: clamp(28px, 5vw, 58px);
-    letter-spacing: -0.08em;
-  }
-
-  .welcome-region-b small {
-    color: #285995;
-    font-size: 8px;
-    font-weight: 800;
-  }
-
-  .welcome-region-c {
-    grid-column: 1 / -1;
-    display: grid;
-    align-content: center;
-    gap: 10%;
-    padding: 8% 12px 8px;
-  }
-
-  .welcome-region-c em {
-    height: 2px;
-    background: #111;
-  }
-
-  .welcome-palette {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    margin-block-start: var(--ha-space-3, 12px);
-  }
-
-  .welcome-palette i {
-    width: 11px;
-    height: 11px;
-    border: 1px solid color-mix(in srgb, var(--odx-ink) 35%, transparent);
-    border-radius: 50%;
-  }
-
-  .welcome-palette i:nth-child(1) { background: #fff; }
-  .welcome-palette i:nth-child(2) { background: #111; }
-  .welcome-palette i:nth-child(3) { background: #c82723; }
-  .welcome-palette i:nth-child(4) { background: #e5b600; }
-  .welcome-palette i:nth-child(5) { background: #285995; }
-  .welcome-palette i:nth-child(6) { background: #72a85a; }
-
-  .welcome-palette span {
-    margin-inline-start: 5px;
-    color: var(--odx-muted);
-    font: 700 9px/1 ui-monospace, Consolas, monospace;
-    letter-spacing: 0.06em;
-  }
-
-  .project-rail,
-  .inspector {
-    min-height: 0;
-    background: var(--odx-surface);
-  }
-
-  .project-rail {
-    min-width: 0;
-    overflow: hidden;
-    border-right: 1px solid var(--odx-line);
-    padding: 18px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .project-rail.collapsed {
-    padding-inline: 7px;
-    align-items: center;
-  }
-
-  .rail-heading,
-  .inspector-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .rail-heading h2,
-  .inspector-heading h2 {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .rail-heading-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--ha-space-1, 4px);
-  }
-
-  .project-rail.collapsed .rail-heading,
-  .project-rail.collapsed .rail-heading-actions {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .rail-toggle {
-    appearance: none;
-    width: 32px;
-    height: 32px;
-    flex: none;
-    display: grid;
-    place-items: center;
-    border: 1px solid var(--odx-line);
-    border-radius: 8px;
-    background: var(--odx-surface);
-    color: var(--odx-muted);
-    cursor: pointer;
-  }
-
-  .rail-toggle:hover,
-  .rail-toggle:focus-visible {
-    border-color: var(--odx-blue);
-    color: var(--odx-blue-strong);
-    outline: 2px solid color-mix(in srgb, var(--odx-blue) 34%, transparent);
-    outline-offset: 1px;
-  }
-
-  .rail-toggle svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .text-button {
-    appearance: none;
-    border: 0;
-    background: transparent;
-    padding: 5px;
-    color: var(--odx-blue-strong);
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-
-  .text-button:hover,
-  .text-button:focus-visible {
-    background: color-mix(in srgb, var(--odx-blue) 12%, transparent);
-    outline: none;
-  }
-
-  .project-list {
-    min-height: 0;
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow: auto;
-  }
-
-  .project-card {
-    width: 100%;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    padding: 10px;
-    background: transparent;
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    gap: 10px;
-    align-items: center;
-    text-align: left;
-    cursor: pointer;
-  }
-
-  .project-card:hover {
-    background: var(--odx-canvas);
-  }
-
-  .project-card.active {
-    background: color-mix(in srgb, var(--odx-blue) 10%, var(--odx-surface));
-    border-color: color-mix(in srgb, var(--odx-blue) 38%, var(--odx-line));
-  }
-
-  .mini-screen {
-    width: 42px;
-    aspect-ratio: var(--mini-aspect, 1.6);
-    border: 2px solid var(--odx-ink);
-    background: #fefefe;
-    display: grid;
-    place-items: center;
-    font: 700 8px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .project-card-copy {
-    min-width: 0;
-  }
-
-  .project-card-copy strong,
-  .project-card-copy span {
-    display: block;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .project-card-copy strong {
-    font-size: 13px;
-  }
-
-  .project-card-copy span {
-    margin-top: 3px;
-    color: var(--odx-muted);
-    font-size: 11px;
-  }
-
-  .rail-footer {
-    padding: 12px 8px 2px;
-    border-top: 1px solid var(--odx-line);
-    color: var(--odx-muted);
-    font-size: 11px;
-    line-height: 1.5;
-  }
-
-  .rail-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  .rail-action {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px;
-    border: 1px solid var(--odx-line);
-    border-radius: 8px;
-    background: var(--odx-surface);
-    color: var(--odx-muted);
-    font-size: 10px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
-  .rail-action:hover,
-  .rail-action:focus-visible {
-    border-color: var(--odx-blue);
-    color: var(--odx-blue-strong);
-    outline: none;
-  }
-
-  .rail-action:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-
-  .rail-action:disabled:hover,
-  .rail-action:disabled:focus-visible {
-    border-color: var(--odx-line);
-    color: var(--odx-muted);
-  }
-
-  .rail-action.danger:hover,
-  .rail-action.danger:focus-visible {
-    border-color: var(--odx-danger);
-    color: var(--odx-danger);
-  }
-
-  .rail-action svg {
-    width: 15px;
-    height: 15px;
-    flex: none;
-    fill: currentColor;
-  }
-
-  .editor {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .device-toolbar {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--odx-line);
-    background: color-mix(in srgb, var(--odx-surface) 85%, var(--odx-canvas));
-    display: flex;
-    align-items: end;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .widget-toolbar {
-    align-items: center;
-    justify-content: space-between;
-    min-height: 72px;
-  }
-
-  .device-summary {
-    min-width: 0;
-    display: grid;
-    gap: 2px;
-  }
-
-  .step-kicker {
-    color: var(--odx-blue-strong);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .device-summary strong {
-    font-size: 13px;
-  }
-
-  .device-summary > span:last-child {
-    overflow: hidden;
-    color: var(--odx-muted);
-    font-size: 11px;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .control {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .control.grow {
-    min-width: 240px;
-    flex: 1 1 300px;
-  }
-
-  .custom-control {
-    min-width: 210px;
-    flex: 1 1 220px;
-  }
-
-  .panel-control {
-    min-width: 260px;
-    flex-basis: 300px;
-  }
-
-  .control label,
-  .field-label {
-    color: var(--odx-muted);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  select,
-  input[type='text'],
-  input[type='number'],
-  textarea {
-    width: 100%;
-    min-height: 38px;
-    border: 1px solid var(--odx-line);
-    border-radius: 9px;
-    background: var(--odx-surface);
-    color: var(--odx-ink);
-    padding: 0 10px;
-  }
-
-  textarea {
-    min-height: 88px;
-    resize: vertical;
-    padding-block: 9px;
-  }
-
-  select:focus,
-  input:focus,
-  textarea:focus {
-    outline: 2px solid color-mix(in srgb, var(--odx-blue) 45%, transparent);
-    outline-offset: 1px;
-    border-color: var(--odx-blue);
-  }
-
-  .segment {
-    display: inline-flex;
-    padding: 3px;
-    border: 1px solid var(--odx-line);
-    border-radius: 10px;
-    background: var(--odx-surface);
-  }
-
-  .segment button {
-    border: 0;
-    background: transparent;
-    border-radius: 7px;
-    min-height: 30px;
-    padding: 0 10px;
-    color: var(--odx-muted);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  .segment button.active {
-    color: var(--odx-ink);
-    background: color-mix(in srgb, var(--odx-blue) 15%, var(--odx-surface));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--odx-blue) 34%, transparent);
-  }
-
-  .grid-badge {
-    align-self: center;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 34px;
-    padding: 0 10px;
-    border-left: 1px solid var(--odx-line);
-    color: var(--odx-muted);
-    font: 600 11px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .canvas-area {
-    min-height: 0;
-    overflow: hidden;
-    container-type: size;
-    padding: 28px;
-    background-color: var(--odx-canvas);
-    background-image: radial-gradient(circle, color-mix(in srgb, var(--odx-muted) 23%, transparent) 0.8px, transparent 0.9px);
-    background-size: 18px 18px;
-  }
-
-  .canvas-stage {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-  }
-
-  .screen-meta {
-    width: min(100%, var(--odx-canvas-max-width));
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    color: var(--odx-muted);
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .screen-meta code {
-    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-    color: var(--odx-ink);
-  }
-
-  .preview-boundary {
-    width: min(100%, var(--odx-canvas-max-width));
-    height: min(var(--odx-canvas-max-height), calc(100cqh - 110px));
-    min-height: 180px;
-    display: grid;
-    place-items: center;
-    container-type: size;
-  }
-
-  .screen-fit {
-    position: relative;
-    flex: none;
-  }
-
-  .screen-bezel {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    padding: 12px;
-    border-radius: clamp(12px, 2vw, 24px);
-    background: #25292c;
-    box-shadow: 0 16px 42px rgba(31, 43, 50, 0.18), 0 2px 7px rgba(31, 43, 50, 0.22);
-    transform-origin: top left;
-  }
-
-  .screen-bezel::after {
-    content: '';
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    right: 7px;
-    top: 50%;
-    background: #62696d;
-  }
-
-  .display-screen {
-    aspect-ratio: auto;
-    position: relative;
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
-    gap: var(--layout-gap, clamp(2px, 0.36cqw, 5px));
-    padding: var(--layout-padding, clamp(3px, 0.5cqw, 7px));
-    color: var(--screen-ink);
-    background: var(--screen-paper);
-    container-type: inline-size;
-    font-family: 'Arial Narrow', Roboto, Arial, sans-serif;
-    filter: contrast(0.98);
-  }
-
-  .display-screen.live-preview {
-    display: block;
-    padding: 0;
-    gap: 0;
-    filter: none;
-  }
-
-  .rendered-preview {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: fill;
-    background: #fff;
-    pointer-events: none;
-  }
-
-  .preview-failure {
-    position: absolute;
-    inset: 50% auto auto 50%;
-    z-index: 1;
-    width: min(70%, 520px);
-    transform: translate(-50%, -50%);
-  }
-
-  .preview-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    display: grid;
-    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
-    gap: var(--preview-gap);
-    padding: var(--preview-padding);
-    box-sizing: border-box;
-  }
-
-  .preview-overlay .screen-region.preview-region {
-    border-color: transparent;
-    background: transparent;
-  }
-
-  .preview-overlay .screen-region.preview-region.empty {
-    border-style: dashed;
-    border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
-  }
-
-  .preview-overlay .screen-region.layout-region {
-    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
-  }
-
-  .display-screen.live-preview .merge-layer {
-    inset: var(--preview-padding, clamp(3px, 0.5cqw, 7px));
-    gap: var(--preview-gap, clamp(2px, 0.36cqw, 5px));
-  }
-
-  .display-screen[data-palette='bw'] {
-    --screen-paper: #fff;
-    --screen-ink: #080808;
-    --screen-muted: #080808;
-    --screen-accent: #080808;
-    --screen-accent-2: #fff;
-    --screen-soft: repeating-linear-gradient(45deg, #fff 0 2px, #111 2px 3px);
-  }
-
-  .display-screen[data-palette='gray4'] {
-    --screen-paper: #f7f7f4;
-    --screen-ink: #10110f;
-    --screen-muted: #777872;
-    --screen-accent: #363733;
-    --screen-accent-2: #a9aaa4;
-    --screen-soft: #d0d1cc;
-  }
-
-  .display-screen[data-palette='gray16'] {
-    --screen-paper: #fafaf7;
-    --screen-ink: #111210;
-    --screen-muted: #686963;
-    --screen-accent: #30312d;
-    --screen-accent-2: #9b9c96;
-    --screen-soft: #dedfd9;
-  }
-
-  .display-screen[data-palette='bwr'] {
-    --screen-paper: #fffdf8;
-    --screen-ink: #101010;
-    --screen-muted: #444;
-    --screen-accent: #c81e1e;
-    --screen-accent-2: #c81e1e;
-    --screen-soft: #f4d9d2;
-  }
-
-  .display-screen[data-palette='bwy'] {
-    --screen-paper: #fffdf7;
-    --screen-ink: #111;
-    --screen-muted: #444;
-    --screen-accent: #e4b800;
-    --screen-accent-2: #111;
-    --screen-soft: #f6e699;
-  }
-
-  .display-screen[data-palette='bwry'] {
-    --screen-paper: #fffdf7;
-    --screen-ink: #111;
-    --screen-muted: #464646;
-    --screen-accent: #d22626;
-    --screen-accent-2: #e5b800;
-    --screen-soft: #f3e3a6;
-  }
-
-  .display-screen[data-palette='spectra6'] {
-    --screen-paper: #fffef5;
-    --screen-ink: #101010;
-    --screen-muted: #285995;
-    --screen-accent: #c82723;
-    --screen-accent-2: #e5b600;
-    --screen-soft: #72a85a;
-  }
-
-  .screen-region {
-    min-width: 0;
-    min-height: 0;
-    position: relative;
-    overflow: hidden;
-    container-type: size;
-    border: max(1px, 0.14cqw) solid transparent;
-    background: transparent;
-    cursor: pointer;
-    isolation: isolate;
-  }
-
-  .screen-region > * {
-    max-width: 100%;
-  }
-
-  .screen-region.region-background {
-    background: var(--screen-paper);
-  }
-
-  .screen-region.region-border {
-    border-color: var(--screen-ink);
-  }
-
-  .screen-region:not(.region-background) > .item {
-    background: transparent !important;
-  }
-
-  .screen-region:hover {
-    outline: max(2px, 0.3cqw) solid var(--screen-accent);
-    outline-offset: calc(max(2px, 0.3cqw) * -1);
-    z-index: 2;
-  }
-
-  .screen-region:focus-visible {
-    outline: max(3px, 0.38cqw) solid var(--odx-blue);
-    outline-offset: calc(max(3px, 0.38cqw) * -1);
-    z-index: 3;
-  }
-
-  .screen-region.selected {
-    outline: max(3px, 0.38cqw) solid var(--odx-selection);
-    outline-offset: calc(max(3px, 0.38cqw) * -1);
-    box-shadow: inset 0 0 0 max(1px, 0.14cqw) var(--screen-paper);
-    z-index: 3;
-  }
-
-  .screen-region.empty {
-    display: grid;
-    place-items: center;
-    border-style: dashed;
-    color: var(--screen-muted);
-    border-color: color-mix(in srgb, var(--screen-ink) 38%, transparent);
-  }
-
-  .screen-region.layout-region {
-    display: grid;
-    place-items: center;
-    border-style: solid;
-    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
-  }
-
-  .layout-region-copy {
-    display: grid;
-    place-items: center;
-    gap: 0.25em;
-    text-align: center;
-  }
-
-  .region-appearance {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 18px;
-    padding-block: 12px;
-    border-block: 1px solid var(--odx-line);
-  }
-
-  .region-appearance-heading h3,
-  .region-appearance-heading p,
-  .spacing-grid p,
-  .region-radius-field p,
-  .palette-color-field p {
-    margin: 0;
-  }
-
-  .region-appearance-heading h3 {
-    font-size: 13px;
-  }
-
-  .region-appearance-heading p,
-  .spacing-grid p,
-  .region-radius-field p,
-  .palette-color-field p {
-    margin-top: 3px;
-    color: var(--odx-muted);
-    font-size: 11px;
-    line-height: 1.4;
-  }
-
-  .spacing-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .palette-color-field {
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-
-  .palette-color-field legend {
-    margin-bottom: 8px;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .palette-color-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
-    gap: 7px;
-  }
-
-  .palette-color-options label {
-    display: flex;
-    min-width: 0;
-    align-items: center;
-    gap: 7px;
-    padding: 7px;
-    border: 1px solid var(--odx-line);
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 11px;
-  }
-
-  .palette-color-options label:has(input:checked) {
-    border-color: var(--odx-blue);
-    box-shadow: inset 0 0 0 1px var(--odx-blue);
-    background: var(--odx-blue-soft);
-  }
-
-  .palette-color-options input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .palette-color-swatch {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-    border: 1px solid color-mix(in srgb, var(--primary-text-color) 28%, transparent);
-    border-radius: 50%;
-  }
-
-  .layout-region-copy strong {
-    font-size: clamp(14px, 22cqh, 44px);
-    line-height: 1;
-  }
-
-  .layout-region-copy span {
-    color: var(--screen-muted);
-    font: 700 clamp(6px, 6cqh, 11px)/1 ui-monospace, Consolas, monospace;
-  }
-
-  .empty-region-copy {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35em;
-    font-size: clamp(7px, 5cqh, 14px);
-    text-align: center;
-  }
-
-  .empty-region-copy strong {
-    color: var(--screen-ink);
-  }
-
-  .empty-region-copy span {
-    opacity: 0.7;
-    font-size: 0.78em;
-  }
-
-  .merge-layer {
-    position: absolute;
-    inset: clamp(3px, 0.5cqw, 7px);
-    z-index: 8;
-    display: grid;
-    grid-template-columns: repeat(var(--grid-columns), minmax(0, 1fr));
-    grid-template-rows: repeat(var(--grid-rows), minmax(0, 1fr));
-    gap: clamp(2px, 0.36cqw, 5px);
-    pointer-events: none;
-  }
-
-  .merge-layer.active {
-    pointer-events: auto;
-  }
-
-  .merge-cell {
-    appearance: none;
-    border: max(1px, 0.15cqw) dashed color-mix(in srgb, var(--screen-ink) 50%, transparent);
-    background: color-mix(in srgb, var(--screen-paper) 50%, transparent);
-    cursor: crosshair;
-    color: var(--screen-muted);
-    font: 700 clamp(7px, 1.5cqw, 12px)/1 ui-monospace, Consolas, monospace;
-    transition: background 90ms ease, border-color 90ms ease;
-  }
-
-  .merge-cell:hover,
-  .merge-cell:focus-visible {
-    border-style: solid;
-    border-color: var(--screen-accent);
-    background: color-mix(in srgb, var(--screen-accent) 12%, var(--screen-paper));
-    outline: none;
-  }
-
-  .merge-cell.preview {
-    border-style: solid;
-    border-color: var(--screen-accent);
-    background: color-mix(in srgb, var(--screen-accent) 22%, var(--screen-paper));
-    color: var(--screen-ink);
-  }
-
-  .merge-cell.preview.invalid {
-    border-color: var(--odx-danger);
-    background: color-mix(in srgb, var(--odx-danger) 20%, var(--screen-paper));
-  }
-
-  .merge-cell.anchor {
-    color: var(--screen-paper);
-    background: var(--screen-accent);
-  }
-
-  .merge-cell.occupied {
-    border: 0;
-    background: transparent;
-    cursor: zoom-out;
-  }
-
-  .merge-cell.occupied:hover,
-  .merge-cell.occupied:focus-visible {
-    background: transparent;
-    outline: none;
-  }
-
-  .inspector {
-    min-width: 0;
-    border-left: 1px solid var(--odx-line);
-    padding: 18px;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  .layout-guide {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ha-space-3, 12px);
-  }
-
-  .layout-guide > *,
-  .layout-section,
-  .background-settings,
-  .background-fieldset,
-  .background-media-form {
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .background-media-form {
-    display: block;
-    overflow: hidden;
-  }
-
-  .layout-guide h2 {
-    margin: 0;
-    font-size: 20px;
-    letter-spacing: -0.03em;
-  }
-
-  .layout-guide > p {
-    margin: 0;
-    color: var(--odx-muted);
-    font-size: 12px;
-    line-height: 1.55;
-  }
-
-  .device-facts {
-    margin: var(--ha-space-2, 8px) 0 0;
-    border-block: 1px solid var(--odx-line);
-  }
-
-  .device-facts div {
-    display: grid;
-    grid-template-columns: 74px minmax(0, 1fr);
-    gap: var(--ha-space-2, 8px);
-    padding-block: 9px;
-    border-bottom: 1px solid var(--odx-line);
-  }
-
-  .device-facts div:last-child {
-    border-bottom: 0;
-  }
-
-  .device-facts dt {
-    color: var(--odx-muted);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .device-facts dd {
-    min-width: 0;
-    margin: 0;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .layout-instructions {
-    margin: 0;
-    padding-inline-start: 20px;
-    color: var(--odx-muted);
-    font-size: 12px;
-    line-height: 1.55;
-  }
-
-  .layout-instructions li + li {
-    margin-block-start: var(--ha-space-2, 8px);
-  }
-
-  .layout-instructions strong {
-    color: var(--odx-ink);
-  }
-
-  .layout-section {
-    display: grid;
-    gap: var(--ha-space-3, 12px);
-    padding-block: var(--ha-space-3, 12px);
-    border-block: 1px solid var(--odx-line);
-  }
-
-  .layout-section-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--ha-space-2, 8px);
-  }
-
-  .layout-section-heading h3 {
-    margin: 0;
-    font-size: 14px;
-  }
-
-  .layout-section-heading p,
-  .background-empty,
-  .background-scale p {
-    margin: 4px 0 0;
-    color: var(--odx-muted);
-    font-size: 11px;
-    line-height: 1.45;
-  }
-
-  .background-settings {
-    display: grid;
-    gap: var(--ha-space-4, 16px);
-  }
-
-  .background-fieldset {
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-
-  .background-fieldset legend {
-    margin-block-end: var(--ha-space-2, 8px);
-    color: var(--odx-muted);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .background-fieldset:disabled {
-    opacity: 0.48;
-  }
-
-  .background-mode-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--ha-space-2, 8px);
-  }
-
-  .background-mode-grid button,
-  .background-anchor-grid button {
-    appearance: none;
-    border: 1px solid var(--odx-line);
-    border-radius: 8px;
-    background: var(--odx-surface);
-    color: var(--odx-ink);
-    cursor: pointer;
-  }
-
-  .background-mode-grid button {
-    min-width: 0;
-    min-height: 36px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .background-mode-grid button:hover,
-  .background-mode-grid button:focus-visible,
-  .background-anchor-grid button:hover,
-  .background-anchor-grid button:focus-visible {
-    border-color: var(--odx-blue);
-    outline: 2px solid color-mix(in srgb, var(--odx-blue) 34%, transparent);
-    outline-offset: 1px;
-  }
-
-  .background-mode-grid button.active,
-  .background-anchor-grid button.active {
-    border-color: var(--odx-blue);
-    background: color-mix(in srgb, var(--odx-blue) 14%, var(--odx-surface));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--odx-blue) 32%, transparent);
-  }
-
-  .background-anchor-grid {
-    width: 132px;
-    aspect-ratio: 1;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px;
-  }
-
-  .background-anchor-grid button {
-    min-width: 0;
-    min-height: 0;
-    display: grid;
-    place-items: center;
-  }
-
-  .background-anchor-grid button span {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-
-  .background-anchor-grid button.active span {
-    color: var(--odx-blue-strong);
-    transform: scale(1.35);
-  }
-
-  .background-anchor-grid button:disabled {
-    cursor: not-allowed;
-  }
-
-  .background-scale {
-    gap: 6px;
-  }
-
-  .background-scale p {
-    overflow-wrap: anywhere;
-  }
-
-  .inspector-heading {
-    margin-bottom: 16px;
-  }
-
-  .region-address {
-    color: var(--odx-muted);
-    font: 600 11px/1 ui-monospace, Consolas, monospace;
-  }
-
-  .inspector-empty {
-    min-height: 260px;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    color: var(--odx-muted);
-  }
-
-  .inspector-empty strong {
-    display: block;
-    margin-bottom: 7px;
-    color: var(--odx-ink);
-    font-size: 14px;
-  }
-
-  .inspector-empty p {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .widget-picker {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 18px;
-  }
-
-  .widget-choice {
-    min-height: 90px;
-    padding: 10px;
-    border: 1px solid var(--odx-line);
-    border-radius: 10px;
-    background: var(--odx-surface);
-    text-align: left;
-    cursor: pointer;
-  }
-
-  .widget-choice:hover,
-  .widget-choice.active {
-    border-color: var(--odx-blue);
-    background: color-mix(in srgb, var(--odx-blue) 8%, var(--odx-surface));
-  }
-
-  .widget-choice svg,
-  .widget-choice ha-icon {
-      width: 22px;
-      height: 22px;
-      color: var(--odx-blue-strong);
-      fill: currentColor;
-    }
-
-  .widget-choice strong,
-  .widget-choice span {
-    display: block;
-  }
-
-  .widget-choice strong {
-    margin-top: 7px;
-    font-size: 12px;
-  }
-
-  .widget-choice span {
-    margin-top: 3px;
-    color: var(--odx-muted);
-    font-size: 10px;
-    line-height: 1.35;
-  }
-
-  .option-form {
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-    padding-top: 16px;
-    border-top: 1px solid var(--odx-line);
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .toggle-field {
-    min-height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .toggle-field label {
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .toggle {
-    appearance: none;
-    width: 38px;
-    height: 22px;
-    border: 0;
-    border-radius: 20px;
-    background: #aeb7bc;
-    padding: 3px;
-    cursor: pointer;
-  }
-
-  .toggle::before {
-    content: '';
-    display: block;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: white;
-    transition: transform 120ms ease;
-  }
-
-  .toggle:checked {
-    background: var(--odx-blue-strong);
-  }
-
-  .toggle:checked::before {
-    transform: translateX(16px);
-  }
-
-  .danger-zone {
-    margin-top: 20px;
-    padding-top: 14px;
-    border-top: 1px solid var(--odx-line);
-  }
-
-  .merge-help {
-    width: min(100%, 900px);
-    min-height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 7px 12px;
-    border: 1px solid color-mix(in srgb, var(--odx-blue) 34%, var(--odx-line));
-    border-radius: 9px;
-    color: var(--odx-blue-strong);
-    background: color-mix(in srgb, var(--odx-blue) 7%, var(--odx-surface));
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .merge-help strong {
-    color: var(--odx-ink);
-  }
-
-  dialog {
-    width: min(92vw, 440px);
-    border: 1px solid var(--odx-line);
-    border-radius: 16px;
-    padding: 0;
-    color: var(--odx-ink);
-    background: var(--odx-surface);
-    box-shadow: 0 24px 80px rgba(20, 32, 40, 0.28);
-  }
-
-  dialog::backdrop {
-    background: rgba(15, 24, 30, 0.42);
-  }
-
-  .dialog-body {
-    padding: 22px;
-  }
-
-  .dialog-body h2 {
-    margin: 0 0 6px;
-    font-size: 19px;
-  }
-
-  .dialog-body p {
-    margin: 0 0 18px;
-    color: var(--odx-muted);
-    font-size: 12px;
-    line-height: 1.5;
-  }
-
-  .dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 20px;
-  }
-
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
-    z-index: 100;
-    transform: translateX(-50%);
-    padding: 10px 14px;
-    border-radius: 9px;
-    color: white;
-    background: #20282d;
-    box-shadow: 0 8px 24px rgba(20, 32, 40, 0.24);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .exporting .screen-region:hover,
-  .exporting .screen-region.selected {
-    outline: none;
-  }
-
-  @media (max-width: 1180px) {
-    .workspace {
-      grid-template-columns: 188px minmax(420px, 1fr) 290px;
-    }
-
-    .topbar {
-      grid-template-columns: 188px minmax(0, 1fr) auto;
-    }
-
-    .workspace.welcome-workspace {
-      grid-template-columns: 188px minmax(0, 1fr);
-    }
-
-    .welcome-main {
-      gap: clamp(24px, 3vw, 40px);
-      padding: clamp(24px, 3vw, 40px);
-    }
-
-    .project-rail {
-      padding-inline: 8px;
-    }
-
-    .inspector {
-      padding: 14px;
-    }
-  }
+    --studio-accent: var(--primary-color, #03a9f4);
+    --studio-accent-soft: color-mix(in srgb, var(--studio-accent) 14%, transparent);
+    --studio-border: var(--divider-color, #d5dadd);
+    --studio-surface: var(--card-background-color, #fff);
+    --studio-text: var(--primary-text-color, #202124);
+    --studio-muted: var(--secondary-text-color, #68727a);
+    display: block; width: 100%; height: 100vh; height: 100dvh; max-height: 100vh; max-height: 100dvh; min-height: 0; color: var(--studio-text); background: var(--primary-background-color, #f5f7f8); font-family: var(--paper-font-body1_-_font-family, Roboto, sans-serif); overflow: hidden; overflow-anchor: none; contain: size layout paint;
+  }
+  * { box-sizing: border-box; }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  ha-icon { display: inline-flex; flex: none; width: 18px; height: 18px; color: currentColor; }
+  .shell { height: 100%; max-height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; overflow-anchor: none; }
+  .topbar { flex: none; height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); min-height: 0; display: flex; align-items: center; gap: 12px; padding: var(--safe-area-inset-top, 0px) 16px 0; border-bottom: 1px solid var(--studio-border); background: var(--studio-surface); z-index: 5; }
+  .brand { display: grid; min-width: 240px; margin-right: auto; }
+  .brand strong { font-size: 15px; letter-spacing: -.01em; }
+  .brand span { color: var(--studio-muted); font: 11px/1.4 var(--code-font-family, monospace); }
+  .project-name { width: min(230px, 20vw); min-height: 38px; border: 1px solid var(--studio-border); border-radius: 9px; padding: 0 11px; background: var(--studio-surface); }
+  .status { padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .status.ready { color: #197438; background: #dff5e6; }
+  .status.draft { color: #635b00; background: #f7efc3; }
+  .actions { display: flex; align-items: center; gap: 4px; }
+  .layout { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--toolbox-width) minmax(0, 1fr) var(--inspector-width); overflow: hidden; }
+  .panel { position: relative; min-width: 0; min-height: 0; background: var(--studio-surface); }
+  .toolbox { border-right: 1px solid var(--studio-border); display: flex; flex-direction: column; overflow: hidden; }
+  .panel-title, .layers > header { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 12px; }
+  .panel-title h2, .layers h2 { margin: 1px 0 0; font-size: 15px; }
+  .eyebrow { display: block; color: var(--studio-muted); font: 700 9px/1.2 var(--code-font-family, monospace); letter-spacing: .14em; text-transform: uppercase; }
+  .icon-button { border: 0; border-radius: 7px; width: 34px; height: 34px; display: inline-grid; place-items: center; background: transparent; color: var(--studio-muted); }
+  .icon-button:hover { background: var(--studio-accent-soft); color: var(--studio-accent); }
+  .search { margin: 0 10px 10px 9px; min-height: 30px; display: flex; align-items: center; gap: 7px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 8px; background: var(--secondary-background-color, #f3f5f6); }
+  .search ha-icon { width: 17px; }
+  .search input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 13px; }
+  .catalog-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 9px 16px; }
+  .catalog-section { margin-top: 8px; }
+  .catalog-section > header { display: flex; justify-content: space-between; align-items: center; padding: 7px 2px; color: var(--studio-muted); font: 700 10px var(--code-font-family, monospace); letter-spacing: .11em; text-transform: uppercase; }
+  .catalog-section > header span:last-child, .count { min-width: 22px; padding: 2px 6px; border-radius: 999px; text-align: center; background: var(--secondary-background-color, #eef1f2); }
+  .catalog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .catalog-item { min-height: 34px; display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: 8px; align-items: center; padding: 0 10px; text-align: start; border: 1px solid var(--studio-border); border-radius: 8px; background: var(--studio-surface); cursor: grab; touch-action: none; user-select: none; }
+  .catalog-item:hover { border-color: var(--studio-accent); background: var(--studio-accent-soft); transform: translateY(-1px); }
+  .catalog-item:active { cursor: grabbing; }
+  .catalog-item ha-icon { width: 16px; height: 16px; color: var(--studio-accent); --mdc-icon-size: 16px; }
+  .catalog-item strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 1.2; }
+  .catalog-item small { display: none; }
+  .empty-result, .empty-layers { grid-column: 1 / -1; margin: 10px 2px; color: var(--studio-muted); font-size: 12px; line-height: 1.45; }
+  .panel-rail { border-right: 1px solid var(--studio-border); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px; padding: 10px 6px; }
+  .right-rail { border-right: 0; border-left: 1px solid var(--studio-border); }
+  .rail-label { writing-mode: vertical-rl; color: var(--studio-muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+
+  .workspace { min-width: 0; min-height: 0; display: grid; grid-template-rows: 42px 42px minmax(0, 1fr); background: #182230; color: #e7edf4; overflow: hidden; }
+  .dashboard-tabs { display: flex; min-width: 0; align-items: stretch; gap: 1px; padding: 0 10px; background: #0c1420; border-bottom: 1px solid #2a3748; overflow-x: auto; }
+  .dashboard-tab, .add-tab { position: relative; display: flex; align-items: center; gap: 7px; padding: 0 12px; border: 0; background: transparent; color: #9caabd; white-space: nowrap; font-size: 12px; }
+  .dashboard-tab ha-icon, .add-tab ha-icon { width: 16px; height: 16px; }
+  .dashboard-tab.active { color: #fff; }
+  .dashboard-tab.active::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; background: var(--studio-accent); }
+  .dashboard-tab i { width: 6px; height: 6px; border-radius: 50%; background: #8c96a3; }
+  .dashboard-tab i.ready { background: #50d17d; }
+  .add-tab { color: var(--studio-accent); }
+  .tab-spacer { flex: 1 1 auto; min-width: 12px; }
+  .history-controls { flex: none; display: flex; align-items: center; gap: 2px; padding: 5px 0; }
+  .history-controls button { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #9caabd; }
+  .history-controls button:hover:not(:disabled) { color: #fff; background: #1b2a3c; }
+  .history-controls button:disabled { cursor: default; opacity: .32; }
+  .history-controls ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
+  .workspace-meta { display: flex; align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid #2a3748; color: #a9b5c5; font: 11px var(--code-font-family, monospace); }
+  .workspace-meta > span:nth-child(2) { margin-left: auto; }
+  .tool-toggle { display: inline-flex; flex: none; align-items: center; gap: 6px; min-height: 28px; padding: 0 9px; border: 1px solid #344459; border-radius: 7px; background: #111b28; color: #9eacc0; font-size: 10px; line-height: 1; white-space: nowrap; }
+  .tool-toggle ha-icon { width: 14px; height: 14px; --mdc-icon-size: 14px; }
+  .tool-toggle.active { color: #8bd9ff; border-color: #2788b8; background: #102b3a; }
+  .zoom-readout { min-width: 42px; text-align: right; color: #fff; }
+  .canvas-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; overflow-anchor: none; overscroll-behavior: contain; contain: layout paint; background-color: #202c3b; background-image: radial-gradient(circle, #3b495a 1px, transparent 1px); background-size: 18px 18px; }
+  .canvas-stage.accepting-drop { box-shadow: inset 0 0 0 3px var(--studio-accent); }
+  .catalog-drag-ghost { position: fixed; z-index: 1200; box-sizing: border-box; display: grid; grid-template-columns: 16px minmax(0, 1fr) 14px; align-items: center; gap: 5px; min-height: 34px; padding: 0 7px; border: 1px solid var(--studio-accent); border-radius: 8px; color: var(--primary-text-color, #182026); background: var(--studio-surface); box-shadow: 0 7px 18px rgba(0,0,0,.22); font-size: 11px; font-weight: 700; pointer-events: none; }
+  .catalog-drag-ghost ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
+  .catalog-drag-ghost .drag-type-icon, .catalog-drag-ghost .drag-add-icon { color: var(--studio-accent); }
+  .canvas-viewport { position: absolute; left: 50%; top: 50%; transform-origin: center; overflow-anchor: none; }
+  .canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; box-shadow: 0 16px 46px rgba(0, 0, 0, .35); user-select: none; touch-action: none; overflow-anchor: none; }
+  .canvas > img, .canvas-placeholder { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .canvas-placeholder { display: grid; place-items: center; color: #59636b; background: #fff; }
+  .working-area { position: absolute; pointer-events: none; z-index: 2; border: 1px dashed rgba(3, 169, 244, .72); background-image: radial-gradient(circle, rgba(3, 169, 244, .22) .7px, transparent .8px); background-size: max(12px, var(--snap-size)) max(12px, var(--snap-size)); }
+  .selection { position: absolute; z-index: 3; min-width: 3px; min-height: 3px; border: 1px solid transparent; cursor: move; touch-action: none; }
+  .selection:hover { border-color: rgba(3, 169, 244, .65); }
+  .selection.selected { border: 2px solid #00aef0; box-shadow: 0 0 0 1px rgba(255,255,255,.9); }
+  .selection.locked { cursor: default; border-style: dashed; }
+  .selection.hidden { background: rgba(3, 169, 244, .09); border: 1px dashed rgba(3, 169, 244, .75); }
+  .locked-notice { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 12px; padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--warning-color, #ffa600) 45%, var(--studio-border)); border-radius: 7px; background: color-mix(in srgb, var(--warning-color, #ffa600) 10%, var(--studio-surface)); font-size: 11px; }
+  .locked-notice span { display: inline-flex; align-items: center; gap: 6px; }
+  .locked-notice ha-icon { width: 15px; height: 15px; --mdc-icon-size: 15px; }
+  .locked-notice button { min-height: 26px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 6px; color: var(--primary-text-color); background: var(--studio-surface); font-size: 11px; font-weight: 700; cursor: pointer; }
+  .hidden-label { position: absolute; left: 3px; top: 3px; color: #006d99; background: rgba(255,255,255,.9); padding: 1px 4px; font-size: 8px; }
+  .lock-badge { position: absolute; right: 2px; top: 2px; width: 15px; height: 15px; padding: 2px; color: #fff; background: #283746; border-radius: 3px; }
+  .resize-handle { position: absolute; z-index: 7; width: 11px; height: 11px; padding: 0; border: 2px solid #00aef0; border-radius: 1px; background: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,.85); touch-action: none; }
+  .resize-nw { left: 0; top: 0; transform: translate(-50%, -50%); cursor: nwse-resize; }
+  .resize-n { left: 50%; top: 0; transform: translate(-50%, -50%); cursor: ns-resize; }
+  .resize-ne { right: 0; top: 0; transform: translate(50%, -50%); cursor: nesw-resize; }
+  .resize-e { right: 0; top: 50%; transform: translate(50%, -50%); cursor: ew-resize; }
+  .resize-se { right: 0; bottom: 0; transform: translate(50%, 50%); cursor: nwse-resize; }
+  .resize-s { left: 50%; bottom: 0; transform: translate(-50%, 50%); cursor: ns-resize; }
+  .resize-sw { left: 0; bottom: 0; transform: translate(-50%, 50%); cursor: nesw-resize; }
+  .resize-w { left: 0; top: 50%; transform: translate(-50%, -50%); cursor: ew-resize; }
+  .selection-size { position: absolute; z-index: 6; left: 50%; top: calc(100% + 9px); transform: translateX(-50%); min-width: max-content; padding: 2px 7px; border: 1px solid #2788b8; border-radius: 999px; color: #9cddff; background: #102033; box-shadow: 0 2px 6px rgba(0,0,0,.28); font: 700 10px/1.2 var(--code-font-family, monospace); white-space: nowrap; pointer-events: none; }
+  .zoom-controls { position: absolute; right: 16px; bottom: 14px; display: flex; align-items: center; padding: 4px; border: 1px solid #354459; border-radius: 9px; background: #101927; box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+  .zoom-controls button { min-width: 34px; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: #aeb9c7; font-size: 11px; }
+  .zoom-controls button:hover, .zoom-controls button.active { color: #fff; background: #1976d2; }
+
+  .inspector { min-width: 0; border-left: 1px solid var(--studio-border); display: flex; flex-direction: column; overflow: hidden; overflow-anchor: none; }
+  .panel-resizer { position: absolute; left: -4px; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 6; }
+  .panel-resizer:hover { background: color-mix(in srgb, var(--studio-accent) 30%, transparent); }
+  .layers { min-height: 150px; flex: 0 0 clamp(176px, 27%, 250px); display: flex; flex-direction: column; border-bottom: 1px solid var(--studio-border); overflow-anchor: none; }
+  .layers > header { min-height: 48px; padding: 7px 8px 7px 11px; }
+  .layers-header-actions { display: flex; align-items: center; gap: 3px; }
+  .layer-list { min-height: 0; flex: 1; overflow: auto; padding: 0 6px 8px; }
+  .layer-row { position: relative; display: grid; grid-template-columns: 24px 18px minmax(0,1fr) auto; align-items: center; min-height: 34px; gap: 4px; padding: 2px 3px; border: 1px solid transparent; border-radius: 5px; }
+  .layer-row:hover { background: var(--secondary-background-color, #f3f5f6); }
+  .layer-row.active { color: var(--studio-accent); border-color: color-mix(in srgb, var(--studio-accent) 45%, var(--studio-border)); background: var(--studio-accent-soft); }
+  .layer-row.is-hidden > span { opacity: .5; }
+  .layer-row.dragging { opacity: .42; }
+  .layer-row.drop-before::before, .layer-row.drop-after::after { content: ''; position: absolute; left: 2px; right: 2px; z-index: 4; height: 2px; border-radius: 2px; background: var(--studio-accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--studio-accent) 22%, transparent); pointer-events: none; }
+  .layer-row.drop-before::before { top: -2px; }
+  .layer-row.drop-after::after { bottom: -2px; }
+  .layer-row .drag { width: 24px; height: 28px; color: var(--studio-muted); cursor: grab; touch-action: none; }
+  .layer-row .drag:active { cursor: grabbing; }
+  .layer-row .layer-type-icon { width: 16px; height: 16px; color: var(--studio-accent); --mdc-icon-size: 16px; }
+  .layer-row > span { min-width: 0; display: grid; }
+  .layer-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 1.2; }
+  .layer-row small { color: var(--studio-muted); font-size: 8px; line-height: 1.15; text-transform: capitalize; }
+  .layer-actions { display: flex; align-items: center; gap: 1px; opacity: 0; pointer-events: none; transition: opacity 100ms ease; }
+  .layer-row:hover .layer-actions, .layer-row:focus-within .layer-actions, .layer-row.active .layer-actions { opacity: 1; pointer-events: auto; }
+  .layer-row button { display: grid; place-items: center; width: 27px; height: 27px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: var(--studio-muted); }
+  .layer-row button:hover { color: var(--studio-text); background: color-mix(in srgb, var(--studio-text) 8%, transparent); }
+  .layer-row button.delete:hover { color: var(--error-color, #db4437); }
+  .layer-row button ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
+  .properties { min-height: 0; flex: 1 1 auto; overflow: auto; overflow-anchor: none; overscroll-behavior: contain; }
+  .inspector-title { min-height: 58px; display: grid; grid-template-columns: 30px minmax(0,1fr); align-items: center; gap: 7px; padding: 8px 12px; border-bottom: 1px solid var(--studio-border); }
+  .inspector-title > ha-icon { color: var(--studio-accent); }
+  .inspector-title h2 { margin: 0; font-size: 15px; }
+  .inspector-title p { margin: 3px 0 0; color: var(--studio-muted); font-size: 10px; }
+  .inspector-section { border-bottom: 1px solid var(--studio-border); }
+  .inspector-section > summary { padding: 12px 14px; cursor: pointer; list-style-position: inside; color: var(--studio-muted); font: 700 10px var(--code-font-family, monospace); letter-spacing: .09em; text-transform: uppercase; }
+  .section-body { padding: 2px 14px 14px; }
+  .field-grid, .dialog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .number-field, .stack-field, .dialog label { display: grid; gap: 5px; min-width: 0; color: var(--studio-muted); font-size: 10px; }
+  .number-field input, .stack-field select, .dialog input, .dialog select { width: 100%; min-width: 0; height: 36px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 7px; background: var(--secondary-background-color, #f3f5f6); color: var(--studio-text); }
+  .number-field input:disabled { opacity: .55; }
+  .section-body > .number-field { margin-top: 10px; }
+  .field-grid + .field-grid, .field-grid + .stack-field, .stack-field + .field-grid { margin-top: 10px; }
+  .field-help { color: var(--studio-muted); font-size: 10px; line-height: 1.45; }
+  .danger-zone { padding: 12px 14px; border-bottom: 1px solid var(--studio-border); color: var(--error-color, #db4437); }
+  .metrics { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; font: 10px var(--code-font-family, monospace); }
+  .metrics strong { text-align: right; }
+  .yaml-actions { display: flex; align-items: center; gap: 8px; padding: 0 10px 8px; }
+  .yaml-actions output { color: var(--studio-muted); font-size: 10px; }
+  .yaml pre { max-height: 280px; margin: 0; padding: 12px; overflow: auto; background: #121a24; color: #d9e4ee; font: 10px/1.45 var(--code-font-family, monospace); white-space: pre; }
+
+  .project-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
+  .empty-card { width: min(460px, 100%); padding: 38px; border: 1px solid var(--studio-border); border-radius: 16px; text-align: center; background: var(--studio-surface); box-shadow: 0 18px 60px rgba(0,0,0,.1); }
+  .empty-card > ha-icon { width: 50px; height: 50px; color: var(--studio-accent); }
+  .empty-card h1 { margin: 9px 0; font-size: 27px; }
+  .empty-card p { margin: 0 auto 22px; color: var(--studio-muted); line-height: 1.55; }
+  .dialog-scrim { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(8, 15, 24, .62); backdrop-filter: blur(3px); }
+  .dialog { width: min(560px, 100%); max-height: calc(100vh - 40px); overflow: auto; border-radius: 14px; background: var(--studio-surface); box-shadow: 0 24px 80px rgba(0,0,0,.35); }
+  .dialog > header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 12px; }
+  .dialog h2 { margin: 3px 0 0; font-size: 21px; }
+  .confirm-dialog { width: min(430px, 100%); }
+  .confirm-dialog > p { margin: 0; padding: 4px 20px 18px; color: var(--studio-muted); font-size: 13px; line-height: 1.5; }
+  .confirm-dialog .confirm-delete { color: var(--error-color, #db4437); }
+  .dialog-grid { padding: 10px 20px 20px; }
+  .dialog-grid .wide { grid-column: 1 / -1; }
+  .dialog footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--studio-border); }
 
   @media (max-width: 900px) {
-    .app-shell {
-      height: auto;
-    }
-
-    .topbar {
-      grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .project-context {
-      display: none;
-    }
-
-    .welcome-topline {
-      display: none;
-    }
-
-    .workspace {
-      grid-template-columns: 1fr;
-    }
-
-    .workspace.rail-collapsed {
-      grid-template-columns: 1fr;
-    }
-
-    .workspace.welcome-workspace {
-      grid-template-columns: 1fr;
-    }
-
-    .project-rail {
-      display: none;
-    }
-
-    .inspector {
-      border-left: 0;
-      border-top: 1px solid var(--odx-line);
-      min-height: 420px;
-    }
-
-    .welcome-main {
-      grid-template-columns: minmax(0, 1fr);
-      align-content: start;
-      padding: clamp(28px, 7vw, 56px);
-    }
-
-    .welcome-copy {
-      max-width: 680px;
-    }
-
-    .welcome-visual {
-      width: min(100%, 620px);
-    }
-
-    .canvas-area {
-      min-height: 520px;
-      overflow: hidden;
-      padding: 20px 14px;
-    }
-
-    .preview-boundary {
-      height: min(var(--odx-canvas-max-height), calc(100cqh - 94px));
-    }
+    .brand span, .status { display: none; }
+    .topbar { height: auto; min-height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 7px; padding: calc(var(--safe-area-inset-top, 0px) + 7px) 10px 7px; }
+    .brand { min-width: 0; margin: 0; }
+    .project-name { width: 100%; }
+    .actions { width: 100%; overflow-x: auto; padding-bottom: 1px; }
+    .layout { grid-template-columns: minmax(0, 1fr) !important; }
+    .toolbox, .inspector, .panel-rail { display: none; }
+    .workspace-meta { gap: 8px; padding: 0 8px; }
+    .workspace-meta > span:nth-child(2), .workspace-meta > span:nth-child(3) { display: none; }
+    .zoom-controls { right: 8px; bottom: 8px; }
+    .zoom-controls button:nth-of-type(2), .zoom-controls button:nth-of-type(4) { display: none; }
   }
-
-  @media (max-width: 560px) {
-    .app-shell {
-      grid-template-rows: 56px minmax(0, 1fr);
-    }
-
-    .topbar {
-      padding-inline: 10px;
-    }
-
-    .brand-copy span,
-    .top-actions .secondary-action {
-      display: none;
-    }
-
-    .welcome-main {
-      gap: var(--ha-space-8, 32px);
-      padding: var(--ha-space-6, 24px) var(--ha-space-4, 16px) var(--ha-space-10, 40px);
-    }
-
-    .welcome-copy h1 {
-      font-size: clamp(34px, 12vw, 48px);
-    }
-
-    .welcome-actions {
-      align-items: stretch;
-      flex-direction: column;
-    }
-
-    .welcome-actions ha-button {
-      width: 100%;
-    }
-
-    .device-toolbar {
-      align-items: stretch;
-    }
-
-    .widget-toolbar {
-      align-items: center;
-    }
-
-    .control.grow {
-      min-width: 100%;
-    }
-
-    .custom-control,
-    .panel-control {
-      min-width: 100%;
-    }
-
-    .grid-badge {
-      border-left: 0;
-    }
-
-    .canvas-area {
-      min-height: 440px;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      scroll-behavior: auto !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
-`, N = "https://opendisplay.org/firmware/toolbox/index.html";
-`${N}`, `${N}`, `${N}`, `${N}`;
-var ot = (e) => e <= 1.6 ? {
-	landscape: {
-		columns: 1,
-		rows: 1
-	},
-	portrait: {
-		columns: 1,
-		rows: 1
-	}
-} : e <= 2.2 ? {
-	landscape: {
-		columns: 2,
-		rows: 1
-	},
-	portrait: {
-		columns: 1,
-		rows: 2
-	}
-} : e <= 3.6 ? {
-	landscape: {
-		columns: 3,
-		rows: 1
-	},
-	portrait: {
-		columns: 1,
-		rows: 3
-	}
-} : e <= 4.3 ? {
-	landscape: {
-		columns: 2,
-		rows: 2
-	},
-	portrait: {
-		columns: 2,
-		rows: 2
-	}
-} : e <= 6 ? {
-	landscape: {
-		columns: 3,
-		rows: 2
-	},
-	portrait: {
-		columns: 2,
-		rows: 3
-	}
-} : {
-	landscape: {
-		columns: 3,
-		rows: 3
-	},
-	portrait: {
-		columns: 3,
-		rows: 3
-	}
-}, P = (e, t, n, r, i, a, o) => ({
-	id: `custom-${e}`,
-	manufacturer: "Custom",
-	family: "Custom",
-	name: t,
-	diagonal: n,
-	nativeWidth: r,
-	nativeHeight: i,
-	nativeOrientation: r >= i ? "landscape" : "portrait",
-	palettes: a === "bw" ? ["bw"] : ["bw", a],
-	defaultPalette: a,
-	grid: ot(n),
-	source: N,
-	connectorPins: o,
-	toolboxId: e
-}), st = [
-	P("ep154-200x200", "1.54″ Monochrome · 200×200", 1.54, 200, 200, "bw", [24]),
-	P("ep154-152x152", "1.54″ B/W/R · 152×152", 1.54, 152, 152, "bwr", [24]),
-	P("ep154yr-200x200", "1.54″ B/W/R/Y · 200×200", 1.54, 200, 200, "bwry", [24]),
-	P("ep213-122x250", "2.13″ Monochrome · 122×250", 2.13, 122, 250, "bw", [24]),
-	P("ep213r-122x250", "2.13″ B/W/R/Y · 122×250", 2.13, 122, 250, "bwry", [24]),
-	P("ep266yr-184x360", "2.66″ B/W/R/Y · 184×360", 2.66, 184, 360, "bwry", [24]),
-	P("ep29-128x296", "2.9″ Flexible monochrome · 128×296", 2.9, 128, 296, "bw", [24]),
-	P("ep29r-128x296", "2.9″ B/W/R/Y · 128×296", 2.9, 128, 296, "bwry", [24]),
-	P("ep29yr-168x384", "2.9″ B/W/R/Y · 168×384", 2.9, 168, 384, "bwry", [24]),
-	P("ep35yr-184x384", "3.5″ B/W/R/Y · 184×384", 3.5, 184, 384, "bwry", [24]),
-	P("ep397-800x480", "3.97″ Monochrome · 800×480", 3.97, 800, 480, "bw", [24]),
-	P("ep397-800x480-4gray", "3.97″ 4-level grayscale · 800×480", 3.97, 800, 480, "gray4", [24]),
-	P("ep397yr-800x480", "3.97″ B/W/R/Y · 800×480", 3.97, 800, 480, "bwry", [24]),
-	P("ep42-400x300", "4.2″ Monochrome · 400×300", 4.2, 400, 300, "bw", [24]),
-	P("ep42yr-400x300", "4.2″ B/W/R/Y · 400×300", 4.2, 400, 300, "bwry", [24]),
-	P("ep426-800x480", "4.26″ Monochrome · 800×480", 4.26, 800, 480, "bw", [24]),
-	P("ep426-800x480-4g", "4.26″ 4-level grayscale · 800×480", 4.26, 800, 480, "gray4", [24]),
-	P("ep583-648x480", "5.83″ Monochrome · 648×480", 5.83, 648, 480, "bw", [24]),
-	P("ep75-800x480", "7.5″ Monochrome · 800×480", 7.5, 800, 480, "bw", [24]),
-	P("ep75-800x480-4gray", "7.5″ 4-level grayscale · 800×480", 7.5, 800, 480, "gray4", [24]),
-	P("ep73-spectra-800x480", "7.3″ Spectra 6 · 800×480", 7.3, 800, 480, "spectra6", [50]),
-	P("ep75-bwry-800x480", "7.5″ B/W/R/Y · 800×480", 7.5, 800, 480, "bwry", [24])
-], F = {
-	bw: "Monochrome · black / white",
-	gray4: "Grayscale · 4 levels",
-	gray16: "Grayscale · 16 levels",
+`, ze = (e, t) => {
+	let n = t.trim().toLocaleLowerCase();
+	return n ? e.filter((e) => `${e.name} ${e.description}`.toLocaleLowerCase().includes(n)) : e;
+}, Be = {
+	bw: "Black / white",
 	bwr: "Black / white / red",
 	bwy: "Black / white / yellow",
 	bwry: "Black / white / red / yellow",
-	spectra6: "Spectra 6 · B/W/R/Y/B/G"
-}, ct = "https://www.solum-group.com/esl-n-iot/product-lineup/professional-esl/newton-pro", I = "https://opendisplay.org/what-hardware-to-buy.html", lt = "opendisplay-seeed-7-5-diy", L = (e, t, n, r, i, a, o, s, c, l) => ({
-	id: e,
-	manufacturer: t,
-	family: "OpenDisplay",
-	name: n,
-	diagonal: r,
-	nativeWidth: i,
-	nativeHeight: a,
-	nativeOrientation: i >= a ? "landscape" : "portrait",
-	palettes: o,
-	defaultPalette: s,
-	grid: {
-		landscape: c,
-		portrait: l
-	},
-	source: I
-}), R = (e, t, n, r, i, a, o, s = !1) => ({
-	id: e,
-	manufacturer: "SOLUM",
-	family: "Newton Pro",
-	name: t,
-	diagonal: n,
-	nativeWidth: r,
-	nativeHeight: i,
-	nativeOrientation: r >= i ? "landscape" : "portrait",
-	palettes: s ? ["bw"] : ["bw", "bwry"],
-	defaultPalette: s ? "bw" : "bwry",
-	grid: {
-		landscape: a,
-		portrait: o
-	},
-	freezer: s,
-	source: ct
-}), z = [
-	R("solum-newton-pro-1-6-v", "Newton Pro 1.6″ V", 1.6, 200, 200, {
-		columns: 1,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 1
-	}),
-	R("solum-newton-pro-1-6-h", "Newton Pro 1.6″ H", 1.6, 200, 200, {
-		columns: 1,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 1
-	}),
-	R("solum-newton-pro-2-2", "Newton Pro 2.2″", 2.2, 296, 160, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}),
-	R("solum-newton-pro-2-2-f", "Newton Pro 2.2″ Freezer", 2.2, 296, 160, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}, !0),
-	R("solum-newton-pro-2-6", "Newton Pro 2.6″", 2.6, 360, 184, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}),
-	R("solum-newton-pro-2-6-f", "Newton Pro 2.6″ Freezer", 2.6, 360, 184, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}, !0),
-	R("solum-newton-pro-2-7", "Newton Pro 2.7″", 2.7, 300, 200, {
-		columns: 2,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 2
-	}),
-	R("solum-newton-pro-2-9", "Newton Pro 2.9″", 2.9, 384, 168, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}),
-	R("solum-newton-pro-2-9-f", "Newton Pro 2.9″ Freezer", 2.9, 384, 168, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}, !0),
-	R("solum-newton-pro-3-45", "Newton Pro 3.5″ · 3.45 panel", 3.45, 480, 224, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}),
-	R("solum-newton-pro-3-45-f", "Newton Pro 3.5″ Freezer · 3.45 panel", 3.45, 480, 224, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}, !0),
-	R("solum-newton-pro-3-52", "Newton Pro 3.5″ · 3.52 panel", 3.52, 384, 180, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}),
-	R("solum-newton-pro-3-52-f", "Newton Pro 3.5″ Freezer · 3.52 panel", 3.52, 384, 180, {
-		columns: 3,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 3
-	}, !0),
-	R("solum-newton-pro-4-2", "Newton Pro 4.2″", 4.2, 400, 300, {
-		columns: 2,
-		rows: 2
-	}, {
-		columns: 2,
-		rows: 2
-	}),
-	R("solum-newton-pro-4-3", "Newton Pro 4.3″", 4.3, 522, 152, {
-		columns: 4,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 4
-	}),
-	R("solum-newton-pro-4-5", "Newton Pro 4.5″", 4.5, 480, 176, {
-		columns: 4,
-		rows: 1
-	}, {
-		columns: 1,
-		rows: 4
-	}),
-	R("solum-newton-pro-5-8", "Newton Pro 5.8″", 5.8, 792, 272, {
-		columns: 4,
-		rows: 2
-	}, {
-		columns: 2,
-		rows: 4
-	}),
-	R("solum-newton-pro-5-8-f", "Newton Pro 5.8″ Freezer", 5.8, 792, 272, {
-		columns: 4,
-		rows: 2
-	}, {
-		columns: 2,
-		rows: 4
-	}, !0),
-	R("solum-newton-pro-6-1", "Newton Pro 6.1″", 6.1, 648, 480, {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	R("solum-newton-pro-7-5", "Newton Pro 7.5″", 7.5, 480, 800, {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	R("solum-newton-pro-9-7", "Newton Pro 9.7″", 9.7, 672, 960, {
-		columns: 4,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 4
-	}),
-	R("solum-newton-pro-11-6", "Newton Pro 11.6″", 11.6, 640, 960, {
-		columns: 4,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 4
-	}),
-	R("solum-newton-pro-12-2", "Newton Pro 12.2″", 12.2, 768, 960, {
-		columns: 4,
-		rows: 4
-	}, {
-		columns: 4,
-		rows: 4
-	}),
-	L("opendisplay-e1001", "Seeed Studio", "reTerminal E1001 7.5″", 7.5, 800, 480, ["bw"], "bw", {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	{
-		id: "opendisplay-reterminal-sticky",
-		manufacturer: "Seeed Studio",
-		family: "OpenDisplay",
-		name: "reTerminal sticky 3.97″",
-		diagonal: 3.97,
-		nativeWidth: 800,
-		nativeHeight: 480,
-		nativeOrientation: "landscape",
-		palettes: ["bw"],
-		defaultPalette: "bw",
-		grid: {
-			landscape: {
-				columns: 3,
-				rows: 2
-			},
-			portrait: {
-				columns: 2,
-				rows: 3
-			}
-		},
-		source: I
-	},
-	{
-		id: "opendisplay-e1002",
-		manufacturer: "Seeed Studio",
-		family: "OpenDisplay",
-		name: "reTerminal E1002 7.3″ Spectra 6",
-		diagonal: 7.3,
-		nativeWidth: 800,
-		nativeHeight: 480,
-		nativeOrientation: "landscape",
-		palettes: ["bw", "spectra6"],
-		defaultPalette: "spectra6",
-		grid: {
-			landscape: {
-				columns: 3,
-				rows: 3
-			},
-			portrait: {
-				columns: 3,
-				rows: 3
-			}
-		},
-		source: I
-	},
-	{
-		id: "opendisplay-e1003",
-		manufacturer: "Seeed Studio",
-		family: "OpenDisplay",
-		name: "reTerminal E1003 10.3″",
-		diagonal: 10.3,
-		nativeWidth: 1404,
-		nativeHeight: 1872,
-		nativeOrientation: "portrait",
-		palettes: [
-			"bw",
-			"gray4",
-			"gray16"
-		],
-		defaultPalette: "gray16",
-		grid: {
-			landscape: {
-				columns: 4,
-				rows: 3
-			},
-			portrait: {
-				columns: 3,
-				rows: 4
-			}
-		},
-		source: I
-	},
-	L("opendisplay-e1004", "Seeed Studio", "reTerminal E1004 13.3″ Spectra 6", 13.3, 1200, 1600, ["bw", "spectra6"], "spectra6", {
-		columns: 4,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 4
-	}),
-	L("opendisplay-xiao-7-5", "Seeed Studio", "XIAO 7.5″ ePaper kit", 7.5, 800, 480, ["bw"], "bw", {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	L("opendisplay-seeed-7-5-diy", "Seeed Studio", "7.5″ DIY · EE04", 7.5, 800, 480, ["bw"], "bw", {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	L("opendisplay-4-26-mono-kit", "OpenDisplay", "OpenDisplay 4.26″ Mono Kit", 4.26, 800, 480, ["bw"], "bw", {
-		columns: 2,
-		rows: 2
-	}, {
-		columns: 2,
-		rows: 2
-	}),
-	L("opendisplay-7-3-color-kit", "OpenDisplay", "OpenDisplay 7.3″ Color Kit", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	L("opendisplay-waveshare-photopainter", "Waveshare", "ESP32-S3 PhotoPainter 7.3″", 7.3, 800, 480, ["bw", "spectra6"], "spectra6", {
-		columns: 3,
-		rows: 3
-	}, {
-		columns: 3,
-		rows: 3
-	}),
-	...st
-], B = (e) => z.find((t) => t.id === e) ?? z.find((e) => e.id === "opendisplay-seeed-7-5-diy") ?? z[0], ut = (e, t) => e.nativeOrientation === t ? {
-	width: e.nativeWidth,
-	height: e.nativeHeight
-} : {
-	width: e.nativeHeight,
-	height: e.nativeWidth
-}, dt = [
-	{
-		value: "stretch",
-		label: "Stretch"
-	},
-	{
-		value: "contain",
-		label: "Fit"
-	},
-	{
-		value: "cover",
-		label: "Cover"
-	},
-	{
-		value: "manual",
-		label: "Manual"
-	}
-], ft = [
-	{
-		value: "top-left",
-		label: "Top left"
-	},
-	{
-		value: "top-center",
-		label: "Top center"
-	},
-	{
-		value: "top-right",
-		label: "Top right"
-	},
-	{
-		value: "center-left",
-		label: "Center left"
-	},
-	{
-		value: "center",
-		label: "Center"
-	},
-	{
-		value: "center-right",
-		label: "Center right"
-	},
-	{
-		value: "bottom-left",
-		label: "Bottom left"
-	},
-	{
-		value: "bottom-center",
-		label: "Bottom center"
-	},
-	{
-		value: "bottom-right",
-		label: "Bottom right"
-	}
-], pt = (e) => ({
-	media: e,
-	mode: "contain",
-	anchor: "center",
-	scale: 100
-}), mt = (e) => {
-	if (e.metadata?.title) return e.metadata.title;
-	if (e.media_content_id.startsWith("media-source://image_upload/")) return "Home Assistant image";
-	let t = e.media_content_id.split("/").at(-1);
-	if (!t) return "Background image";
-	try {
-		return decodeURIComponent(t);
-	} catch {
-		return t;
-	}
-}, ht = (e) => ({
-	...e,
-	metadata: {
-		...e.metadata,
-		title: mt(e)
-	}
-}), gt = (e) => Number.isFinite(e) ? Math.max(1, Math.min(400, Math.round(e))) : 100, _t = (e, t) => t ? {
-	...e,
-	regions: []
-} : e, vt = 0, yt = {
-	showBackground: !1,
-	showBorder: !1,
-	borderRadius: null
-}, bt = (e) => !!(e.label || e.widget || e.rowSpan > 1 || e.columnSpan > 1), xt = (e) => Math.max(0, Math.min(128, Math.round(Number.isFinite(e) ? e : 0))), V = (e) => Math.max(0, Math.min(128, Math.round(Number.isFinite(e) ? e : 0))), St = (e, t) => Math.max(4, Math.min(24, Math.round(Math.min(e, t) / 40))), Ct = (e, t, n, r) => {
-	let i = r.filter(bt);
-	return i.length === 1 && i[0].row === 1 && i[0].column === 1 && i[0].rowSpan === n.rows && i[0].columnSpan === n.columns ? 0 : Math.max(3, Math.min(10, Math.round(Math.min(e, t) / 60)));
-}, wt = (e) => {
-	let t = Ct(e.width, e.height, e.grid, e.regions);
-	return {
-		screenPadding: Number.isInteger(e.screenPadding) ? xt(e.screenPadding) : t,
-		regionGap: Number.isInteger(e.regionGap) ? xt(e.regionGap) : t
-	};
-}, H = (e) => ({
-	...yt,
-	...e.appearance
-}), Tt = (e, t) => {
-	let n = H(t).borderRadius;
-	return n === null ? Number.isInteger(e.regionBorderRadius) ? V(e.regionBorderRadius) : St(e.width, e.height) : V(n);
-}, U = (e = globalThis.crypto) => {
-	if (typeof e?.randomUUID == "function") return e.randomUUID();
-	if (e) {
-		let t = e.getRandomValues(/* @__PURE__ */ new Uint8Array(16));
-		t[6] = t[6] & 15 | 64, t[8] = t[8] & 63 | 128;
-		let n = Array.from(t, (e) => e.toString(16).padStart(2, "0")).join("");
-		return `${n.slice(0, 8)}-${n.slice(8, 12)}-${n.slice(12, 16)}-${n.slice(16, 20)}-${n.slice(20)}`;
-	}
-	return vt += 1, `odx-${Date.now().toString(36)}-${vt.toString(36)}`;
-}, W = (e) => {
-	let t = [];
-	for (let n = 1; n <= e.rows; n += 1) for (let r = 1; r <= e.columns; r += 1) t.push({
-		id: U(),
-		row: n,
-		column: r,
-		rowSpan: 1,
-		columnSpan: 1,
-		appearance: { ...yt }
-	});
-	return t;
-}, Et = (e, t) => t.row >= e.row && t.row < e.row + e.rowSpan && t.column >= e.column && t.column < e.column + e.columnSpan, Dt = (e, t, n) => {
-	let r = Math.min(t.row, n.row), i = Math.min(t.column, n.column), a = Math.max(t.row, n.row), o = Math.max(t.column, n.column), s = e.filter((e) => e.row >= r && e.column >= i && e.row + e.rowSpan - 1 <= a && e.column + e.columnSpan - 1 <= o);
-	if ((a - r + 1) * (o - i + 1) !== s.reduce((e, t) => e + t.rowSpan * t.columnSpan, 0) || s.length === 0) return null;
-	let c = s.find((e) => e.widget) ?? s[0], l = c.widget, u = new Set(s.map((e) => e.id));
-	return [...e.filter((e) => !u.has(e.id)), {
-		id: U(),
-		row: r,
-		column: i,
-		rowSpan: a - r + 1,
-		columnSpan: o - i + 1,
-		appearance: { ...H(c) },
-		widget: l
-	}];
-}, Ot = (e, t) => {
-	let n = e.find((e) => e.id === t);
-	if (!n || n.rowSpan === 1 && n.columnSpan === 1 && !n.label) return e;
-	if (n.rowSpan === 1 && n.columnSpan === 1) return e.map((e) => e.id === t ? {
-		id: U(),
-		row: e.row,
-		column: e.column,
-		rowSpan: 1,
-		columnSpan: 1,
-		appearance: { ...H(n) }
-	} : e);
-	let r = [];
-	for (let e = n.row; e < n.row + n.rowSpan; e += 1) for (let t = n.column; t < n.column + n.columnSpan; t += 1) r.push({
-		id: U(),
-		row: e,
-		column: t,
-		rowSpan: 1,
-		columnSpan: 1,
-		appearance: { ...H(n) }
-	});
-	return [...e.filter((e) => e.id !== t), ...r];
-}, kt = (e, t, n, r) => t.columns === n.rows && t.rows === n.columns ? e.map((e) => r === "clockwise" ? {
-	...e,
-	row: e.column,
-	column: t.rows - e.row - e.rowSpan + 2,
-	rowSpan: e.columnSpan,
-	columnSpan: e.rowSpan
-} : {
-	...e,
-	row: t.columns - e.column - e.columnSpan + 2,
-	column: e.row,
-	rowSpan: e.columnSpan,
-	columnSpan: e.rowSpan
-}) : W(n), At = (e, t) => ({ ...e.grid[t] }), G = {
-	black: {
-		value: "#000000",
-		label: "Black"
-	},
-	white: {
-		value: "#ffffff",
-		label: "White"
-	},
-	red: {
-		value: "#d22626",
-		label: "Red"
-	},
-	yellow: {
-		value: "#e5b800",
-		label: "Yellow"
-	},
-	blue: {
-		value: "#285995",
-		label: "Blue"
-	},
-	green: {
-		value: "#72a85a",
-		label: "Green"
-	}
-}, jt = (e) => Array.from({ length: e }, (t, n) => ({
-	value: `#${Math.round(255 * n / (e - 1)).toString(16).padStart(2, "0").repeat(3)}`,
-	label: n === 0 ? "Black" : n === e - 1 ? "White" : `Gray ${n}`
-})), Mt = {
-	bw: [G.black, G.white],
-	gray4: jt(4),
-	gray16: jt(16),
+	spectra6: "Spectra 6 · black / white / red / yellow / blue / green"
+}, Ve = {
+	bw: ["black", "white"],
 	bwr: [
-		G.black,
-		G.white,
-		G.red
+		"black",
+		"white",
+		"red"
 	],
 	bwy: [
-		G.black,
-		G.white,
-		G.yellow
+		"black",
+		"white",
+		"yellow"
 	],
 	bwry: [
-		G.black,
-		G.white,
-		G.red,
-		G.yellow
+		"black",
+		"white",
+		"red",
+		"yellow"
 	],
 	spectra6: [
-		G.black,
-		G.white,
-		G.red,
-		G.yellow,
-		G.blue,
-		G.green
+		"black",
+		"white",
+		"red",
+		"yellow",
+		"blue",
+		"green"
 	]
-}, Nt = (e) => Mt[e], Pt = (e, t) => {
-	let n = Nt(e), r = String(t ?? "").toLowerCase();
-	return n.find((e) => e.value === r)?.value ?? n[0].value;
-}, Ft = (e = "Kitchen display", t = "en") => {
-	let n = B(lt), r = "landscape", i = At(n, r), a = W(i), o = Ct(n.nativeWidth, n.nativeHeight, i, a), s = (/* @__PURE__ */ new Date()).toISOString();
-	return {
-		id: U(),
-		schemaVersion: 1,
-		name: e,
-		status: "draft",
-		language: t,
-		theme: "light",
-		fontFamily: "default",
-		textScale: "regular",
-		displayId: n.id,
-		orientation: r,
-		palette: n.defaultPalette,
-		width: n.nativeWidth,
-		height: n.nativeHeight,
-		grid: i,
-		screenPadding: o,
-		regionGap: o,
-		regionBorderRadius: St(n.nativeWidth, n.nativeHeight),
-		regions: a,
-		createdAt: s,
-		updatedAt: s
-	};
-}, K = (e, t) => String(e[t] ?? ""), It = (e, t) => Number(e[t] ?? 0), q = (e, t = "") => C`
-  <svg class="widget-icon" viewBox="0 0 24 24" role="img" aria-label=${t}>
-    <path d=${e}></path>
-  </svg>
-`, J = (e) => C`
-  <svg slot="start" class="button-icon" viewBox="0 0 24 24" aria-hidden="true">
-    <path d=${e}></path>
-  </svg>
-`, Lt = {
-	id: "calendar",
-	version: "0.5.0",
-	name: "Calendar",
-	description: "An agenda from one or more calendar entities.",
-	icon: Ke,
-	styles: o`
-  .event-list {
-    min-height: 0;
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    justify-content: space-evenly;
-  }
-
-  .event-row {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(38px, 0.7fr) minmax(36px, 0.5fr) minmax(0, 3fr);
-    gap: 0.6em;
-    align-items: center;
-    padding: 0.32em 0;
-    border-bottom: 1px solid var(--screen-muted);
-    font-size: clamp(6px, 5.6cqh, 13px);
-  }
-
-  .event-row:last-child {
-    border-bottom: 0;
-  }
-
-  .event-day {
-    color: var(--screen-accent);
-    font-weight: 900;
-    font-size: 0.82em;
-  }
-
-  .event-time {
-    font-variant-numeric: tabular-nums;
-  }
-
-  .event-row strong {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-`,
-	defaults: {
-		calendar: "",
-		title: "Upcoming events",
-		days: 5,
-		showLocation: !0,
-		showDescription: !1,
-		time24h: !0
-	},
-	options: [
-		{
-			key: "calendar",
-			label: "Calendar",
-			type: "calendar"
-		},
-		{
-			key: "title",
-			label: "Title",
-			type: "text"
-		},
-		{
-			key: "days",
-			label: "Day range",
-			type: "number",
-			min: 1,
-			max: 31,
-			step: 1
-		},
-		{
-			key: "showLocation",
-			label: "Show location",
-			type: "toggle"
-		},
-		{
-			key: "showDescription",
-			label: "Show description",
-			type: "toggle"
-		},
-		{
-			key: "time24h",
-			label: "24-hour time",
-			type: "toggle"
-		}
-	],
-	render: (e, t) => {
-		let n = t.compact ? 2 : 4, r = [
-			[
-				"TODAY",
-				"09:30",
-				"Team stand-up"
-			],
-			[
-				"TODAY",
-				"14:00",
-				"Project review"
-			],
-			[
-				"THU",
-				"18:15",
-				"Training"
-			],
-			[
-				"FRI",
-				"08:00",
-				"Dentist"
-			],
-			[
-				"SAT",
-				"12:30",
-				"Family lunch"
-			]
-		].slice(0, n);
-		return C`
-      <div class="widget calendar-widget ${t.compact ? "compact" : ""}">
-        <div class="widget-heading">
-          <span>${q(Ke)}</span>
-          <strong>${K(e, "title")}</strong>
-          <span class="widget-kicker">${It(e, "days")} days</span>
-        </div>
-        <div class="event-list">
-          ${r.map(([e, t, n]) => C`
-              <div class="event-row">
-                <span class="event-day">${e}</span>
-                <span class="event-time">${t}</span>
-                <strong>${n}</strong>
-              </div>
-            `)}
-        </div>
-      </div>
-    `;
-	}
-}, Rt = {
-	id: "sensor",
-	version: "0.6.1",
-	name: "Sensor",
-	description: "Current value of a selected Home Assistant sensor.",
-	icon: et,
-	styles: o`
-  .sensor-widget {
-    justify-content: space-between;
-  }
-
-  .sensor-name {
-    max-width: 100%;
-    overflow: hidden;
-    font-size: clamp(10px, 6cqh, 20px);
-    font-weight: 700;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .sensor-reading {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    align-self: stretch;
-    justify-content: center;
-    gap: clamp(8px, 5cqw, 24px);
-  }
-
-  .sensor-reading > .widget-icon {
-    width: clamp(28px, 24cqh, 72px);
-    height: clamp(28px, 24cqh, 72px);
-  }
-
-  .sensor-reading > strong {
-    font-size: clamp(26px, 22cqh, 76px);
-    line-height: 1;
-  }
-`,
-	defaults: {
-		entity: "",
-		showEntityId: !0,
-		showFooter: !0
-	},
-	options: [
-		{
-			key: "entity",
-			label: "Sensor entity",
-			required: !0,
-			selector: { entity: { filter: { domain: "sensor" } } }
-		},
-		{
-			key: "showEntityId",
-			label: "Show entity ID",
-			selector: { boolean: {} }
-		},
-		{
-			key: "showFooter",
-			label: "Show footer",
-			selector: { boolean: {} }
-		}
-	],
-	render: (e) => C`
-    <div class="widget sensor-widget">
-      <span class="sensor-name">${K(e, "entity") || "Choose a sensor"}</span>
-      <div class="sensor-reading">
-        ${q(et, "Sensor")}
-        <strong>Live data</strong>
-      </div>
-    </div>
-  `
-}, zt = {
-	id: "text",
-	version: "0.5.0",
-	name: "Text",
-	description: "A simple message or heading.",
-	icon: $e,
-	styles: o`
-  .note-widget {
-    justify-content: center;
-    gap: 0.45em;
-  }
-
-  .note-widget.align-center {
-    text-align: center;
-    align-items: center;
-  }
-
-  .note-widget.align-right {
-    text-align: right;
-    align-items: flex-end;
-  }
-
-  .note-eyebrow {
-    color: var(--screen-accent);
-    font-size: clamp(6px, min(7cqh, 8cqw), 16px);
-    font-weight: 900;
-    letter-spacing: 0.1em;
-  }
-
-  .note-widget strong {
-    max-width: 95%;
-    font-size: clamp(9px, min(17cqh, 15cqw), 42px);
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-  }
-
-  .note-widget.emphasis-strong strong {
-    text-transform: uppercase;
-  }
-
-  .note-widget.emphasis-accent {
-    background: var(--screen-accent);
-    color: var(--screen-paper);
-  }
-
-  .note-widget.emphasis-accent .note-eyebrow {
-    color: var(--screen-accent-2);
-  }
-`,
-	defaults: {
-		title: "",
-		text: "Text",
-		align: "left"
-	},
-	options: [
-		{
-			key: "title",
-			label: "Title",
-			type: "text"
-		},
-		{
-			key: "text",
-			label: "Content",
-			type: "text"
-		},
-		{
-			key: "align",
-			label: "Alignment",
-			type: "select",
-			options: [
-				{
-					label: "Left",
-					value: "left"
-				},
-				{
-					label: "Center",
-					value: "center"
-				},
-				{
-					label: "Right",
-					value: "right"
-				}
-			]
-		}
-	],
-	render: (e) => C`
-    <div class="widget note-widget align-${K(e, "align")}">
-      <span class="note-eyebrow">${K(e, "title")}</span>
-      <strong>${K(e, "text")}</strong>
-    </div>
-  `
-}, Bt = {
-	id: "weather",
-	version: "0.6.1",
-	name: "Weather",
-	description: "Current conditions and a daily Home Assistant forecast.",
-	icon: it,
-	styles: o`
-  .weather-widget-placeholder {
-    align-items: center;
-    justify-content: center;
-    gap: clamp(4px, 3cqh, 12px);
-    text-align: center;
-  }
-
-  .weather-widget-placeholder svg {
-    width: clamp(24px, min(28cqw, 28cqh), 72px);
-    height: clamp(24px, min(28cqw, 28cqh), 72px);
-  }
-
-  .weather-widget-placeholder strong {
-    font-size: clamp(12px, min(12cqw, 12cqh), 28px);
-  }
-
-  .weather-widget-placeholder span {
-    max-width: 90%;
-    overflow: hidden;
-    font-size: clamp(8px, min(7cqw, 7cqh), 15px);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`,
-	defaults: {
-		weather: "",
-		showHumidity: !0,
-		showFeelsLike: !0,
-		showForecast: !0,
-		showEntityId: !0,
-		showFooter: !0
-	},
-	options: [
-		{
-			key: "weather",
-			label: "Weather entity",
-			required: !0,
-			selector: { entity: { filter: { domain: "weather" } } }
-		},
-		{
-			key: "showHumidity",
-			label: "Show humidity",
-			selector: { boolean: {} }
-		},
-		{
-			key: "showFeelsLike",
-			label: "Show feels like",
-			selector: { boolean: {} }
-		},
-		{
-			key: "showForecast",
-			label: "Show forecast",
-			selector: { boolean: {} }
-		},
-		{
-			key: "showEntityId",
-			label: "Show entity ID",
-			selector: { boolean: {} }
-		},
-		{
-			key: "showFooter",
-			label: "Show footer",
-			selector: { boolean: {} }
-		}
-	],
-	render: (e) => C`
-    <div class="widget weather-widget-placeholder">
-      ${q(it, "Weather")}
-      <strong>Weather</strong>
-      <span>${K(e, "weather") || "Choose a weather entity"}</span>
-    </div>
-  `
-}, Vt = [
-	Lt,
+}, V = (e, t, n, r, i = !1) => ({
+	id: `solum-${e}`,
+	manufacturer: "SOLUM",
+	name: `Newton Pro ${t}`,
+	width: n,
+	height: r,
+	palettes: i ? ["bw"] : ["bw", "bwry"],
+	defaultPalette: i ? "bw" : "bwry"
+}), H = [
 	{
-		id: "hero-weather",
-		version: "0.1.0",
-		name: "Hero Weather",
-		description: "Large current temperature, condition, and today’s minimum and maximum.",
-		icon: it,
-		defaults: {
-			weather: "",
-			primaryColor: "#000000",
-			accentColor: "#d22626"
-		},
-		options: [
-			{
-				key: "weather",
-				label: "Weather entity",
-				required: !0,
-				selector: { entity: { filter: { domain: "weather" } } }
-			},
-			{
-				key: "primaryColor",
-				label: "Primary color",
-				selector: { opendisplay_color: {} }
-			},
-			{
-				key: "accentColor",
-				label: "Accent color",
-				selector: { opendisplay_color: {} }
-			}
+		id: "seeed-e1001",
+		manufacturer: "Seeed Studio",
+		name: "reTerminal E1001 7.5″",
+		width: 800,
+		height: 480,
+		palettes: ["bw"],
+		defaultPalette: "bw"
+	},
+	{
+		id: "seeed-sticky",
+		manufacturer: "Seeed Studio",
+		name: "reTerminal sticky 3.97″",
+		width: 800,
+		height: 480,
+		palettes: ["bw"],
+		defaultPalette: "bw"
+	},
+	{
+		id: "seeed-xiao-7-5",
+		manufacturer: "Seeed Studio",
+		name: "XIAO 7.5″ ePaper kit",
+		width: 800,
+		height: 480,
+		palettes: ["bw"],
+		defaultPalette: "bw"
+	},
+	{
+		id: "opendisplay-4-26",
+		manufacturer: "OpenDisplay",
+		name: "OpenDisplay 4.26″ Mono Kit",
+		width: 800,
+		height: 480,
+		palettes: ["bw"],
+		defaultPalette: "bw"
+	},
+	{
+		id: "eink-spectra6-7-3",
+		manufacturer: "E Ink",
+		name: "Spectra 6 7.3″ · ED2208-GCA",
+		width: 800,
+		height: 480,
+		palettes: ["spectra6"],
+		defaultPalette: "spectra6"
+	},
+	{
+		id: "eink-spectra6-13-3",
+		manufacturer: "E Ink",
+		name: "Spectra 6 13.3″ · ED2208-NCA",
+		width: 1200,
+		height: 1600,
+		palettes: ["spectra6"],
+		defaultPalette: "spectra6"
+	},
+	V("1-6-v", "1.6″ V", 200, 200),
+	V("1-6-h", "1.6″ H", 200, 200),
+	V("2-2", "2.2″", 296, 160),
+	V("2-2-freezer", "2.2″ Freezer", 296, 160, !0),
+	V("2-6", "2.6″", 360, 184),
+	V("2-6-freezer", "2.6″ Freezer", 360, 184, !0),
+	V("2-7", "2.7″", 300, 200),
+	V("2-9", "2.9″", 384, 168),
+	V("2-9-freezer", "2.9″ Freezer", 384, 168, !0),
+	V("3-45", "3.5″ · 3.45 panel", 480, 224),
+	V("3-52", "3.5″ · 3.52 panel", 384, 180),
+	V("4-2", "4.2″", 400, 300),
+	V("4-3", "4.3″", 522, 152),
+	V("4-5", "4.5″", 480, 176),
+	V("5-8", "5.8″", 792, 272),
+	V("6-1", "6.1″", 648, 480),
+	V("7-5", "7.5″", 800, 480),
+	V("9-7", "9.7″", 672, 960),
+	V("11-6", "11.6″", 640, 960),
+	V("12-2", "12.2″", 768, 960),
+	{
+		id: "custom",
+		manufacturer: "Custom",
+		name: "Custom display",
+		width: 800,
+		height: 480,
+		palettes: [
+			"bw",
+			"bwr",
+			"bwy",
+			"bwry",
+			"spectra6"
 		],
-		styles: o`
-    .hero-weather-widget {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-      gap: 6%;
-      padding: 6%;
-      box-sizing: border-box;
-      color: var(--hero-primary);
-      text-align: center;
-    }
-
-    .hero-weather-current {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .hero-weather-current strong {
-      font-size: clamp(44px, 48cqh, 170px);
-      line-height: 0.82;
-      letter-spacing: -0.055em;
-    }
-
-    .hero-weather-current span {
-      margin-top: 4%;
-      font-size: clamp(12px, 11cqh, 34px);
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .hero-weather-range {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: clamp(14px, 14cqh, 40px);
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .hero-weather-range .high { color: var(--hero-accent); }
-  `,
-		render: (e) => C`
-    <div
-      class="widget hero-weather-widget"
-      style=${`--hero-primary:${K(e, "primaryColor")};--hero-accent:${K(e, "accentColor")}`}
-    >
-      <div class="hero-weather-current"><strong>23°</strong><span>Partly cloudy</span></div>
-      <div class="hero-weather-range"><span class="high">↑ 27°</span><span>↓ 16°</span></div>
-    </div>
-  `
-	},
-	{
-		id: "section-title",
-		version: "0.1.0",
-		name: "Section Title",
-		description: "Localized weekday and date heading for a dashboard section.",
-		icon: qe,
-		defaults: {
-			source: "current",
-			weekdayColor: "#000000",
-			dateColor: "#d22626"
-		},
-		options: [{
-			key: "weekdayColor",
-			label: "Weekday color",
-			selector: { opendisplay_color: {} }
-		}, {
-			key: "dateColor",
-			label: "Date color",
-			selector: { opendisplay_color: {} }
-		}],
-		styles: o`
-    .section-title-widget {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 8%;
-      box-sizing: border-box;
-      text-transform: uppercase;
-    }
-
-    .section-title-widget strong {
-      color: var(--section-weekday);
-      font-size: clamp(14px, 30cqh, 56px);
-      line-height: 0.95;
-    }
-
-    .section-title-widget span {
-      color: var(--section-date);
-      font-size: clamp(11px, 21cqh, 36px);
-      font-weight: 800;
-      line-height: 1;
-    }
-  `,
-		render: (e) => C`
-    <div
-      class="widget section-title-widget"
-      style=${`--section-weekday:${K(e, "weekdayColor")};--section-date:${K(e, "dateColor")}`}
-    >
-      <strong>Monday</strong>
-      <span>25 Aug 2025</span>
-    </div>
-  `
-	},
-	Rt,
-	zt,
-	Bt
-], Y = (e) => Vt.find((t) => t.id === e), Ht = (e) => {
-	let t = Y(e.id);
-	return t ? {
-		...t,
-		version: e.version,
-		name: e.name,
-		description: e.description,
-		defaults: e.defaults,
-		options: e.fields
-	} : {
-		id: e.id,
-		version: e.version,
-		name: e.name,
-		description: e.description,
-		icon: e.icon,
-		defaults: e.defaults,
-		options: e.fields,
-		styles: o``,
-		render: () => C`
-      <div class="empty-region-copy">
-        <ha-icon .icon=${e.icon}></ha-icon>
-        <strong>${e.name}</strong>
-        <span>Loading exact preview…</span>
-      </div>
-    `
+		defaultPalette: "bw"
+	}
+], U = (e) => H.find((t) => t.id === e) ?? H[0], He = () => Math.floor(Math.random() * 256), Ue = () => {
+	let e = globalThis.crypto;
+	if (typeof e?.randomUUID == "function") return e.randomUUID();
+	let t = /* @__PURE__ */ new Uint8Array(16);
+	typeof e?.getRandomValues == "function" ? e.getRandomValues(t) : t.forEach((e, n) => {
+		t[n] = He();
+	}), t[6] = t[6] & 15 | 64, t[8] = t[8] & 63 | 128;
+	let n = [...t].map((e) => e.toString(16).padStart(2, "0"));
+	return `${n.slice(0, 4).join("")}-${n.slice(4, 6).join("")}-${n.slice(6, 8).join("")}-${n.slice(8, 10).join("")}-${n.slice(10).join("")}`;
+}, We = (e, t) => {
+	let { x: n, y: r, displayWidth: i, displayHeight: a } = t, o = Math.min(i - 1, n + 160), s = Math.min(a - 1, r + 90);
+	switch (e) {
+		case "text": return {
+			type: "text",
+			value: "Text",
+			x: n,
+			y: r,
+			size: 32,
+			color: "black"
+		};
+		case "rectangle": return {
+			type: "rectangle",
+			x_start: n,
+			y_start: r,
+			x_end: o,
+			y_end: s,
+			fill: null,
+			outline: "black",
+			width: 2
+		};
+		case "line": return {
+			type: "line",
+			x_start: n,
+			y_start: r,
+			x_end: o,
+			y_end: s,
+			fill: "black",
+			width: 2,
+			dashed: !1
+		};
+		case "circle": return {
+			type: "circle",
+			x: n,
+			y: r,
+			radius: Math.max(8, Math.min(40, n, r, i - n - 1, a - r - 1)),
+			fill: null,
+			outline: "black",
+			width: 2
+		};
+		case "ellipse": return {
+			type: "ellipse",
+			x_start: n,
+			y_start: r,
+			x_end: o,
+			y_end: s,
+			fill: null,
+			outline: "black",
+			width: 2
+		};
+		case "icon": return {
+			type: "icon",
+			value: "star-outline",
+			x: n,
+			y: r,
+			size: 48,
+			color: "black",
+			anchor: "lt"
+		};
+		case "qrcode": return {
+			type: "qrcode",
+			data: "ODX",
+			x: n,
+			y: r,
+			boxsize: 3,
+			border: 1,
+			color: "black",
+			bgcolor: "white"
+		};
+		case "progress_bar": return {
+			type: "progress_bar",
+			x_start: n,
+			y_start: r,
+			x_end: o,
+			y_end: Math.min(a - 1, r + 32),
+			progress: 50,
+			direction: "right",
+			background: "white",
+			fill: "accent",
+			outline: "black",
+			width: 1,
+			show_percentage: !0
+		};
+		default: return;
+	}
+}, Ge = [
+	"nw",
+	"n",
+	"ne",
+	"e",
+	"se",
+	"s",
+	"sw",
+	"w"
+], W = (e, t, n) => Math.max(t, Math.min(n, e)), Ke = (e, t, n) => n + Math.round((e - n) / t) * t, qe = (e) => e.includes("e") || e.includes("w"), Je = (e) => e.includes("n") || e.includes("s"), G = (e, t, n, r) => r ? Ke(e, t, n) : Math.round(e), Ye = ({ bounds: e, handle: t, deltaX: n, deltaY: r, minimumWidth: i, minimumHeight: a, area: o, preserveAspect: s, snapSize: c, snapEnabled: l }) => {
+	let u = o.x + o.width, d = o.y + o.height, f = e.x, p = e.y, m = e.x + e.width, h = e.y + e.height, g = f + e.width / 2, ee = p + e.height / 2, _ = f, v = p, y = m, b = h;
+	if (t.includes("w") && (_ = G(f + n, c, o.x, l)), t.includes("e") && (y = G(m + n, c, o.x, l)), t.includes("n") && (v = G(p + r, c, o.y, l)), t.includes("s") && (b = G(h + r, c, o.y, l)), t.includes("w") && (_ = W(_, o.x, m - i)), t.includes("e") && (y = W(y, f + i, u)), t.includes("n") && (v = W(v, o.y, h - a)), t.includes("s") && (b = W(b, p + a, d)), !s) return {
+		x: Math.round(_),
+		y: Math.round(v),
+		width: Math.round(y - _),
+		height: Math.round(b - v)
 	};
-}, Ut = Vt.map((e) => e.styles), Wt = o`
-  .widget {
-    width: 100%;
-    height: 100%;
-    padding: clamp(5px, 2.4cqw, 18px);
-    display: flex;
-    flex-direction: column;
-    color: var(--screen-ink);
-    background: var(--screen-paper);
-    overflow: hidden;
-  }
-
-  .widget-heading {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 0.5em;
-    align-items: center;
-    border-bottom: max(1px, 0.12cqw) solid var(--screen-ink);
-    padding-bottom: 0.42em;
-    font-size: clamp(7px, 6.5cqh, 15px);
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .widget-heading strong {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .widget-icon {
-    width: 1.2em;
-    height: 1.2em;
-    display: block;
-    fill: currentColor;
-  }
-
-  .widget-kicker {
-    color: var(--screen-accent);
-    font-weight: 800;
-  }
-`;
+	let x = e.width / Math.max(1, e.height), S = Math.max(i, y - _), C = Math.max(a, b - v), te = Math.abs(S - e.width) / Math.max(1, e.width), w = Math.abs(C - e.height) / Math.max(1, e.height), T, E;
+	qe(t) && (!Je(t) || te >= w) ? (T = S, E = T / x) : (E = C, T = E * x);
+	let D = t.includes("w") ? m - o.x : t.includes("e") ? u - f : Math.max(1, Math.min(g - o.x, u - g) * 2), ne = t.includes("n") ? h - o.y : t.includes("s") ? d - p : Math.max(1, Math.min(ee - o.y, d - ee) * 2), re = Math.max(i / Math.max(1, e.width), a / Math.max(1, e.height)), O = Math.min(D / Math.max(1, e.width), ne / Math.max(1, e.height)), k = W(Math.max(T / Math.max(1, e.width), E / Math.max(1, e.height)), Math.min(re, O), O);
+	return T = Math.max(1, Math.round(e.width * k)), E = Math.max(1, Math.round(e.height * k)), _ = t.includes("w") ? m - T : t.includes("e") ? f : g - T / 2, v = t.includes("n") ? h - E : t.includes("s") ? p : ee - E / 2, _ = W(Math.round(_), o.x, u - T), v = W(Math.round(v), o.y, d - E), {
+		x: _,
+		y: v,
+		width: T,
+		height: E
+	};
+}, K = (e, t, n, r) => {
+	let i = r.includes("w") ? e.x + e.width - t : r.includes("e") ? e.x : e.x + (e.width - t) / 2, a = r.includes("n") ? e.y + e.height - n : r.includes("s") ? e.y : e.y + (e.height - n) / 2;
+	return {
+		x: Math.round(i),
+		y: Math.round(a),
+		width: t,
+		height: n
+	};
+};
 //#endregion
 //#region \0@oxc-project+runtime@0.146.0/helpers/esm/decorate.js
-function X(e, t, n, r) {
+function q(e, t, n, r) {
 	var i = arguments.length, a = i < 3 ? t : r === null ? r = Object.getOwnPropertyDescriptor(t, n) : r, o;
 	if (typeof Reflect == "object" && typeof Reflect.decorate == "function") a = Reflect.decorate(e, t, n, r);
 	else for (var s = e.length - 1; s >= 0; s--) (o = e[s]) && (a = (i < 3 ? o(a) : i > 3 ? o(t, n, a) : o(t, n)) || a);
@@ -3820,1084 +1095,978 @@ function X(e, t, n, r) {
 }
 //#endregion
 //#region src/odx-app.ts
-var Z = (e, t) => {
-	if (e instanceof Error && e.message) return e.message;
-	if (typeof e == "string" && e) return e;
-	if (e && typeof e == "object") {
-		let n = e;
-		if (typeof n.message == "string" && n.message) return n.message;
-		if (typeof n.body == "string" && n.body) return n.body;
-		if (typeof n.code == "string" && n.code) return `${t} (${n.code})`;
-	}
-	return t;
-}, Gt = (e) => {
-	let t = (/* @__PURE__ */ new Date()).toISOString();
+var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)), Xe = (e, t, n = 0) => n + Math.round((e - n) / t) * t, X = (e, t) => e instanceof Error && e.message ? e.message : typeof e == "string" && e ? e : t, Z = (e) => "x_start" in e, Ze = {
+	text: "Text",
+	rectangle: "Rectangle",
+	line: "Line",
+	circle: "Circle",
+	ellipse: "Ellipse",
+	icon: "Icon",
+	qrcode: "QR code",
+	progress_bar: "Progress bar"
+}, Qe = {
+	text: "mdi:format-text",
+	rectangle: "mdi:rectangle-outline",
+	line: "mdi:vector-line",
+	circle: "mdi:circle-outline",
+	ellipse: "mdi:ellipse-outline",
+	icon: "mdi:star-outline",
+	qrcode: "mdi:qrcode",
+	progress_bar: "mdi:progress-helper"
+}, $e = {
+	nw: "north west",
+	n: "north",
+	ne: "north east",
+	e: "east",
+	se: "south east",
+	s: "south",
+	sw: "south west",
+	w: "west"
+}, et = (e, t = H[0].id) => {
+	let n = U(t);
 	return {
-		...structuredClone(e),
-		id: U(),
-		name: `${e.name} copy`,
-		createdAt: t,
-		updatedAt: t,
-		regions: e.regions.map((e) => ({
-			...structuredClone(e),
-			id: U()
-		}))
+		id: "",
+		schemaVersion: 3,
+		name: "New dashboard",
+		status: "draft",
+		language: e || "en",
+		display: {
+			profileId: n.id,
+			width: n.width,
+			height: n.height,
+			palette: n.defaultPalette,
+			background: "white",
+			padding: 0,
+			snapSize: 5
+		},
+		items: [],
+		createdAt: "",
+		updatedAt: ""
 	};
-}, Q = (e) => {
-	let t = e + 1, n = "";
-	for (; t > 0;) --t, n = String.fromCharCode(65 + t % 26) + n, t = Math.floor(t / 26);
-	return n;
-}, $ = class extends k {
+}, tt = (e) => {
+	if (Z(e)) return {
+		x: Math.min(e.x_start, e.x_end),
+		y: Math.min(e.y_start, e.y_end),
+		width: Math.abs(e.x_end - e.x_start) + 1,
+		height: Math.abs(e.y_end - e.y_start) + 1
+	};
+	if (e.type === "circle") return {
+		x: e.x - e.radius,
+		y: e.y - e.radius,
+		width: e.radius * 2 + 1,
+		height: e.radius * 2 + 1
+	};
+	if (e.type === "qrcode") {
+		let t = (21 + e.border * 2) * e.boxsize;
+		return {
+			x: e.x,
+			y: e.y,
+			width: t,
+			height: t
+		};
+	}
+	return e.type === "icon" ? {
+		x: e.x,
+		y: e.y,
+		width: e.size,
+		height: e.size
+	} : {
+		x: e.x,
+		y: e.y,
+		width: Math.max(e.size, Math.round(e.value.length * e.size * .62)),
+		height: Math.max(1, Math.round(e.size * 1.25))
+	};
+}, Q = (e) => e.kind === "widget" ? e.frame : tt(e.primitive), $ = class extends R {
 	constructor(...e) {
-		super(...e), this.store = {
-			schemaVersion: 1,
-			activeProjectId: "",
-			projects: []
-		}, this.selectedRegionId = "", this.toastMessage = "", this.loading = !0, this.saving = !1, this.loadError = "", this.renameDraft = "", this.editorMode = "widgets", this.widgetMetadata = [], this.previewImageUrl = "", this.previewLoading = !1, this.previewError = "", this.projectRailCollapsed = !1, this.saveRevision = 0, this.previewRevision = 0, this.entityStateSignature = "";
+		super(...e), this.projects = [], this.integrationVersion = "", this.widgets = [], this.primitives = [], this.selectedItemId = "", this.query = "", this.loading = !0, this.saving = !1, this.dirty = !1, this.draggingCatalog = !1, this.draggingLayerId = "", this.undoCount = 0, this.redoCount = 0, this.pendingDeleteItemId = "", this.error = "", this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.zoom = 1, this.panX = 0, this.panY = 0, this.snapEnabled = !0, this.newDashboardOpen = !1, this.newDashboard = et("en"), this.yamlCopyState = "idle", this.previewRequest = 0, this.bootstrapStarted = !1, this.suppressCatalogClick = !1, this.undoStack = [], this.redoStack = [], this.undo = () => {
+			if (!this.current) return;
+			let e = this.undoStack.pop();
+			e && (this.redoStack.push(J(this.current)), this.current = J(e), this.dirty = !0, this.selectedItemId && !this.current.items.some((e) => e.id === this.selectedItemId) && (this.selectedItemId = ""), this.syncHistoryState(), this.schedulePreview());
+		}, this.redo = () => {
+			if (!this.current) return;
+			let e = this.redoStack.pop();
+			e && (this.undoStack.push(J(this.current)), this.current = J(e), this.dirty = !0, this.selectedItemId && !this.current.items.some((e) => e.id === this.selectedItemId) && (this.selectedItemId = ""), this.syncHistoryState(), this.schedulePreview());
+		}, this.onHistoryKeyDown = (e) => {
+			if (!e.ctrlKey && !e.metaKey || e.composedPath().some((e) => e instanceof HTMLElement && (e.matches("input, textarea, select") || e.isContentEditable))) return;
+			let t = e.key.toLowerCase();
+			if (t === "z" && e.shiftKey) {
+				e.preventDefault(), this.redo();
+				return;
+			}
+			if (t === "z") {
+				e.preventDefault(), this.undo();
+				return;
+			}
+			t === "y" && (e.preventDefault(), this.redo());
+		}, this.onCatalogPointerMove = (e) => {
+			let t = this.catalogPointerDrag;
+			if (!t || !t.active && Math.hypot(e.clientX - t.startX, e.clientY - t.startY) < 4) return;
+			e.preventDefault(), t.active = !0, t.currentX = e.clientX, t.currentY = e.clientY;
+			let n = this.getBoundingClientRect();
+			this.draggingCatalog = !0, this.catalogDragPosition = {
+				x: e.clientX - n.left - t.grabOffsetX,
+				y: e.clientY - n.top - t.grabOffsetY
+			};
+		}, this.onCatalogPointerUp = (e) => {
+			let t = this.catalogPointerDrag;
+			this.finishCatalogPointerDrag(), t?.active && (this.suppressCatalogClick = !0, this.dropCatalogItem(t.value, e.clientX, e.clientY), window.setTimeout(() => {
+				this.suppressCatalogClick = !1;
+			}, 0));
+		}, this.onCatalogPointerCancel = () => {
+			this.finishCatalogPointerDrag();
+		}, this.onPointerMove = (e) => {
+			if (!this.current || !this.pointerEdit) return;
+			let t = this.renderRoot.querySelector(".canvas");
+			if (!t) return;
+			let n = this.pointerEdit;
+			if (!n.changed && Math.hypot(e.clientX - n.startX, e.clientY - n.startY) < 3) return;
+			n.changed = !0;
+			let r = t.getBoundingClientRect(), i = Math.round((e.clientX - n.startX) / r.width * this.current.display.width), a = Math.round((e.clientY - n.startY) / r.height * this.current.display.height);
+			this.mutate((t) => {
+				let r = t.items.findIndex((e) => e.id === n.itemId);
+				if (r < 0) return;
+				let o = J(n.original);
+				if (o.locked) return;
+				let s = this.workingArea(t), c = Q(o);
+				if (n.mode === "move") {
+					let e = Y(this.snapValue(c.x + i, t), s.x, Math.max(s.x, s.x + s.width - c.width)), n = Y(this.snapValue(c.y + a, t), s.y, Math.max(s.y, s.y + s.height - c.height));
+					this.translateItem(o, e - c.x, n - c.y);
+				} else n.resizeHandle && this.resizeItem(o, n.resizeHandle, i, a, e.shiftKey, t);
+				t.items[r] = o;
+			}, !1, !1);
+		}, this.onPointerUp = () => {
+			let e = this.pointerEdit;
+			window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), this.pointerEdit = void 0, e?.changed && (this.recordHistory(e.beforeProject), this.schedulePreview());
+		}, this.onLayerPointerMove = (e) => {
+			let t = this.layerPointerDrag;
+			if (!t || !t.active && Math.hypot(e.clientX - t.startX, e.clientY - t.startY) < 4) return;
+			e.preventDefault(), t.active = !0, this.draggingLayerId = t.itemId;
+			let n = this.shadowRoot?.elementFromPoint(e.clientX, e.clientY)?.closest(".layer-row"), r = n?.dataset.itemId;
+			if (!n || !r || r === t.itemId) {
+				this.layerDropTarget = void 0;
+				return;
+			}
+			let i = n.getBoundingClientRect();
+			this.layerDropTarget = {
+				itemId: r,
+				edge: e.clientY < i.top + i.height / 2 ? "before" : "after"
+			};
+		}, this.onLayerPointerUp = () => {
+			let e = this.layerPointerDrag, t = this.layerDropTarget;
+			this.finishLayerPointerDrag(), !(!e?.active || !t || e.itemId === t.itemId) && this.mutate((n) => {
+				let r = [...n.items].reverse(), i = r.findIndex((t) => t.id === e.itemId);
+				if (i < 0) return;
+				let [a] = r.splice(i, 1), o = r.findIndex((e) => e.id === t.itemId);
+				if (o < 0) return;
+				let s = t.edge === "before" ? o : o + 1;
+				r.splice(s, 0, a), n.items = r.reverse();
+			});
+		}, this.onLayerPointerCancel = () => {
+			this.finishLayerPointerDrag();
+		}, this.onPanelResizeMove = (e) => {
+			this.panelResize && (this.inspectorWidth = Y(this.panelResize.startWidth + this.panelResize.startX - e.clientX, 286, 560));
+		}, this.onPanelResizeEnd = () => {
+			this.panelResize = void 0, window.removeEventListener("pointermove", this.onPanelResizeMove), window.removeEventListener("pointerup", this.onPanelResizeEnd);
+		};
 	}
 	static {
-		this.styles = [
-			at,
-			Wt,
-			...Ut
-		];
+		this.styles = Re;
+	}
+	connectedCallback() {
+		super.connectedCallback(), window.addEventListener("keydown", this.onHistoryKeyDown);
 	}
 	firstUpdated() {
-		this.previewResizeObserver = new ResizeObserver(() => this.updatePreviewScale()), this.previewBoundary && this.previewResizeObserver.observe(this.previewBoundary), this.updatePreviewScale(), this.loadProjects();
+		this.ensureBootstrap();
 	}
 	updated(e) {
-		if (this.previewBoundary && this.previewResizeObserver?.observe(this.previewBoundary), this.updatePreviewScale(), e.has("hass")) {
-			let e = this.currentEntityStateSignature();
-			e !== this.entityStateSignature && (this.entityStateSignature = e, this.schedulePreview());
-		}
+		e.has("hass") && this.ensureBootstrap();
 	}
 	disconnectedCallback() {
-		super.disconnectedCallback(), this.previewResizeObserver?.disconnect(), this.previewTimer && window.clearTimeout(this.previewTimer);
+		super.disconnectedCallback(), this.previewTimer && window.clearTimeout(this.previewTimer), this.yamlCopyTimer && window.clearTimeout(this.yamlCopyTimer), window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), window.removeEventListener("pointermove", this.onCatalogPointerMove), window.removeEventListener("pointerup", this.onCatalogPointerUp), window.removeEventListener("pointercancel", this.onCatalogPointerCancel), window.removeEventListener("pointermove", this.onLayerPointerMove), window.removeEventListener("pointerup", this.onLayerPointerUp), window.removeEventListener("pointercancel", this.onLayerPointerCancel), window.removeEventListener("pointermove", this.onPanelResizeMove), window.removeEventListener("pointerup", this.onPanelResizeEnd), window.removeEventListener("keydown", this.onHistoryKeyDown);
 	}
-	get project() {
-		return this.store.projects.find((e) => e.id === this.store.activeProjectId) ?? this.store.projects[0];
+	ensureBootstrap() {
+		!this.hass || this.bootstrapStarted || (this.bootstrapStarted = !0, this.bootstrap());
 	}
-	get canvasProject() {
-		return this.layoutDraft ?? this.project;
-	}
-	get canvasDisplay() {
-		return B(this.canvasProject.displayId);
-	}
-	get canvasPixels() {
-		return {
-			width: this.canvasProject.width,
-			height: this.canvasProject.height
-		};
-	}
-	displayName(e) {
-		return e.displayId === "custom" ? "Custom display" : B(e.displayId).name;
-	}
-	get selectedRegion() {
-		return this.project.regions.find((e) => e.id === this.selectedRegionId);
-	}
-	widgetDefinition(e) {
-		let t = Y(e), n = this.widgetMetadata.find((t) => t.id === e);
-		return n ? Ht(n) : t;
-	}
-	updatePreviewScale() {
-		if (!this.previewBoundary || !this.screenFit || !this.screenBezel) return;
-		let e = this.canvasPixels, t = e.width + 24, n = e.height + 24, r = Math.max(.05, Math.min(2, this.previewBoundary.clientWidth / t, this.previewBoundary.clientHeight / n));
-		this.screenFit.style.width = `${t * r}px`, this.screenFit.style.height = `${n * r}px`, this.screenBezel.style.width = `${t}px`, this.screenBezel.style.height = `${n}px`, this.screenBezel.style.transform = `scale(${r})`;
-	}
-	persist(e) {
-		this.store = e;
-	}
-	currentEntityStateSignature() {
-		return this.store.projects.length ? this.project.regions.flatMap((e) => e.widget?.type === "sensor" ? [String(e.widget.config.entity ?? "")] : e.widget?.type === "weather" ? [String(e.widget.config.weather ?? "")] : []).filter(Boolean).sort().map((e) => {
-			let t = this.hass.states?.[e];
-			return `${e}:${t?.state ?? ""}:${t?.last_updated ?? ""}`;
-		}).join("|") : "";
-	}
-	schedulePreview(e = 250) {
-		this.store.projects.length && (this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => {
-			this.previewTimer = void 0, this.composePreview(this.canvasProject);
-		}, e));
-	}
-	async composePreview(e) {
-		let t = ++this.previewRevision;
-		this.previewLoading = !0, this.previewError = "";
-		try {
-			let n = await this.hass.callWS({
-				type: "opendisplay_studio/compose_preview",
-				project: _t(e, this.editorMode === "layout")
-			});
-			if (t !== this.previewRevision) return;
-			this.previewImageUrl = n.imageUrl, this.previewTimings = n.timings;
-		} catch (e) {
-			if (t !== this.previewRevision) return;
-			this.previewImageUrl = "", this.previewError = Z(e, "Could not compose live preview"), this.previewError.startsWith("Renderer App is not connected") && this.schedulePreview(1500);
-		} finally {
-			t === this.previewRevision && (this.previewLoading = !1);
+	async bootstrap() {
+		let e = this.hass;
+		if (e) {
+			this.loading = !0, this.error = "";
+			try {
+				let t = await e.callWS({ type: "opendisplay_studio/bootstrap" });
+				this.integrationVersion = t.version, this.projects = t.projects, this.widgets = t.widgets, this.primitives = t.primitives, this.current = this.projects[0] ? J(this.projects[0]) : void 0, this.clearHistory(), this.newDashboard = et(e.language), this.current && (await this.composePreview(), await this.updateComplete, requestAnimationFrame(() => this.fitCanvas()));
+			} catch (e) {
+				this.error = X(e, "Could not load OpenDisplay Studio");
+			} finally {
+				this.loading = !1;
+			}
 		}
 	}
-	previewImageFailed() {
-		this.previewImageUrl = "", this.previewError = "Renderer preview image could not be loaded";
+	openNewDashboard() {
+		this.newDashboard = et(this.hass?.language ?? "en"), this.newDashboardOpen = !0;
 	}
-	async loadProjects() {
-		this.loading = !0, this.loadError = "";
-		try {
-			let e = await this.hass.callWS({ type: "opendisplay_studio/bootstrap" });
-			this.store = {
-				schemaVersion: 1,
-				activeProjectId: e.projects[0]?.id ?? "",
-				projects: e.projects
-			}, this.widgetMetadata = e.widgets, this.schedulePreview(0);
-		} catch (e) {
-			this.loadError = Z(e, "Unable to load projects");
-		} finally {
-			this.loading = !1;
+	updateNewDashboard(e, t) {
+		let n = J(this.newDashboard);
+		if (e === "profileId") {
+			let e = U(t);
+			n.display.profileId = e.id, n.display.width = e.width, n.display.height = e.height, n.display.palette = e.defaultPalette;
+		} else e === "name" ? n.name = t : e === "palette" ? n.display.palette = t : e === "background" ? n.display.background = t : (e === "width" || e === "height" || e === "padding" || e === "snapSize") && (n.display[e] = Math.max(+(e === "snapSize"), Math.round(Number(t) || 0)));
+		this.newDashboard = n;
+	}
+	async createProject() {
+		if (this.hass) {
+			this.saving = !0, this.error = "";
+			try {
+				let e = await this.hass.callWS({
+					type: "opendisplay_studio/create_project",
+					project: this.newDashboard
+				});
+				this.projects = [...this.projects, e.project], this.current = J(e.project), this.selectedItemId = "", this.dirty = !1, this.newDashboardOpen = !1, this.clearHistory(), await this.composePreview(), await this.updateComplete, this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
+			} catch (e) {
+				this.error = X(e, "Could not create the dashboard");
+			} finally {
+				this.saving = !1;
+			}
 		}
 	}
-	async saveProject(e) {
-		let t = ++this.saveRevision;
-		this.saving = !0;
-		try {
-			let n = await this.hass.callWS({
-				type: "opendisplay_studio/update_project",
-				project_id: e.id,
-				project: e
-			});
-			t === this.saveRevision && (this.store = {
-				...this.store,
-				projects: this.store.projects.map((e) => e.id === n.project.id ? n.project : e)
-			}, this.schedulePreview());
-		} catch (e) {
-			this.showToast(Z(e, "Could not save project"));
-		} finally {
-			t === this.saveRevision && (this.saving = !1);
+	async saveProject() {
+		if (!(!this.hass || !this.current)) {
+			this.saving = !0, this.error = "";
+			try {
+				let e = await this.hass.callWS({
+					type: "opendisplay_studio/update_project",
+					project_id: this.current.id,
+					project: this.current
+				});
+				this.current = J(e.project), this.projects = this.projects.map((t) => t.id === e.project.id ? e.project : t), this.dirty = !1;
+			} catch (e) {
+				this.error = X(e, "Could not save the dashboard");
+			} finally {
+				this.saving = !1;
+			}
 		}
-	}
-	updateProject(e) {
-		let t = this.store.projects.map((t) => t.id === this.store.activeProjectId ? {
-			...e(t),
-			updatedAt: (/* @__PURE__ */ new Date()).toISOString()
-		} : t);
-		this.persist({
-			...this.store,
-			projects: t
-		});
-		let n = t.find((e) => e.id === this.store.activeProjectId);
-		n && (this.saveProject(n), this.schedulePreview());
-	}
-	updateLayoutDraft(e) {
-		this.layoutDraft && (this.layoutDraft = e(this.layoutDraft), this.schedulePreview());
-	}
-	openLayoutEditor() {
-		this.layoutDraft = structuredClone(this.project), this.editorMode = "layout", this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.previewImageUrl = "", this.schedulePreview(0);
-	}
-	cancelLayoutEditor() {
-		this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0, this.previewImageUrl = "", this.schedulePreview(0);
-	}
-	applyLayoutEditor() {
-		if (!this.layoutDraft) return;
-		let e = this.layoutDraft;
-		this.updateProject(() => e), this.layoutDraft = void 0, this.editorMode = "widgets", this.mergeAnchor = void 0, this.mergeHover = void 0, this.selectedRegionId = "", this.showToast("Device and layout updated"), this.schedulePreview(0);
-	}
-	showToast(e) {
-		this.toastMessage = e, this.toastTimer && window.clearTimeout(this.toastTimer), this.toastTimer = window.setTimeout(() => {
-			this.toastMessage = "";
-		}, 2600);
-	}
-	selectProject(e) {
-		this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.layoutDraft = void 0, this.editorMode = "widgets", this.persist({
-			...this.store,
-			activeProjectId: e
-		}), this.previewImageUrl = "", this.schedulePreview(0);
-	}
-	async addProject() {
-		try {
-			let e = Ft(`Untitled display ${this.store.projects.length + 1}`, this.hass.language), t = (await this.hass.callWS({
-				type: "opendisplay_studio/create_project",
-				project: e
-			})).project;
-			this.persist({
-				...this.store,
-				activeProjectId: t.id,
-				projects: [...this.store.projects, t]
-			}), this.selectedRegionId = "", this.layoutDraft = structuredClone(t), this.editorMode = "layout", this.showToast("Display created"), this.schedulePreview(0);
-		} catch (e) {
-			this.showToast(Z(e, "Could not create display"));
-		}
-	}
-	async duplicateProject() {
-		let e = Gt(this.project), t = (await this.hass.callWS({
-			type: "opendisplay_studio/create_project",
-			project: e
-		})).project;
-		this.persist({
-			...this.store,
-			activeProjectId: t.id,
-			projects: [...this.store.projects, t]
-		}), this.selectedRegionId = "", this.previewImageUrl = "", this.schedulePreview(0), this.showToast("Display duplicated");
 	}
 	async deleteProject() {
-		await this.hass.callWS({
-			type: "opendisplay_studio/delete_project",
-			project_id: this.project.id
-		});
-		let e = this.store.projects.filter((e) => e.id !== this.project.id);
-		this.persist({
-			...this.store,
-			activeProjectId: e[0]?.id ?? "",
-			projects: e
-		}), this.selectedRegionId = "", this.layoutDraft = void 0, this.editorMode = "widgets", this.previewImageUrl = "", this.schedulePreview(0), this.showToast("Display deleted");
-	}
-	setProjectStatus(e) {
-		this.updateProject((t) => ({
-			...t,
-			status: e
-		})), this.showToast(e === "ready" ? "Media Source is ready" : "Project moved to Draft");
-	}
-	openRenameDialog() {
-		this.renameDraft = this.project.name, this.renameDialog?.showModal();
-	}
-	saveProjectName() {
-		let e = this.renameDraft.trim();
-		e && (this.updateProject((t) => ({
-			...t,
-			name: e
-		})), this.renameDialog?.close(), this.showToast("Name updated"));
-	}
-	applyDisplayProfile(e, t) {
-		let n = B(e), r = At(n, this.canvasProject.orientation), i = r.columns === this.canvasProject.grid.columns && r.rows === this.canvasProject.grid.rows, a = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), o = i ? this.canvasProject.regions : W(r).map((e, t) => ({
-			...e,
-			widget: a[t]
-		})), s = ut(n, this.canvasProject.orientation);
-		this.updateLayoutDraft((i) => ({
-			...i,
-			displayId: e,
-			driverId: t,
-			width: s.width,
-			height: s.height,
-			palette: n.palettes.includes(i.palette) ? i.palette : n.defaultPalette,
-			grid: r,
-			regions: o
-		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, i || this.showToast("Grid adapted to the selected display");
-	}
-	changeDisplay(e) {
-		let t = e.currentTarget.value;
-		if (t === "custom") {
-			this.updateLayoutDraft((e) => ({
-				...e,
-				displayId: "custom",
-				driverId: void 0
-			}));
-			return;
+		if (!this.hass || !this.current) return;
+		let e = this.current.id;
+		try {
+			await this.hass.callWS({
+				type: "opendisplay_studio/delete_project",
+				project_id: e
+			}), this.projects = this.projects.filter((t) => t.id !== e), this.current = this.projects[0] ? J(this.projects[0]) : void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.clearHistory(), this.current && await this.composePreview();
+		} catch (e) {
+			this.error = X(e, "Could not delete the dashboard");
 		}
-		this.applyDisplayProfile(t);
 	}
-	changePalette(e) {
-		let t = e.currentTarget.value;
-		this.updateLayoutDraft((e) => ({
-			...e,
-			palette: t,
-			regions: e.regions.map((e) => {
-				if (!e.widget) return e;
-				let n = this.widgetDefinition(e.widget.type);
-				if (!n) return e;
-				let r = { ...e.widget.config };
-				for (let e of n.options) !e.selector || !("opendisplay_color" in e.selector) || (r[e.key] = Pt(t, r[e.key] ?? n.defaults[e.key]));
-				return {
-					...e,
-					widget: {
-						...e.widget,
-						config: r
-					}
-				};
-			})
-		}));
-	}
-	changeTheme(e) {
-		this.updateLayoutDraft((t) => ({
-			...t,
-			theme: e
-		}));
-	}
-	changeFontFamily(e) {
-		let t = e.currentTarget.value;
-		this.updateLayoutDraft((e) => ({
-			...e,
-			fontFamily: t
-		}));
-	}
-	changeTextScale(e) {
-		let t = e.currentTarget.value;
-		this.updateLayoutDraft((e) => ({
-			...e,
-			textScale: t
-		}));
-	}
-	changeBackgroundMedia(e) {
-		let t = e.detail.value.backgroundMedia;
-		this.updateLayoutDraft((e) => ({
-			...e,
-			background: t?.media_content_id ? e.background ? {
-				...e.background,
-				media: t
-			} : pt(t) : void 0
-		}));
-	}
-	clearBackground() {
-		this.updateLayoutDraft((e) => ({
-			...e,
-			background: void 0
-		}));
-	}
-	changeBackgroundMode(e) {
-		this.updateLayoutDraft((t) => t.background ? {
-			...t,
-			background: {
-				...t.background,
-				mode: e
-			}
-		} : t);
-	}
-	changeBackgroundAnchor(e) {
-		this.updateLayoutDraft((t) => t.background ? {
-			...t,
-			background: {
-				...t.background,
-				anchor: e
-			}
-		} : t);
-	}
-	changeBackgroundScale(e) {
-		let t = gt(Number(e.currentTarget.value));
-		this.updateLayoutDraft((e) => e.background ? {
-			...e,
-			background: {
-				...e.background,
-				scale: t
-			}
-		} : e);
-	}
-	changeLayoutSpacing(e, t) {
-		let n = xt(Number(t.currentTarget.value));
-		this.updateLayoutDraft((t) => ({
-			...t,
-			[e]: n
-		}));
-	}
-	changeDisplayRegionBorderRadius(e) {
-		let t = V(Number(e.currentTarget.value));
-		this.updateLayoutDraft((e) => ({
-			...e,
-			regionBorderRadius: t
-		}));
-	}
-	changeOrientation(e) {
-		if (e === this.canvasProject.orientation) return;
-		let t = this.canvasProject.displayId === "custom" ? {
-			columns: this.canvasProject.grid.rows,
-			rows: this.canvasProject.grid.columns
-		} : At(this.canvasDisplay, e), n = e === "portrait" ? "clockwise" : "counterclockwise", r = kt(this.canvasProject.regions, this.canvasProject.grid, t, n), i = this.canvasProject.displayId === "custom" ? {
-			width: this.canvasProject.height,
-			height: this.canvasProject.width
-		} : ut(this.canvasDisplay, e);
-		this.updateLayoutDraft((n) => ({
-			...n,
-			orientation: e,
-			grid: t,
-			regions: r,
-			...i
-		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0;
-	}
-	changeCustomSize(e, t) {
-		let n = Math.max(64, Math.min(4096, Number(t.currentTarget.value)));
-		this.updateLayoutDraft((t) => ({
-			...t,
-			[e]: n
-		}));
-	}
-	changeGrid(e, t) {
-		let n = Math.max(1, Math.min(24, Number(t.currentTarget.value))), r = {
-			...this.canvasProject.grid,
-			[e]: n
-		}, i = this.canvasProject.regions.flatMap((e) => e.widget ? [e.widget] : []), a = W(r).map((e, t) => ({
-			...e,
-			widget: i[t]
-		}));
-		this.updateLayoutDraft((e) => ({
-			...e,
-			grid: r,
-			regions: a
-		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0;
-	}
-	selectionContainsComposedRegion(e, t) {
-		let n = Math.min(e.row, t.row), r = Math.max(e.row, t.row), i = Math.min(e.column, t.column), a = Math.max(e.column, t.column);
-		return this.canvasProject.regions.some((e) => {
-			if (e.rowSpan === 1 && e.columnSpan === 1 && !e.label) return !1;
-			let t = e.row + e.rowSpan - 1, o = e.column + e.columnSpan - 1;
-			return e.row <= r && t >= n && e.column <= a && o >= i;
+	selectProject(e) {
+		this.current = J(e), this.selectedItemId = "", this.dirty = !1, this.clearHistory(), this.composePreview().then(() => {
+			this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
 		});
 	}
-	selectMergeCell(e) {
-		let t = this.canvasProject.regions.find((t) => Et(t, e));
-		if (t && (t.label || t.rowSpan > 1 || t.columnSpan > 1)) return;
-		if (!this.mergeAnchor) {
-			this.mergeAnchor = e, this.mergeHover = e;
-			return;
+	mutate(e, t = !0, n = !0) {
+		if (!this.current) return;
+		let r = J(this.current), i = J(this.current);
+		e(i), JSON.stringify(i) !== JSON.stringify(r) && (n && this.recordHistory(r), this.current = i, this.dirty = !0, t && this.schedulePreview());
+	}
+	recordHistory(e) {
+		this.undoStack.push(J(e)), this.undoStack.length > 100 && this.undoStack.shift(), this.redoStack = [], this.syncHistoryState();
+	}
+	clearHistory() {
+		this.undoStack = [], this.redoStack = [], this.syncHistoryState();
+	}
+	syncHistoryState() {
+		this.undoCount = this.undoStack.length, this.redoCount = this.redoStack.length;
+	}
+	selectItemId(e) {
+		this.selectedItemId !== e && (this.selectedItemId = e, this.updateComplete.then(() => {
+			this.selectedItemId === e && this.propertiesPanel && (this.propertiesPanel.scrollTop = 0);
+		}));
+	}
+	schedulePreview() {
+		this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => void this.composePreview(), 220);
+	}
+	async composePreview() {
+		if (!this.hass || !this.current) return;
+		this.error = "";
+		let e = ++this.previewRequest;
+		try {
+			let t = await this.hass.callWS({
+				type: "opendisplay_studio/compose_preview",
+				project: J(this.current)
+			});
+			e === this.previewRequest && (this.preview = t, this.yamlCopyState = "idle");
+		} catch (e) {
+			this.error = X(e, "Could not render the preview");
 		}
-		if (this.selectionContainsComposedRegion(this.mergeAnchor, e)) {
-			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Remove the existing region before drawing across it");
-			return;
-		}
-		let n = Dt(this.canvasProject.regions, this.mergeAnchor, e);
-		if (!n) {
-			this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("The selected rectangle crosses an existing merged region");
-			return;
-		}
-		let r = new Set(this.canvasProject.regions.map((e) => e.id)), i = n.find((e) => !r.has(e.id)), a = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), o = new Set(a.map((e, t) => e.label ?? Q(t))), s = 0;
-		for (; o.has(Q(s));) s += 1;
-		let c = Q(s), l = n.map((e) => e.id === i?.id ? {
-			...e,
-			label: c
-		} : e);
-		this.updateLayoutDraft((e) => ({
-			...e,
-			regions: l
-		})), this.selectedRegionId = i?.id ?? "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast(`Region ${c} created`);
 	}
-	splitSelectedRegion(e) {
-		let t = this.canvasProject.regions.find((t) => t.id === e);
-		!t || t.rowSpan === 1 && t.columnSpan === 1 && !t.label || (this.updateLayoutDraft((t) => ({
-			...t,
-			regions: Ot(t.regions, e)
-		})), this.selectedRegionId = "", this.mergeAnchor = void 0, this.mergeHover = void 0, this.showToast("Region removed"));
+	toggleReady() {
+		this.mutate((e) => {
+			e.status = e.status === "ready" ? "draft" : "ready";
+		}, !1);
 	}
-	assignWidget(e) {
-		let t = this.widgetDefinition(e);
-		!t || !this.selectedRegion || this.updateProject((e) => ({
-			...e,
-			regions: e.regions.map((n) => n.id === this.selectedRegionId ? {
-				...n,
-				widget: {
-					type: t.id,
-					version: t.version,
-					config: Object.fromEntries(Object.entries(t.defaults).map(([n, r]) => {
-						let i = t.options.find((e) => e.key === n);
-						return [n, i?.selector && "opendisplay_color" in i.selector ? Pt(e.palette, r) : r];
-					}))
-				}
-			} : n)
-		}));
+	updateName(e) {
+		let t = e.target.value;
+		this.mutate((e) => {
+			e.name = t;
+		}, !1);
 	}
-	removeWidget() {
-		this.updateProject((e) => ({
-			...e,
-			regions: e.regions.map((e) => e.id === this.selectedRegionId ? {
-				...e,
-				widget: void 0
-			} : e)
-		}));
-	}
-	updateWidgetOption(e, t) {
-		let n = t.currentTarget, r = e.type === "toggle" ? n.checked : e.type === "number" ? Number(n.value) : n.value;
-		this.updateProject((t) => ({
-			...t,
-			regions: t.regions.map((t) => t.id !== this.selectedRegionId || !t.widget ? t : {
-				...t,
-				widget: {
-					...t.widget,
-					config: {
-						...t.widget.config,
-						[e.key]: r
-					}
-				}
-			})
-		}));
-	}
-	updateRegionAppearance(e, t) {
-		let n = t.currentTarget.checked;
-		this.updateProject((t) => ({
-			...t,
-			regions: t.regions.map((t) => t.id === this.selectedRegionId ? {
-				...t,
-				appearance: {
-					...H(t),
-					[e]: n
-				}
-			} : t)
-		}));
-	}
-	updateRegionBorderRadius(e) {
-		let t = e.currentTarget.value.trim(), n = t === "" ? null : V(Number(t));
-		this.updateProject((e) => ({
-			...e,
-			regions: e.regions.map((e) => e.id === this.selectedRegionId ? {
-				...e,
-				appearance: {
-					...H(e),
-					borderRadius: n
-				}
-			} : e)
-		}));
-	}
-	renderProjectRail() {
-		return C`
-      <aside id="project-library" class="project-rail ${this.projectRailCollapsed ? "collapsed" : ""}" aria-label="Saved displays">
-        <div class="rail-heading">
-          ${this.projectRailCollapsed ? T : C`<h2>Displays</h2>`}
-          <div class="rail-heading-actions">
-            ${this.projectRailCollapsed ? T : C`<button class="text-button" @click=${this.addProject}>+ New</button>`}
-            <button
-              class="rail-toggle"
-              aria-controls="project-library"
-              aria-expanded=${!this.projectRailCollapsed}
-              aria-label=${this.projectRailCollapsed ? "Expand displays panel" : "Collapse displays panel"}
-              title=${this.projectRailCollapsed ? "Expand displays panel" : "Collapse displays panel"}
-              @click=${() => {
-			this.projectRailCollapsed = !this.projectRailCollapsed;
-		}}
-            >${q(this.projectRailCollapsed ? Xe : Ye)}</button>
-          </div>
-        </div>
-        <div class="project-list" ?hidden=${this.projectRailCollapsed}>
-          ${this.store.projects.map((e) => {
-			let t = {
-				width: e.width,
-				height: e.height
-			};
-			return C`
-              <button class="project-card ${e.id === this.project.id ? "active" : ""}" @click=${() => this.selectProject(e.id)}>
-                <span class="mini-screen" style=${M({ "--mini-aspect": String(t.width / t.height) })}>${e.grid.columns}×${e.grid.rows}</span>
-                <span class="project-card-copy"><strong>${e.name}</strong><span>${this.displayName(e)} · ${e.status === "ready" ? "Ready" : "Draft"}</span>${e.status === "ready" ? C`<code>media-source://opendisplay_studio/${e.id}</code>` : T}</span>
-              </button>
-            `;
-		})}
-        </div>
-        <div class="rail-footer" ?hidden=${this.projectRailCollapsed}>Stored by Home Assistant.<br />Ready displays become Media Sources.</div>
-        <div class="rail-actions" aria-label="Project actions" ?hidden=${this.projectRailCollapsed}>
-          <button class="rail-action danger" @click=${this.deleteProject}>${q(Qe)} Delete</button>
-        </div>
-      </aside>
-    `;
-	}
-	renderToolbar() {
-		let e = this.canvasProject, t = this.canvasDisplay;
-		return C`
-      <div class="device-toolbar layout-toolbar">
-        <div class="control grow">
-          <label for="device-model">Device model</label>
-          <select id="device-model" @change=${this.changeDisplay}>
-            <optgroup label="SOLUM · Newton Pro">
-              ${z.filter((e) => e.family === "Newton Pro").map((e) => C`
-                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}${e.freezer ? " · mono" : ""}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Seeed · ready to use">
-              ${z.filter((e) => e.family === "OpenDisplay" && e.manufacturer === "Seeed Studio").map((e) => C`
-                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Other OpenDisplay hardware">
-              ${z.filter((e) => e.family === "OpenDisplay" && e.manufacturer !== "Seeed Studio").map((e) => C`
-                <option value=${e.id} .selected=${e.id === t.id}>${e.name} · ${e.nativeWidth}×${e.nativeHeight}</option>
-              `)}
-            </optgroup>
-            <optgroup label="Custom hardware">
-              <option value="custom" .selected=${e.displayId === "custom"}>Custom resolution</option>
-            </optgroup>
-          </select>
-        </div>
-        ${e.displayId === "custom" ? C`
-          <div class="control custom-control">
-            <label for="custom-width">Width</label>
-            <input id="custom-width" type="number" min="64" max="4096" .value=${String(e.width)} @change=${(e) => this.changeCustomSize("width", e)} />
-          </div>
-          <div class="control custom-control">
-            <label for="custom-height">Height</label>
-            <input id="custom-height" type="number" min="64" max="4096" .value=${String(e.height)} @change=${(e) => this.changeCustomSize("height", e)} />
-          </div>
-        ` : T}
-        <div class="control">
-          <label for="palette">Palette</label>
-          <select id="palette" .value=${e.palette} @change=${this.changePalette}>
-            ${(e.displayId === "custom" ? Object.keys(F) : t.palettes).map((e) => C`<option value=${e}>${F[e]}</option>`)}
-          </select>
-        </div>
-        <div class="control">
-          <span class="field-label">Theme</span>
-          <div class="segment" role="group" aria-label="Display theme">
-            <button class=${e.theme === "light" ? "active" : ""} @click=${() => this.changeTheme("light")}>Light</button>
-            <button class=${e.theme === "dark" ? "active" : ""} @click=${() => this.changeTheme("dark")}>Dark</button>
-          </div>
-        </div>
-        <div class="control">
-          <label for="font-family">Font family</label>
-          <select id="font-family" .value=${e.fontFamily} @change=${this.changeFontFamily}>
-            <option value="default">Default</option>
-            <option value="classic">Classic</option>
-            <option value="trmnl">TRMNL</option>
-          </select>
-        </div>
-        <div class="control">
-          <label for="text-scale">Text scale</label>
-          <select id="text-scale" .value=${e.textScale} @change=${this.changeTextScale}>
-            <option value="small">Small</option>
-            <option value="regular">Regular</option>
-            <option value="large">Large</option>
-            <option value="xlarge">Extra large</option>
-          </select>
-        </div>
-        <div class="control">
-          <span class="field-label">Orientation</span>
-          <div class="segment" role="group" aria-label="Display orientation">
-            <button class=${e.orientation === "landscape" ? "active" : ""} @click=${() => this.changeOrientation("landscape")}>Landscape</button>
-            <button class=${e.orientation === "portrait" ? "active" : ""} @click=${() => this.changeOrientation("portrait")}>Portrait</button>
-          </div>
-        </div>
-        <div class="control"><label for="grid-columns">Columns</label><input id="grid-columns" type="number" min="1" max="24" .value=${String(e.grid.columns)} @change=${(e) => this.changeGrid("columns", e)} /></div>
-        <div class="control"><label for="grid-rows">Rows</label><input id="grid-rows" type="number" min="1" max="24" .value=${String(e.grid.rows)} @change=${(e) => this.changeGrid("rows", e)} /></div>
-      </div>
-    `;
-	}
-	renderWidgetToolbar() {
-		let e = {
-			width: this.project.width,
-			height: this.project.height
+	workingArea(e = this.current) {
+		if (!e) return {
+			x: 0,
+			y: 0,
+			width: 1,
+			height: 1
 		};
-		return C`
-      <div class="device-toolbar widget-toolbar">
-        <div class="device-summary">
-          <span class="step-kicker">Step 2 · Widgets</span>
-          <strong>${this.displayName(this.project)}</strong>
-          <span>${e.width}×${e.height} · ${F[this.project.palette]} · ${this.project.theme} · ${this.project.fontFamily}/${this.project.textScale} · ${this.project.grid.columns}×${this.project.grid.rows} grid</span>
-        </div>
-        <ha-button size="s" appearance="outlined" @click=${this.openLayoutEditor}>${J(rt)} Edit device & layout</ha-button>
-      </div>
-    `;
+		let t = e.display.padding;
+		return {
+			x: t,
+			y: t,
+			width: e.display.width - t * 2,
+			height: e.display.height - t * 2
+		};
 	}
-	renderScreenRegion(e) {
-		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = e.columnSpan === 1 || e.rowSpan === 1, r = this.editorMode === "layout", i = !r && !!(this.previewImageUrl || this.previewError), a = !!e.label || e.rowSpan > 1 || e.columnSpan > 1, o = this.canvasProject.regions.filter((e) => e.label || e.rowSpan > 1 || e.columnSpan > 1).sort((e, t) => e.row - t.row || e.column - t.column), s = a ? e.label ?? Q(o.findIndex((t) => t.id === e.id)) : `${e.column}.${e.row}`, c = H(e), l = Tt(this.canvasProject, e);
-		return C`
-      <section
-        class="screen-region ${r ? "layout-region" : e.widget ? "" : "empty"} ${c.showBackground ? "region-background" : ""} ${c.showBorder ? "region-border" : ""} ${i ? "preview-region" : ""} ${!r && e.id === this.selectedRegionId ? "selected" : ""}"
-        style=${M({
-			gridColumn: `${e.column} / span ${e.columnSpan}`,
-			gridRow: `${e.row} / span ${e.rowSpan}`,
-			borderRadius: `${l}px`
+	snapValue(e, t = this.current) {
+		return !t || !this.snapEnabled ? Math.round(e) : Xe(e, t.display.snapSize, t.display.padding);
+	}
+	startCatalogPointerDrag(e, t) {
+		if (e.button !== 0) return;
+		e.preventDefault();
+		let n = e.currentTarget.getBoundingClientRect();
+		this.catalogPointerDrag = {
+			value: t,
+			startX: e.clientX,
+			startY: e.clientY,
+			currentX: e.clientX,
+			currentY: e.clientY,
+			grabOffsetX: e.clientX - n.left,
+			grabOffsetY: e.clientY - n.top,
+			previewWidth: n.width,
+			previewHeight: n.height,
+			active: !1
+		}, window.addEventListener("pointermove", this.onCatalogPointerMove), window.addEventListener("pointerup", this.onCatalogPointerUp), window.addEventListener("pointercancel", this.onCatalogPointerCancel);
+	}
+	finishCatalogPointerDrag() {
+		this.catalogPointerDrag = void 0, this.draggingCatalog = !1, this.catalogDragPosition = void 0, window.removeEventListener("pointermove", this.onCatalogPointerMove), window.removeEventListener("pointerup", this.onCatalogPointerUp), window.removeEventListener("pointercancel", this.onCatalogPointerCancel);
+	}
+	dropCatalogItem(e, t, n) {
+		if (!this.current) return;
+		let [r, i] = e.split(":"), a = this.renderRoot.querySelector(".canvas");
+		if (!a || !i) return;
+		let o = a.getBoundingClientRect();
+		if (t < o.left || t > o.right || n < o.top || n > o.bottom) return;
+		let s = this.workingArea(), c = Y(this.snapValue((t - o.left) / o.width * this.current.display.width), s.x, s.x + s.width - 1), l = Y(this.snapValue((n - o.top) / o.height * this.current.display.height), s.y, s.y + s.height - 1);
+		r === "widget" && this.addWidget(i, c, l), r === "primitive" && this.addPrimitive(i, c, l);
+	}
+	onCanvasDragOver(e) {
+		this.draggingCatalog && e.preventDefault();
+	}
+	onCanvasDrop(e) {
+		e.preventDefault();
+	}
+	addCatalogItem(e) {
+		if (this.suppressCatalogClick || !this.current) return;
+		let [t, n] = e.split(":");
+		if (!n) return;
+		let r = this.workingArea(), i = this.current.items.length * Math.max(this.current.display.snapSize, 5) * 3 % Math.max(1, Math.min(r.width, r.height) / 3), a = this.snapValue(r.x + Math.min(24 + i, Math.max(0, r.width - 1))), o = this.snapValue(r.y + Math.min(24 + i, Math.max(0, r.height - 1)));
+		t === "widget" && this.addWidget(n, a, o), t === "primitive" && this.addPrimitive(n, a, o);
+	}
+	addWidget(e, t, n) {
+		if (!this.current) return;
+		let r = this.widgets.find((t) => t.id === e);
+		if (!r) return;
+		let i = this.workingArea(), a = Math.min(r.layout.defaultSize?.width ?? 240, i.width), o = Math.min(r.layout.defaultSize?.height ?? 144, i.height), s = {
+			id: Ue(),
+			kind: "widget",
+			locked: !1,
+			hidden: !1,
+			widget: {
+				type: e,
+				version: r.version,
+				config: J(r.defaults)
+			},
+			frame: {
+				x: Y(Math.round(t - a / 2), i.x, i.x + i.width - a),
+				y: Y(Math.round(n - o / 2), i.y, i.y + i.height - o),
+				width: a,
+				height: o
+			},
+			layout: { padding: 0 }
+		};
+		this.mutate((e) => {
+			e.items.push(s);
+		}), this.selectItemId(s.id);
+	}
+	addPrimitive(e, t, n) {
+		if (!this.current) return;
+		let r = We(e.trim(), {
+			x: Math.round(this.current.display.width / 2),
+			y: Math.round(this.current.display.height / 2),
+			displayWidth: this.current.display.width,
+			displayHeight: this.current.display.height
+		});
+		if (!r) {
+			this.error = `Unsupported primitive type: ${e || "(empty)"}`;
+			return;
+		}
+		let i = {
+			id: Ue(),
+			kind: "primitive",
+			locked: !1,
+			hidden: !1,
+			primitive: r
+		}, a = Q(i);
+		this.translateItem(i, Math.round(t - (a.x + a.width / 2)), Math.round(n - (a.y + a.height / 2))), this.constrainItem(i, this.current), this.mutate((e) => {
+			e.items.push(i);
+		}), this.selectItemId(i.id);
+	}
+	constrainItem(e, t) {
+		let n = this.workingArea(t), r = Q(e), i = Y(r.x, n.x, Math.max(n.x, n.x + n.width - r.width)) - r.x, a = Y(r.y, n.y, Math.max(n.y, n.y + n.height - r.height)) - r.y;
+		this.translateItem(e, i, a), e.kind === "widget" && (e.frame.width = Math.min(e.frame.width, n.width), e.frame.height = Math.min(e.frame.height, n.height));
+	}
+	translateItem(e, t, n) {
+		if (e.kind === "widget") {
+			e.frame.x += t, e.frame.y += n;
+			return;
+		}
+		let r = e.primitive;
+		Z(r) ? (r.x_start += t, r.x_end += t, r.y_start += n, r.y_end += n) : (r.type, r.x += t, r.y += n);
+	}
+	resizeItem(e, t, n, r, i, a) {
+		let o = Q(e), s = 1, c = 1, l = !1;
+		if (e.kind === "widget") {
+			let t = this.widgets.find((t) => t.id === e.widget.type)?.layout.minSize ?? {
+				width: 60,
+				height: 48
+			};
+			s = t.width, c = t.height;
+		} else if (e.primitive.type === "circle") s = c = 3, l = !0;
+		else if (e.primitive.type === "qrcode") s = c = 21 + e.primitive.border * 2, l = !0;
+		else if (e.primitive.type === "icon") s = c = 8, l = !0;
+		else if (e.primitive.type === "text") {
+			let t = tt({
+				...e.primitive,
+				size: 6
+			});
+			s = t.width, c = t.height, l = !0;
+		} else e.primitive.type !== "line" && (s = c = 2);
+		let u = l ? {
+			n: "ne",
+			e: "se",
+			s: "se",
+			w: "sw"
+		}[t] ?? t : t, d = Ye({
+			bounds: o,
+			handle: u,
+			deltaX: n,
+			deltaY: r,
+			minimumWidth: s,
+			minimumHeight: c,
+			area: this.workingArea(a),
+			preserveAspect: i || l,
+			snapSize: a.display.snapSize,
+			snapEnabled: this.snapEnabled
+		});
+		if (e.kind === "widget") {
+			e.frame = d;
+			return;
+		}
+		let f = e.primitive;
+		if (Z(f)) {
+			let e = d.x + d.width - 1, t = d.y + d.height - 1;
+			if (f.type === "line") {
+				let n = f.x_start <= f.x_end, r = f.y_start <= f.y_end;
+				f.x_start = n ? d.x : e, f.x_end = n ? e : d.x, f.y_start = r ? d.y : t, f.y_end = r ? t : d.y, f.x_start === f.x_end && f.y_start === f.y_end && (f.x_end = Math.min(a.display.width - 1, f.x_start + 1));
+			} else f.x_start = d.x, f.y_start = d.y, f.x_end = e, f.y_end = t;
+			return;
+		}
+		if (f.type === "circle") {
+			let e = Math.max(1, Math.floor((Math.min(d.width, d.height) - 1) / 2)), t = e * 2 + 1, n = K(d, t, t, u);
+			f.x = n.x + e, f.y = n.y + e, f.radius = e;
+			return;
+		}
+		if (f.type === "qrcode") {
+			let e = 21 + f.border * 2;
+			f.boxsize = Y(Math.floor(Math.min(d.width, d.height) / e), 1, 16);
+			let t = e * f.boxsize, n = K(d, t, t, u);
+			f.x = n.x, f.y = n.y;
+			return;
+		}
+		if (f.type === "icon") {
+			f.size = Y(Math.floor(Math.min(d.width, d.height)), 8, 256);
+			let e = K(d, f.size, f.size, u);
+			f.x = e.x, f.y = e.y;
+			return;
+		}
+		f.size = Y(Math.round(f.size * d.width / Math.max(1, o.width)), 6, 256);
+		let p = tt(f), m = K(d, p.width, p.height, u);
+		f.x = m.x, f.y = m.y;
+	}
+	selectItem(e, t, n = "move", r) {
+		e.stopPropagation(), e.preventDefault(), this.selectItemId(t.id), !t.locked && (n === "resize" && !r || (this.pointerEdit = {
+			itemId: t.id,
+			mode: n,
+			resizeHandle: r,
+			startX: e.clientX,
+			startY: e.clientY,
+			original: J(t),
+			beforeProject: J(this.current),
+			changed: !1
+		}, window.addEventListener("pointermove", this.onPointerMove), window.addEventListener("pointerup", this.onPointerUp)));
+	}
+	updateWidgetConfig(e) {
+		this.mutate((t) => {
+			let n = t.items.find((e) => e.id === this.selectedItemId);
+			n?.kind === "widget" && (n.widget.config = e.detail.value);
+		});
+	}
+	updatePrimitive(e) {
+		this.mutate((t) => {
+			let n = t.items.find((e) => e.id === this.selectedItemId);
+			if (n?.kind !== "primitive") return;
+			let r = {
+				...n.primitive,
+				...e.detail.value
+			};
+			"fill" in r && r.fill === "transparent" && (r.fill = null), n.primitive = r;
+		});
+	}
+	updateSelectedNumber(e, t) {
+		if (!this.current) return;
+		let n = Math.round(Number(t));
+		Number.isFinite(n) && this.mutate((t) => {
+			let r = t.items.find((e) => e.id === this.selectedItemId);
+			if (!r || r.locked) return;
+			let i = this.workingArea(t);
+			if (r.kind === "widget") {
+				e === "padding" && (r.layout.padding = Y(n, 0, 128)), e === "x" && (r.frame.x = Y(n, i.x, i.x + i.width - r.frame.width)), e === "y" && (r.frame.y = Y(n, i.y, i.y + i.height - r.frame.height)), e === "width" && (r.frame.width = Y(n, 1, i.x + i.width - r.frame.x)), e === "height" && (r.frame.height = Y(n, 1, i.y + i.height - r.frame.y));
+				return;
+			}
+			let a = r.primitive;
+			if (Z(a)) {
+				if (e === "x") {
+					let e = a.x_end - a.x_start;
+					a.x_start = Y(n, i.x, i.x + i.width - e - 1), a.x_end = a.x_start + e;
+				}
+				if (e === "y") {
+					let e = a.y_end - a.y_start;
+					a.y_start = Y(n, i.y, i.y + i.height - e - 1), a.y_end = a.y_start + e;
+				}
+				e === "width" && (a.x_end = Y(a.x_start + Math.max(1, n) - 1, a.x_start + 1, i.x + i.width - 1)), e === "height" && (a.y_end = Y(a.y_start + Math.max(1, n) - 1, a.y_start + 1, i.y + i.height - 1));
+			} else a.type === "circle" ? (e === "x" && (a.x = Y(n, i.x + a.radius, i.x + i.width - a.radius)), e === "y" && (a.y = Y(n, i.y + a.radius, i.y + i.height - a.radius)), e === "radius" && (a.radius = Y(n, 1, Math.floor(Math.min(i.width, i.height) / 2)))) : (e === "x" && (a.x = Y(n, i.x, i.x + i.width - 1)), e === "y" && (a.y = Y(n, i.y, i.y + i.height - 1)), e === "size" && a.type !== "qrcode" && (a.size = Y(n, a.type === "text" ? 6 : 8, 256)), e === "boxsize" && a.type === "qrcode" && (a.boxsize = Y(n, 1, 16)));
+		});
+	}
+	updateDisplayNumber(e, t) {
+		let n = Math.round(Number(t));
+		Number.isFinite(n) && this.mutate((t) => {
+			(e === "width" || e === "height") && (t.display[e] = Y(n, 64, 4096)), e === "padding" && (t.display.padding = Y(n, 0, Math.floor((Math.min(t.display.width, t.display.height) - 1) / 2))), e === "snapSize" && (t.display.snapSize = Y(n, 1, 256)), t.items.forEach((e) => this.constrainItem(e, t));
+		});
+	}
+	updateProfile(e) {
+		let t = U(e);
+		this.mutate((e) => {
+			e.display.profileId = t.id, e.display.width = t.width, e.display.height = t.height, e.display.palette = t.defaultPalette, e.items.forEach((t) => this.constrainItem(t, e));
+		}), requestAnimationFrame(() => this.fitCanvas());
+	}
+	deleteSelected() {
+		this.selectedItemId && (this.pendingDeleteItemId = this.selectedItemId);
+	}
+	itemName(e) {
+		if (e.kind === "primitive") return Ze[e.primitive.type];
+		let t = this.widgets.find((t) => t.id === e.widget.type), n = e.widget.config.title;
+		return typeof n == "string" && n.trim() ? n : t?.name ?? e.widget.type;
+	}
+	toggleItemState(e, t) {
+		this.mutate((n) => {
+			let r = n.items.find((t) => t.id === e);
+			r && (r[t] = !r[t]);
+		});
+	}
+	removeItem(e) {
+		this.pendingDeleteItemId = e;
+	}
+	confirmDeleteItem() {
+		let e = this.pendingDeleteItemId;
+		e && (this.pendingDeleteItemId = "", this.mutate((t) => {
+			t.items = t.items.filter((t) => t.id !== e);
+		}), this.selectedItemId === e && this.selectItemId(""));
+	}
+	startLayerPointerDrag(e, t) {
+		e.button === 0 && (e.stopPropagation(), e.preventDefault(), this.layerPointerDrag = {
+			itemId: t,
+			startX: e.clientX,
+			startY: e.clientY,
+			active: !1
+		}, window.addEventListener("pointermove", this.onLayerPointerMove), window.addEventListener("pointerup", this.onLayerPointerUp), window.addEventListener("pointercancel", this.onLayerPointerCancel));
+	}
+	finishLayerPointerDrag() {
+		this.layerPointerDrag = void 0, this.draggingLayerId = "", this.layerDropTarget = void 0, window.removeEventListener("pointermove", this.onLayerPointerMove), window.removeEventListener("pointerup", this.onLayerPointerUp), window.removeEventListener("pointercancel", this.onLayerPointerCancel);
+	}
+	startPanelResize(e) {
+		e.preventDefault(), this.panelResize = {
+			startX: e.clientX,
+			startWidth: this.inspectorWidth
+		}, window.addEventListener("pointermove", this.onPanelResizeMove), window.addEventListener("pointerup", this.onPanelResizeEnd);
+	}
+	onCanvasWheel(e) {
+		e.preventDefault(), e.shiftKey ? this.zoom = Y(this.zoom + (e.deltaY < 0 ? .1 : -.1), .25, 4) : e.altKey ? this.panX -= e.deltaY : this.panY -= e.deltaY;
+	}
+	resetCanvas() {
+		this.zoom = 1, this.panX = 0, this.panY = 0;
+	}
+	fitCanvas() {
+		if (!this.current) return;
+		let e = this.renderRoot.querySelector(".canvas-stage");
+		if (!e) return;
+		let t = Math.max(100, e.clientWidth - 96), n = Math.max(100, e.clientHeight - 96);
+		this.zoom = Y(Math.min(t / this.current.display.width, n / this.current.display.height), .25, 3), this.panX = 0, this.panY = 0;
+	}
+	async copyGeneratedYaml() {
+		if (this.preview?.yaml) {
+			this.yamlCopyTimer && window.clearTimeout(this.yamlCopyTimer);
+			try {
+				await navigator.clipboard.writeText(this.preview.yaml), this.yamlCopyState = "copied";
+			} catch {
+				this.yamlCopyState = "failed";
+			}
+			this.yamlCopyTimer = window.setTimeout(() => {
+				this.yamlCopyState = "idle";
+			}, 2200);
+		}
+	}
+	renderNewDashboardDialog() {
+		if (!this.newDashboardOpen) return F;
+		let e = U(this.newDashboard.display.profileId);
+		return N`<div class="dialog-scrim" @click=${(e) => {
+			e.target === e.currentTarget && (this.newDashboardOpen = !1);
+		}}><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="new-dashboard-title"><header><div><span class="eyebrow">Dashboard setup</span><h2 id="new-dashboard-title">Add dashboard</h2></div><button class="icon-button" aria-label="Close" @click=${() => {
+			this.newDashboardOpen = !1;
+		}}><ha-icon icon="mdi:close"></ha-icon></button></header><div class="dialog-grid"><label class="wide">Name<input aria-label="Dashboard name" .value=${this.newDashboard.name} @input=${(e) => this.updateNewDashboard("name", e.target.value)}></label><label class="wide">Display type<select aria-label="Display type" .value=${this.newDashboard.display.profileId ?? ""} @change=${(e) => this.updateNewDashboard("profileId", e.target.value)}>${H.map((e) => N`<option value=${e.id}>${e.manufacturer} · ${e.name}</option>`)}</select></label><label>Width<input aria-label="New dashboard width" type="number" .disabled=${e.id !== "custom"} .value=${String(this.newDashboard.display.width)} @input=${(e) => this.updateNewDashboard("width", e.target.value)}></label><label>Height<input aria-label="New dashboard height" type="number" .disabled=${e.id !== "custom"} .value=${String(this.newDashboard.display.height)} @input=${(e) => this.updateNewDashboard("height", e.target.value)}></label><label class="wide">Colors<select aria-label="Dashboard colors" .value=${this.newDashboard.display.palette} @change=${(e) => this.updateNewDashboard("palette", e.target.value)}>${e.palettes.map((e) => N`<option value=${e}>${Be[e]}</option>`)}</select></label><label>Outer padding<input aria-label="Dashboard padding" type="number" min="0" .value=${String(this.newDashboard.display.padding)} @input=${(e) => this.updateNewDashboard("padding", e.target.value)}></label><label>Snap size<input aria-label="Dashboard snap size" type="number" min="1" .value=${String(this.newDashboard.display.snapSize)} @input=${(e) => this.updateNewDashboard("snapSize", e.target.value)}></label></div><footer><ha-button appearance="plain" @click=${() => {
+			this.newDashboardOpen = !1;
+		}}>Cancel</ha-button><ha-button appearance="filled" .disabled=${this.saving || !this.newDashboard.name.trim()} @click=${this.createProject}>${this.saving ? "Creating…" : "Create dashboard"}</ha-button></footer></section></div>`;
+	}
+	renderDeleteDialog() {
+		if (!this.pendingDeleteItemId || !this.current) return F;
+		let e = this.current.items.find((e) => e.id === this.pendingDeleteItemId);
+		return e ? N`<div class="dialog-scrim" @click=${(e) => {
+			e.target === e.currentTarget && (this.pendingDeleteItemId = "");
+		}}><section class="dialog confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-element-title"><header><div><span class="eyebrow">Confirm removal</span><h2 id="delete-element-title">Delete ${this.itemName(e)}?</h2></div><button class="icon-button" aria-label="Close" @click=${() => {
+			this.pendingDeleteItemId = "";
+		}}><ha-icon icon="mdi:close"></ha-icon></button></header><p>This removes the element from the dashboard. You can restore it with Undo.</p><footer><ha-button appearance="plain" @click=${() => {
+			this.pendingDeleteItemId = "";
+		}}>Cancel</ha-button><ha-button appearance="filled" class="confirm-delete" @click=${this.confirmDeleteItem}>Delete element</ha-button></footer></section></div>` : F;
+	}
+	renderToolbox() {
+		if (this.leftCollapsed) return N`<aside class="panel panel-rail"><button class="icon-button" title="Expand element catalog" aria-label="Expand element catalog" @click=${() => {
+			this.leftCollapsed = !1;
+		}}><ha-icon icon="mdi:chevron-right"></ha-icon></button><span class="rail-label">Library</span></aside>`;
+		let e = ze(this.widgets, this.query), t = ze(this.primitives, this.query);
+		return N`<aside class="panel toolbox"><div class="panel-title"><div><span class="eyebrow">Library</span><h2>Elements</h2></div><button class="icon-button" title="Collapse element catalog" aria-label="Collapse element catalog" @click=${() => {
+			this.leftCollapsed = !0;
+		}}><ha-icon icon="mdi:chevron-left"></ha-icon></button></div><label class="search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" aria-label="Search widgets and primitives" placeholder="Search elements…" .value=${this.query} @input=${(e) => {
+			this.query = e.target.value;
+		}}></label><div class="catalog-scroll"><section class="catalog-section"><header><span>Widgets</span><span>${e.length}</span></header><div class="catalog-grid">${e.map((e) => {
+			let t = `widget:${e.id}`;
+			return N`<button class="catalog-item" title=${`${e.description} Click or drag to add.`} @click=${() => this.addCatalogItem(t)} @pointerdown=${(e) => this.startCatalogPointerDrag(e, t)}><ha-icon .icon=${e.icon}></ha-icon><strong>${e.name}</strong><small>${e.description}</small></button>`;
+		})}${e.length ? F : N`<p class="empty-result">No matching widgets</p>`}</div></section><section class="catalog-section"><header><span>Primitives</span><span>${t.length}</span></header><div class="catalog-grid">${t.map((e) => {
+			let t = `primitive:${e.id}`;
+			return N`<button class="catalog-item" title=${`${e.description} Click or drag to add.`} @click=${() => this.addCatalogItem(t)} @pointerdown=${(e) => this.startCatalogPointerDrag(e, t)}><ha-icon .icon=${e.icon}></ha-icon><strong>${e.name}</strong><small>${e.description}</small></button>`;
+		})}${t.length ? F : N`<p class="empty-result">No matching primitives</p>`}</div></section></div></aside>`;
+	}
+	renderCatalogDragGhost() {
+		let e = this.catalogPointerDrag;
+		if (!e?.active || !this.catalogDragPosition) return F;
+		let [t, n] = e.value.split(":"), r = t === "widget" ? this.widgets.find((e) => e.id === n) : this.primitives.find((e) => e.id === n);
+		return r ? N`
+      <div
+        class="catalog-drag-ghost"
+        data-catalog-value=${e.value}
+        style=${B({
+			left: `${this.catalogDragPosition.x}px`,
+			top: `${this.catalogDragPosition.y}px`,
+			width: `${e.previewWidth}px`,
+			height: `${e.previewHeight}px`
 		})}
-        aria-label=${r ? a ? `Region ${s}` : `Grid cell ${s}` : t ? `${t.name} region` : "Empty region"}
-        aria-pressed=${r ? T : String(e.id === this.selectedRegionId)}
-        role=${r ? T : "button"}
-        tabindex=${r ? T : 0}
-        @click=${() => {
-			r || (this.selectedRegionId = e.id);
-		}}
-        @keydown=${(t) => {
-			r || t.key !== "Enter" && t.key !== " " || (t.preventDefault(), this.selectedRegionId = e.id);
-		}}
-        @dblclick=${() => {
-			r && this.splitSelectedRegion(e.id);
-		}}
       >
-        ${i ? T : r ? a ? C`<div class="layout-region-copy composed"><strong>${s}</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>` : T : t && e.widget ? t.render(e.widget.config, {
-			compact: n,
-			palette: this.project.palette
-		}) : C`<div class="empty-region-copy"><strong>Add widget</strong><span>${e.columnSpan}×${e.rowSpan} region</span></div>`}
-      </section>
-    `;
+        <ha-icon class="drag-type-icon" .icon=${r.icon}></ha-icon>
+        <span>${r.name}</span>
+        <ha-icon class="drag-add-icon" icon="mdi:plus"></ha-icon>
+      </div>
+    ` : F;
 	}
-	renderMergeLayer() {
-		if (this.editorMode !== "layout") return C``;
-		let e = Array.from({ length: this.canvasProject.grid.columns * this.canvasProject.grid.rows }, (e, t) => ({
-			row: Math.floor(t / this.canvasProject.grid.columns) + 1,
-			column: t % this.canvasProject.grid.columns + 1
-		})), t = this.mergeHover ?? this.mergeAnchor, n = !!(this.mergeAnchor && t && this.selectionContainsComposedRegion(this.mergeAnchor, t));
-		return C`
-      <div class="merge-layer active" aria-label="Region composition grid" @pointerleave=${() => {
-			this.mergeHover = void 0;
-		}}>
-        ${e.map((e) => {
-			let r = this.canvasProject.regions.find((t) => Et(t, e)), i = !!(r && (r.label || r.rowSpan > 1 || r.columnSpan > 1)), a = !!(this.mergeAnchor && t && e.row >= Math.min(this.mergeAnchor.row, t.row) && e.row <= Math.max(this.mergeAnchor.row, t.row) && e.column >= Math.min(this.mergeAnchor.column, t.column) && e.column <= Math.max(this.mergeAnchor.column, t.column));
-			return C`
-            <button
-              class="merge-cell ${i ? "occupied" : ""} ${a ? "preview" : ""} ${n && a ? "invalid" : ""} ${this.mergeAnchor?.row === e.row && this.mergeAnchor?.column === e.column ? "anchor" : ""}"
-              aria-label=${i ? `Existing region at column ${e.column}, row ${e.row}; double-click to remove` : `Grid cell column ${e.column}, row ${e.row}`}
-              @pointerenter=${() => {
-				this.mergeAnchor && (this.mergeHover = e);
-			}}
-              @click=${() => this.selectMergeCell(e)}
-              @dblclick=${(e) => {
-				e.preventDefault(), e.stopPropagation(), i && r && this.splitSelectedRegion(r.id);
-			}}
-            >${i ? T : `${e.column}.${e.row}`}</button>
-          `;
+	renderDashboardTabs() {
+		return N`<nav class="dashboard-tabs" aria-label="Dashboards">${this.projects.map((e) => N`<button class=${e.id === this.current?.id ? "dashboard-tab active" : "dashboard-tab"} @click=${() => this.selectProject(e)}><ha-icon icon="mdi:monitor"></ha-icon><span>${e.name}</span><i class=${e.status} title=${e.status}></i></button>`)}<button class="add-tab" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon>Add dashboard</button><span class="tab-spacer"></span><div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div></nav>${this.renderCatalogDragGhost()}`;
+	}
+	renderCanvasItem(e, t) {
+		let n = Q(e), r = e.id === this.selectedItemId;
+		return N`
+      <div
+        data-item-id=${e.id}
+        class=${`selection ${r ? "selected" : ""} ${e.locked ? "locked" : ""} ${e.hidden ? "hidden" : ""}`}
+        style=${B({
+			left: `${n.x / t.display.width * 100}%`,
+			top: `${n.y / t.display.height * 100}%`,
+			width: `${n.width / t.display.width * 100}%`,
+			height: `${n.height / t.display.height * 100}%`
 		})}
+        @pointerdown=${(t) => this.selectItem(t, e)}
+      >
+        ${e.hidden ? N`<span class="hidden-label">Hidden</span>` : F}
+        ${e.locked ? N`<ha-icon class="lock-badge" icon="mdi:lock"></ha-icon>` : F}
+        ${r ? N`<output class="selection-size" aria-live="off">${Math.round(n.width)} × ${Math.round(n.height)}</output>` : F}
+        ${r && !e.locked ? Ge.map((t) => N`
+          <button
+            data-resize-handle=${t}
+            class=${`resize-handle resize-${t}`}
+            tabindex="-1"
+            aria-label=${`Resize ${this.itemName(e)} from ${$e[t]}`}
+            @pointerdown=${(n) => this.selectItem(n, e, "resize", t)}
+          ></button>
+        `) : F}
       </div>
     `;
 	}
 	renderCanvas() {
-		let e = this.canvasProject, t = this.canvasDisplay, n = {
-			width: e.width,
-			height: e.height
-		}, r = !!(this.previewImageUrl || this.previewError), i = wt(e), a = this.editorMode === "layout" ? e.regions : e.regions.filter(bt);
-		return C`
-      <main class="canvas-area">
-        <div class="canvas-stage">
-          <div class="screen-meta"><span>${e.displayId === "custom" ? "CUSTOM DISPLAY" : `${t.manufacturer} · ${t.diagonal}″`}</span><code>${n.width} × ${n.height} px</code></div>
-          <div class="preview-boundary">
-            <div class="screen-fit">
-              <div class="screen-bezel">
-                <div
-                  id="display-screen"
-                  class="display-screen ${r ? "live-preview" : ""}"
-                  data-palette=${e.palette}
-                  style=${M({
-			"--grid-columns": String(e.grid.columns),
-			"--grid-rows": String(e.grid.rows),
-			"--preview-padding": `${i.screenPadding}px`,
-			"--preview-gap": `${i.regionGap}px`,
-			"--layout-padding": `${i.screenPadding}px`,
-			"--layout-gap": `${i.regionGap}px`,
-			width: `${n.width}px`,
-			height: `${n.height}px`
-		})}
-                >
-                  ${r ? C`
-                      ${this.previewImageUrl ? C`<img class="rendered-preview" alt="Live Home Assistant data preview" src=${this.previewImageUrl} @error=${this.previewImageFailed} />` : C`<ha-alert class="preview-failure" alert-type="error" .title=${"Exact preview unavailable"}>${this.previewError}</ha-alert>`}
-                      <div
-                        class="preview-overlay"
-                        style=${M({
-			"--grid-columns": String(e.grid.columns),
-			"--grid-rows": String(e.grid.rows)
-		})}
-                      >${a.map((e) => this.renderScreenRegion(e))}</div>
-                      ${this.renderMergeLayer()}
-                    ` : C`
-                      ${a.map((e) => this.renderScreenRegion(e))}
-                      ${this.renderMergeLayer()}
-                    `}
-                </div>
-              </div>
+		let e = this.current, t = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`, n = this.workingArea(e);
+		return N`
+      <main class="workspace">
+        ${this.renderDashboardTabs()}
+        <div class="workspace-meta">
+          <span>${e.display.width} × ${e.display.height} px</span>
+          <span>${e.items.length} layers</span>
+          <span>Padding ${e.display.padding}px</span>
+          <button class=${this.snapEnabled ? "tool-toggle active" : "tool-toggle"} aria-pressed=${this.snapEnabled} @click=${() => {
+			this.snapEnabled = !this.snapEnabled;
+		}}>
+            <ha-icon icon="mdi:magnet"></ha-icon><span>Snap ${e.display.snapSize}px</span>
+          </button>
+          <span class="zoom-readout">${Math.round(this.zoom * 100)}%</span>
+        </div>
+        <section class=${this.draggingCatalog ? "canvas-stage accepting-drop" : "canvas-stage"} @wheel=${this.onCanvasWheel} @dragover=${this.onCanvasDragOver} @drop=${this.onCanvasDrop}>
+          <div class="canvas-viewport" style=${B({ transform: t })}>
+            <div class="canvas" style=${B({
+			width: `${e.display.width}px`,
+			height: `${e.display.height}px`
+		})} @pointerdown=${() => this.selectItemId("")}>
+              ${this.preview ? N`<img draggable="false" src=${this.preview.imageUrl} alt="Authoritative rendered display preview">` : N`<div class="canvas-placeholder">Rendering…</div>`}
+              <div class="working-area" aria-hidden="true" style=${B({
+			left: `${n.x / e.display.width * 100}%`,
+			top: `${n.y / e.display.height * 100}%`,
+			width: `${n.width / e.display.width * 100}%`,
+			height: `${n.height / e.display.height * 100}%`,
+			"--snap-size": `${e.display.snapSize * this.zoom}px`
+		})}></div>
+              ${e.items.map((t) => this.renderCanvasItem(t, e))}
             </div>
           </div>
-          ${this.editorMode === "layout" ? this.mergeAnchor ? C`<div class="merge-help"><strong>First corner selected.</strong> Move across the grid and click the opposite corner.</div>` : C`<div class="merge-help"><strong>Draw a region:</strong> Click two opposite corners. Double-click a region to remove it.</div>` : C`<div class="merge-help"><strong>Live preview:</strong> ${this.previewError ? this.previewError : this.previewLoading ? "Refreshing current Home Assistant data…" : this.previewTimings ? `Exact Renderer preview in ${this.previewTimings.pipeline.toFixed(1)} ms (${this.previewTimings.renderer.toFixed(1)} ms render). Select a region to configure it.` : "Select a region to configure its content."}</div>`}
-        </div>
+          <div class="zoom-controls"><button aria-label="Zoom out" @click=${() => {
+			this.zoom = Y(this.zoom - .25, .25, 4);
+		}}>−</button>${[
+			.5,
+			1,
+			2,
+			3
+		].map((e) => N`<button class=${this.zoom === e ? "active" : ""} aria-label=${`${e}×`} @click=${() => {
+			this.zoom = e;
+		}}>${e}×</button>`)}<button aria-label="Zoom in" @click=${() => {
+			this.zoom = Y(this.zoom + .25, .25, 4);
+		}}>+</button><button aria-label="Reset" @click=${this.resetCanvas}>Reset</button><button aria-label="Fit" @click=${this.fitCanvas}>Fit</button></div>
+        </section>
       </main>
     `;
 	}
-	renderOption(e) {
-		let t = this.selectedRegion?.widget, n = t?.config[e.key] ?? (t ? this.widgetDefinition(t.type)?.defaults[e.key] : void 0), r = e.selector ?? (e.type === "calendar" ? { entity: { filter: { domain: "calendar" } } } : e.type === "entities" ? { entity: { multiple: !0 } } : e.type === "entity" ? { entity: {} } : void 0);
-		if (r && "opendisplay_color" in r) {
-			let t = Pt(this.project.palette, n);
-			return C`
-        <fieldset class="palette-color-field">
-          <legend>${e.label}</legend>
-          <div class="palette-color-options">
-            ${Nt(this.project.palette).map((n) => C`
-              <label title=${n.label}>
-                <input
-                  type="radio"
-                  name=${`option-${e.key}`}
-                  value=${n.value}
-                  .checked=${t === n.value}
-                  @change=${() => this.updateWidgetValue(e, n.value)}
-                />
-                <span class="palette-color-swatch" style=${M({ backgroundColor: n.value })}></span>
-                <span>${n.label}</span>
-              </label>
-            `)}
-          </div>
-          ${e.help ? C`<p>${e.help}</p>` : T}
-        </fieldset>
-      `;
-		}
-		return r ? C`
-        <ha-form
-          .hass=${this.hass}
-          .data=${{ [e.key]: n ?? "" }}
-          .schema=${[{
+	renderLayers() {
+		let e = [...this.current?.items ?? []].reverse();
+		return N`<section class="layers"><header><div><span class="eyebrow">Structure</span><h2>Elements</h2></div><div class="layers-header-actions"><span class="count">${e.length}</span><button class="icon-button" title="Collapse inspector" aria-label="Collapse inspector" @click=${() => {
+			this.rightCollapsed = !0;
+		}}><ha-icon icon="mdi:chevron-right"></ha-icon></button></div></header><div class="layer-list">${e.length ? e.map((e) => {
+			let t = this.layerDropTarget?.itemId === e.id ? `drop-${this.layerDropTarget.edge}` : "", n = this.itemName(e);
+			return N`<div data-item-id=${e.id} class=${`layer-row ${e.id === this.selectedItemId ? "active" : ""} ${e.hidden ? "is-hidden" : ""} ${e.id === this.draggingLayerId ? "dragging" : ""} ${t}`} @click=${() => this.selectItemId(e.id)}><button class="drag" title="Reorder layer" aria-label=${`Reorder ${n}`} @pointerdown=${(t) => this.startLayerPointerDrag(t, e.id)}><ha-icon icon="mdi:drag-vertical"></ha-icon></button><ha-icon class="layer-type-icon" .icon=${e.kind === "widget" ? this.widgets.find((t) => t.id === e.widget.type)?.icon ?? "mdi:puzzle" : Qe[e.primitive.type]}></ha-icon><span><strong>${n}</strong><small>${e.kind === "widget" ? "Widget" : e.primitive.type}</small></span><div class="layer-actions"><button title=${e.hidden ? "Show layer" : "Hide layer"} aria-label=${e.hidden ? `Show ${n}` : `Hide ${n}`} @click=${(t) => {
+				t.stopPropagation(), this.toggleItemState(e.id, "hidden");
+			}}><ha-icon .icon=${e.hidden ? "mdi:eye-off-outline" : "mdi:eye-outline"}></ha-icon></button><button title=${e.locked ? "Unlock position" : "Lock position"} aria-label=${e.locked ? `Unlock ${n}` : `Lock ${n}`} @click=${(t) => {
+				t.stopPropagation(), this.toggleItemState(e.id, "locked");
+			}}><ha-icon .icon=${e.locked ? "mdi:lock" : "mdi:lock-open-variant-outline"}></ha-icon></button><button class="delete" title="Delete layer" aria-label=${`Delete ${n}`} @click=${(t) => {
+				t.stopPropagation(), this.removeItem(e.id);
+			}}><ha-icon icon="mdi:delete-outline"></ha-icon></button></div></div>`;
+		}) : N`<p class="empty-layers">Drag widgets or primitives onto the canvas.</p>`}</div></section>`;
+	}
+	numberField(e, t, n, r = 0, i = 4096, a = !1) {
+		return N`<label class="number-field"><span>${e}</span><input data-field=${n} type="number" .value=${String(t)} min=${r} max=${i} .disabled=${a} @change=${(e) => this.updateSelectedNumber(n, e.target.value)}></label>`;
+	}
+	screenNumberField(e, t, n, r, i) {
+		return N`<label class="number-field"><span>${e}</span><input aria-label=${e} type="number" .value=${String(t)} min=${r} max=${i} @change=${(e) => this.updateDisplayNumber(n, e.target.value)}></label>`;
+	}
+	renderInspectorHeader(e, t, n) {
+		return N`<div class="inspector-title"><ha-icon .icon=${n}></ha-icon><div><h2>${e}</h2><p>${t}</p></div></div>`;
+	}
+	renderScreenInspector() {
+		let e = this.current, t = U(e.display.profileId);
+		return N`${this.renderInspectorHeader("Dashboard", "Display and canvas settings", "mdi:monitor")}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select .value=${e.display.profileId ?? "custom"} @change=${(e) => this.updateProfile(e.target.value)}>${H.map((e) => N`<option value=${e.id}>${e.manufacturer} · ${e.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField("Width", e.display.width, "width", 64, 4096)}${this.screenNumberField("Height", e.display.height, "height", 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select .value=${e.display.palette} @change=${(e) => {
+			let t = e.target.value;
+			this.mutate((e) => {
+				e.display.palette = t, Ve[t].includes(e.display.background) || (e.display.background = "white");
+			});
+		}}>${(t.id === "custom" ? Object.keys(Be) : t.palettes).map((e) => N`<option value=${e}>${Be[e]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(e) => {
+			let t = e.target.value;
+			this.mutate((e) => {
+				e.display.background = t;
+			});
+		}}>${Ve[e.display.palette].map((t) => N`<option value=${t} ?selected=${t === e.display.background}>${t[0].toUpperCase()}${t.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField("Outer padding", e.display.padding, "padding", 0, 1024)}${this.screenNumberField("Snap size", e.display.snapSize, "snapSize", 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`;
+	}
+	renderItemLayout(e) {
+		let t = e.locked;
+		if (e.kind === "widget") return N`<div class="field-grid">${this.numberField("X", e.frame.x, "x", 0, this.current.display.width, t)}${this.numberField("Y", e.frame.y, "y", 0, this.current.display.height, t)}${this.numberField("Width", e.frame.width, "width", 1, this.current.display.width, t)}${this.numberField("Height", e.frame.height, "height", 1, this.current.display.height, t)}</div>${this.numberField("Inner padding", e.layout.padding, "padding", 0, 128, t)}`;
+		let n = e.primitive;
+		return Z(n) ? N`<div class="field-grid">${this.numberField("X", Math.min(n.x_start, n.x_end), "x", 0, this.current.display.width, t)}${this.numberField("Y", Math.min(n.y_start, n.y_end), "y", 0, this.current.display.height, t)}${this.numberField("Width", Math.abs(n.x_end - n.x_start) + 1, "width", 1, this.current.display.width, t)}${this.numberField("Height", Math.abs(n.y_end - n.y_start) + 1, "height", 1, this.current.display.height, t)}</div>` : n.type === "circle" ? N`<div class="field-grid">${this.numberField("Center X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Center Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Radius", n.radius, "radius", 1, Math.min(this.current.display.width, this.current.display.height), t)}</div>` : n.type === "qrcode" ? N`<div class="field-grid">${this.numberField("X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Module size", n.boxsize, "boxsize", 1, 16, t)}</div>` : N`<div class="field-grid">${this.numberField("X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Size", n.size, "size", 6, 256, t)}</div>`;
+	}
+	primitiveAppearanceSchema(e) {
+		let t = e.primitive.type, n = [...Ve[this.current?.display.palette ?? "bw"], "accent"];
+		return t === "text" ? [{
+			name: "value",
+			label: "Text",
+			selector: { text: {} }
+		}, {
+			name: "color",
+			label: "Color",
+			selector: { select: { options: n } }
+		}] : t === "line" ? [
+			{
+				name: "fill",
+				label: "Color",
+				selector: { select: { options: n } }
+			},
+			{
+				name: "width",
+				label: "Line width",
+				selector: { number: {
+					min: 1,
+					max: 32
+				} }
+			},
+			{
+				name: "dashed",
+				label: "Dashed",
+				selector: { boolean: {} }
+			}
+		] : t === "icon" ? [{
+			name: "value",
+			label: "MDI icon name",
+			selector: { text: {} }
+		}, {
+			name: "color",
+			label: "Color",
+			selector: { select: { options: n } }
+		}] : t === "qrcode" ? [
+			{
+				name: "data",
+				label: "Content",
+				selector: { text: {} }
+			},
+			{
+				name: "border",
+				label: "Quiet zone",
+				selector: { number: {
+					min: 0,
+					max: 8
+				} }
+			},
+			{
+				name: "color",
+				label: "Foreground",
+				selector: { select: { options: n } }
+			},
+			{
+				name: "bgcolor",
+				label: "Background",
+				selector: { select: { options: n } }
+			}
+		] : t === "progress_bar" ? [
+			{
+				name: "progress",
+				label: "Progress",
+				selector: { number: {
+					min: 0,
+					max: 100
+				} }
+			},
+			{
+				name: "direction",
+				label: "Direction",
+				selector: { select: { options: [
+					"right",
+					"left",
+					"up",
+					"down"
+				] } }
+			},
+			{
+				name: "fill",
+				label: "Fill",
+				selector: { select: { options: n } }
+			},
+			{
+				name: "background",
+				label: "Background",
+				selector: { select: { options: n } }
+			},
+			{
+				name: "show_percentage",
+				label: "Show percentage",
+				selector: { boolean: {} }
+			}
+		] : [
+			{
+				name: "fill",
+				label: "Fill",
+				selector: { select: { options: ["transparent", ...n] } }
+			},
+			{
+				name: "outline",
+				label: "Outline",
+				selector: { select: { options: n } }
+			},
+			{
+				name: "width",
+				label: "Outline width",
+				selector: { number: {
+					min: 0,
+					max: 32
+				} }
+			}
+		];
+	}
+	renderItemInspector(e) {
+		let t = e.kind === "widget" ? this.widgets.find((t) => t.id === e.widget.type) : void 0, n = this.itemName(e), r = `${e.kind === "widget" ? "Widget" : "ODL primitive"} · ${e.locked ? "position locked" : "editable"}`, i = e.kind === "widget" ? t?.icon ?? "mdi:puzzle" : Qe[e.primitive.type], a = e.kind === "primitive" && "fill" in e.primitive ? {
+			...e.primitive,
+			fill: e.primitive.fill ?? "transparent"
+		} : e.kind === "primitive" ? e.primitive : void 0;
+		return N`${this.renderInspectorHeader(n, r, i)}${e.locked ? N`<div class="locked-notice"><span><ha-icon icon="mdi:lock"></ha-icon>Position is locked</span><button type="button" aria-label="Unlock element position" @click=${() => this.toggleItemState(e.id, "locked")}>Unlock</button></div>` : F}<details class="inspector-section" open><summary>Layout</summary><div class="section-body">${this.renderItemLayout(e)}</div></details>${e.kind === "widget" ? N`<details class="inspector-section" open><summary>Widget settings</summary><div class="section-body"><ha-form .hass=${this.hass} .data=${e.widget.config} .schema=${t?.fields.map((e) => ({
 			name: e.key,
 			label: e.label,
-			required: e.required ?? !1,
-			selector: r
-		}]}
-          .computeLabel=${() => e.label}
-          @value-changed=${(t) => this.updateWidgetValue(e, t.detail.value[e.key])}
-        ></ha-form>
-      ` : e.type === "toggle" ? C`
-      <div class="toggle-field"><label for=${`option-${e.key}`}>${e.label}</label><input id=${`option-${e.key}`} class="toggle" type="checkbox" .checked=${!!n} @change=${(t) => this.updateWidgetOption(e, t)} /></div>
-    ` : e.type === "select" ? C`
-      <div class="field">
-        <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <select id=${`option-${e.key}`} .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}>
-          ${e.options?.map((e) => C`<option value=${e.value}>${e.label}</option>`)}
-        </select>
-      </div>
-    ` : e.type === "text" && e.multiline ? C`
-      <div class="field">
-        <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <textarea id=${`option-${e.key}`} rows="4" .value=${String(n ?? "")} @change=${(t) => this.updateWidgetOption(e, t)}></textarea>
-      </div>
-    ` : C`
-      <div class="field">
-        <label class="field-label" for=${`option-${e.key}`}>${e.label}</label>
-        <input id=${`option-${e.key}`} type=${e.type} .value=${String(n ?? "")} min=${e.min ?? T} max=${e.max ?? T} step=${e.step ?? T} @change=${(t) => this.updateWidgetOption(e, t)} />
-      </div>
-    `;
+			required: e.required,
+			selector: e.selector
+		})) ?? []} .computeLabel=${(e) => e.label} @value-changed=${this.updateWidgetConfig}></ha-form></div></details>` : N`<details class="inspector-section" open><summary>Appearance</summary><div class="section-body"><ha-form .hass=${this.hass} .data=${a} .schema=${this.primitiveAppearanceSchema(e)} .computeLabel=${(e) => e.label} @value-changed=${this.updatePrimitive}></ha-form></div></details>`}<div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteSelected}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Remove element</ha-button></div>${this.renderMetrics()}`;
 	}
-	updateWidgetValue(e, t) {
-		let n = Array.isArray(t) ? t.map((e) => String(e)) : typeof t == "string" || typeof t == "number" || typeof t == "boolean" ? t : String(t ?? "");
-		this.updateProject((t) => ({
-			...t,
-			regions: t.regions.map((t) => t.id !== this.selectedRegionId || !t.widget ? t : {
-				...t,
-				widget: {
-					...t.widget,
-					config: {
-						...t.widget.config,
-						[e.key]: n
-					}
-				}
-			})
-		}));
+	renderMetrics() {
+		if (!this.preview) return F;
+		let e = this.yamlCopyState === "copied" ? "Copied" : this.yamlCopyState === "failed" ? "Copy failed" : "Copy YAML", t = this.yamlCopyState === "copied" ? "mdi:check" : this.yamlCopyState === "failed" ? "mdi:alert-circle-outline" : "mdi:content-copy";
+		return N`${this.preview.warnings.map((e) => N`<ha-alert class="warning" alert-type="warning">${e}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details><details class="inspector-section yaml"><summary>Generated ODL YAML</summary><div class="yaml-actions"><ha-button size="s" appearance="plain" aria-label="Copy generated ODL YAML" @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${t}></ha-icon>${e}</ha-button><output aria-live="polite">${this.yamlCopyState === "copied" ? "YAML copied to clipboard" : this.yamlCopyState === "failed" ? "Clipboard access failed" : ""}</output></div><pre>${this.preview.yaml}</pre></details>`;
 	}
 	renderInspector() {
-		let e = this.selectedRegion;
-		if (!e) return C`
-      <aside class="inspector"><div class="inspector-heading"><h2>Region settings</h2></div><div class="inspector-empty"><div><strong>Select a region</strong><p>Choose a region on the display to assign a widget and configure its data.</p></div></div></aside>
-    `;
-		let t = e.widget ? this.widgetDefinition(e.widget.type) : void 0, n = H(e);
-		return C`
-      <aside class="inspector">
-        <div class="inspector-heading"><h2>Region settings</h2><span class="region-address">R${e.row}:C${e.column} · ${e.columnSpan}×${e.rowSpan}</span></div>
-        <section class="region-appearance" aria-labelledby="region-appearance-heading">
-          <div class="region-appearance-heading"><h3 id="region-appearance-heading">Appearance</h3><p>Applied to this region only.</p></div>
-          <div class="toggle-field"><label for="region-show-background">Show background</label><input id="region-show-background" class="toggle" type="checkbox" .checked=${n.showBackground} @change=${(e) => this.updateRegionAppearance("showBackground", e)} /></div>
-          <div class="toggle-field"><label for="region-show-border">Show border</label><input id="region-show-border" class="toggle" type="checkbox" .checked=${n.showBorder} @change=${(e) => this.updateRegionAppearance("showBorder", e)} /></div>
-          <div class="field region-radius-field">
-            <label class="field-label" for="region-border-radius">Corner radius (px)</label>
-            <input id="region-border-radius" type="number" min="0" max="128" step="1" placeholder=${String(this.project.regionBorderRadius)} .value=${n.borderRadius === null ? "" : String(n.borderRadius)} @change=${this.updateRegionBorderRadius} />
-            <p>Leave empty to use the display default (${this.project.regionBorderRadius} px).</p>
-          </div>
-        </section>
-        <div class="widget-picker">
-          ${this.widgetMetadata.map((e) => C`
-            <button class="widget-choice ${t?.id === e.id ? "active" : ""}" @click=${() => this.assignWidget(e.id)}>
-              ${Y(e.id) ? q(Y(e.id).icon) : C`<ha-icon .icon=${e.icon}></ha-icon>`}
-              <strong>${e.name}</strong><span>${e.description}</span>
-            </button>
-          `)}
-        </div>
-        ${t ? C`<div class="option-form">${t.options.map((e) => this.renderOption(e))}</div><div class="danger-zone"><ha-button size="s" variant="danger" appearance="outlined" @click=${this.removeWidget}>${J(Qe)} Remove widget</ha-button></div>` : C`<div class="inspector-empty"><div><strong>Choose a widget</strong><p>Each widget brings its own data source and configuration fields.</p></div></div>`}
-      </aside>
-    `;
-	}
-	renderLayoutGuide() {
-		let e = this.canvasProject, t = {
-			width: e.width,
-			height: e.height
-		};
-		return C`
-      <aside class="inspector layout-guide">
-        <span class="step-kicker">Step 1 · Device & layout</span>
-        <h2>Prepare the canvas</h2>
-        <p>Choose the hardware and palette, then compose regions before assigning widgets.</p>
-        <dl class="device-facts">
-          <div><dt>Device</dt><dd>${this.displayName(e)}</dd></div>
-          <div><dt>Output</dt><dd>${t.width} × ${t.height} px</dd></div>
-          <div><dt>Grid</dt><dd>${e.grid.columns} × ${e.grid.rows}</dd></div>
-          <div><dt>Regions</dt><dd>${e.regions.length}</dd></div>
-        </dl>
-        <section class="layout-section" aria-labelledby="background-heading">
-          <div class="layout-section-heading">
-            <div><h3 id="background-heading">Display background</h3><p>Choose an image stored in Home Assistant Media.</p></div>
-            ${e.background ? C`<ha-button size="s" appearance="plain" @click=${this.clearBackground}>Remove</ha-button>` : T}
-          </div>
-          <ha-form class="background-media-form"
-            .hass=${this.hass}
-            .data=${{ backgroundMedia: e.background ? ht(e.background.media) : void 0 }}
-            .schema=${[{
-			name: "backgroundMedia",
-			label: "Background image",
-			selector: { media: {
-				accept: ["image/*"],
-				hide_content_type: !0
-			} }
-		}]}
-            .computeLabel=${() => "Background image"}
-            .computeHelper=${() => "Home Assistant Media images only"}
-            @value-changed=${this.changeBackgroundMedia}
-          ></ha-form>
-          ${e.background ? C`
-              <div class="background-settings">
-                <fieldset class="background-fieldset">
-                  <legend>Image fit</legend>
-                  <div class="background-mode-grid">
-                    ${dt.map((t) => C`
-                      <button
-                        class=${e.background?.mode === t.value ? "active" : ""}
-                        aria-pressed=${e.background?.mode === t.value}
-                        @click=${() => this.changeBackgroundMode(t.value)}
-                      >${t.label}</button>
-                    `)}
-                  </div>
-                </fieldset>
-                <fieldset class="background-fieldset" ?disabled=${e.background.mode === "stretch"}>
-                  <legend>Position</legend>
-                  <div class="background-anchor-grid">
-                    ${ft.map((t) => C`
-                      <button
-                        class=${e.background?.anchor === t.value ? "active" : ""}
-                        aria-label=${t.label}
-                        title=${t.label}
-                        aria-pressed=${e.background?.anchor === t.value}
-                        ?disabled=${e.background?.mode === "stretch"}
-                        @click=${() => this.changeBackgroundAnchor(t.value)}
-                      ><span></span></button>
-                    `)}
-                  </div>
-                </fieldset>
-                ${e.background.mode === "manual" ? C`
-                    <div class="field background-scale">
-                      <label class="field-label" for="background-scale">Scale of original image (%)</label>
-                      <input
-                        id="background-scale"
-                        type="number"
-                        min="1"
-                        max="400"
-                        step="1"
-                        .value=${String(e.background.scale)}
-                        @change=${this.changeBackgroundScale}
-                      />
-                      <p>100% uses the image's natural pixel size. An 800 × 800 image at 50% renders as 400 × 400 px.</p>
-                    </div>
-                  ` : T}
-              </div>
-            ` : C`<p class="background-empty">No background image. The display uses its selected theme canvas.</p>`}
-        </section>
-        <section class="layout-section" aria-labelledby="spacing-heading">
-          <div class="layout-section-heading"><div><h3 id="spacing-heading">Region spacing</h3><p>Set spacing in native output pixels.</p></div></div>
-          <div class="spacing-grid">
-            <div class="field"><label class="field-label" for="screen-padding">Screen padding (px)</label><input id="screen-padding" type="number" min="0" max="128" step="1" .value=${String(wt(e).screenPadding)} @change=${(e) => this.changeLayoutSpacing("screenPadding", e)} /><p>Inset from the display edge.</p></div>
-            <div class="field"><label class="field-label" for="region-gap">Region gap (px)</label><input id="region-gap" type="number" min="0" max="128" step="1" .value=${String(wt(e).regionGap)} @change=${(e) => this.changeLayoutSpacing("regionGap", e)} /><p>Gutter between regions.</p></div>
-            <div class="field"><label class="field-label" for="region-border-radius-default">Default corner radius (px)</label><input id="region-border-radius-default" type="number" min="0" max="128" step="1" .value=${String(e.regionBorderRadius)} @change=${this.changeDisplayRegionBorderRadius} /><p>Inherited by regions without an override.</p></div>
-          </div>
-        </section>
-        <ha-form
-          .hass=${this.hass}
-          .data=${{ language: e.language === "system" ? this.hass.language : e.language }}
-          .schema=${[{
-			name: "language",
-			label: "Display language",
-			required: !0,
-			selector: { language: { native_name: !0 } }
-		}]}
-          .computeLabel=${() => "Display language"}
-          @value-changed=${(e) => {
-			let t = e.detail.value.language;
-			t && this.updateLayoutDraft((e) => ({
-				...e,
-				language: t
-			}));
-		}}
-        ></ha-form>
-        <p>The selected language is used by live preview, Media Source, and the physical display.</p>
-        <ol class="layout-instructions">
-          <li>Click the first corner of a new region.</li>
-          <li>Move across the grid and click the opposite corner.</li>
-          <li>Double-click an existing region to remove it.</li>
-        </ol>
-      </aside>
-    `;
-	}
-	renderRenameDialog() {
-		return C`
-      <dialog id="rename-dialog"><div class="dialog-body">
-        <h2>Rename display</h2><p>Use a name that describes where this display will be installed.</p>
-        <div class="field"><label class="field-label" for="display-name">Display name</label><input id="display-name" type="text" .value=${this.renameDraft} @input=${(e) => {
-			this.renameDraft = e.currentTarget.value;
-		}} @keydown=${(e) => {
-			e.key === "Enter" && this.saveProjectName();
-		}} /></div>
-        <div class="dialog-actions"><ha-button appearance="outlined" @click=${() => this.renameDialog?.close()}>Cancel</ha-button><ha-button variant="brand" @click=${this.saveProjectName}>Save name</ha-button></div>
-      </div></dialog>
-    `;
-	}
-	renderWelcome() {
-		return C`
-      <div class="app-shell welcome-shell">
-        <header class="topbar welcome-topbar">
-          <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
-          <span class="welcome-topline">Device-accurate e-paper composition</span>
-          <ha-button size="s" variant="brand" @click=${this.addProject}>${J(tt)} New display</ha-button>
-        </header>
-        <div class="workspace welcome-workspace">
-          <aside class="project-rail empty-rail" aria-label="Saved displays">
-            <div class="rail-heading"><h2>Displays</h2><button class="text-button" @click=${this.addProject}>+ New</button></div>
-            <div class="empty-library"><span class="empty-library-count">0</span><strong>No displays yet</strong><p>Your saved screens will appear here.</p></div>
-            <div class="rail-footer">Stored securely by Home Assistant.</div>
-          </aside>
-          <main class="welcome-main">
-            <section class="welcome-copy">
-              <span class="step-kicker">Start with the hardware</span>
-              <h1>Design an e-paper screen that fits the device.</h1>
-              <p>Choose a verified display, compose its native-pixel layout, then add widgets and export the exact screen as PNG or JPG.</p>
-              <div class="welcome-actions">
-                <ha-button size="l" variant="brand" @click=${this.addProject}>${J(tt)} Create your first display</ha-button>
-              </div>
-              <dl class="welcome-facts">
-                <div><dt>1</dt><dd><strong>Select hardware</strong><span>Model, palette and orientation</span></dd></div>
-                <div><dt>2</dt><dd><strong>Compose regions</strong><span>Device-aware native grid</span></dd></div>
-                <div><dt>3</dt><dd><strong>Add widgets</strong><span>Preview and export one surface</span></dd></div>
-              </dl>
-            </section>
-            <div class="welcome-visual" aria-hidden="true">
-              <div class="welcome-device-meta"><span>OPEN DISPLAY</span><code>800 × 480</code></div>
-              <div class="welcome-device">
-                <div class="welcome-screen">
-                  <div class="welcome-region welcome-region-a"><span>A</span><i></i><i></i></div>
-                  <div class="welcome-region welcome-region-b"><span>B</span><b>21°</b><small>HOME</small></div>
-                  <div class="welcome-region welcome-region-c"><span>C</span><em></em><em></em><em></em></div>
-                </div>
-              </div>
-              <div class="welcome-palette"><i></i><i></i><i></i><i></i><i></i><i></i><span>SPECTRA 6</span></div>
-            </div>
-          </main>
-        </div>
-      </div>
-      ${this.toastMessage ? C`<div class="toast" role="status">${this.toastMessage}</div>` : T}
-    `;
+		if (this.rightCollapsed) return N`<aside class="panel panel-rail right-rail"><button class="icon-button" title="Expand inspector" aria-label="Expand inspector" @click=${() => {
+			this.rightCollapsed = !1;
+		}}><ha-icon icon="mdi:chevron-left"></ha-icon></button><span class="rail-label">Layers</span></aside>`;
+		let e = this.current?.items.find((e) => e.id === this.selectedItemId);
+		return N`<aside class="panel inspector"><div class="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector" @pointerdown=${this.startPanelResize}></div>${this.renderLayers()}<section class="properties">${e ? this.renderItemInspector(e) : this.renderScreenInspector()}</section></aside>${this.renderDeleteDialog()}`;
 	}
 	render() {
-		return this.loading ? C`<div class="loading-state"><ha-circular-progress active></ha-circular-progress><p>Loading OpenDisplay Studio…</p></div>` : this.loadError ? C`<div class="loading-state"><ha-alert alert-type="error">${this.loadError}</ha-alert><ha-button @click=${this.loadProjects}>Retry</ha-button></div>` : this.store.projects.length === 0 ? this.renderWelcome() : C`
-      <div class="app-shell">
-        <header class="topbar">
-          <div class="brand"><span class="brand-mark">ODX</span><span class="brand-copy"><strong>OpenDisplay Studio</strong><span>Proof of Concept</span></span></div>
-          <div class="project-context">
-            <div class="project-title"><strong>${this.project.name}</strong><span class="autosave-state">${this.editorMode === "layout" ? "Changes not applied" : this.saving ? "Saving…" : "Saved in Home Assistant"}</span></div>
-            <div class="workflow" aria-label="Editor workflow">
-              <span class=${this.editorMode === "layout" ? "active" : "complete"}><b>1</b> Device & layout</span>
-              <i aria-hidden="true"></i>
-              <span class=${this.editorMode === "widgets" ? "active" : ""}><b>2</b> Widgets</span>
-            </div>
-          </div>
-          <div class="top-actions">
-            ${this.editorMode === "layout" ? C`<ha-button size="s" appearance="plain" @click=${this.cancelLayoutEditor}>Cancel</ha-button><ha-button size="s" variant="brand" appearance="filled" @click=${this.applyLayoutEditor}>${J(Je)} Apply layout</ha-button>` : C`
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.openRenameDialog}>${J(nt)} Rename</ha-button>
-                  <ha-button class="secondary-action" size="s" appearance="outlined" @click=${this.duplicateProject}>${J(Ze)} Duplicate</ha-button>
-                  <ha-button size="s" variant=${this.project.status === "ready" ? "neutral" : "brand"} @click=${() => this.setProjectStatus(this.project.status === "ready" ? "draft" : "ready")}>${this.project.status === "ready" ? "Move to Draft" : "Mark Ready"}</ha-button>
-                `}
-          </div>
-        </header>
-        <div class="workspace ${this.projectRailCollapsed ? "rail-collapsed" : ""}">
-          ${this.renderProjectRail()}
-          <section class="editor">${this.editorMode === "layout" ? this.renderToolbar() : this.renderWidgetToolbar()}${this.renderCanvas()}</section>
-          ${this.editorMode === "layout" ? this.renderLayoutGuide() : this.renderInspector()}
-        </div>
-      </div>
-      ${this.renderRenameDialog()}
-      ${this.toastMessage ? C`<div class="toast" role="status">${this.toastMessage}</div>` : T}
-    `;
+		if (this.loading) return N`<div class="project-empty"><p>Loading OpenDisplay Studio…</p></div>`;
+		if (!this.current) return N`<div class="project-empty"><section class="empty-card"><ha-icon icon="mdi:monitor-edit"></ha-icon><span class="eyebrow">OpenDisplay Studio</span><h1>Build your first dashboard</h1><p>Create an exact-size e-paper canvas and compose it from live widgets and ODL primitives.</p>${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}<ha-button appearance="filled" @click=${this.openNewDashboard}>Add dashboard</ha-button></section>${this.renderNewDashboardDialog()}</div>`;
+		let e = B({
+			"--toolbox-width": this.leftCollapsed ? "48px" : "255px",
+			"--inspector-width": this.rightCollapsed ? "48px" : `${this.inspectorWidth}px`
+		});
+		return N`<div class="shell"><header class="topbar"><div class="brand"><strong>OpenDisplay Studio</strong><span>Layer-based ODL designer · v${this.integrationVersion}</span></div><input class="project-name" aria-label="Dashboard name" .value=${this.current.name} @input=${this.updateName}><span class="status ${this.current.status}">${this.current.status}</span><div class="actions"><ha-button appearance="plain" @click=${this.openNewDashboard}><ha-icon slot="start" icon="mdi:plus"></ha-icon>Add dashboard</ha-button><ha-button appearance="plain" @click=${this.toggleReady}>${this.current.status === "ready" ? "Set Draft" : "Set Ready"}</ha-button><ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? "Saving…" : "Save"}</ha-button></div></header>${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}<div class="layout" style=${e}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>${this.renderNewDashboardDialog()}</div>`;
 	}
 };
-X([ze({ attribute: !1 })], $.prototype, "hass", void 0), X([A()], $.prototype, "store", void 0), X([A()], $.prototype, "selectedRegionId", void 0), X([A()], $.prototype, "mergeAnchor", void 0), X([A()], $.prototype, "mergeHover", void 0), X([A()], $.prototype, "toastMessage", void 0), X([A()], $.prototype, "loading", void 0), X([A()], $.prototype, "saving", void 0), X([A()], $.prototype, "loadError", void 0), X([A()], $.prototype, "renameDraft", void 0), X([A()], $.prototype, "editorMode", void 0), X([A()], $.prototype, "layoutDraft", void 0), X([A()], $.prototype, "widgetMetadata", void 0), X([A()], $.prototype, "previewImageUrl", void 0), X([A()], $.prototype, "previewLoading", void 0), X([A()], $.prototype, "previewError", void 0), X([A()], $.prototype, "previewTimings", void 0), X([A()], $.prototype, "projectRailCollapsed", void 0), X([j(".preview-boundary")], $.prototype, "previewBoundary", void 0), X([j(".screen-fit")], $.prototype, "screenFit", void 0), X([j(".screen-bezel")], $.prototype, "screenBezel", void 0), X([j("#rename-dialog")], $.prototype, "renameDialog", void 0), $ = X([Ie("opendisplay-studio-panel")], $);
+q([Ae({ attribute: !1 })], $.prototype, "hass", void 0), q([z()], $.prototype, "projects", void 0), q([z()], $.prototype, "integrationVersion", void 0), q([z()], $.prototype, "widgets", void 0), q([z()], $.prototype, "primitives", void 0), q([z()], $.prototype, "current", void 0), q([z()], $.prototype, "selectedItemId", void 0), q([z()], $.prototype, "query", void 0), q([z()], $.prototype, "preview", void 0), q([z()], $.prototype, "loading", void 0), q([z()], $.prototype, "saving", void 0), q([z()], $.prototype, "dirty", void 0), q([z()], $.prototype, "draggingCatalog", void 0), q([z()], $.prototype, "draggingLayerId", void 0), q([z()], $.prototype, "catalogDragPosition", void 0), q([z()], $.prototype, "layerDropTarget", void 0), q([z()], $.prototype, "undoCount", void 0), q([z()], $.prototype, "redoCount", void 0), q([z()], $.prototype, "pendingDeleteItemId", void 0), q([z()], $.prototype, "error", void 0), q([z()], $.prototype, "leftCollapsed", void 0), q([z()], $.prototype, "rightCollapsed", void 0), q([z()], $.prototype, "inspectorWidth", void 0), q([z()], $.prototype, "zoom", void 0), q([z()], $.prototype, "panX", void 0), q([z()], $.prototype, "panY", void 0), q([z()], $.prototype, "snapEnabled", void 0), q([z()], $.prototype, "newDashboardOpen", void 0), q([z()], $.prototype, "newDashboard", void 0), q([z()], $.prototype, "yamlCopyState", void 0), q([Me(".properties")], $.prototype, "propertiesPanel", void 0), $ = q([De("opendisplay-studio-panel")], $);
 //#endregion
-export { $ as OdxApp };
+export { $ as OpenDisplayStudioPanel };

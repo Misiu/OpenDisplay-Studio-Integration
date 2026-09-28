@@ -23,6 +23,13 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": [
+    "src/odx-app.ts",
+    "src/app-styles.ts",
+    "src/types.ts",
+    "src/catalog.ts",
+    "src/dev.ts",
+    "src/**/*.d.ts"
+  ],
   "exclude": ["src/**/*.test.ts"]
 }

@@ -1,6 +1,6 @@
 [project]
 name = "opendisplay-studio-integration"
-version = "0.9.5"
+version = "2.0.3"
 requires-python = ">=3.14.2"
 
 [tool.pytest.ini_options]
@@ -37,11 +37,15 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["ANN", "D", "PLR2004", "S101", "SLF001"]
-"tests/test_trmnl_liquid.py" = ["E501"]
-"custom_components/opendisplay_studio/screens.py" = ["E501", "RUF001"]
-"custom_components/opendisplay_studio/widgets/sensor/provider.py" = ["E501"]
-"custom_components/opendisplay_studio/composer.py" = ["E501"]
-"custom_components/opendisplay_studio/projects.py" = ["PLR0915"]
+"custom_components/opendisplay_studio/compiler.py" = ["E501", "EM102"]
+"custom_components/opendisplay_studio/media_source.py" = ["D103", "D107"]
+"custom_components/opendisplay_studio/odl.py" = ["PLR0913"]
+"custom_components/opendisplay_studio/projects.py" = ["D102", "D107", "EM102", "PLR0915"]
+"custom_components/opendisplay_studio/rendering.py" = ["D107"]
+"custom_components/opendisplay_studio/websocket.py" = ["D103"]
+"custom_components/opendisplay_studio/widgets/__init__.py" = ["D102", "D107", "EM102", "TID252"]
+"custom_components/opendisplay_studio/widgets/temperature/provider.py" = ["D102"]
+"custom_components/opendisplay_studio/widgets/temperature/renderer.py" = ["TID252"]
 
 [tool.mypy]
 python_version = "3.14"

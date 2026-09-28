@@ -2,6 +2,119 @@
 
 ## Unreleased
 
+## 3.0.6
+
+- Match the Studio top bar to Home Assistant's `--header-height` and safe-area
+  inset so both headers align exactly.
+- Replace the single resize control with eight directional edge and corner
+  handles, fixed opposite-edge geometry, Shift aspect locking, and a live size
+  badge below the selection.
+- Keep intrinsic ODL primitives such as circles, icons, text, and QR codes
+  proportional while anchoring them to the correct resize edge.
+- Add pure geometry tests plus rendered E2E coverage for every resize handle,
+  Shift resizing, circles, box and quantized primitives, stable canvas
+  positioning, and catalog drops across varying Home Assistant sidebar widths.
+
+## 3.0.5
+
+- Generate frontend item IDs when `Crypto.randomUUID()` is unavailable, as it
+  can be outside secure browser contexts, and run the complete E2E suite with
+  that API disabled.
+- Preserve the pointer hotspot in a compact source-sized catalog drag preview
+  and place the center of a dropped widget or primitive at the drop point.
+- Match the compact ESPBoards catalog density and make a persisted position
+  lock explicit and directly unlockable from the element inspector.
+- Add regressions for catalog geometry, UUID fallback, centered primitive and
+  widget drops, Temperature lock/unlock parity, and immediate widget movement.
+
+## 3.0.4
+
+- Make the catalog drag preview identify the exact widget or primitive being
+  dragged, matching the direct manipulation model used by the reference
+  designer.
+- Add E2E coverage for consecutive catalog drops, immediate selection and
+  movement of a newly created element, and cancellation outside the canvas.
+
+## 3.0.3
+
+- Correct catalog drag coordinates when the Studio panel is offset by Home
+  Assistant navigation or header chrome. The drag indicator now follows the
+  pointer instead of applying the panel offset twice.
+- Add a rendered E2E regression that embeds Studio at a 252 px horizontal and
+  48 px vertical offset, verifies pointer/indicator alignment, performs the
+  complete pointer drop, and checks the created element's canvas position.
+
+## 3.0.2
+
+- Replace browser-native catalog drag-and-drop with pointer tracking that works
+  across the Home Assistant panel shadow boundary and clearly marks the canvas
+  as a valid drop target.
+- Add Undo and Redo controls and keyboard shortcuts for element creation,
+  movement, resizing, visibility, locking, layer ordering, property changes,
+  and deletion.
+- Compact the layer list, reveal layer actions on hover or selection, move the
+  inspector collapse control to the panel header, and show an exact insertion
+  line while reordering layers.
+- Require confirmation before removing a layer and keep deletion recoverable
+  through Undo.
+- Exercise real pointer sequences in E2E tests for loading, catalog drops,
+  movement, visibility, layer ordering, insertion feedback, Undo/Redo, and
+  confirmed deletion.
+
+## 3.0.1
+
+- Constrain the complete designer to the Home Assistant viewport so switching
+  between dashboard and element inspectors cannot resize or recenter the canvas.
+- Make catalog drops reliable across the complete canvas stage and add
+  click-to-add as an accessible fallback for every widget and primitive.
+- Reproduce Home Assistant's delayed and repeated `hass` assignments in the E2E
+  harness, covering project loading, selection/deselection, property editing,
+  movement, and adding elements without a canvas position change.
+
+## 3.0.0
+
+- Keep the canvas transform and page scroll position stable while selecting,
+  moving, and editing elements; avoid preview renders for selection-only clicks.
+- Reset the Inspector scroll position when its subject changes and prevent
+  browser scroll anchoring from moving the workspace during reactive updates.
+- Compact the element library, layer controls, and icon sizing while giving
+  the properties panel more usable vertical space.
+- Replace the logical row/column grid with a freeform pixel canvas, configurable
+  outer padding, and configurable snap size.
+- Restore a multi-dashboard workflow with predefined/custom display setup and
+  persistent dashboard tabs.
+- Add an Elements layer panel with selection synchronization, drag reordering,
+  overlap support, visibility, position locking, and per-layer deletion.
+- Redesign the workspace around a dark fixed-size canvas, compact property
+  controls, and the existing pan/zoom/collapse/resize interaction model.
+- Preserve the selected catalog primitive type end-to-end instead of silently
+  falling back to Rectangle, and add clipboard copy for generated ODL YAML.
+- Keep Temperature titles centered across the complete tile, align the native
+  thermometer icon with the reading, and fit the complete value and unit
+  without ellipsis in compact grid cells.
+- Expand the primitive catalog with Line, Circle, Ellipse, Icon, QR code, and
+  Progress bar elements backed directly by `odl-renderer`.
+- Add E Ink Spectra 6 profiles and expose its complete black, white, red,
+  yellow, blue, and green palette throughout the editor and ODL pipeline.
+- Fix stale Studio frontend assets after an integration replacement by adding
+  the bundle content hash to the panel module URL and showing the running
+  integration version in the panel header.
+- Replace the external Chromium Renderer App, Liquid, and TRMNL pipeline with
+  the embedded `odl-renderer` package.
+- Introduce the v3 semantic project model with ordered widgets and raw ODL
+  primitives; earlier experimental projects are intentionally not migrated.
+- Add the Temperature widget, Text and Rectangle primitives, direct canvas
+  editing, and a shared searchable Widgets/Primitives catalog.
+- Use the exact backend ODL PNG as the designer preview and expose generated
+  YAML, authoritative item bounds, warnings, and full pipeline timings.
+- Add a fixed native-size canvas viewport with mouse pan, modifier-key zoom,
+  zoom presets, Reset, and Fit controls.
+- Add mouse resizing for ODL primitives, compact screen/snap and
+  element layout controls, persisted widget padding, collapsible side panels,
+  and a resizable Inspector.
+- Add deterministic Playwright coverage for project layout persistence,
+  primitive resize gestures, viewport controls, and panel interactions.
+
 ## 0.9.5
 
 - Add self-contained Section Title and Hero Weather widgets with English and
