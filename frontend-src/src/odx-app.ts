@@ -19,11 +19,17 @@ const isBoxPrimitive = (primitive: Primitive): primitive is BoxPrimitive => 'x_s
 const primitiveNames: Record<Primitive['type'], string> = { text: 'Text', rectangle: 'Rectangle', line: 'Line', circle: 'Circle', ellipse: 'Ellipse', icon: 'Icon', qrcode: 'QR code', progress_bar: 'Progress bar' }
 const primitiveIcons: Record<Primitive['type'], string> = { text: 'mdi:format-text', rectangle: 'mdi:rectangle-outline', line: 'mdi:vector-line', circle: 'mdi:circle-outline', ellipse: 'mdi:ellipse-outline', icon: 'mdi:star-outline', qrcode: 'mdi:qrcode', progress_bar: 'mdi:progress-helper' }
 const resizeHandleNames: Record<ResizeHandle, string> = { nw: 'north west', n: 'north', ne: 'north east', e: 'east', se: 'south east', s: 'south', sw: 'south west', w: 'west' }
+type StudioView = 'dashboards' | 'design' | 'code'
+type DashboardSort = 'updated' | 'name'
+type DashboardDialog = 'rename' | 'settings' | 'delete'
+interface DashboardFormData { name: string; width: number; height: number; palette: PaletteId; padding: number; snapSize: number }
+interface FormSectionSchema { name: string; type: 'grid' | 'expandable'; flatten: true; title?: string; expanded?: boolean; schema: StudioFormSchema[] }
+type StudioFormSchema = HaFormSchema | FormSectionSchema
 
-const freshProject = (language: string, profileId = DISPLAY_PROFILES[0].id): ScreenProject => {
+const freshProject = (language: string, profileId = 'custom'): ScreenProject => {
   const profile = profileById(profileId)
   return {
-    id: '', schemaVersion: 3, name: 'New dashboard', status: 'draft', language: language || 'en',
+    id: '', schemaVersion: 3, name: '', status: 'draft', language: language || 'en',
     display: { profileId: profile.id, width: profile.width, height: profile.height, palette: profile.defaultPalette, background: 'white', padding: 0, snapSize: 5 },
     items: [], createdAt: '', updatedAt: '',
   }
@@ -50,7 +56,9 @@ export class OpenDisplayStudioPanel extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant
 
   @state() private projects: ScreenProject[] = []
-  @state() private integrationVersion = ''
+  @state() private view: StudioView = 'dashboards'
+  @state() private dashboardQuery = ''
+  @state() private dashboardSort: DashboardSort = 'updated'
   @state() private widgets: WidgetDefinition[] = []
   @state() private primitives: PrimitiveDefinition[] = []
   @state() private current?: ScreenProject
@@ -77,6 +85,9 @@ export class OpenDisplayStudioPanel extends LitElement {
   @state() private snapEnabled = true
   @state() private newDashboardOpen = false
   @state() private newDashboard = freshProject('en')
+  @state() private dashboardMenuProjectId = ''
+  @state() private dashboardDialog?: DashboardDialog
+  @state() private dashboardDraft?: ScreenProject
   @state() private yamlCopyState: 'idle' | 'copied' | 'failed' = 'idle'
 
   private previewTimer?: number
@@ -96,6 +107,8 @@ export class OpenDisplayStudioPanel extends LitElement {
   connectedCallback(): void {
     super.connectedCallback()
     window.addEventListener('keydown', this.onHistoryKeyDown)
+    window.addEventListener('keydown', this.onDashboardMenuKeyDown)
+    window.addEventListener('pointerdown', this.onDashboardOutsidePointerDown)
   }
   protected firstUpdated(): void { this.ensureBootstrap() }
   protected updated(changed: PropertyValues<this>): void {
@@ -116,6 +129,8 @@ export class OpenDisplayStudioPanel extends LitElement {
     window.removeEventListener('pointermove', this.onPanelResizeMove)
     window.removeEventListener('pointerup', this.onPanelResizeEnd)
     window.removeEventListener('keydown', this.onHistoryKeyDown)
+    window.removeEventListener('keydown', this.onDashboardMenuKeyDown)
+    window.removeEventListener('pointerdown', this.onDashboardOutsidePointerDown)
   }
 
   private ensureBootstrap(): void {
@@ -129,11 +144,10 @@ export class OpenDisplayStudioPanel extends LitElement {
     this.loading = true; this.error = ''
     try {
       const data = await hass.callWS<BootstrapResponse>({ type: 'opendisplay_studio/bootstrap' })
-      this.integrationVersion = data.version; this.projects = data.projects; this.widgets = data.widgets; this.primitives = data.primitives
-      this.current = this.projects[0] ? clone(this.projects[0]) : undefined
+      this.projects = data.projects; this.widgets = data.widgets; this.primitives = data.primitives
+      this.current = undefined; this.preview = undefined; this.view = 'dashboards'
       this.clearHistory()
       this.newDashboard = freshProject(hass.language)
-      if (this.current) { await this.composePreview(); await this.updateComplete; requestAnimationFrame(() => this.fitCanvas()) }
     } catch (error) { this.error = messageFrom(error, 'Could not load OpenDisplay Studio') } finally { this.loading = false }
   }
 
@@ -141,22 +155,46 @@ export class OpenDisplayStudioPanel extends LitElement {
     this.newDashboard = freshProject(this.hass?.language ?? 'en')
     this.newDashboardOpen = true
   }
-  private updateNewDashboard(field: string, value: string): void {
-    const next = clone(this.newDashboard)
-    if (field === 'profileId') {
-      const profile = profileById(value); next.display.profileId = profile.id; next.display.width = profile.width; next.display.height = profile.height; next.display.palette = profile.defaultPalette
-    } else if (field === 'name') next.name = value
-    else if (field === 'palette') next.display.palette = value as PaletteId
-    else if (field === 'background') next.display.background = value
-    else if (field === 'width' || field === 'height' || field === 'padding' || field === 'snapSize') next.display[field] = Math.max(field === 'snapSize' ? 1 : 0, Math.round(Number(value) || 0))
-    this.newDashboard = next
+  private dashboardFormData(project: ScreenProject): DashboardFormData {
+    return {
+      name: project.name,
+      width: project.display.width,
+      height: project.display.height,
+      palette: project.display.palette,
+      padding: project.display.padding,
+      snapSize: project.display.snapSize,
+    }
+  }
+  private projectFromForm(project: ScreenProject, partial: Partial<DashboardFormData>): ScreenProject {
+    const value = { ...this.dashboardFormData(project), ...partial }
+    const next = clone(project)
+    next.name = String(value.name)
+    next.display.profileId = 'custom'
+    next.display.width = Math.round(Number(value.width) || 0)
+    next.display.height = Math.round(Number(value.height) || 0)
+    next.display.palette = value.palette in PALETTE_LABELS ? value.palette : 'bw'
+    next.display.padding = Math.round(Number(value.padding) || 0)
+    next.display.snapSize = Math.round(Number(value.snapSize) || 0)
+    if (!PALETTE_COLORS[next.display.palette].includes(next.display.background)) next.display.background = 'white'
+    return next
+  }
+  private updateNewDashboardForm(event: CustomEvent<{ value: Partial<DashboardFormData> }>): void {
+    this.newDashboard = this.projectFromForm(this.newDashboard, event.detail.value)
+  }
+  private dashboardIsValid(project: ScreenProject): boolean {
+    const { width, height, padding, snapSize } = project.display
+    return Boolean(project.name.trim())
+      && width >= 64 && width <= 4096
+      && height >= 64 && height <= 4096
+      && padding >= 0 && padding * 2 < Math.min(width, height)
+      && snapSize >= 1 && snapSize <= 256
   }
   private async createProject(): Promise<void> {
     if (!this.hass) return
     this.saving = true; this.error = ''
     try {
       const result = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/create_project', project: this.newDashboard })
-      this.projects = [...this.projects, result.project]; this.current = clone(result.project); this.selectedItemId = ''; this.dirty = false; this.newDashboardOpen = false
+      this.projects = [...this.projects, result.project]; this.current = clone(result.project); this.selectedItemId = ''; this.dirty = false; this.newDashboardOpen = false; this.view = 'design'
       this.clearHistory()
       await this.composePreview(); await this.updateComplete; this.resetCanvas(); requestAnimationFrame(() => this.fitCanvas())
     } catch (error) { this.error = messageFrom(error, 'Could not create the dashboard') } finally { this.saving = false }
@@ -174,15 +212,148 @@ export class OpenDisplayStudioPanel extends LitElement {
     const id = this.current.id
     try {
       await this.hass.callWS({ type: 'opendisplay_studio/delete_project', project_id: id })
-      this.projects = this.projects.filter(project => project.id !== id); this.current = this.projects[0] ? clone(this.projects[0]) : undefined; this.selectedItemId = ''; this.preview = undefined; this.dirty = false
+      this.projects = this.projects.filter(project => project.id !== id); this.current = undefined; this.selectedItemId = ''; this.preview = undefined; this.dirty = false; this.view = 'dashboards'
       this.clearHistory()
-      if (this.current) await this.composePreview()
     } catch (error) { this.error = messageFrom(error, 'Could not delete the dashboard') }
   }
-  private selectProject(project: ScreenProject): void {
+  private toggleDashboardMenu(event: Event, projectId: string): void {
+    event.stopPropagation()
+    this.dashboardMenuProjectId = this.dashboardMenuProjectId === projectId ? '' : projectId
+  }
+  private openDashboardAction(event: Event, project: ScreenProject, action: DashboardDialog): void {
+    event.stopPropagation()
+    this.dashboardMenuProjectId = ''
+    this.dashboardDraft = clone(project)
+    this.dashboardDialog = action
+    if (action === 'rename') {
+      void this.updateComplete.then(() => {
+        const input = this.renderRoot.querySelector('.dashboard-rename-input') as HTMLInputElement | null
+        input?.focus(); input?.select()
+      })
+    }
+  }
+  private closeDashboardAction(): void {
+    this.dashboardDialog = undefined
+    this.dashboardDraft = undefined
+  }
+  private onDashboardOutsidePointerDown = (event: PointerEvent): void => {
+    if (!this.dashboardMenuProjectId) return
+    const insideMenu = event.composedPath().some(node => node instanceof HTMLElement
+      && (node.classList.contains('dashboard-menu') || node.classList.contains('dashboard-menu-trigger')))
+    if (!insideMenu) this.dashboardMenuProjectId = ''
+  }
+  private onDashboardMenuKeyDown = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape') return
+    if (this.dashboardMenuProjectId) {
+      this.dashboardMenuProjectId = ''
+      event.stopPropagation()
+    } else if (this.dashboardDialog) {
+      this.closeDashboardAction()
+      event.stopPropagation()
+    }
+  }
+  private updateDashboardRename(event: Event): void {
+    if (!this.dashboardDraft) return
+    const draft = clone(this.dashboardDraft)
+    draft.name = (event.target as HTMLInputElement).value
+    this.dashboardDraft = draft
+  }
+  private onDashboardRenameKeyDown(event: KeyboardEvent): void {
+    event.stopPropagation()
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      void this.saveDashboardRename()
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      this.closeDashboardAction()
+    }
+  }
+  private async updateDashboardFromGallery(project: ScreenProject, fallback: string): Promise<ScreenProject | undefined> {
+    if (!this.hass || this.saving) return undefined
+    this.saving = true; this.error = ''
+    try {
+      const result = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/update_project', project_id: project.id, project })
+      this.projects = this.projects.map(candidate => candidate.id === result.project.id ? result.project : candidate)
+      if (this.current?.id === result.project.id) {
+        this.current = clone(result.project); this.preview = undefined; this.dirty = false
+      }
+      return result.project
+    } catch (error) {
+      this.error = messageFrom(error, fallback)
+      return undefined
+    } finally { this.saving = false }
+  }
+  private async saveDashboardRename(): Promise<void> {
+    if (this.dashboardDialog !== 'rename' || !this.dashboardDraft || this.saving) return
+    const project = clone(this.dashboardDraft)
+    project.name = project.name.trim()
+    if (!project.name) {
+      this.error = 'Dashboard name cannot be empty'
+      return
+    }
+    const current = this.projects.find(candidate => candidate.id === project.id)
+    if (current?.name === project.name) {
+      this.closeDashboardAction()
+      return
+    }
+    if (await this.updateDashboardFromGallery(project, 'Could not rename the dashboard')) this.closeDashboardAction()
+  }
+  private dashboardCopyName(project: ScreenProject): string {
+    const names = new Set(this.projects.map(candidate => candidate.name.toLocaleLowerCase(this.hass?.language || 'en')))
+    const base = `${project.name} copy`
+    let candidate = base; let suffix = 2
+    while (names.has(candidate.toLocaleLowerCase(this.hass?.language || 'en'))) candidate = `${base} ${suffix++}`
+    return candidate
+  }
+  private async duplicateDashboard(event: Event, project: ScreenProject): Promise<void> {
+    event.stopPropagation()
+    if (!this.hass || this.saving) return
+    this.dashboardMenuProjectId = ''; this.saving = true; this.error = ''
+    const duplicate = clone(project)
+    duplicate.id = ''; duplicate.name = this.dashboardCopyName(project); duplicate.status = 'draft'; duplicate.createdAt = ''; duplicate.updatedAt = ''
+    try {
+      const result = await this.hass.callWS<{ project: ScreenProject }>({ type: 'opendisplay_studio/create_project', project: duplicate })
+      this.projects = [...this.projects, result.project]
+    } catch (error) { this.error = messageFrom(error, 'Could not duplicate the dashboard') } finally { this.saving = false }
+  }
+  private updateDashboardSettings(event: CustomEvent<{ value: Partial<DashboardFormData> }>): void {
+    if (!this.dashboardDraft) return
+    this.dashboardDraft = this.projectFromForm(this.dashboardDraft, event.detail.value)
+  }
+  private async saveDashboardSettings(): Promise<void> {
+    if (this.dashboardDialog !== 'settings' || !this.dashboardDraft || !this.dashboardIsValid(this.dashboardDraft)) return
+    const project = clone(this.dashboardDraft); project.name = project.name.trim()
+    if (await this.updateDashboardFromGallery(project, 'Could not update dashboard settings')) this.closeDashboardAction()
+  }
+  private async confirmDeleteDashboard(): Promise<void> {
+    if (this.dashboardDialog !== 'delete' || !this.dashboardDraft || !this.hass || this.saving) return
+    const id = this.dashboardDraft.id
+    this.saving = true; this.error = ''
+    try {
+      await this.hass.callWS({ type: 'opendisplay_studio/delete_project', project_id: id })
+      this.projects = this.projects.filter(project => project.id !== id)
+      if (this.current?.id === id) {
+        this.current = undefined; this.selectedItemId = ''; this.preview = undefined; this.dirty = false; this.clearHistory()
+      }
+      this.closeDashboardAction()
+    } catch (error) { this.error = messageFrom(error, 'Could not delete the dashboard') } finally { this.saving = false }
+  }
+  private openDashboard(project: ScreenProject): void {
+    if (this.current?.id === project.id) {
+      this.view = 'design'
+      if (!this.preview) void this.composePreview()
+      return
+    }
+    if (this.dirty && !window.confirm('Discard unsaved dashboard changes?')) return
     this.current = clone(project); this.selectedItemId = ''; this.dirty = false
     this.clearHistory()
+    this.view = 'design'
     void this.composePreview().then(() => { this.resetCanvas(); requestAnimationFrame(() => this.fitCanvas()) })
+  }
+  private showDashboards(): void { this.view = 'dashboards' }
+  private setEditorView(view: 'design' | 'code'): void {
+    this.view = view
+    if (view === 'code' && !this.preview) void this.composePreview()
   }
   private mutate(mutator: (project: ScreenProject) => void, preview = true, history = true): void {
     if (!this.current) return
@@ -655,10 +826,183 @@ export class OpenDisplayStudioPanel extends LitElement {
     this.yamlCopyTimer = window.setTimeout(() => { this.yamlCopyState = 'idle' }, 2200)
   }
 
+  private dashboardList(): ScreenProject[] {
+    const query = this.dashboardQuery.trim().toLocaleLowerCase(this.hass?.language || 'en')
+    return this.projects
+      .filter(project => !query || project.name.toLocaleLowerCase(this.hass?.language || 'en').includes(query))
+      .sort((left, right) => this.dashboardSort === 'name'
+        ? left.name.localeCompare(right.name, this.hass?.language || 'en')
+        : right.updatedAt.localeCompare(left.updatedAt) || left.name.localeCompare(right.name, this.hass?.language || 'en'))
+  }
+  private dashboardDate(project: ScreenProject): string {
+    const date = new Date(project.updatedAt)
+    return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(this.hass?.language || 'en', { dateStyle: 'medium' }).format(date)
+  }
+  private dashboardAccent(palette: PaletteId): string {
+    if (palette === 'bwr' || palette === 'bwry') return '#d32f2f'
+    if (palette === 'bwy') return '#d6a800'
+    if (palette === 'spectra6') return '#246bfd'
+    return '#202124'
+  }
+  private renderDashboardCard(project: ScreenProject): TemplateResult {
+    const colors = PALETTE_COLORS[project.display.palette]
+    const menuOpen = this.dashboardMenuProjectId === project.id
+    const renaming = this.dashboardDialog === 'rename' && this.dashboardDraft?.id === project.id
+    const menuId = `dashboard-menu-${project.id}`
+    return html`
+      <article class=${`dashboard-card${menuOpen ? ' menu-open' : ''}`} data-dashboard-id=${project.id}>
+        <div class="dashboard-card-preview">
+          <div
+            class="dashboard-miniature"
+            style=${styleMap({
+              aspectRatio: `${project.display.width} / ${project.display.height}`,
+              background: project.display.background,
+              '--dashboard-accent': this.dashboardAccent(project.display.palette),
+            })}
+          >
+            <span class="miniature-title"></span>
+            <span class="miniature-accent"></span>
+            <span class="miniature-line long"></span>
+            <span class="miniature-line"></span>
+          </div>
+          <span class="dashboard-resolution">${project.display.width} × ${project.display.height}</span>
+        </div>
+        <div class="dashboard-card-copy">
+          <span class="dashboard-card-title">
+            ${renaming ? html`<input class="dashboard-rename-input" aria-label=${`Rename dashboard ${project.name}`} .value=${this.dashboardDraft?.name ?? project.name} @input=${this.updateDashboardRename} @keydown=${this.onDashboardRenameKeyDown} @blur=${this.saveDashboardRename}>` : html`<strong>${project.name}</strong>`}
+            <span class=${`status ${project.status}`}>${project.status}</span>
+          </span>
+          <span class="dashboard-card-meta">
+            <span>${project.display.width} × ${project.display.height}</span>
+            <span class="palette-dots" aria-label=${PALETTE_LABELS[project.display.palette]}>${colors.map(color => html`<i style=${styleMap({ background: color })}></i>`)}</span>
+            <span>${PALETTE_LABELS[project.display.palette]}</span>
+          </span>
+          <small>Updated ${this.dashboardDate(project)}</small>
+        </div>
+        <button class="dashboard-card-open" aria-label=${`Open dashboard ${project.name}`} @click=${() => this.openDashboard(project)}></button>
+        <button class="dashboard-menu-trigger" aria-label=${`Dashboard actions for ${project.name}`} aria-haspopup="menu" aria-controls=${menuId} aria-expanded=${menuOpen} @click=${(event: Event) => this.toggleDashboardMenu(event, project.id)}><ha-icon icon="mdi:dots-horizontal"></ha-icon></button>
+        ${menuOpen ? html`
+          <div class="dashboard-menu" id=${menuId} role="menu" aria-label=${`Actions for ${project.name}`}>
+            <button role="menuitem" @click=${(event: Event) => this.openDashboardAction(event, project, 'rename')}><ha-icon icon="mdi:pencil-outline"></ha-icon><span>Rename</span></button>
+            <button role="menuitem" @click=${(event: Event) => this.duplicateDashboard(event, project)}><ha-icon icon="mdi:content-copy"></ha-icon><span>Duplicate</span></button>
+            <button role="menuitem" @click=${(event: Event) => this.openDashboardAction(event, project, 'settings')}><ha-icon icon="mdi:monitor-cog"></ha-icon><span>Display Settings</span></button>
+            <button class="delete" role="menuitem" @click=${(event: Event) => this.openDashboardAction(event, project, 'delete')}><ha-icon icon="mdi:delete-outline"></ha-icon><span>Delete</span></button>
+          </div>
+        ` : nothing}
+      </article>
+    `
+  }
+  private renderDashboardLibrary(): TemplateResult {
+    const dashboards = this.dashboardList()
+    return html`
+      <main class="dashboard-library">
+        <header class="dashboard-library-header">
+          <div><h1>Dashboards</h1><p>${this.projects.length} ${this.projects.length === 1 ? 'dashboard' : 'dashboards'}</p></div>
+          <ha-button class="dashboard-new-button" appearance="filled" aria-label="New dashboard" @click=${this.openNewDashboard}><span class="dashboard-new-button-label"><ha-icon icon="mdi:plus"></ha-icon><span>New dashboard</span></span></ha-button>
+        </header>
+        ${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}
+        <section class="dashboard-library-tools" aria-label="Dashboard filters">
+          <label class="dashboard-search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" aria-label="Search dashboards" placeholder="Search dashboards…" .value=${this.dashboardQuery} @input=${(event: Event) => { this.dashboardQuery = (event.target as HTMLInputElement).value }}></label>
+          <label class="dashboard-sort"><span>Sort</span><select aria-label="Sort dashboards" .value=${this.dashboardSort} @change=${(event: Event) => { this.dashboardSort = (event.target as HTMLSelectElement).value as DashboardSort }}><option value="updated">Last updated</option><option value="name">Name A–Z</option></select></label>
+        </section>
+        <section class="dashboard-grid" aria-label="Saved dashboards">
+          <button class="dashboard-add-card" aria-label="Add dashboard" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon><strong>New dashboard</strong></button>
+          ${dashboards.map(project => this.renderDashboardCard(project))}
+          ${!dashboards.length ? html`<div class="dashboard-no-results"><ha-icon icon="mdi:magnify"></ha-icon><strong>No dashboards found</strong><span>Try a different search.</span></div>` : nothing}
+        </section>
+      </main>
+      ${this.renderNewDashboardDialog()}
+      ${this.renderDashboardActionDialog()}
+    `
+  }
+
+  private newDashboardSchema(): StudioFormSchema[] {
+    return [
+      { name: 'name', label: 'Dashboard name', required: true, selector: { text: {} } },
+      {
+        name: 'dimensions', type: 'grid', flatten: true,
+        schema: [
+          { name: 'width', label: 'Width', required: true, selector: { number: { mode: 'box', min: 64, max: 4096, unit_of_measurement: 'px' } } },
+          { name: 'height', label: 'Height', required: true, selector: { number: { mode: 'box', min: 64, max: 4096, unit_of_measurement: 'px' } } },
+        ],
+      },
+      {
+        name: 'palette', label: 'Palette', required: true,
+        selector: { select: { mode: 'dropdown', options: Object.entries(PALETTE_LABELS).map(([value, label]) => ({ value, label })) } },
+      },
+      {
+        name: 'advanced', type: 'expandable', flatten: true, title: 'Advanced display options', expanded: false,
+        schema: [
+          { name: 'padding', label: 'Outer padding', selector: { number: { mode: 'box', min: 0, max: 1024, unit_of_measurement: 'px' } } },
+          { name: 'snapSize', label: 'Snap size', selector: { number: { mode: 'box', min: 1, max: 256, unit_of_measurement: 'px' } } },
+        ],
+      },
+    ]
+  }
+
   private renderNewDashboardDialog(): TemplateResult | typeof nothing {
     if (!this.newDashboardOpen) return nothing
-    const profile = profileById(this.newDashboard.display.profileId)
-    return html`<div class="dialog-scrim" @click=${(event: Event) => { if (event.target === event.currentTarget) this.newDashboardOpen = false }}><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="new-dashboard-title"><header><div><span class="eyebrow">Dashboard setup</span><h2 id="new-dashboard-title">Add dashboard</h2></div><button class="icon-button" aria-label="Close" @click=${() => { this.newDashboardOpen = false }}><ha-icon icon="mdi:close"></ha-icon></button></header><div class="dialog-grid"><label class="wide">Name<input aria-label="Dashboard name" .value=${this.newDashboard.name} @input=${(event: Event) => this.updateNewDashboard('name', (event.target as HTMLInputElement).value)}></label><label class="wide">Display type<select aria-label="Display type" .value=${this.newDashboard.display.profileId ?? ''} @change=${(event: Event) => this.updateNewDashboard('profileId', (event.target as HTMLSelectElement).value)}>${DISPLAY_PROFILES.map(entry => html`<option value=${entry.id}>${entry.manufacturer} · ${entry.name}</option>`)}</select></label><label>Width<input aria-label="New dashboard width" type="number" .disabled=${profile.id !== 'custom'} .value=${String(this.newDashboard.display.width)} @input=${(event: Event) => this.updateNewDashboard('width', (event.target as HTMLInputElement).value)}></label><label>Height<input aria-label="New dashboard height" type="number" .disabled=${profile.id !== 'custom'} .value=${String(this.newDashboard.display.height)} @input=${(event: Event) => this.updateNewDashboard('height', (event.target as HTMLInputElement).value)}></label><label class="wide">Colors<select aria-label="Dashboard colors" .value=${this.newDashboard.display.palette} @change=${(event: Event) => this.updateNewDashboard('palette', (event.target as HTMLSelectElement).value)}>${profile.palettes.map(palette => html`<option value=${palette}>${PALETTE_LABELS[palette]}</option>`)}</select></label><label>Outer padding<input aria-label="Dashboard padding" type="number" min="0" .value=${String(this.newDashboard.display.padding)} @input=${(event: Event) => this.updateNewDashboard('padding', (event.target as HTMLInputElement).value)}></label><label>Snap size<input aria-label="Dashboard snap size" type="number" min="1" .value=${String(this.newDashboard.display.snapSize)} @input=${(event: Event) => this.updateNewDashboard('snapSize', (event.target as HTMLInputElement).value)}></label></div><footer><ha-button appearance="plain" @click=${() => { this.newDashboardOpen = false }}>Cancel</ha-button><ha-button appearance="filled" .disabled=${this.saving || !this.newDashboard.name.trim()} @click=${this.createProject}>${this.saving ? 'Creating…' : 'Create dashboard'}</ha-button></footer></section></div>`
+    return html`
+      <ha-dialog .open=${true} width="medium" header-title="New dashboard" header-subtitle="Create a custom OpenDisplay canvas" @closed=${() => { this.newDashboardOpen = false }}>
+        <div class="new-dashboard-content">
+          <span class="form-label">Start from</span>
+          <div class="dashboard-source-options" role="radiogroup" aria-label="Dashboard source">
+            <button class="dashboard-source selected" type="button" role="radio" aria-checked="true">
+              <ha-icon icon="mdi:monitor"></ha-icon><span><strong>Custom size</strong><small>Set resolution and colors</small></span>
+            </button>
+            <button class="dashboard-source" type="button" role="radio" aria-checked="false" disabled>
+              <ha-icon icon="mdi:devices"></ha-icon><span><strong>From OpenDisplay device</strong><small>Coming later</small></span>
+            </button>
+          </div>
+          <ha-form
+            autofocus
+            .hass=${this.hass}
+            .data=${this.dashboardFormData(this.newDashboard)}
+            .schema=${this.newDashboardSchema()}
+            .computeLabel=${(entry: StudioFormSchema) => 'label' in entry ? entry.label : entry.title ?? ''}
+            @value-changed=${this.updateNewDashboardForm}
+          ></ha-form>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${() => { this.newDashboardOpen = false }}>Cancel</ha-button>
+          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(this.newDashboard)} @click=${this.createProject}>${this.saving ? 'Creating…' : 'Create dashboard'}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    `
+  }
+  private renderDashboardActionDialog(): TemplateResult | typeof nothing {
+    const project = this.dashboardDraft
+    if (!project || this.dashboardDialog === 'rename' || !this.dashboardDialog) return nothing
+    if (this.dashboardDialog === 'delete') return html`
+      <ha-dialog .open=${true} width="small" header-title="Delete dashboard?" @closed=${this.closeDashboardAction}>
+        <div class="dashboard-delete-content">
+          <p><strong>${project.name}</strong> and all of its elements will be permanently removed.</p>
+          <p>This action cannot be undone.</p>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${this.closeDashboardAction}>Cancel</ha-button>
+          <ha-button slot="primaryAction" variant="danger" appearance="filled" .disabled=${this.saving} @click=${this.confirmDeleteDashboard}>${this.saving ? 'Deleting…' : 'Delete dashboard'}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    `
+    return html`
+      <ha-dialog .open=${true} width="medium" header-title="Display settings" header-subtitle=${project.name} @closed=${this.closeDashboardAction}>
+        <div class="dashboard-settings-content">
+          <ha-form
+            autofocus
+            .hass=${this.hass}
+            .data=${this.dashboardFormData(project)}
+            .schema=${this.newDashboardSchema()}
+            .computeLabel=${(entry: StudioFormSchema) => 'label' in entry ? entry.label : entry.title ?? ''}
+            @value-changed=${this.updateDashboardSettings}
+          ></ha-form>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${this.closeDashboardAction}>Cancel</ha-button>
+          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(project)} @click=${this.saveDashboardSettings}>${this.saving ? 'Saving…' : 'Save changes'}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    `
   }
   private renderDeleteDialog(): TemplateResult | typeof nothing {
     if (!this.pendingDeleteItemId || !this.current) return nothing
@@ -695,8 +1039,8 @@ export class OpenDisplayStudioPanel extends LitElement {
     `
   }
 
-  private renderDashboardTabs(): TemplateResult {
-    return html`<nav class="dashboard-tabs" aria-label="Dashboards">${this.projects.map(project => html`<button class=${project.id === this.current?.id ? 'dashboard-tab active' : 'dashboard-tab'} @click=${() => this.selectProject(project)}><ha-icon icon="mdi:monitor"></ha-icon><span>${project.name}</span><i class=${project.status} title=${project.status}></i></button>`)}<button class="add-tab" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon>Add dashboard</button><span class="tab-spacer"></span><div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div></nav>${this.renderCatalogDragGhost()}`
+  private renderHistoryControls(): TemplateResult {
+    return html`<div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div>`
   }
   private renderCanvasItem(item: StudioItem, project: ScreenProject): TemplateResult {
     const box = itemBounds(item)
@@ -734,11 +1078,12 @@ export class OpenDisplayStudioPanel extends LitElement {
     const area = this.workingArea(project)
     return html`
       <main class="workspace">
-        ${this.renderDashboardTabs()}
+        ${this.renderCatalogDragGhost()}
         <div class="workspace-meta">
           <span>${project.display.width} × ${project.display.height} px</span>
           <span>${project.items.length} layers</span>
           <span>Padding ${project.display.padding}px</span>
+          ${this.renderHistoryControls()}
           <button class=${this.snapEnabled ? 'tool-toggle active' : 'tool-toggle'} aria-pressed=${this.snapEnabled} @click=${() => { this.snapEnabled = !this.snapEnabled }}>
             <ha-icon icon="mdi:magnet"></ha-icon><span>Snap ${project.display.snapSize}px</span>
           </button>
@@ -774,7 +1119,7 @@ export class OpenDisplayStudioPanel extends LitElement {
   }
   private renderScreenInspector(): TemplateResult {
     const project = this.current!; const profile = profileById(project.display.profileId)
-    return html`${this.renderInspectorHeader('Dashboard', 'Display and canvas settings', 'mdi:monitor')}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select .value=${project.display.profileId ?? 'custom'} @change=${(event: Event) => this.updateProfile((event.target as HTMLSelectElement).value)}>${DISPLAY_PROFILES.map(entry => html`<option value=${entry.id}>${entry.manufacturer} · ${entry.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField('Width', project.display.width, 'width', 64, 4096)}${this.screenNumberField('Height', project.display.height, 'height', 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select .value=${project.display.palette} @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value as PaletteId; this.mutate(current => { current.display.palette = value; if (!PALETTE_COLORS[value].includes(current.display.background)) current.display.background = 'white' }) }}>${(profile.id === 'custom' ? Object.keys(PALETTE_LABELS) as PaletteId[] : profile.palettes).map(palette => html`<option value=${palette}>${PALETTE_LABELS[palette]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value; this.mutate(current => { current.display.background = value }) }}>${PALETTE_COLORS[project.display.palette].map(color => html`<option value=${color} ?selected=${color === project.display.background}>${color[0].toUpperCase()}${color.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField('Outer padding', project.display.padding, 'padding', 0, 1024)}${this.screenNumberField('Snap size', project.display.snapSize, 'snapSize', 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`
+    return html`${this.renderInspectorHeader('Dashboard', 'Display and canvas settings', 'mdi:monitor')}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select @change=${(event: Event) => this.updateProfile((event.target as HTMLSelectElement).value)}>${DISPLAY_PROFILES.map(entry => html`<option value=${entry.id} ?selected=${entry.id === project.display.profileId}>${entry.manufacturer} · ${entry.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField('Width', project.display.width, 'width', 64, 4096)}${this.screenNumberField('Height', project.display.height, 'height', 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value as PaletteId; this.mutate(current => { current.display.palette = value; if (!PALETTE_COLORS[value].includes(current.display.background)) current.display.background = 'white' }) }}>${(profile.id === 'custom' ? Object.keys(PALETTE_LABELS) as PaletteId[] : profile.palettes).map(palette => html`<option value=${palette} ?selected=${palette === project.display.palette}>${PALETTE_LABELS[palette]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(event: Event) => { const value = (event.target as HTMLSelectElement).value; this.mutate(current => { current.display.background = value }) }}>${PALETTE_COLORS[project.display.palette].map(color => html`<option value=${color} ?selected=${color === project.display.background}>${color[0].toUpperCase()}${color.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField('Outer padding', project.display.padding, 'padding', 0, 1024)}${this.screenNumberField('Snap size', project.display.snapSize, 'snapSize', 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`
   }
   private renderItemLayout(item: StudioItem): TemplateResult {
     const disabled = item.locked
@@ -803,8 +1148,7 @@ export class OpenDisplayStudioPanel extends LitElement {
   }
   private renderMetrics(): TemplateResult | typeof nothing {
     if (!this.preview) return nothing
-    const copyLabel = this.yamlCopyState === 'copied' ? 'Copied' : this.yamlCopyState === 'failed' ? 'Copy failed' : 'Copy YAML'; const copyIcon = this.yamlCopyState === 'copied' ? 'mdi:check' : this.yamlCopyState === 'failed' ? 'mdi:alert-circle-outline' : 'mdi:content-copy'
-    return html`${this.preview.warnings.map(warning => html`<ha-alert class="warning" alert-type="warning">${warning}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details><details class="inspector-section yaml"><summary>Generated ODL YAML</summary><div class="yaml-actions"><ha-button size="s" appearance="plain" aria-label="Copy generated ODL YAML" @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${copyIcon}></ha-icon>${copyLabel}</ha-button><output aria-live="polite">${this.yamlCopyState === 'copied' ? 'YAML copied to clipboard' : this.yamlCopyState === 'failed' ? 'Clipboard access failed' : ''}</output></div><pre>${this.preview.yaml}</pre></details>`
+    return html`${this.preview.warnings.map(warning => html`<ha-alert class="warning" alert-type="warning">${warning}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details>`
   }
   private renderInspector(): TemplateResult {
     if (this.rightCollapsed) return html`<aside class="panel panel-rail right-rail"><button class="icon-button" title="Expand inspector" aria-label="Expand inspector" @click=${() => { this.rightCollapsed = false }}><ha-icon icon="mdi:chevron-left"></ha-icon></button><span class="rail-label">Layers</span></aside>`
@@ -812,11 +1156,57 @@ export class OpenDisplayStudioPanel extends LitElement {
     return html`<aside class="panel inspector"><div class="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector" @pointerdown=${this.startPanelResize}></div>${this.renderLayers()}<section class="properties">${item ? this.renderItemInspector(item) : this.renderScreenInspector()}</section></aside>${this.renderDeleteDialog()}`
   }
 
+  private renderEditorHeader(): TemplateResult {
+    const project = this.current!
+    return html`
+      <header class="topbar">
+        <div class="editor-breadcrumb">
+          <strong class="studio-name">OpenDisplay Studio</strong>
+          <span class="breadcrumb-divider">/</span>
+          <button class="breadcrumb-link" @click=${this.showDashboards}>Dashboards</button>
+          <span class="breadcrumb-divider">/</span>
+          <input class="project-name" aria-label="Dashboard name" .value=${project.name} @input=${this.updateName}>
+        </div>
+        <nav class="view-switch" aria-label="Dashboard view">
+          <button class=${this.view === 'design' ? 'active' : ''} aria-pressed=${this.view === 'design'} @click=${() => this.setEditorView('design')}><ha-icon icon="mdi:tools"></ha-icon>Design</button>
+          <button class=${this.view === 'code' ? 'active' : ''} aria-pressed=${this.view === 'code'} @click=${() => this.setEditorView('code')}><ha-icon icon="mdi:code-tags"></ha-icon>Code</button>
+        </nav>
+        <div class="editor-actions">
+          <span class="status ${project.status}">${project.status}</span>
+          <ha-button appearance="plain" @click=${this.toggleReady}>${project.status === 'ready' ? 'Set Draft' : 'Set Ready'}</ha-button>
+          <ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? 'Saving…' : 'Save'}</ha-button>
+        </div>
+      </header>
+    `
+  }
+
+  private renderCodeView(): TemplateResult {
+    const copyLabel = this.yamlCopyState === 'copied' ? 'Copied' : this.yamlCopyState === 'failed' ? 'Copy failed' : 'Copy YAML'
+    const copyIcon = this.yamlCopyState === 'copied' ? 'mdi:check' : this.yamlCopyState === 'failed' ? 'mdi:alert-circle-outline' : 'mdi:content-copy'
+    return html`
+      <main class="code-workspace">
+        <section class="code-panel" aria-labelledby="generated-code-title">
+          <header>
+            <div>
+              <span class="eyebrow">Generated output</span>
+              <h1 id="generated-code-title">Generated ODL YAML</h1>
+              <p>Read-only output generated from the current dashboard.</p>
+            </div>
+            <ha-button appearance="plain" aria-label="Copy generated ODL YAML" .disabled=${!this.preview?.yaml} @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${copyIcon}></ha-icon>${copyLabel}</ha-button>
+          </header>
+          ${this.preview?.warnings.map(warning => html`<ha-alert alert-type="warning">${warning}</ha-alert>`) ?? nothing}
+          <textarea aria-label="Generated ODL YAML" readonly spellcheck="false" dir="ltr" .value=${this.preview?.yaml ?? ''}></textarea>
+          <output class="copy-status" aria-live="polite">${this.yamlCopyState === 'copied' ? 'YAML copied to clipboard' : this.yamlCopyState === 'failed' ? 'Clipboard access failed' : ''}</output>
+        </section>
+      </main>
+    `
+  }
+
   protected render(): TemplateResult {
     if (this.loading) return html`<div class="project-empty"><p>Loading OpenDisplay Studio…</p></div>`
-    if (!this.current) return html`<div class="project-empty"><section class="empty-card"><ha-icon icon="mdi:monitor-edit"></ha-icon><span class="eyebrow">OpenDisplay Studio</span><h1>Build your first dashboard</h1><p>Create an exact-size e-paper canvas and compose it from live widgets and ODL primitives.</p>${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}<ha-button appearance="filled" @click=${this.openNewDashboard}>Add dashboard</ha-button></section>${this.renderNewDashboardDialog()}</div>`
+    if (this.view === 'dashboards' || !this.current) return this.renderDashboardLibrary()
     const layoutStyle = styleMap({ '--toolbox-width': this.leftCollapsed ? '48px' : '255px', '--inspector-width': this.rightCollapsed ? '48px' : `${this.inspectorWidth}px` })
-    return html`<div class="shell"><header class="topbar"><div class="brand"><strong>OpenDisplay Studio</strong><span>Layer-based ODL designer · v${this.integrationVersion}</span></div><input class="project-name" aria-label="Dashboard name" .value=${this.current.name} @input=${this.updateName}><span class="status ${this.current.status}">${this.current.status}</span><div class="actions"><ha-button appearance="plain" @click=${this.openNewDashboard}><ha-icon slot="start" icon="mdi:plus"></ha-icon>Add dashboard</ha-button><ha-button appearance="plain" @click=${this.toggleReady}>${this.current.status === 'ready' ? 'Set Draft' : 'Set Ready'}</ha-button><ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? 'Saving…' : 'Save'}</ha-button></div></header>${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}<div class="layout" style=${layoutStyle}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>${this.renderNewDashboardDialog()}</div>`
+    return html`<div class="shell">${this.renderEditorHeader()}${this.error ? html`<ha-alert alert-type="error">${this.error}</ha-alert>` : nothing}${this.view === 'code' ? this.renderCodeView() : html`<div class="layout" style=${layoutStyle}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>`}</div>`
   }
 }
 

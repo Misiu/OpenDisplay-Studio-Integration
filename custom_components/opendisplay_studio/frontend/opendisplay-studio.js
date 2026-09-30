@@ -29,11 +29,11 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: f, getOwnPropertySymbols: p, getPrototypeOf: m } = Object, h = globalThis, g = h.trustedTypes, ee = g ? g.emptyScript : "", _ = h.reactiveElementPolyfillSupport, v = (e, t) => e, y = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: f, getOwnPropertySymbols: p, getPrototypeOf: m } = Object, h = globalThis, g = h.trustedTypes, _ = g ? g.emptyScript : "", v = h.reactiveElementPolyfillSupport, y = (e, t) => e, b = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? ee : null;
+				e = e ? _ : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -58,13 +58,13 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, b = (e, t) => !l(e, t), x = {
+}, x = (e, t) => !l(e, t), ee = {
 	attribute: !0,
 	type: String,
-	converter: y,
+	converter: b,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: b
+	hasChanged: x
 };
 Symbol.metadata ??= Symbol("metadata"), h.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
 var S = class extends HTMLElement {
@@ -74,7 +74,7 @@ var S = class extends HTMLElement {
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = x) {
+	static createProperty(e, t = ee) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,16 +100,16 @@ var S = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? x;
+		return this.elementProperties.get(e) ?? ee;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(v("elementProperties"))) return;
+		if (this.hasOwnProperty(y("elementProperties"))) return;
 		let e = m(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(v("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(v("properties"))) {
+		if (this.hasOwnProperty(y("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(y("properties"))) {
 			let e = this.properties, t = [...f(e), ...p(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
@@ -171,14 +171,14 @@ var S = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? y : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? b : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? y : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? b : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var S = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? b)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? x)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,7 +251,7 @@ var S = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-S.elementStyles = [], S.shadowRootOptions = { mode: "open" }, S[v("elementProperties")] = /* @__PURE__ */ new Map(), S[v("finalized")] = /* @__PURE__ */ new Map(), _?.({ ReactiveElement: S }), (h.reactiveElementVersions ??= []).push("2.1.2");
+S.elementStyles = [], S.shadowRootOptions = { mode: "open" }, S[y("elementProperties")] = /* @__PURE__ */ new Map(), S[y("finalized")] = /* @__PURE__ */ new Map(), v?.({ ReactiveElement: S }), (h.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
 var C = globalThis, te = (e) => e, w = C.trustedTypes, T = w ? w.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, E = "$lit$", D = `lit$${Math.random().toFixed(9).slice(2)}$`, ne = "?" + D, re = `<${ne}>`, O = document, k = () => O.createComment(""), A = (e) => e === null || typeof e != "object" && typeof e != "function", ie = Array.isArray, ae = (e) => ie(e) || typeof e?.[Symbol.iterator] == "function", oe = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, ce = />/g, M = RegExp(`>|${oe}(?:([^\\s"'>=/]+)(${oe}*=${oe}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), le = /'/g, ue = /"/g, de = /^(?:script|style|textarea|title)$/i, N = ((e) => (t, ...n) => ({
@@ -290,7 +290,7 @@ var me = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ye : r[1] === "?" ? be : r[1] === "@" ? xe : ve
+						ctor: r[1] === "." ? ve : r[1] === "?" ? ye : r[1] === "@" ? be : R
 					}), i.removeAttribute(e);
 				} else e.startsWith(D) && (c.push({
 					type: 6,
@@ -350,7 +350,7 @@ var ge = class {
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new _e(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Se(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new _e(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new xe(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
 			a !== s?.index && (i = I.nextNode(), a++);
 		}
@@ -416,7 +416,7 @@ var ge = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, ve = class {
+}, R = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -438,21 +438,21 @@ var ge = class {
 	j(e) {
 		e === F ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ye = class extends ve {
+}, ve = class extends R {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
 		this.element[this.name] = e === F ? void 0 : e;
 	}
-}, be = class extends ve {
+}, ye = class extends R {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
 		this.element.toggleAttribute(this.name, !!e && e !== F);
 	}
-}, xe = class extends ve {
+}, be = class extends R {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
@@ -464,7 +464,7 @@ var ge = class {
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Se = class {
+}, xe = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -474,16 +474,16 @@ var ge = class {
 	_$AI(e) {
 		L(this, e);
 	}
-}, Ce = C.litHtmlPolyfillSupport;
-Ce?.(he, _e), (C.litHtmlVersions ??= []).push("3.3.3");
-var we = (e, t, n) => {
+}, Se = C.litHtmlPolyfillSupport;
+Se?.(he, _e), (C.litHtmlVersions ??= []).push("3.3.3");
+var Ce = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
 		r._$litPart$ = i = new _e(t.insertBefore(k(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Te = globalThis, R = class extends S {
+}, we = globalThis, z = class extends S {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var we = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = we(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ce(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -505,22 +505,22 @@ var we = (e, t, n) => {
 		return P;
 	}
 };
-R._$litElement$ = !0, R.finalized = !0, Te.litElementHydrateSupport?.({ LitElement: R });
-var Ee = Te.litElementPolyfillSupport;
-Ee?.({ LitElement: R }), (Te.litElementVersions ??= []).push("4.2.2");
+z._$litElement$ = !0, z.finalized = !0, we.litElementHydrateSupport?.({ LitElement: z });
+var Te = we.litElementPolyfillSupport;
+Te?.({ LitElement: z }), (we.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
-var De = (e) => (t, n) => {
+var Ee = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, Oe = {
+}, De = {
 	attribute: !0,
 	type: String,
-	converter: y,
+	converter: b,
 	reflect: !1,
-	hasChanged: b
-}, ke = (e = Oe, t, n) => {
+	hasChanged: x
+}, Oe = (e = De, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -543,16 +543,16 @@ var De = (e) => (t, n) => {
 	}
 	throw Error("Unsupported decorator location: " + r);
 };
-function Ae(e) {
-	return (t, n) => typeof n == "object" ? ke(e, t, n) : ((e, t, n) => {
+function ke(e) {
+	return (t, n) => typeof n == "object" ? Oe(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/state.js
-function z(e) {
-	return Ae({
+function B(e) {
+	return ke({
 		...e,
 		state: !0,
 		attribute: !1
@@ -560,10 +560,10 @@ function z(e) {
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/base.js
-var je = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
+var Ae = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/query.js
-function Me(e, t) {
+function je(e, t) {
 	return (n, r, i) => {
 		let a = (t) => t.renderRoot?.querySelector(e) ?? null;
 		if (t) {
@@ -578,29 +578,29 @@ function Me(e, t) {
 					}
 				};
 			})();
-			return je(n, r, { get() {
+			return Ae(n, r, { get() {
 				let n = e.call(this);
 				return n === void 0 && (n = a(this), (n !== null || this.hasUpdated) && t.call(this, n)), n;
 			} });
 		}
-		return je(n, r, { get() {
+		return Ae(n, r, { get() {
 			return a(this);
 		} });
 	};
 }
 //#endregion
 //#region node_modules/lit-html/directive.js
-var Ne = {
+var Me = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, Pe = (e) => (...t) => ({
+}, Ne = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Fe = class {
+}), Pe = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -614,9 +614,9 @@ var Ne = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, Ie = "important", Le = " !" + Ie, B = Pe(class extends Fe {
+}, Fe = "important", Ie = " !" + Fe, V = Ne(class extends Pe {
 	constructor(e) {
-		if (super(e), e.type !== Ne.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
+		if (super(e), e.type !== Me.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
 	}
 	render(e) {
 		return Object.keys(e).reduce((t, n) => {
@@ -632,13 +632,13 @@ var Ne = {
 			let r = t[e];
 			if (r != null) {
 				this.ft.add(e);
-				let t = typeof r == "string" && r.endsWith(Le);
-				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? Ie : "") : n[e] = r;
+				let t = typeof r == "string" && r.endsWith(Ie);
+				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? Fe : "") : n[e] = r;
 			}
 		}
 		return P;
 	}
-}), Re = o`
+}), Le = o`
   :host {
     --studio-accent: var(--primary-color, #03a9f4);
     --studio-accent-soft: color-mix(in srgb, var(--studio-accent) 14%, transparent);
@@ -651,17 +651,80 @@ var Ne = {
   * { box-sizing: border-box; }
   button, input, select { font: inherit; color: inherit; }
   button { cursor: pointer; }
-  ha-icon { display: inline-flex; flex: none; width: 18px; height: 18px; color: currentColor; }
+  ha-icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 18px; height: 18px; color: currentColor; line-height: 1; }
   .shell { height: 100%; max-height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; overflow-anchor: none; }
-  .topbar { flex: none; height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); min-height: 0; display: flex; align-items: center; gap: 12px; padding: var(--safe-area-inset-top, 0px) 16px 0; border-bottom: 1px solid var(--studio-border); background: var(--studio-surface); z-index: 5; }
-  .brand { display: grid; min-width: 240px; margin-right: auto; }
-  .brand strong { font-size: 15px; letter-spacing: -.01em; }
-  .brand span { color: var(--studio-muted); font: 11px/1.4 var(--code-font-family, monospace); }
-  .project-name { width: min(230px, 20vw); min-height: 38px; border: 1px solid var(--studio-border); border-radius: 9px; padding: 0 11px; background: var(--studio-surface); }
+  .topbar { flex: none; height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 14px; padding: var(--safe-area-inset-top, 0px) 14px 0; border-bottom: 1px solid var(--studio-border); background: var(--studio-surface); z-index: 5; }
+  .editor-breadcrumb { min-width: 0; display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; }
+  .studio-name { flex: none; font-size: 14px; letter-spacing: -.01em; }
+  .breadcrumb-divider { flex: none; color: var(--studio-border); }
+  .breadcrumb-link { flex: none; min-height: 30px; padding: 0 3px; border: 0; color: var(--studio-accent); background: transparent; font-size: 12px; font-weight: 600; }
+  .breadcrumb-link:hover { text-decoration: underline; }
+  .project-name { min-width: 80px; width: min(210px, 18vw); height: 32px; border: 1px solid transparent; border-radius: 7px; padding: 0 7px; background: transparent; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+  .project-name:hover, .project-name:focus { border-color: var(--studio-border); background: var(--secondary-background-color, #f3f5f6); outline: 0; }
+  .view-switch { display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--studio-border); border-radius: 9px; background: var(--secondary-background-color, #f3f5f6); }
+  .view-switch button { min-height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; border-radius: 6px; color: var(--studio-muted); background: transparent; font-size: 11px; font-weight: 700; }
+  .view-switch button.active { color: var(--studio-text); background: var(--studio-surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .view-switch ha-icon { width: 15px; height: 15px; --mdc-icon-size: 15px; }
+  .editor-actions { min-width: 0; display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
   .status { padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .status.ready { color: #197438; background: #dff5e6; }
   .status.draft { color: #635b00; background: #f7efc3; }
-  .actions { display: flex; align-items: center; gap: 4px; }
+
+  .dashboard-library { height: 100%; overflow: auto; padding: clamp(22px, 4vw, 48px); background: var(--primary-background-color, #f5f7f8); }
+  .dashboard-library-header, .dashboard-library-tools, .dashboard-grid, .dashboard-library > ha-alert { width: min(1180px, 100%); margin-inline: auto; }
+  .dashboard-library-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+  .dashboard-library-header h1 { margin: 0; font-size: 25px; letter-spacing: -.025em; }
+  .dashboard-library-header p { margin: 5px 0 0; color: var(--studio-muted); font-size: 12px; }
+  .dashboard-new-button-label { display: inline-flex; align-items: center; justify-content: center; gap: 7px; line-height: 1; }
+  .dashboard-new-button-label ha-icon { width: 17px; height: 17px; line-height: 1; --mdc-icon-size: 17px; }
+  .dashboard-library-tools { display: grid; grid-template-columns: minmax(220px, 1fr) auto; gap: 10px; margin-bottom: 18px; }
+  .dashboard-search, .dashboard-sort { min-height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--studio-border); border-radius: 10px; background: var(--studio-surface); }
+  .dashboard-search ha-icon { width: 17px; color: var(--studio-muted); }
+  .dashboard-search input { width: 100%; border: 0; outline: 0; background: transparent; }
+  .dashboard-sort span { color: var(--studio-muted); font-size: 11px; }
+  .dashboard-sort select { min-width: 130px; border: 0; outline: 0; background: transparent; font-size: 12px; }
+  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; align-items: stretch; }
+  .dashboard-card, .dashboard-add-card { min-width: 0; min-height: 236px; padding: 0; border: 1px solid var(--studio-border); border-radius: 13px; text-align: start; background: var(--studio-surface); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .dashboard-card { position: relative; display: grid; grid-template-rows: 150px auto; }
+  .dashboard-card.menu-open { z-index: 20; }
+  .dashboard-card:hover, .dashboard-card:focus-within, .dashboard-add-card:hover, .dashboard-add-card:focus-visible { border-color: color-mix(in srgb, var(--studio-accent) 55%, var(--studio-border)); box-shadow: 0 8px 24px rgba(0,0,0,.09); outline: 0; transform: translateY(-1px); }
+  .dashboard-card-open { position: absolute; inset: 0; z-index: 1; padding: 0; border: 0; border-radius: inherit; background: transparent; }
+  .dashboard-card-open:focus-visible { outline: 2px solid var(--studio-accent); outline-offset: 2px; }
+  .dashboard-card-preview { position: relative; display: grid; place-items: center; overflow: hidden; padding: 23px; border-radius: 12px 12px 0 0; background: color-mix(in srgb, var(--primary-background-color, #f5f7f8) 70%, var(--studio-surface)); pointer-events: none; }
+  .dashboard-miniature { position: relative; width: min(145px, 70%); max-height: 96px; overflow: hidden; border: 2px solid color-mix(in srgb, var(--dashboard-accent) 22%, var(--studio-border)); border-radius: 9px; box-shadow: 0 7px 18px rgba(0,0,0,.12); }
+  .dashboard-miniature > span { position: absolute; display: block; border-radius: 99px; }
+  .miniature-title { left: 12%; top: 25%; width: 25%; height: 4%; min-height: 3px; background: color-mix(in srgb, var(--studio-muted) 50%, transparent); }
+  .miniature-accent { right: 12%; top: 25%; width: 5px; height: 5px; background: var(--dashboard-accent); }
+  .miniature-line { left: 12%; bottom: 26%; width: 48%; height: 4%; min-height: 3px; background: color-mix(in srgb, var(--studio-muted) 28%, transparent); }
+  .miniature-line.long { bottom: 39%; width: 72%; height: 13%; background: color-mix(in srgb, var(--dashboard-accent) 18%, var(--studio-surface)); }
+  .dashboard-resolution { position: absolute; right: 11px; bottom: 8px; color: var(--studio-muted); font: 9px var(--code-font-family, monospace); }
+  .dashboard-card-copy { min-width: 0; display: grid; align-content: start; gap: 7px; padding: 13px 15px 15px; border-radius: 0 0 12px 12px; pointer-events: none; }
+  .dashboard-card-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .dashboard-card-title strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+  .dashboard-card-title .status { flex: none; padding: 3px 7px; font-size: 8px; }
+  .dashboard-rename-input { position: relative; z-index: 7; min-width: 0; width: 100%; height: 28px; padding: 0 7px; border: 1px solid var(--studio-accent); border-radius: 6px; outline: 0; background: var(--secondary-background-color, #f3f5f6); font-size: 13px; font-weight: 700; pointer-events: auto; }
+  .dashboard-card-meta { display: flex; align-items: center; gap: 7px; color: var(--studio-muted); font-size: 10px; }
+  .dashboard-card-meta > span + span::before { content: '·'; margin-right: 7px; }
+  .dashboard-card-copy small { color: var(--studio-muted); font-size: 10px; }
+  .palette-dots { display: inline-flex; align-items: center; gap: 2px; }
+  .palette-dots i { width: 8px; height: 8px; border: 1px solid color-mix(in srgb, var(--studio-text) 22%, transparent); border-radius: 50%; }
+  .dashboard-menu-trigger { position: absolute; inset-block-start: 9px; inset-inline-end: 9px; z-index: 5; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 8px; color: var(--studio-muted); background: color-mix(in srgb, var(--studio-surface) 90%, transparent); box-shadow: 0 1px 3px rgba(0,0,0,.08); opacity: 0; pointer-events: none; transition: opacity 120ms ease, color 120ms ease, background 120ms ease; }
+  .dashboard-menu-trigger:hover, .dashboard-menu-trigger:focus-visible { color: var(--studio-text); background: var(--studio-surface); outline: 0; }
+  .dashboard-card:hover .dashboard-menu-trigger, .dashboard-card:focus-within .dashboard-menu-trigger, .dashboard-card.menu-open .dashboard-menu-trigger { opacity: 1; pointer-events: auto; }
+  .dashboard-menu-trigger ha-icon { width: 17px; height: 17px; --mdc-icon-size: 17px; }
+  .dashboard-menu { position: absolute; inset-block-start: 45px; inset-inline-end: 9px; z-index: 8; width: 190px; padding: 5px; border: 1px solid var(--studio-border); border-radius: 10px; background: var(--studio-surface); box-shadow: 0 16px 36px rgba(0,0,0,.18); }
+  .dashboard-menu button { width: 100%; min-height: 36px; display: grid; grid-template-columns: 20px minmax(0,1fr); align-items: center; gap: 8px; padding: 0 9px; border: 0; border-radius: 6px; text-align: start; color: var(--studio-text); background: transparent; font-size: 12px; }
+  .dashboard-menu button:hover, .dashboard-menu button:focus-visible { outline: 0; background: var(--secondary-background-color, #f3f5f6); }
+  .dashboard-menu button.delete { margin-top: 4px; border-top: 1px solid var(--studio-border); border-radius: 0 0 6px 6px; color: var(--error-color, #db4437); }
+  .dashboard-menu ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
+  .dashboard-add-card { display: grid; place-items: center; align-content: center; gap: 10px; border-style: dashed; color: var(--studio-muted); box-shadow: none; }
+  .dashboard-add-card ha-icon { width: 38px; height: 38px; display: grid; place-items: center; padding: 9px; border-radius: 10px; color: var(--studio-accent); background: var(--studio-accent-soft); line-height: 1; --mdc-icon-size: 20px; }
+  .dashboard-add-card strong { color: var(--studio-text); font-size: 13px; }
+  .dashboard-no-results { min-height: 236px; display: grid; place-items: center; align-content: center; gap: 8px; color: var(--studio-muted); text-align: center; }
+  .dashboard-no-results ha-icon { width: 30px; height: 30px; }
+  .dashboard-no-results strong { color: var(--studio-text); }
+  .dashboard-no-results span { font-size: 12px; }
+
   .layout { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--toolbox-width) minmax(0, 1fr) var(--inspector-width); overflow: hidden; }
   .panel { position: relative; min-width: 0; min-height: 0; background: var(--studio-surface); }
   .toolbox { border-right: 1px solid var(--studio-border); display: flex; flex-direction: column; overflow: hidden; }
@@ -689,34 +752,24 @@ var Ne = {
   .right-rail { border-right: 0; border-left: 1px solid var(--studio-border); }
   .rail-label { writing-mode: vertical-rl; color: var(--studio-muted); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 
-  .workspace { min-width: 0; min-height: 0; display: grid; grid-template-rows: 42px 42px minmax(0, 1fr); background: #182230; color: #e7edf4; overflow: hidden; }
-  .dashboard-tabs { display: flex; min-width: 0; align-items: stretch; gap: 1px; padding: 0 10px; background: #0c1420; border-bottom: 1px solid #2a3748; overflow-x: auto; }
-  .dashboard-tab, .add-tab { position: relative; display: flex; align-items: center; gap: 7px; padding: 0 12px; border: 0; background: transparent; color: #9caabd; white-space: nowrap; font-size: 12px; }
-  .dashboard-tab ha-icon, .add-tab ha-icon { width: 16px; height: 16px; }
-  .dashboard-tab.active { color: #fff; }
-  .dashboard-tab.active::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 0; height: 2px; background: var(--studio-accent); }
-  .dashboard-tab i { width: 6px; height: 6px; border-radius: 50%; background: #8c96a3; }
-  .dashboard-tab i.ready { background: #50d17d; }
-  .add-tab { color: var(--studio-accent); }
-  .tab-spacer { flex: 1 1 auto; min-width: 12px; }
-  .history-controls { flex: none; display: flex; align-items: center; gap: 2px; padding: 5px 0; }
-  .history-controls button { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #9caabd; }
-  .history-controls button:hover:not(:disabled) { color: #fff; background: #1b2a3c; }
+  .workspace { min-width: 0; min-height: 0; display: grid; grid-template-rows: 42px minmax(0, 1fr); background: var(--primary-background-color, #f4f6f8); color: var(--studio-text); overflow: hidden; }
+  .history-controls { flex: none; display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
+  .history-controls button { width: 30px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--studio-muted); }
+  .history-controls button:hover:not(:disabled) { color: var(--studio-text); background: var(--secondary-background-color, #eef1f4); }
   .history-controls button:disabled { cursor: default; opacity: .32; }
   .history-controls ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
-  .workspace-meta { display: flex; align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid #2a3748; color: #a9b5c5; font: 11px var(--code-font-family, monospace); }
-  .workspace-meta > span:nth-child(2) { margin-left: auto; }
-  .tool-toggle { display: inline-flex; flex: none; align-items: center; gap: 6px; min-height: 28px; padding: 0 9px; border: 1px solid #344459; border-radius: 7px; background: #111b28; color: #9eacc0; font-size: 10px; line-height: 1; white-space: nowrap; }
+  .workspace-meta { display: flex; align-items: center; gap: 16px; padding: 0 16px; border-bottom: 1px solid var(--studio-border); color: var(--studio-muted); background: var(--studio-surface); font: 11px var(--code-font-family, monospace); }
+  .tool-toggle { display: inline-flex; flex: none; align-items: center; gap: 6px; min-height: 28px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 7px; background: var(--studio-surface); color: var(--studio-muted); font-size: 10px; line-height: 1; white-space: nowrap; }
   .tool-toggle ha-icon { width: 14px; height: 14px; --mdc-icon-size: 14px; }
-  .tool-toggle.active { color: #8bd9ff; border-color: #2788b8; background: #102b3a; }
-  .zoom-readout { min-width: 42px; text-align: right; color: #fff; }
-  .canvas-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; overflow-anchor: none; overscroll-behavior: contain; contain: layout paint; background-color: #202c3b; background-image: radial-gradient(circle, #3b495a 1px, transparent 1px); background-size: 18px 18px; }
+  .tool-toggle.active { color: var(--studio-accent); border-color: color-mix(in srgb, var(--studio-accent) 65%, var(--studio-border)); background: var(--studio-accent-soft); }
+  .zoom-readout { min-width: 42px; text-align: right; color: var(--studio-text); }
+  .canvas-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; overflow-anchor: none; overscroll-behavior: contain; contain: layout paint; background-color: var(--secondary-background-color, #eef1f4); background-image: radial-gradient(circle, color-mix(in srgb, var(--studio-muted) 27%, transparent) .8px, transparent .9px); background-size: 18px 18px; }
   .canvas-stage.accepting-drop { box-shadow: inset 0 0 0 3px var(--studio-accent); }
   .catalog-drag-ghost { position: fixed; z-index: 1200; box-sizing: border-box; display: grid; grid-template-columns: 16px minmax(0, 1fr) 14px; align-items: center; gap: 5px; min-height: 34px; padding: 0 7px; border: 1px solid var(--studio-accent); border-radius: 8px; color: var(--primary-text-color, #182026); background: var(--studio-surface); box-shadow: 0 7px 18px rgba(0,0,0,.22); font-size: 11px; font-weight: 700; pointer-events: none; }
   .catalog-drag-ghost ha-icon { width: 16px; height: 16px; --mdc-icon-size: 16px; }
   .catalog-drag-ghost .drag-type-icon, .catalog-drag-ghost .drag-add-icon { color: var(--studio-accent); }
   .canvas-viewport { position: absolute; left: 50%; top: 50%; transform-origin: center; overflow-anchor: none; }
-  .canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; box-shadow: 0 16px 46px rgba(0, 0, 0, .35); user-select: none; touch-action: none; overflow-anchor: none; }
+  .canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #fff; box-shadow: 0 14px 38px rgba(28, 38, 48, .18); user-select: none; touch-action: none; overflow-anchor: none; }
   .canvas > img, .canvas-placeholder { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
   .canvas-placeholder { display: grid; place-items: center; color: #59636b; background: #fff; }
   .working-area { position: absolute; pointer-events: none; z-index: 2; border: 1px dashed rgba(3, 169, 244, .72); background-image: radial-gradient(circle, rgba(3, 169, 244, .22) .7px, transparent .8px); background-size: max(12px, var(--snap-size)) max(12px, var(--snap-size)); }
@@ -741,9 +794,10 @@ var Ne = {
   .resize-sw { left: 0; bottom: 0; transform: translate(-50%, 50%); cursor: nesw-resize; }
   .resize-w { left: 0; top: 50%; transform: translate(-50%, -50%); cursor: ew-resize; }
   .selection-size { position: absolute; z-index: 6; left: 50%; top: calc(100% + 9px); transform: translateX(-50%); min-width: max-content; padding: 2px 7px; border: 1px solid #2788b8; border-radius: 999px; color: #9cddff; background: #102033; box-shadow: 0 2px 6px rgba(0,0,0,.28); font: 700 10px/1.2 var(--code-font-family, monospace); white-space: nowrap; pointer-events: none; }
-  .zoom-controls { position: absolute; right: 16px; bottom: 14px; display: flex; align-items: center; padding: 4px; border: 1px solid #354459; border-radius: 9px; background: #101927; box-shadow: 0 8px 24px rgba(0,0,0,.28); }
-  .zoom-controls button { min-width: 34px; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: #aeb9c7; font-size: 11px; }
-  .zoom-controls button:hover, .zoom-controls button.active { color: #fff; background: #1976d2; }
+  .zoom-controls { position: absolute; right: 16px; bottom: 14px; display: flex; align-items: center; padding: 4px; border: 1px solid var(--studio-border); border-radius: 9px; background: var(--studio-surface); box-shadow: 0 8px 24px rgba(28,38,48,.14); }
+  .zoom-controls button { min-width: 34px; height: 30px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--studio-muted); font-size: 11px; }
+  .zoom-controls button:hover { color: var(--studio-text); background: var(--secondary-background-color, #eef1f4); }
+  .zoom-controls button.active { color: #fff; background: var(--studio-accent); }
 
   .inspector { min-width: 0; border-left: 1px solid var(--studio-border); display: flex; flex-direction: column; overflow: hidden; overflow-anchor: none; }
   .panel-resizer { position: absolute; left: -4px; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 6; }
@@ -780,9 +834,9 @@ var Ne = {
   .inspector-section { border-bottom: 1px solid var(--studio-border); }
   .inspector-section > summary { padding: 12px 14px; cursor: pointer; list-style-position: inside; color: var(--studio-muted); font: 700 10px var(--code-font-family, monospace); letter-spacing: .09em; text-transform: uppercase; }
   .section-body { padding: 2px 14px 14px; }
-  .field-grid, .dialog-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .number-field, .stack-field, .dialog label { display: grid; gap: 5px; min-width: 0; color: var(--studio-muted); font-size: 10px; }
-  .number-field input, .stack-field select, .dialog input, .dialog select { width: 100%; min-width: 0; height: 36px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 7px; background: var(--secondary-background-color, #f3f5f6); color: var(--studio-text); }
+  .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .number-field, .stack-field { display: grid; gap: 5px; min-width: 0; color: var(--studio-muted); font-size: 10px; }
+  .number-field input, .stack-field select { width: 100%; min-width: 0; height: 36px; padding: 0 9px; border: 1px solid var(--studio-border); border-radius: 7px; background: var(--secondary-background-color, #f3f5f6); color: var(--studio-text); }
   .number-field input:disabled { opacity: .55; }
   .section-body > .number-field { margin-top: 10px; }
   .field-grid + .field-grid, .field-grid + .stack-field, .stack-field + .field-grid { margin-top: 10px; }
@@ -790,15 +844,34 @@ var Ne = {
   .danger-zone { padding: 12px 14px; border-bottom: 1px solid var(--studio-border); color: var(--error-color, #db4437); }
   .metrics { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; font: 10px var(--code-font-family, monospace); }
   .metrics strong { text-align: right; }
-  .yaml-actions { display: flex; align-items: center; gap: 8px; padding: 0 10px 8px; }
-  .yaml-actions output { color: var(--studio-muted); font-size: 10px; }
-  .yaml pre { max-height: 280px; margin: 0; padding: 12px; overflow: auto; background: #121a24; color: #d9e4ee; font: 10px/1.45 var(--code-font-family, monospace); white-space: pre; }
+
+  .code-workspace { flex: 1; min-height: 0; overflow: auto; padding: clamp(18px, 3vw, 36px); background: var(--primary-background-color, #f5f7f8); }
+  .code-panel { width: min(1080px, 100%); min-height: 100%; display: flex; flex-direction: column; gap: 12px; margin-inline: auto; padding: clamp(16px, 2vw, 24px); border: 1px solid var(--studio-border); border-radius: 12px; background: var(--studio-surface); box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+  .code-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .code-panel h1 { margin: 4px 0 0; font-size: 20px; }
+  .code-panel p { margin: 5px 0 0; color: var(--studio-muted); font-size: 12px; }
+  .code-panel textarea { flex: 1; min-height: 420px; width: 100%; resize: none; padding: 15px; border: 1px solid var(--studio-border); border-radius: 9px; outline: 0; color: #d9e4ee; background: #121a24; font: 12px/1.55 var(--code-font-family, monospace); white-space: pre; tab-size: 2; }
+  .code-panel textarea:focus { border-color: var(--studio-accent); box-shadow: 0 0 0 1px var(--studio-accent); }
+  .copy-status { min-height: 16px; color: var(--studio-muted); font-size: 11px; text-align: end; }
 
   .project-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
-  .empty-card { width: min(460px, 100%); padding: 38px; border: 1px solid var(--studio-border); border-radius: 16px; text-align: center; background: var(--studio-surface); box-shadow: 0 18px 60px rgba(0,0,0,.1); }
-  .empty-card > ha-icon { width: 50px; height: 50px; color: var(--studio-accent); }
-  .empty-card h1 { margin: 9px 0; font-size: 27px; }
-  .empty-card p { margin: 0 auto 22px; color: var(--studio-muted); line-height: 1.55; }
+  ha-dialog { --dialog-content-padding: 0; }
+  .new-dashboard-content { display: grid; gap: 16px; padding: 18px 22px 22px; }
+  .dashboard-settings-content { padding: 18px 22px 22px; }
+  .dashboard-delete-content { padding: 8px 22px 22px; color: var(--studio-muted); font-size: 13px; line-height: 1.5; }
+  .dashboard-delete-content p { margin: 0; }
+  .dashboard-delete-content p + p { margin-top: 8px; }
+  .dashboard-delete-content strong { color: var(--studio-text); }
+  .form-label { color: var(--studio-muted); font-size: 11px; font-weight: 700; }
+  .dashboard-source-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .dashboard-source { min-width: 0; min-height: 64px; display: grid; grid-template-columns: 24px minmax(0,1fr); align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid var(--studio-border); border-radius: 9px; text-align: start; background: var(--studio-surface); }
+  .dashboard-source.selected { border-color: var(--studio-accent); box-shadow: inset 0 0 0 1px var(--studio-accent); background: var(--studio-accent-soft); }
+  .dashboard-source:disabled { cursor: not-allowed; opacity: .52; }
+  .dashboard-source ha-icon { color: var(--studio-accent); }
+  .dashboard-source span { min-width: 0; display: grid; gap: 3px; }
+  .dashboard-source strong { font-size: 12px; }
+  .dashboard-source small { overflow: hidden; color: var(--studio-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+  .new-dashboard-content ha-form { display: block; }
   .dialog-scrim { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 20px; background: rgba(8, 15, 24, .62); backdrop-filter: blur(3px); }
   .dialog { width: min(560px, 100%); max-height: calc(100vh - 40px); overflow: auto; border-radius: 14px; background: var(--studio-surface); box-shadow: 0 24px 80px rgba(0,0,0,.35); }
   .dialog > header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 12px; }
@@ -806,16 +879,19 @@ var Ne = {
   .confirm-dialog { width: min(430px, 100%); }
   .confirm-dialog > p { margin: 0; padding: 4px 20px 18px; color: var(--studio-muted); font-size: 13px; line-height: 1.5; }
   .confirm-dialog .confirm-delete { color: var(--error-color, #db4437); }
-  .dialog-grid { padding: 10px 20px 20px; }
-  .dialog-grid .wide { grid-column: 1 / -1; }
   .dialog footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--studio-border); }
 
+  @media (hover: none) {
+    .dashboard-menu-trigger { opacity: 1; pointer-events: auto; }
+  }
+
   @media (max-width: 900px) {
-    .brand span, .status { display: none; }
-    .topbar { height: auto; min-height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 7px; padding: calc(var(--safe-area-inset-top, 0px) + 7px) 10px 7px; }
-    .brand { min-width: 0; margin: 0; }
-    .project-name { width: 100%; }
-    .actions { width: 100%; overflow-x: auto; padding-bottom: 1px; }
+    .topbar { height: auto; min-height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'breadcrumb actions' 'switch switch'; gap: 5px 10px; padding: calc(var(--safe-area-inset-top, 0px) + 6px) 9px 6px; }
+    .editor-breadcrumb { grid-area: breadcrumb; }
+    .studio-name, .editor-actions .status { display: none; }
+    .project-name { width: min(180px, 36vw); }
+    .view-switch { grid-area: switch; justify-self: center; }
+    .editor-actions { grid-area: actions; }
     .layout { grid-template-columns: minmax(0, 1fr) !important; }
     .toolbox, .inspector, .panel-rail { display: none; }
     .workspace-meta { gap: 8px; padding: 0 8px; }
@@ -823,16 +899,29 @@ var Ne = {
     .zoom-controls { right: 8px; bottom: 8px; }
     .zoom-controls button:nth-of-type(2), .zoom-controls button:nth-of-type(4) { display: none; }
   }
-`, ze = (e, t) => {
+  @media (max-width: 600px) {
+    .dashboard-library { padding: 18px 12px; }
+    .dashboard-library-header { align-items: flex-start; }
+    .dashboard-library-tools { grid-template-columns: 1fr; }
+    .dashboard-sort { justify-content: space-between; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .dashboard-source-options { grid-template-columns: 1fr; }
+    .breadcrumb-divider:first-of-type { display: none; }
+    .editor-actions ha-button:first-of-type { display: none; }
+    .code-workspace { padding: 10px; }
+    .code-panel { padding: 13px; }
+    .code-panel > header { align-items: stretch; flex-direction: column; }
+  }
+`, Re = (e, t) => {
 	let n = t.trim().toLocaleLowerCase();
 	return n ? e.filter((e) => `${e.name} ${e.description}`.toLocaleLowerCase().includes(n)) : e;
-}, Be = {
+}, H = {
 	bw: "Black / white",
 	bwr: "Black / white / red",
 	bwy: "Black / white / yellow",
 	bwry: "Black / white / red / yellow",
 	spectra6: "Spectra 6 · black / white / red / yellow / blue / green"
-}, Ve = {
+}, U = {
 	bw: ["black", "white"],
 	bwr: [
 		"black",
@@ -858,7 +947,7 @@ var Ne = {
 		"blue",
 		"green"
 	]
-}, V = (e, t, n, r, i = !1) => ({
+}, W = (e, t, n, r, i = !1) => ({
 	id: `solum-${e}`,
 	manufacturer: "SOLUM",
 	name: `Newton Pro ${t}`,
@@ -866,7 +955,7 @@ var Ne = {
 	height: r,
 	palettes: i ? ["bw"] : ["bw", "bwry"],
 	defaultPalette: i ? "bw" : "bwry"
-}), H = [
+}), ze = [
 	{
 		id: "seeed-e1001",
 		manufacturer: "Seeed Studio",
@@ -921,26 +1010,26 @@ var Ne = {
 		palettes: ["spectra6"],
 		defaultPalette: "spectra6"
 	},
-	V("1-6-v", "1.6″ V", 200, 200),
-	V("1-6-h", "1.6″ H", 200, 200),
-	V("2-2", "2.2″", 296, 160),
-	V("2-2-freezer", "2.2″ Freezer", 296, 160, !0),
-	V("2-6", "2.6″", 360, 184),
-	V("2-6-freezer", "2.6″ Freezer", 360, 184, !0),
-	V("2-7", "2.7″", 300, 200),
-	V("2-9", "2.9″", 384, 168),
-	V("2-9-freezer", "2.9″ Freezer", 384, 168, !0),
-	V("3-45", "3.5″ · 3.45 panel", 480, 224),
-	V("3-52", "3.5″ · 3.52 panel", 384, 180),
-	V("4-2", "4.2″", 400, 300),
-	V("4-3", "4.3″", 522, 152),
-	V("4-5", "4.5″", 480, 176),
-	V("5-8", "5.8″", 792, 272),
-	V("6-1", "6.1″", 648, 480),
-	V("7-5", "7.5″", 800, 480),
-	V("9-7", "9.7″", 672, 960),
-	V("11-6", "11.6″", 640, 960),
-	V("12-2", "12.2″", 768, 960),
+	W("1-6-v", "1.6″ V", 200, 200),
+	W("1-6-h", "1.6″ H", 200, 200),
+	W("2-2", "2.2″", 296, 160),
+	W("2-2-freezer", "2.2″ Freezer", 296, 160, !0),
+	W("2-6", "2.6″", 360, 184),
+	W("2-6-freezer", "2.6″ Freezer", 360, 184, !0),
+	W("2-7", "2.7″", 300, 200),
+	W("2-9", "2.9″", 384, 168),
+	W("2-9-freezer", "2.9″ Freezer", 384, 168, !0),
+	W("3-45", "3.5″ · 3.45 panel", 480, 224),
+	W("3-52", "3.5″ · 3.52 panel", 384, 180),
+	W("4-2", "4.2″", 400, 300),
+	W("4-3", "4.3″", 522, 152),
+	W("4-5", "4.5″", 480, 176),
+	W("5-8", "5.8″", 792, 272),
+	W("6-1", "6.1″", 648, 480),
+	W("7-5", "7.5″", 800, 480),
+	W("9-7", "9.7″", 672, 960),
+	W("11-6", "11.6″", 640, 960),
+	W("12-2", "12.2″", 768, 960),
 	{
 		id: "custom",
 		manufacturer: "Custom",
@@ -956,16 +1045,16 @@ var Ne = {
 		],
 		defaultPalette: "bw"
 	}
-], U = (e) => H.find((t) => t.id === e) ?? H[0], He = () => Math.floor(Math.random() * 256), Ue = () => {
+], Be = (e) => ze.find((t) => t.id === e) ?? ze[0], Ve = () => Math.floor(Math.random() * 256), He = () => {
 	let e = globalThis.crypto;
 	if (typeof e?.randomUUID == "function") return e.randomUUID();
 	let t = /* @__PURE__ */ new Uint8Array(16);
 	typeof e?.getRandomValues == "function" ? e.getRandomValues(t) : t.forEach((e, n) => {
-		t[n] = He();
+		t[n] = Ve();
 	}), t[6] = t[6] & 15 | 64, t[8] = t[8] & 63 | 128;
 	let n = [...t].map((e) => e.toString(16).padStart(2, "0"));
 	return `${n.slice(0, 4).join("")}-${n.slice(4, 6).join("")}-${n.slice(6, 8).join("")}-${n.slice(8, 10).join("")}-${n.slice(10).join("")}`;
-}, We = (e, t) => {
+}, Ue = (e, t) => {
 	let { x: n, y: r, displayWidth: i, displayHeight: a } = t, o = Math.min(i - 1, n + 160), s = Math.min(a - 1, r + 90);
 	switch (e) {
 		case "text": return {
@@ -1050,7 +1139,7 @@ var Ne = {
 		};
 		default: return;
 	}
-}, Ge = [
+}, We = [
 	"nw",
 	"n",
 	"ne",
@@ -1059,24 +1148,24 @@ var Ne = {
 	"s",
 	"sw",
 	"w"
-], W = (e, t, n) => Math.max(t, Math.min(n, e)), Ke = (e, t, n) => n + Math.round((e - n) / t) * t, qe = (e) => e.includes("e") || e.includes("w"), Je = (e) => e.includes("n") || e.includes("s"), G = (e, t, n, r) => r ? Ke(e, t, n) : Math.round(e), Ye = ({ bounds: e, handle: t, deltaX: n, deltaY: r, minimumWidth: i, minimumHeight: a, area: o, preserveAspect: s, snapSize: c, snapEnabled: l }) => {
-	let u = o.x + o.width, d = o.y + o.height, f = e.x, p = e.y, m = e.x + e.width, h = e.y + e.height, g = f + e.width / 2, ee = p + e.height / 2, _ = f, v = p, y = m, b = h;
-	if (t.includes("w") && (_ = G(f + n, c, o.x, l)), t.includes("e") && (y = G(m + n, c, o.x, l)), t.includes("n") && (v = G(p + r, c, o.y, l)), t.includes("s") && (b = G(h + r, c, o.y, l)), t.includes("w") && (_ = W(_, o.x, m - i)), t.includes("e") && (y = W(y, f + i, u)), t.includes("n") && (v = W(v, o.y, h - a)), t.includes("s") && (b = W(b, p + a, d)), !s) return {
-		x: Math.round(_),
-		y: Math.round(v),
-		width: Math.round(y - _),
-		height: Math.round(b - v)
+], G = (e, t, n) => Math.max(t, Math.min(n, e)), Ge = (e, t, n) => n + Math.round((e - n) / t) * t, Ke = (e) => e.includes("e") || e.includes("w"), qe = (e) => e.includes("n") || e.includes("s"), K = (e, t, n, r) => r ? Ge(e, t, n) : Math.round(e), Je = ({ bounds: e, handle: t, deltaX: n, deltaY: r, minimumWidth: i, minimumHeight: a, area: o, preserveAspect: s, snapSize: c, snapEnabled: l }) => {
+	let u = o.x + o.width, d = o.y + o.height, f = e.x, p = e.y, m = e.x + e.width, h = e.y + e.height, g = f + e.width / 2, _ = p + e.height / 2, v = f, y = p, b = m, x = h;
+	if (t.includes("w") && (v = K(f + n, c, o.x, l)), t.includes("e") && (b = K(m + n, c, o.x, l)), t.includes("n") && (y = K(p + r, c, o.y, l)), t.includes("s") && (x = K(h + r, c, o.y, l)), t.includes("w") && (v = G(v, o.x, m - i)), t.includes("e") && (b = G(b, f + i, u)), t.includes("n") && (y = G(y, o.y, h - a)), t.includes("s") && (x = G(x, p + a, d)), !s) return {
+		x: Math.round(v),
+		y: Math.round(y),
+		width: Math.round(b - v),
+		height: Math.round(x - y)
 	};
-	let x = e.width / Math.max(1, e.height), S = Math.max(i, y - _), C = Math.max(a, b - v), te = Math.abs(S - e.width) / Math.max(1, e.width), w = Math.abs(C - e.height) / Math.max(1, e.height), T, E;
-	qe(t) && (!Je(t) || te >= w) ? (T = S, E = T / x) : (E = C, T = E * x);
-	let D = t.includes("w") ? m - o.x : t.includes("e") ? u - f : Math.max(1, Math.min(g - o.x, u - g) * 2), ne = t.includes("n") ? h - o.y : t.includes("s") ? d - p : Math.max(1, Math.min(ee - o.y, d - ee) * 2), re = Math.max(i / Math.max(1, e.width), a / Math.max(1, e.height)), O = Math.min(D / Math.max(1, e.width), ne / Math.max(1, e.height)), k = W(Math.max(T / Math.max(1, e.width), E / Math.max(1, e.height)), Math.min(re, O), O);
-	return T = Math.max(1, Math.round(e.width * k)), E = Math.max(1, Math.round(e.height * k)), _ = t.includes("w") ? m - T : t.includes("e") ? f : g - T / 2, v = t.includes("n") ? h - E : t.includes("s") ? p : ee - E / 2, _ = W(Math.round(_), o.x, u - T), v = W(Math.round(v), o.y, d - E), {
-		x: _,
-		y: v,
+	let ee = e.width / Math.max(1, e.height), S = Math.max(i, b - v), C = Math.max(a, x - y), te = Math.abs(S - e.width) / Math.max(1, e.width), w = Math.abs(C - e.height) / Math.max(1, e.height), T, E;
+	Ke(t) && (!qe(t) || te >= w) ? (T = S, E = T / ee) : (E = C, T = E * ee);
+	let D = t.includes("w") ? m - o.x : t.includes("e") ? u - f : Math.max(1, Math.min(g - o.x, u - g) * 2), ne = t.includes("n") ? h - o.y : t.includes("s") ? d - p : Math.max(1, Math.min(_ - o.y, d - _) * 2), re = Math.max(i / Math.max(1, e.width), a / Math.max(1, e.height)), O = Math.min(D / Math.max(1, e.width), ne / Math.max(1, e.height)), k = G(Math.max(T / Math.max(1, e.width), E / Math.max(1, e.height)), Math.min(re, O), O);
+	return T = Math.max(1, Math.round(e.width * k)), E = Math.max(1, Math.round(e.height * k)), v = t.includes("w") ? m - T : t.includes("e") ? f : g - T / 2, y = t.includes("n") ? h - E : t.includes("s") ? p : _ - E / 2, v = G(Math.round(v), o.x, u - T), y = G(Math.round(y), o.y, d - E), {
+		x: v,
+		y,
 		width: T,
 		height: E
 	};
-}, K = (e, t, n, r) => {
+}, Ye = (e, t, n, r) => {
 	let i = r.includes("w") ? e.x + e.width - t : r.includes("e") ? e.x : e.x + (e.width - t) / 2, a = r.includes("n") ? e.y + e.height - n : r.includes("s") ? e.y : e.y + (e.height - n) / 2;
 	return {
 		x: Math.round(i),
@@ -1122,12 +1211,12 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	s: "south",
 	sw: "south west",
 	w: "west"
-}, et = (e, t = H[0].id) => {
-	let n = U(t);
+}, et = (e, t = "custom") => {
+	let n = Be(t);
 	return {
 		id: "",
 		schemaVersion: 3,
-		name: "New dashboard",
+		name: "",
 		status: "draft",
 		language: e || "en",
 		display: {
@@ -1176,9 +1265,13 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		width: Math.max(e.size, Math.round(e.value.length * e.size * .62)),
 		height: Math.max(1, Math.round(e.size * 1.25))
 	};
-}, Q = (e) => e.kind === "widget" ? e.frame : tt(e.primitive), $ = class extends R {
+}, Q = (e) => e.kind === "widget" ? e.frame : tt(e.primitive), $ = class extends z {
 	constructor(...e) {
-		super(...e), this.projects = [], this.integrationVersion = "", this.widgets = [], this.primitives = [], this.selectedItemId = "", this.query = "", this.loading = !0, this.saving = !1, this.dirty = !1, this.draggingCatalog = !1, this.draggingLayerId = "", this.undoCount = 0, this.redoCount = 0, this.pendingDeleteItemId = "", this.error = "", this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.zoom = 1, this.panX = 0, this.panY = 0, this.snapEnabled = !0, this.newDashboardOpen = !1, this.newDashboard = et("en"), this.yamlCopyState = "idle", this.previewRequest = 0, this.bootstrapStarted = !1, this.suppressCatalogClick = !1, this.undoStack = [], this.redoStack = [], this.undo = () => {
+		super(...e), this.projects = [], this.view = "dashboards", this.dashboardQuery = "", this.dashboardSort = "updated", this.widgets = [], this.primitives = [], this.selectedItemId = "", this.query = "", this.loading = !0, this.saving = !1, this.dirty = !1, this.draggingCatalog = !1, this.draggingLayerId = "", this.undoCount = 0, this.redoCount = 0, this.pendingDeleteItemId = "", this.error = "", this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.zoom = 1, this.panX = 0, this.panY = 0, this.snapEnabled = !0, this.newDashboardOpen = !1, this.newDashboard = et("en"), this.dashboardMenuProjectId = "", this.yamlCopyState = "idle", this.previewRequest = 0, this.bootstrapStarted = !1, this.suppressCatalogClick = !1, this.undoStack = [], this.redoStack = [], this.onDashboardOutsidePointerDown = (e) => {
+			this.dashboardMenuProjectId && (e.composedPath().some((e) => e instanceof HTMLElement && (e.classList.contains("dashboard-menu") || e.classList.contains("dashboard-menu-trigger"))) || (this.dashboardMenuProjectId = ""));
+		}, this.onDashboardMenuKeyDown = (e) => {
+			e.key === "Escape" && (this.dashboardMenuProjectId ? (this.dashboardMenuProjectId = "", e.stopPropagation()) : this.dashboardDialog && (this.closeDashboardAction(), e.stopPropagation()));
+		}, this.undo = () => {
 			if (!this.current) return;
 			let e = this.undoStack.pop();
 			e && (this.redoStack.push(J(this.current)), this.current = J(e), this.dirty = !0, this.selectedItemId && !this.current.items.some((e) => e.id === this.selectedItemId) && (this.selectedItemId = ""), this.syncHistoryState(), this.schedulePreview());
@@ -1270,10 +1363,10 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		};
 	}
 	static {
-		this.styles = Re;
+		this.styles = Le;
 	}
 	connectedCallback() {
-		super.connectedCallback(), window.addEventListener("keydown", this.onHistoryKeyDown);
+		super.connectedCallback(), window.addEventListener("keydown", this.onHistoryKeyDown), window.addEventListener("keydown", this.onDashboardMenuKeyDown), window.addEventListener("pointerdown", this.onDashboardOutsidePointerDown);
 	}
 	firstUpdated() {
 		this.ensureBootstrap();
@@ -1282,7 +1375,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		e.has("hass") && this.ensureBootstrap();
 	}
 	disconnectedCallback() {
-		super.disconnectedCallback(), this.previewTimer && window.clearTimeout(this.previewTimer), this.yamlCopyTimer && window.clearTimeout(this.yamlCopyTimer), window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), window.removeEventListener("pointermove", this.onCatalogPointerMove), window.removeEventListener("pointerup", this.onCatalogPointerUp), window.removeEventListener("pointercancel", this.onCatalogPointerCancel), window.removeEventListener("pointermove", this.onLayerPointerMove), window.removeEventListener("pointerup", this.onLayerPointerUp), window.removeEventListener("pointercancel", this.onLayerPointerCancel), window.removeEventListener("pointermove", this.onPanelResizeMove), window.removeEventListener("pointerup", this.onPanelResizeEnd), window.removeEventListener("keydown", this.onHistoryKeyDown);
+		super.disconnectedCallback(), this.previewTimer && window.clearTimeout(this.previewTimer), this.yamlCopyTimer && window.clearTimeout(this.yamlCopyTimer), window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), window.removeEventListener("pointermove", this.onCatalogPointerMove), window.removeEventListener("pointerup", this.onCatalogPointerUp), window.removeEventListener("pointercancel", this.onCatalogPointerCancel), window.removeEventListener("pointermove", this.onLayerPointerMove), window.removeEventListener("pointerup", this.onLayerPointerUp), window.removeEventListener("pointercancel", this.onLayerPointerCancel), window.removeEventListener("pointermove", this.onPanelResizeMove), window.removeEventListener("pointerup", this.onPanelResizeEnd), window.removeEventListener("keydown", this.onHistoryKeyDown), window.removeEventListener("keydown", this.onDashboardMenuKeyDown), window.removeEventListener("pointerdown", this.onDashboardOutsidePointerDown);
 	}
 	ensureBootstrap() {
 		!this.hass || this.bootstrapStarted || (this.bootstrapStarted = !0, this.bootstrap());
@@ -1293,7 +1386,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			this.loading = !0, this.error = "";
 			try {
 				let t = await e.callWS({ type: "opendisplay_studio/bootstrap" });
-				this.integrationVersion = t.version, this.projects = t.projects, this.widgets = t.widgets, this.primitives = t.primitives, this.current = this.projects[0] ? J(this.projects[0]) : void 0, this.clearHistory(), this.newDashboard = et(e.language), this.current && (await this.composePreview(), await this.updateComplete, requestAnimationFrame(() => this.fitCanvas()));
+				this.projects = t.projects, this.widgets = t.widgets, this.primitives = t.primitives, this.current = void 0, this.preview = void 0, this.view = "dashboards", this.clearHistory(), this.newDashboard = et(e.language);
 			} catch (e) {
 				this.error = X(e, "Could not load OpenDisplay Studio");
 			} finally {
@@ -1304,13 +1397,29 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	openNewDashboard() {
 		this.newDashboard = et(this.hass?.language ?? "en"), this.newDashboardOpen = !0;
 	}
-	updateNewDashboard(e, t) {
-		let n = J(this.newDashboard);
-		if (e === "profileId") {
-			let e = U(t);
-			n.display.profileId = e.id, n.display.width = e.width, n.display.height = e.height, n.display.palette = e.defaultPalette;
-		} else e === "name" ? n.name = t : e === "palette" ? n.display.palette = t : e === "background" ? n.display.background = t : (e === "width" || e === "height" || e === "padding" || e === "snapSize") && (n.display[e] = Math.max(+(e === "snapSize"), Math.round(Number(t) || 0)));
-		this.newDashboard = n;
+	dashboardFormData(e) {
+		return {
+			name: e.name,
+			width: e.display.width,
+			height: e.display.height,
+			palette: e.display.palette,
+			padding: e.display.padding,
+			snapSize: e.display.snapSize
+		};
+	}
+	projectFromForm(e, t) {
+		let n = {
+			...this.dashboardFormData(e),
+			...t
+		}, r = J(e);
+		return r.name = String(n.name), r.display.profileId = "custom", r.display.width = Math.round(Number(n.width) || 0), r.display.height = Math.round(Number(n.height) || 0), r.display.palette = n.palette in H ? n.palette : "bw", r.display.padding = Math.round(Number(n.padding) || 0), r.display.snapSize = Math.round(Number(n.snapSize) || 0), U[r.display.palette].includes(r.display.background) || (r.display.background = "white"), r;
+	}
+	updateNewDashboardForm(e) {
+		this.newDashboard = this.projectFromForm(this.newDashboard, e.detail.value);
+	}
+	dashboardIsValid(e) {
+		let { width: t, height: n, padding: r, snapSize: i } = e.display;
+		return !!e.name.trim() && t >= 64 && t <= 4096 && n >= 64 && n <= 4096 && r >= 0 && r * 2 < Math.min(t, n) && i >= 1 && i <= 256;
 	}
 	async createProject() {
 		if (this.hass) {
@@ -1320,7 +1429,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 					type: "opendisplay_studio/create_project",
 					project: this.newDashboard
 				});
-				this.projects = [...this.projects, e.project], this.current = J(e.project), this.selectedItemId = "", this.dirty = !1, this.newDashboardOpen = !1, this.clearHistory(), await this.composePreview(), await this.updateComplete, this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
+				this.projects = [...this.projects, e.project], this.current = J(e.project), this.selectedItemId = "", this.dirty = !1, this.newDashboardOpen = !1, this.view = "design", this.clearHistory(), await this.composePreview(), await this.updateComplete, this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
 			} catch (e) {
 				this.error = X(e, "Could not create the dashboard");
 			} finally {
@@ -1352,15 +1461,121 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			await this.hass.callWS({
 				type: "opendisplay_studio/delete_project",
 				project_id: e
-			}), this.projects = this.projects.filter((t) => t.id !== e), this.current = this.projects[0] ? J(this.projects[0]) : void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.clearHistory(), this.current && await this.composePreview();
+			}), this.projects = this.projects.filter((t) => t.id !== e), this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.view = "dashboards", this.clearHistory();
 		} catch (e) {
 			this.error = X(e, "Could not delete the dashboard");
 		}
 	}
-	selectProject(e) {
-		this.current = J(e), this.selectedItemId = "", this.dirty = !1, this.clearHistory(), this.composePreview().then(() => {
-			this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
+	toggleDashboardMenu(e, t) {
+		e.stopPropagation(), this.dashboardMenuProjectId = this.dashboardMenuProjectId === t ? "" : t;
+	}
+	openDashboardAction(e, t, n) {
+		e.stopPropagation(), this.dashboardMenuProjectId = "", this.dashboardDraft = J(t), this.dashboardDialog = n, n === "rename" && this.updateComplete.then(() => {
+			let e = this.renderRoot.querySelector(".dashboard-rename-input");
+			e?.focus(), e?.select();
 		});
+	}
+	closeDashboardAction() {
+		this.dashboardDialog = void 0, this.dashboardDraft = void 0;
+	}
+	updateDashboardRename(e) {
+		if (!this.dashboardDraft) return;
+		let t = J(this.dashboardDraft);
+		t.name = e.target.value, this.dashboardDraft = t;
+	}
+	onDashboardRenameKeyDown(e) {
+		e.stopPropagation(), e.key === "Enter" ? (e.preventDefault(), this.saveDashboardRename()) : e.key === "Escape" && (e.preventDefault(), this.closeDashboardAction());
+	}
+	async updateDashboardFromGallery(e, t) {
+		if (!(!this.hass || this.saving)) {
+			this.saving = !0, this.error = "";
+			try {
+				let t = await this.hass.callWS({
+					type: "opendisplay_studio/update_project",
+					project_id: e.id,
+					project: e
+				});
+				return this.projects = this.projects.map((e) => e.id === t.project.id ? t.project : e), this.current?.id === t.project.id && (this.current = J(t.project), this.preview = void 0, this.dirty = !1), t.project;
+			} catch (e) {
+				this.error = X(e, t);
+				return;
+			} finally {
+				this.saving = !1;
+			}
+		}
+	}
+	async saveDashboardRename() {
+		if (this.dashboardDialog !== "rename" || !this.dashboardDraft || this.saving) return;
+		let e = J(this.dashboardDraft);
+		if (e.name = e.name.trim(), !e.name) {
+			this.error = "Dashboard name cannot be empty";
+			return;
+		}
+		if (this.projects.find((t) => t.id === e.id)?.name === e.name) {
+			this.closeDashboardAction();
+			return;
+		}
+		await this.updateDashboardFromGallery(e, "Could not rename the dashboard") && this.closeDashboardAction();
+	}
+	dashboardCopyName(e) {
+		let t = new Set(this.projects.map((e) => e.name.toLocaleLowerCase(this.hass?.language || "en"))), n = `${e.name} copy`, r = n, i = 2;
+		for (; t.has(r.toLocaleLowerCase(this.hass?.language || "en"));) r = `${n} ${i++}`;
+		return r;
+	}
+	async duplicateDashboard(e, t) {
+		if (e.stopPropagation(), !this.hass || this.saving) return;
+		this.dashboardMenuProjectId = "", this.saving = !0, this.error = "";
+		let n = J(t);
+		n.id = "", n.name = this.dashboardCopyName(t), n.status = "draft", n.createdAt = "", n.updatedAt = "";
+		try {
+			let e = await this.hass.callWS({
+				type: "opendisplay_studio/create_project",
+				project: n
+			});
+			this.projects = [...this.projects, e.project];
+		} catch (e) {
+			this.error = X(e, "Could not duplicate the dashboard");
+		} finally {
+			this.saving = !1;
+		}
+	}
+	updateDashboardSettings(e) {
+		this.dashboardDraft &&= this.projectFromForm(this.dashboardDraft, e.detail.value);
+	}
+	async saveDashboardSettings() {
+		if (this.dashboardDialog !== "settings" || !this.dashboardDraft || !this.dashboardIsValid(this.dashboardDraft)) return;
+		let e = J(this.dashboardDraft);
+		e.name = e.name.trim(), await this.updateDashboardFromGallery(e, "Could not update dashboard settings") && this.closeDashboardAction();
+	}
+	async confirmDeleteDashboard() {
+		if (this.dashboardDialog !== "delete" || !this.dashboardDraft || !this.hass || this.saving) return;
+		let e = this.dashboardDraft.id;
+		this.saving = !0, this.error = "";
+		try {
+			await this.hass.callWS({
+				type: "opendisplay_studio/delete_project",
+				project_id: e
+			}), this.projects = this.projects.filter((t) => t.id !== e), this.current?.id === e && (this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.clearHistory()), this.closeDashboardAction();
+		} catch (e) {
+			this.error = X(e, "Could not delete the dashboard");
+		} finally {
+			this.saving = !1;
+		}
+	}
+	openDashboard(e) {
+		if (this.current?.id === e.id) {
+			this.view = "design", this.preview || this.composePreview();
+			return;
+		}
+		this.dirty && !window.confirm("Discard unsaved dashboard changes?") || (this.current = J(e), this.selectedItemId = "", this.dirty = !1, this.clearHistory(), this.view = "design", this.composePreview().then(() => {
+			this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
+		}));
+	}
+	showDashboards() {
+		this.view = "dashboards";
+	}
+	setEditorView(e) {
+		this.view = e, e === "code" && !this.preview && this.composePreview();
 	}
 	mutate(e, t = !0, n = !0) {
 		if (!this.current) return;
@@ -1474,7 +1689,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		let r = this.widgets.find((t) => t.id === e);
 		if (!r) return;
 		let i = this.workingArea(), a = Math.min(r.layout.defaultSize?.width ?? 240, i.width), o = Math.min(r.layout.defaultSize?.height ?? 144, i.height), s = {
-			id: Ue(),
+			id: He(),
 			kind: "widget",
 			locked: !1,
 			hidden: !1,
@@ -1497,7 +1712,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	}
 	addPrimitive(e, t, n) {
 		if (!this.current) return;
-		let r = We(e.trim(), {
+		let r = Ue(e.trim(), {
 			x: Math.round(this.current.display.width / 2),
 			y: Math.round(this.current.display.height / 2),
 			displayWidth: this.current.display.width,
@@ -1508,7 +1723,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			return;
 		}
 		let i = {
-			id: Ue(),
+			id: He(),
 			kind: "primitive",
 			locked: !1,
 			hidden: !1,
@@ -1553,7 +1768,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			e: "se",
 			s: "se",
 			w: "sw"
-		}[t] ?? t : t, d = Ye({
+		}[t] ?? t : t, d = Je({
 			bounds: o,
 			handle: u,
 			deltaX: n,
@@ -1579,25 +1794,25 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			return;
 		}
 		if (f.type === "circle") {
-			let e = Math.max(1, Math.floor((Math.min(d.width, d.height) - 1) / 2)), t = e * 2 + 1, n = K(d, t, t, u);
+			let e = Math.max(1, Math.floor((Math.min(d.width, d.height) - 1) / 2)), t = e * 2 + 1, n = Ye(d, t, t, u);
 			f.x = n.x + e, f.y = n.y + e, f.radius = e;
 			return;
 		}
 		if (f.type === "qrcode") {
 			let e = 21 + f.border * 2;
 			f.boxsize = Y(Math.floor(Math.min(d.width, d.height) / e), 1, 16);
-			let t = e * f.boxsize, n = K(d, t, t, u);
+			let t = e * f.boxsize, n = Ye(d, t, t, u);
 			f.x = n.x, f.y = n.y;
 			return;
 		}
 		if (f.type === "icon") {
 			f.size = Y(Math.floor(Math.min(d.width, d.height)), 8, 256);
-			let e = K(d, f.size, f.size, u);
+			let e = Ye(d, f.size, f.size, u);
 			f.x = e.x, f.y = e.y;
 			return;
 		}
 		f.size = Y(Math.round(f.size * d.width / Math.max(1, o.width)), 6, 256);
-		let p = tt(f), m = K(d, p.width, p.height, u);
+		let p = tt(f), m = Ye(d, p.width, p.height, u);
 		f.x = m.x, f.y = m.y;
 	}
 	selectItem(e, t, n = "move", r) {
@@ -1661,7 +1876,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		});
 	}
 	updateProfile(e) {
-		let t = U(e);
+		let t = Be(e);
 		this.mutate((e) => {
 			e.display.profileId = t.id, e.display.width = t.width, e.display.height = t.height, e.display.palette = t.defaultPalette, e.items.forEach((t) => this.constrainItem(t, e));
 		}), requestAnimationFrame(() => this.fitCanvas());
@@ -1732,16 +1947,227 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			}, 2200);
 		}
 	}
+	dashboardList() {
+		let e = this.dashboardQuery.trim().toLocaleLowerCase(this.hass?.language || "en");
+		return this.projects.filter((t) => !e || t.name.toLocaleLowerCase(this.hass?.language || "en").includes(e)).sort((e, t) => this.dashboardSort === "name" ? e.name.localeCompare(t.name, this.hass?.language || "en") : t.updatedAt.localeCompare(e.updatedAt) || e.name.localeCompare(t.name, this.hass?.language || "en"));
+	}
+	dashboardDate(e) {
+		let t = new Date(e.updatedAt);
+		return Number.isNaN(t.getTime()) ? "" : new Intl.DateTimeFormat(this.hass?.language || "en", { dateStyle: "medium" }).format(t);
+	}
+	dashboardAccent(e) {
+		return e === "bwr" || e === "bwry" ? "#d32f2f" : e === "bwy" ? "#d6a800" : e === "spectra6" ? "#246bfd" : "#202124";
+	}
+	renderDashboardCard(e) {
+		let t = U[e.display.palette], n = this.dashboardMenuProjectId === e.id, r = this.dashboardDialog === "rename" && this.dashboardDraft?.id === e.id, i = `dashboard-menu-${e.id}`;
+		return N`
+      <article class=${`dashboard-card${n ? " menu-open" : ""}`} data-dashboard-id=${e.id}>
+        <div class="dashboard-card-preview">
+          <div
+            class="dashboard-miniature"
+            style=${V({
+			aspectRatio: `${e.display.width} / ${e.display.height}`,
+			background: e.display.background,
+			"--dashboard-accent": this.dashboardAccent(e.display.palette)
+		})}
+          >
+            <span class="miniature-title"></span>
+            <span class="miniature-accent"></span>
+            <span class="miniature-line long"></span>
+            <span class="miniature-line"></span>
+          </div>
+          <span class="dashboard-resolution">${e.display.width} × ${e.display.height}</span>
+        </div>
+        <div class="dashboard-card-copy">
+          <span class="dashboard-card-title">
+            ${r ? N`<input class="dashboard-rename-input" aria-label=${`Rename dashboard ${e.name}`} .value=${this.dashboardDraft?.name ?? e.name} @input=${this.updateDashboardRename} @keydown=${this.onDashboardRenameKeyDown} @blur=${this.saveDashboardRename}>` : N`<strong>${e.name}</strong>`}
+            <span class=${`status ${e.status}`}>${e.status}</span>
+          </span>
+          <span class="dashboard-card-meta">
+            <span>${e.display.width} × ${e.display.height}</span>
+            <span class="palette-dots" aria-label=${H[e.display.palette]}>${t.map((e) => N`<i style=${V({ background: e })}></i>`)}</span>
+            <span>${H[e.display.palette]}</span>
+          </span>
+          <small>Updated ${this.dashboardDate(e)}</small>
+        </div>
+        <button class="dashboard-card-open" aria-label=${`Open dashboard ${e.name}`} @click=${() => this.openDashboard(e)}></button>
+        <button class="dashboard-menu-trigger" aria-label=${`Dashboard actions for ${e.name}`} aria-haspopup="menu" aria-controls=${i} aria-expanded=${n} @click=${(t) => this.toggleDashboardMenu(t, e.id)}><ha-icon icon="mdi:dots-horizontal"></ha-icon></button>
+        ${n ? N`
+          <div class="dashboard-menu" id=${i} role="menu" aria-label=${`Actions for ${e.name}`}>
+            <button role="menuitem" @click=${(t) => this.openDashboardAction(t, e, "rename")}><ha-icon icon="mdi:pencil-outline"></ha-icon><span>Rename</span></button>
+            <button role="menuitem" @click=${(t) => this.duplicateDashboard(t, e)}><ha-icon icon="mdi:content-copy"></ha-icon><span>Duplicate</span></button>
+            <button role="menuitem" @click=${(t) => this.openDashboardAction(t, e, "settings")}><ha-icon icon="mdi:monitor-cog"></ha-icon><span>Display Settings</span></button>
+            <button class="delete" role="menuitem" @click=${(t) => this.openDashboardAction(t, e, "delete")}><ha-icon icon="mdi:delete-outline"></ha-icon><span>Delete</span></button>
+          </div>
+        ` : F}
+      </article>
+    `;
+	}
+	renderDashboardLibrary() {
+		let e = this.dashboardList();
+		return N`
+      <main class="dashboard-library">
+        <header class="dashboard-library-header">
+          <div><h1>Dashboards</h1><p>${this.projects.length} ${this.projects.length === 1 ? "dashboard" : "dashboards"}</p></div>
+          <ha-button class="dashboard-new-button" appearance="filled" aria-label="New dashboard" @click=${this.openNewDashboard}><span class="dashboard-new-button-label"><ha-icon icon="mdi:plus"></ha-icon><span>New dashboard</span></span></ha-button>
+        </header>
+        ${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}
+        <section class="dashboard-library-tools" aria-label="Dashboard filters">
+          <label class="dashboard-search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" aria-label="Search dashboards" placeholder="Search dashboards…" .value=${this.dashboardQuery} @input=${(e) => {
+			this.dashboardQuery = e.target.value;
+		}}></label>
+          <label class="dashboard-sort"><span>Sort</span><select aria-label="Sort dashboards" .value=${this.dashboardSort} @change=${(e) => {
+			this.dashboardSort = e.target.value;
+		}}><option value="updated">Last updated</option><option value="name">Name A–Z</option></select></label>
+        </section>
+        <section class="dashboard-grid" aria-label="Saved dashboards">
+          <button class="dashboard-add-card" aria-label="Add dashboard" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon><strong>New dashboard</strong></button>
+          ${e.map((e) => this.renderDashboardCard(e))}
+          ${e.length ? F : N`<div class="dashboard-no-results"><ha-icon icon="mdi:magnify"></ha-icon><strong>No dashboards found</strong><span>Try a different search.</span></div>`}
+        </section>
+      </main>
+      ${this.renderNewDashboardDialog()}
+      ${this.renderDashboardActionDialog()}
+    `;
+	}
+	newDashboardSchema() {
+		return [
+			{
+				name: "name",
+				label: "Dashboard name",
+				required: !0,
+				selector: { text: {} }
+			},
+			{
+				name: "dimensions",
+				type: "grid",
+				flatten: !0,
+				schema: [{
+					name: "width",
+					label: "Width",
+					required: !0,
+					selector: { number: {
+						mode: "box",
+						min: 64,
+						max: 4096,
+						unit_of_measurement: "px"
+					} }
+				}, {
+					name: "height",
+					label: "Height",
+					required: !0,
+					selector: { number: {
+						mode: "box",
+						min: 64,
+						max: 4096,
+						unit_of_measurement: "px"
+					} }
+				}]
+			},
+			{
+				name: "palette",
+				label: "Palette",
+				required: !0,
+				selector: { select: {
+					mode: "dropdown",
+					options: Object.entries(H).map(([e, t]) => ({
+						value: e,
+						label: t
+					}))
+				} }
+			},
+			{
+				name: "advanced",
+				type: "expandable",
+				flatten: !0,
+				title: "Advanced display options",
+				expanded: !1,
+				schema: [{
+					name: "padding",
+					label: "Outer padding",
+					selector: { number: {
+						mode: "box",
+						min: 0,
+						max: 1024,
+						unit_of_measurement: "px"
+					} }
+				}, {
+					name: "snapSize",
+					label: "Snap size",
+					selector: { number: {
+						mode: "box",
+						min: 1,
+						max: 256,
+						unit_of_measurement: "px"
+					} }
+				}]
+			}
+		];
+	}
 	renderNewDashboardDialog() {
-		if (!this.newDashboardOpen) return F;
-		let e = U(this.newDashboard.display.profileId);
-		return N`<div class="dialog-scrim" @click=${(e) => {
-			e.target === e.currentTarget && (this.newDashboardOpen = !1);
-		}}><section class="dialog" role="dialog" aria-modal="true" aria-labelledby="new-dashboard-title"><header><div><span class="eyebrow">Dashboard setup</span><h2 id="new-dashboard-title">Add dashboard</h2></div><button class="icon-button" aria-label="Close" @click=${() => {
+		return this.newDashboardOpen ? N`
+      <ha-dialog .open=${!0} width="medium" header-title="New dashboard" header-subtitle="Create a custom OpenDisplay canvas" @closed=${() => {
 			this.newDashboardOpen = !1;
-		}}><ha-icon icon="mdi:close"></ha-icon></button></header><div class="dialog-grid"><label class="wide">Name<input aria-label="Dashboard name" .value=${this.newDashboard.name} @input=${(e) => this.updateNewDashboard("name", e.target.value)}></label><label class="wide">Display type<select aria-label="Display type" .value=${this.newDashboard.display.profileId ?? ""} @change=${(e) => this.updateNewDashboard("profileId", e.target.value)}>${H.map((e) => N`<option value=${e.id}>${e.manufacturer} · ${e.name}</option>`)}</select></label><label>Width<input aria-label="New dashboard width" type="number" .disabled=${e.id !== "custom"} .value=${String(this.newDashboard.display.width)} @input=${(e) => this.updateNewDashboard("width", e.target.value)}></label><label>Height<input aria-label="New dashboard height" type="number" .disabled=${e.id !== "custom"} .value=${String(this.newDashboard.display.height)} @input=${(e) => this.updateNewDashboard("height", e.target.value)}></label><label class="wide">Colors<select aria-label="Dashboard colors" .value=${this.newDashboard.display.palette} @change=${(e) => this.updateNewDashboard("palette", e.target.value)}>${e.palettes.map((e) => N`<option value=${e}>${Be[e]}</option>`)}</select></label><label>Outer padding<input aria-label="Dashboard padding" type="number" min="0" .value=${String(this.newDashboard.display.padding)} @input=${(e) => this.updateNewDashboard("padding", e.target.value)}></label><label>Snap size<input aria-label="Dashboard snap size" type="number" min="1" .value=${String(this.newDashboard.display.snapSize)} @input=${(e) => this.updateNewDashboard("snapSize", e.target.value)}></label></div><footer><ha-button appearance="plain" @click=${() => {
+		}}>
+        <div class="new-dashboard-content">
+          <span class="form-label">Start from</span>
+          <div class="dashboard-source-options" role="radiogroup" aria-label="Dashboard source">
+            <button class="dashboard-source selected" type="button" role="radio" aria-checked="true">
+              <ha-icon icon="mdi:monitor"></ha-icon><span><strong>Custom size</strong><small>Set resolution and colors</small></span>
+            </button>
+            <button class="dashboard-source" type="button" role="radio" aria-checked="false" disabled>
+              <ha-icon icon="mdi:devices"></ha-icon><span><strong>From OpenDisplay device</strong><small>Coming later</small></span>
+            </button>
+          </div>
+          <ha-form
+            autofocus
+            .hass=${this.hass}
+            .data=${this.dashboardFormData(this.newDashboard)}
+            .schema=${this.newDashboardSchema()}
+            .computeLabel=${(e) => "label" in e ? e.label : e.title ?? ""}
+            @value-changed=${this.updateNewDashboardForm}
+          ></ha-form>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${() => {
 			this.newDashboardOpen = !1;
-		}}>Cancel</ha-button><ha-button appearance="filled" .disabled=${this.saving || !this.newDashboard.name.trim()} @click=${this.createProject}>${this.saving ? "Creating…" : "Create dashboard"}</ha-button></footer></section></div>`;
+		}}>Cancel</ha-button>
+          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(this.newDashboard)} @click=${this.createProject}>${this.saving ? "Creating…" : "Create dashboard"}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    ` : F;
+	}
+	renderDashboardActionDialog() {
+		let e = this.dashboardDraft;
+		return !e || this.dashboardDialog === "rename" || !this.dashboardDialog ? F : this.dashboardDialog === "delete" ? N`
+      <ha-dialog .open=${!0} width="small" header-title="Delete dashboard?" @closed=${this.closeDashboardAction}>
+        <div class="dashboard-delete-content">
+          <p><strong>${e.name}</strong> and all of its elements will be permanently removed.</p>
+          <p>This action cannot be undone.</p>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${this.closeDashboardAction}>Cancel</ha-button>
+          <ha-button slot="primaryAction" variant="danger" appearance="filled" .disabled=${this.saving} @click=${this.confirmDeleteDashboard}>${this.saving ? "Deleting…" : "Delete dashboard"}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    ` : N`
+      <ha-dialog .open=${!0} width="medium" header-title="Display settings" header-subtitle=${e.name} @closed=${this.closeDashboardAction}>
+        <div class="dashboard-settings-content">
+          <ha-form
+            autofocus
+            .hass=${this.hass}
+            .data=${this.dashboardFormData(e)}
+            .schema=${this.newDashboardSchema()}
+            .computeLabel=${(e) => "label" in e ? e.label : e.title ?? ""}
+            @value-changed=${this.updateDashboardSettings}
+          ></ha-form>
+        </div>
+        <ha-dialog-footer slot="footer">
+          <ha-button slot="secondaryAction" appearance="plain" @click=${this.closeDashboardAction}>Cancel</ha-button>
+          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(e)} @click=${this.saveDashboardSettings}>${this.saving ? "Saving…" : "Save changes"}</ha-button>
+        </ha-dialog-footer>
+      </ha-dialog>
+    `;
 	}
 	renderDeleteDialog() {
 		if (!this.pendingDeleteItemId || !this.current) return F;
@@ -1758,7 +2184,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		if (this.leftCollapsed) return N`<aside class="panel panel-rail"><button class="icon-button" title="Expand element catalog" aria-label="Expand element catalog" @click=${() => {
 			this.leftCollapsed = !1;
 		}}><ha-icon icon="mdi:chevron-right"></ha-icon></button><span class="rail-label">Library</span></aside>`;
-		let e = ze(this.widgets, this.query), t = ze(this.primitives, this.query);
+		let e = Re(this.widgets, this.query), t = Re(this.primitives, this.query);
 		return N`<aside class="panel toolbox"><div class="panel-title"><div><span class="eyebrow">Library</span><h2>Elements</h2></div><button class="icon-button" title="Collapse element catalog" aria-label="Collapse element catalog" @click=${() => {
 			this.leftCollapsed = !0;
 		}}><ha-icon icon="mdi:chevron-left"></ha-icon></button></div><label class="search"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" aria-label="Search widgets and primitives" placeholder="Search elements…" .value=${this.query} @input=${(e) => {
@@ -1779,7 +2205,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
       <div
         class="catalog-drag-ghost"
         data-catalog-value=${e.value}
-        style=${B({
+        style=${V({
 			left: `${this.catalogDragPosition.x}px`,
 			top: `${this.catalogDragPosition.y}px`,
 			width: `${e.previewWidth}px`,
@@ -1792,8 +2218,8 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
       </div>
     ` : F;
 	}
-	renderDashboardTabs() {
-		return N`<nav class="dashboard-tabs" aria-label="Dashboards">${this.projects.map((e) => N`<button class=${e.id === this.current?.id ? "dashboard-tab active" : "dashboard-tab"} @click=${() => this.selectProject(e)}><ha-icon icon="mdi:monitor"></ha-icon><span>${e.name}</span><i class=${e.status} title=${e.status}></i></button>`)}<button class="add-tab" @click=${this.openNewDashboard}><ha-icon icon="mdi:plus"></ha-icon>Add dashboard</button><span class="tab-spacer"></span><div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div></nav>${this.renderCatalogDragGhost()}`;
+	renderHistoryControls() {
+		return N`<div class="history-controls"><button aria-label="Undo" title="Undo (Ctrl+Z)" ?disabled=${!this.undoCount} @click=${this.undo}><ha-icon icon="mdi:undo"></ha-icon></button><button aria-label="Redo" title="Redo (Ctrl+Shift+Z)" ?disabled=${!this.redoCount} @click=${this.redo}><ha-icon icon="mdi:redo"></ha-icon></button></div>`;
 	}
 	renderCanvasItem(e, t) {
 		let n = Q(e), r = e.id === this.selectedItemId;
@@ -1801,7 +2227,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
       <div
         data-item-id=${e.id}
         class=${`selection ${r ? "selected" : ""} ${e.locked ? "locked" : ""} ${e.hidden ? "hidden" : ""}`}
-        style=${B({
+        style=${V({
 			left: `${n.x / t.display.width * 100}%`,
 			top: `${n.y / t.display.height * 100}%`,
 			width: `${n.width / t.display.width * 100}%`,
@@ -1812,7 +2238,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
         ${e.hidden ? N`<span class="hidden-label">Hidden</span>` : F}
         ${e.locked ? N`<ha-icon class="lock-badge" icon="mdi:lock"></ha-icon>` : F}
         ${r ? N`<output class="selection-size" aria-live="off">${Math.round(n.width)} × ${Math.round(n.height)}</output>` : F}
-        ${r && !e.locked ? Ge.map((t) => N`
+        ${r && !e.locked ? We.map((t) => N`
           <button
             data-resize-handle=${t}
             class=${`resize-handle resize-${t}`}
@@ -1828,11 +2254,12 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		let e = this.current, t = `translate(${this.panX}px, ${this.panY}px) scale(${this.zoom})`, n = this.workingArea(e);
 		return N`
       <main class="workspace">
-        ${this.renderDashboardTabs()}
+        ${this.renderCatalogDragGhost()}
         <div class="workspace-meta">
           <span>${e.display.width} × ${e.display.height} px</span>
           <span>${e.items.length} layers</span>
           <span>Padding ${e.display.padding}px</span>
+          ${this.renderHistoryControls()}
           <button class=${this.snapEnabled ? "tool-toggle active" : "tool-toggle"} aria-pressed=${this.snapEnabled} @click=${() => {
 			this.snapEnabled = !this.snapEnabled;
 		}}>
@@ -1841,13 +2268,13 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
           <span class="zoom-readout">${Math.round(this.zoom * 100)}%</span>
         </div>
         <section class=${this.draggingCatalog ? "canvas-stage accepting-drop" : "canvas-stage"} @wheel=${this.onCanvasWheel} @dragover=${this.onCanvasDragOver} @drop=${this.onCanvasDrop}>
-          <div class="canvas-viewport" style=${B({ transform: t })}>
-            <div class="canvas" style=${B({
+          <div class="canvas-viewport" style=${V({ transform: t })}>
+            <div class="canvas" style=${V({
 			width: `${e.display.width}px`,
 			height: `${e.display.height}px`
 		})} @pointerdown=${() => this.selectItemId("")}>
               ${this.preview ? N`<img draggable="false" src=${this.preview.imageUrl} alt="Authoritative rendered display preview">` : N`<div class="canvas-placeholder">Rendering…</div>`}
-              <div class="working-area" aria-hidden="true" style=${B({
+              <div class="working-area" aria-hidden="true" style=${V({
 			left: `${n.x / e.display.width * 100}%`,
 			top: `${n.y / e.display.height * 100}%`,
 			width: `${n.width / e.display.width * 100}%`,
@@ -1898,18 +2325,18 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return N`<div class="inspector-title"><ha-icon .icon=${n}></ha-icon><div><h2>${e}</h2><p>${t}</p></div></div>`;
 	}
 	renderScreenInspector() {
-		let e = this.current, t = U(e.display.profileId);
-		return N`${this.renderInspectorHeader("Dashboard", "Display and canvas settings", "mdi:monitor")}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select .value=${e.display.profileId ?? "custom"} @change=${(e) => this.updateProfile(e.target.value)}>${H.map((e) => N`<option value=${e.id}>${e.manufacturer} · ${e.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField("Width", e.display.width, "width", 64, 4096)}${this.screenNumberField("Height", e.display.height, "height", 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select .value=${e.display.palette} @change=${(e) => {
+		let e = this.current, t = Be(e.display.profileId);
+		return N`${this.renderInspectorHeader("Dashboard", "Display and canvas settings", "mdi:monitor")}<details class="inspector-section" open><summary>Display</summary><div class="section-body"><label class="stack-field">Display type<select @change=${(e) => this.updateProfile(e.target.value)}>${ze.map((t) => N`<option value=${t.id} ?selected=${t.id === e.display.profileId}>${t.manufacturer} · ${t.name}</option>`)}</select></label><div class="field-grid">${this.screenNumberField("Width", e.display.width, "width", 64, 4096)}${this.screenNumberField("Height", e.display.height, "height", 64, 4096)}</div><div class="field-grid"><label class="stack-field">Palette<select @change=${(e) => {
 			let t = e.target.value;
 			this.mutate((e) => {
-				e.display.palette = t, Ve[t].includes(e.display.background) || (e.display.background = "white");
+				e.display.palette = t, U[t].includes(e.display.background) || (e.display.background = "white");
 			});
-		}}>${(t.id === "custom" ? Object.keys(Be) : t.palettes).map((e) => N`<option value=${e}>${Be[e]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(e) => {
+		}}>${(t.id === "custom" ? Object.keys(H) : t.palettes).map((t) => N`<option value=${t} ?selected=${t === e.display.palette}>${H[t]}</option>`)}</select></label><label class="stack-field">Background<select @change=${(e) => {
 			let t = e.target.value;
 			this.mutate((e) => {
 				e.display.background = t;
 			});
-		}}>${Ve[e.display.palette].map((t) => N`<option value=${t} ?selected=${t === e.display.background}>${t[0].toUpperCase()}${t.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField("Outer padding", e.display.padding, "padding", 0, 1024)}${this.screenNumberField("Snap size", e.display.snapSize, "snapSize", 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`;
+		}}>${U[e.display.palette].map((t) => N`<option value=${t} ?selected=${t === e.display.background}>${t[0].toUpperCase()}${t.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField("Outer padding", e.display.padding, "padding", 0, 1024)}${this.screenNumberField("Snap size", e.display.snapSize, "snapSize", 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`;
 	}
 	renderItemLayout(e) {
 		let t = e.locked;
@@ -1918,7 +2345,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return Z(n) ? N`<div class="field-grid">${this.numberField("X", Math.min(n.x_start, n.x_end), "x", 0, this.current.display.width, t)}${this.numberField("Y", Math.min(n.y_start, n.y_end), "y", 0, this.current.display.height, t)}${this.numberField("Width", Math.abs(n.x_end - n.x_start) + 1, "width", 1, this.current.display.width, t)}${this.numberField("Height", Math.abs(n.y_end - n.y_start) + 1, "height", 1, this.current.display.height, t)}</div>` : n.type === "circle" ? N`<div class="field-grid">${this.numberField("Center X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Center Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Radius", n.radius, "radius", 1, Math.min(this.current.display.width, this.current.display.height), t)}</div>` : n.type === "qrcode" ? N`<div class="field-grid">${this.numberField("X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Module size", n.boxsize, "boxsize", 1, 16, t)}</div>` : N`<div class="field-grid">${this.numberField("X", n.x, "x", 0, this.current.display.width, t)}${this.numberField("Y", n.y, "y", 0, this.current.display.height, t)}${this.numberField("Size", n.size, "size", 6, 256, t)}</div>`;
 	}
 	primitiveAppearanceSchema(e) {
-		let t = e.primitive.type, n = [...Ve[this.current?.display.palette ?? "bw"], "accent"];
+		let t = e.primitive.type, n = [...U[this.current?.display.palette ?? "bw"], "accent"];
 		return t === "text" ? [{
 			name: "value",
 			label: "Text",
@@ -2046,9 +2473,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		})) ?? []} .computeLabel=${(e) => e.label} @value-changed=${this.updateWidgetConfig}></ha-form></div></details>` : N`<details class="inspector-section" open><summary>Appearance</summary><div class="section-body"><ha-form .hass=${this.hass} .data=${a} .schema=${this.primitiveAppearanceSchema(e)} .computeLabel=${(e) => e.label} @value-changed=${this.updatePrimitive}></ha-form></div></details>`}<div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteSelected}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Remove element</ha-button></div>${this.renderMetrics()}`;
 	}
 	renderMetrics() {
-		if (!this.preview) return F;
-		let e = this.yamlCopyState === "copied" ? "Copied" : this.yamlCopyState === "failed" ? "Copy failed" : "Copy YAML", t = this.yamlCopyState === "copied" ? "mdi:check" : this.yamlCopyState === "failed" ? "mdi:alert-circle-outline" : "mdi:content-copy";
-		return N`${this.preview.warnings.map((e) => N`<ha-alert class="warning" alert-type="warning">${e}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details><details class="inspector-section yaml"><summary>Generated ODL YAML</summary><div class="yaml-actions"><ha-button size="s" appearance="plain" aria-label="Copy generated ODL YAML" @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${t}></ha-icon>${e}</ha-button><output aria-live="polite">${this.yamlCopyState === "copied" ? "YAML copied to clipboard" : this.yamlCopyState === "failed" ? "Clipboard access failed" : ""}</output></div><pre>${this.preview.yaml}</pre></details>`;
+		return this.preview ? N`${this.preview.warnings.map((e) => N`<ha-alert class="warning" alert-type="warning">${e}</ha-alert>`)}<details class="inspector-section telemetry"><summary>Render diagnostics</summary><div class="section-body metrics"><span>Queue</span><strong>${this.preview.timings.queue.toFixed(1)} ms</strong><span>Data</span><strong>${this.preview.timings.data.toFixed(1)} ms</strong><span>Compile</span><strong>${this.preview.timings.compile.toFixed(1)} ms</strong><span>Render</span><strong>${this.preview.timings.render.toFixed(1)} ms</strong><span>Encode</span><strong>${this.preview.timings.encode.toFixed(1)} ms</strong><span>Total</span><strong>${this.preview.timings.pipeline.toFixed(1)} ms</strong></div></details>` : F;
 	}
 	renderInspector() {
 		if (this.rightCollapsed) return N`<aside class="panel panel-rail right-rail"><button class="icon-button" title="Expand inspector" aria-label="Expand inspector" @click=${() => {
@@ -2057,16 +2482,59 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		let e = this.current?.items.find((e) => e.id === this.selectedItemId);
 		return N`<aside class="panel inspector"><div class="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize inspector" @pointerdown=${this.startPanelResize}></div>${this.renderLayers()}<section class="properties">${e ? this.renderItemInspector(e) : this.renderScreenInspector()}</section></aside>${this.renderDeleteDialog()}`;
 	}
+	renderEditorHeader() {
+		let e = this.current;
+		return N`
+      <header class="topbar">
+        <div class="editor-breadcrumb">
+          <strong class="studio-name">OpenDisplay Studio</strong>
+          <span class="breadcrumb-divider">/</span>
+          <button class="breadcrumb-link" @click=${this.showDashboards}>Dashboards</button>
+          <span class="breadcrumb-divider">/</span>
+          <input class="project-name" aria-label="Dashboard name" .value=${e.name} @input=${this.updateName}>
+        </div>
+        <nav class="view-switch" aria-label="Dashboard view">
+          <button class=${this.view === "design" ? "active" : ""} aria-pressed=${this.view === "design"} @click=${() => this.setEditorView("design")}><ha-icon icon="mdi:tools"></ha-icon>Design</button>
+          <button class=${this.view === "code" ? "active" : ""} aria-pressed=${this.view === "code"} @click=${() => this.setEditorView("code")}><ha-icon icon="mdi:code-tags"></ha-icon>Code</button>
+        </nav>
+        <div class="editor-actions">
+          <span class="status ${e.status}">${e.status}</span>
+          <ha-button appearance="plain" @click=${this.toggleReady}>${e.status === "ready" ? "Set Draft" : "Set Ready"}</ha-button>
+          <ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? "Saving…" : "Save"}</ha-button>
+        </div>
+      </header>
+    `;
+	}
+	renderCodeView() {
+		let e = this.yamlCopyState === "copied" ? "Copied" : this.yamlCopyState === "failed" ? "Copy failed" : "Copy YAML", t = this.yamlCopyState === "copied" ? "mdi:check" : this.yamlCopyState === "failed" ? "mdi:alert-circle-outline" : "mdi:content-copy";
+		return N`
+      <main class="code-workspace">
+        <section class="code-panel" aria-labelledby="generated-code-title">
+          <header>
+            <div>
+              <span class="eyebrow">Generated output</span>
+              <h1 id="generated-code-title">Generated ODL YAML</h1>
+              <p>Read-only output generated from the current dashboard.</p>
+            </div>
+            <ha-button appearance="plain" aria-label="Copy generated ODL YAML" .disabled=${!this.preview?.yaml} @click=${this.copyGeneratedYaml}><ha-icon slot="start" .icon=${t}></ha-icon>${e}</ha-button>
+          </header>
+          ${this.preview?.warnings.map((e) => N`<ha-alert alert-type="warning">${e}</ha-alert>`) ?? F}
+          <textarea aria-label="Generated ODL YAML" readonly spellcheck="false" dir="ltr" .value=${this.preview?.yaml ?? ""}></textarea>
+          <output class="copy-status" aria-live="polite">${this.yamlCopyState === "copied" ? "YAML copied to clipboard" : this.yamlCopyState === "failed" ? "Clipboard access failed" : ""}</output>
+        </section>
+      </main>
+    `;
+	}
 	render() {
 		if (this.loading) return N`<div class="project-empty"><p>Loading OpenDisplay Studio…</p></div>`;
-		if (!this.current) return N`<div class="project-empty"><section class="empty-card"><ha-icon icon="mdi:monitor-edit"></ha-icon><span class="eyebrow">OpenDisplay Studio</span><h1>Build your first dashboard</h1><p>Create an exact-size e-paper canvas and compose it from live widgets and ODL primitives.</p>${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}<ha-button appearance="filled" @click=${this.openNewDashboard}>Add dashboard</ha-button></section>${this.renderNewDashboardDialog()}</div>`;
-		let e = B({
+		if (this.view === "dashboards" || !this.current) return this.renderDashboardLibrary();
+		let e = V({
 			"--toolbox-width": this.leftCollapsed ? "48px" : "255px",
 			"--inspector-width": this.rightCollapsed ? "48px" : `${this.inspectorWidth}px`
 		});
-		return N`<div class="shell"><header class="topbar"><div class="brand"><strong>OpenDisplay Studio</strong><span>Layer-based ODL designer · v${this.integrationVersion}</span></div><input class="project-name" aria-label="Dashboard name" .value=${this.current.name} @input=${this.updateName}><span class="status ${this.current.status}">${this.current.status}</span><div class="actions"><ha-button appearance="plain" @click=${this.openNewDashboard}><ha-icon slot="start" icon="mdi:plus"></ha-icon>Add dashboard</ha-button><ha-button appearance="plain" @click=${this.toggleReady}>${this.current.status === "ready" ? "Set Draft" : "Set Ready"}</ha-button><ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? "Saving…" : "Save"}</ha-button></div></header>${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}<div class="layout" style=${e}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>${this.renderNewDashboardDialog()}</div>`;
+		return N`<div class="shell">${this.renderEditorHeader()}${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}${this.view === "code" ? this.renderCodeView() : N`<div class="layout" style=${e}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>`}</div>`;
 	}
 };
-q([Ae({ attribute: !1 })], $.prototype, "hass", void 0), q([z()], $.prototype, "projects", void 0), q([z()], $.prototype, "integrationVersion", void 0), q([z()], $.prototype, "widgets", void 0), q([z()], $.prototype, "primitives", void 0), q([z()], $.prototype, "current", void 0), q([z()], $.prototype, "selectedItemId", void 0), q([z()], $.prototype, "query", void 0), q([z()], $.prototype, "preview", void 0), q([z()], $.prototype, "loading", void 0), q([z()], $.prototype, "saving", void 0), q([z()], $.prototype, "dirty", void 0), q([z()], $.prototype, "draggingCatalog", void 0), q([z()], $.prototype, "draggingLayerId", void 0), q([z()], $.prototype, "catalogDragPosition", void 0), q([z()], $.prototype, "layerDropTarget", void 0), q([z()], $.prototype, "undoCount", void 0), q([z()], $.prototype, "redoCount", void 0), q([z()], $.prototype, "pendingDeleteItemId", void 0), q([z()], $.prototype, "error", void 0), q([z()], $.prototype, "leftCollapsed", void 0), q([z()], $.prototype, "rightCollapsed", void 0), q([z()], $.prototype, "inspectorWidth", void 0), q([z()], $.prototype, "zoom", void 0), q([z()], $.prototype, "panX", void 0), q([z()], $.prototype, "panY", void 0), q([z()], $.prototype, "snapEnabled", void 0), q([z()], $.prototype, "newDashboardOpen", void 0), q([z()], $.prototype, "newDashboard", void 0), q([z()], $.prototype, "yamlCopyState", void 0), q([Me(".properties")], $.prototype, "propertiesPanel", void 0), $ = q([De("opendisplay-studio-panel")], $);
+q([ke({ attribute: !1 })], $.prototype, "hass", void 0), q([B()], $.prototype, "projects", void 0), q([B()], $.prototype, "view", void 0), q([B()], $.prototype, "dashboardQuery", void 0), q([B()], $.prototype, "dashboardSort", void 0), q([B()], $.prototype, "widgets", void 0), q([B()], $.prototype, "primitives", void 0), q([B()], $.prototype, "current", void 0), q([B()], $.prototype, "selectedItemId", void 0), q([B()], $.prototype, "query", void 0), q([B()], $.prototype, "preview", void 0), q([B()], $.prototype, "loading", void 0), q([B()], $.prototype, "saving", void 0), q([B()], $.prototype, "dirty", void 0), q([B()], $.prototype, "draggingCatalog", void 0), q([B()], $.prototype, "draggingLayerId", void 0), q([B()], $.prototype, "catalogDragPosition", void 0), q([B()], $.prototype, "layerDropTarget", void 0), q([B()], $.prototype, "undoCount", void 0), q([B()], $.prototype, "redoCount", void 0), q([B()], $.prototype, "pendingDeleteItemId", void 0), q([B()], $.prototype, "error", void 0), q([B()], $.prototype, "leftCollapsed", void 0), q([B()], $.prototype, "rightCollapsed", void 0), q([B()], $.prototype, "inspectorWidth", void 0), q([B()], $.prototype, "zoom", void 0), q([B()], $.prototype, "panX", void 0), q([B()], $.prototype, "panY", void 0), q([B()], $.prototype, "snapEnabled", void 0), q([B()], $.prototype, "newDashboardOpen", void 0), q([B()], $.prototype, "newDashboard", void 0), q([B()], $.prototype, "dashboardMenuProjectId", void 0), q([B()], $.prototype, "dashboardDialog", void 0), q([B()], $.prototype, "dashboardDraft", void 0), q([B()], $.prototype, "yamlCopyState", void 0), q([je(".properties")], $.prototype, "propertiesPanel", void 0), $ = q([Ee("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OpenDisplayStudioPanel };

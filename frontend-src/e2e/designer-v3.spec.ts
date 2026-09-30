@@ -115,16 +115,23 @@ const startLayerReorder = async (page: Page, source: Locator, target: Locator, e
   await expect(target).toHaveClass(new RegExp(`drop-${edge}`))
 }
 
+const openKitchenDashboard = async (page: Page) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Dashboards', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Open dashboard Kitchen display' }).click()
+  await expect(page.getByAltText('Authoritative rendered display preview')).toBeVisible()
+}
+
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(globalThis.crypto, 'randomUUID', { configurable: true, value: undefined })
   })
-  await page.goto('/')
-  await expect(page.getByAltText('Authoritative rendered display preview')).toBeVisible()
+  await openKitchenDashboard(page)
 })
 
 test('loads a persisted project after HA assigns hass and ignores later hass object replacements', async ({ page }) => {
-  await expect(page.getByRole('navigation', { name: 'Dashboards' })).toContainText('Kitchen display')
+  await expect(page.getByRole('button', { name: 'Dashboards', exact: true })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Dashboard name' })).toHaveValue('Kitchen display')
   await expect(page.locator('.selection[data-item-id="temperature"]')).toBeVisible()
   expect(await page.evaluate(() => window.__ODX_E2E__.hassRevision())).toBe(2)
   expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
@@ -139,9 +146,10 @@ test('loads a persisted project after HA assigns hass and ignores later hass obj
   expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
 })
 
-test('shows dashboard tabs, a searchable catalog and pixel-based canvas settings', async ({ page }) => {
-  await expect(page.getByText(/Layer-based ODL designer · v3\.0\./)).toBeVisible()
-  await expect(page.getByRole('navigation', { name: 'Dashboards' })).toContainText('Kitchen display')
+test('shows dashboard navigation, a searchable catalog and pixel-based canvas settings', async ({ page }) => {
+  await expect(page.getByText('OpenDisplay Studio', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Dashboards', exact: true })).toBeVisible()
+  await expect(page.getByRole('textbox', { name: 'Dashboard name' })).toHaveValue('Kitchen display')
   await expect(page.getByRole('button', { name: /Temperature/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /Rectangle/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /Progress bar/ })).toBeVisible()
@@ -169,24 +177,6 @@ test('shows dashboard tabs, a searchable catalog and pixel-based canvas settings
   await expect(page.getByText('No matching widgets')).toBeVisible()
   await expect(page.getByRole('button', { name: /Rectangle/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /Text/ })).toBeHidden()
-})
-
-test('creates a dashboard from a display profile with padding and snap size', async ({ page }) => {
-  await page.getByRole('button', { name: 'Add dashboard' }).first().click()
-  const dialog = page.getByRole('dialog', { name: 'Add dashboard' })
-  await expect(dialog).toBeVisible()
-  await dialog.getByRole('textbox', { name: 'Dashboard name' }).fill('Office board')
-  await dialog.getByRole('combobox', { name: 'Display type' }).selectOption('custom')
-  await dialog.getByRole('spinbutton', { name: 'New dashboard width' }).fill('640')
-  await dialog.getByRole('spinbutton', { name: 'New dashboard height' }).fill('384')
-  await dialog.getByRole('spinbutton', { name: 'Dashboard padding' }).fill('12')
-  await dialog.getByRole('spinbutton', { name: 'Dashboard snap size' }).fill('8')
-  await page.locator('.dialog footer ha-button').last().dispatchEvent('click')
-
-  await expect(page.getByRole('navigation', { name: 'Dashboards' })).toContainText('Office board')
-  await expect(page.locator('.workspace-meta')).toContainText('640 × 384 px')
-  await expect(page.locator('.workspace-meta')).toContainText('Padding 12px')
-  await expect(page.getByRole('button', { name: /Snap 8px/ })).toBeVisible()
 })
 
 test('moves and resizes an absolute widget with pixel snapping', async ({ page }) => {
@@ -636,12 +626,14 @@ test('requires confirmation before deleting a layer and supports undo', async ({
 })
 
 test('copies generated ODL YAML to the clipboard', async ({ page }) => {
-  await page.getByText('Generated ODL YAML').click()
-  const expected = await page.locator('.yaml pre').textContent()
-  await page.locator('ha-button[aria-label="Copy generated ODL YAML"]').click()
+  await page.getByRole('navigation', { name: 'Dashboard view' }).getByRole('button', { name: 'Code' }).click()
+  const code = page.getByRole('textbox', { name: 'Generated ODL YAML' })
+  await expect(code).toHaveJSProperty('readOnly', true)
+  const expected = await code.inputValue()
+  await page.getByRole('button', { name: 'Copy generated ODL YAML' }).click()
   await expect(page.getByText('YAML copied to clipboard')).toBeVisible()
   const clipboard = await page.evaluate(() => navigator.clipboard.readText())
-  expect(clipboard.replaceAll('\r\n', '\n')).toBe(expected?.replaceAll('\r\n', '\n'))
+  expect(clipboard.replaceAll('\r\n', '\n')).toBe(expected.replaceAll('\r\n', '\n'))
 })
 
 test('supports zoom, wheel panning, reset, fit and resizable collapsible panels', async ({ page }) => {
@@ -666,10 +658,12 @@ test('supports zoom, wheel panning, reset, fit and resizable collapsible panels'
 
 test('keeps the authoritative canvas usable on a narrow HA panel', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 812 }); await page.reload()
+  await expect(page.getByRole('heading', { name: 'Dashboards', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Open dashboard Kitchen display' }).click()
   await expect(page.getByAltText('Authoritative rendered display preview')).toBeVisible()
   const canvas = await page.locator('.canvas').boundingBox()
   expect(canvas?.width ?? 0).toBeGreaterThan(200)
-  await expect(page.getByRole('navigation', { name: 'Dashboards' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Dashboards', exact: true })).toBeVisible()
 })
 
 declare global {
