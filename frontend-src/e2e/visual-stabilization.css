@@ -15,6 +15,6 @@
 .layout-region-copy span,
 .merge-cell,
 .region-address,
-.project-card-copy code {
+.dashboard-card-copy code {
   font-family: 'Roboto Mono', monospace !important;
 }

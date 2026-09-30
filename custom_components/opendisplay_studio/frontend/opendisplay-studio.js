@@ -659,8 +659,8 @@ var Me = {
   .breadcrumb-divider { flex: none; color: var(--studio-border); }
   .breadcrumb-link { flex: none; min-height: 30px; padding: 0 3px; border: 0; color: var(--studio-accent); background: transparent; font-size: 12px; font-weight: 600; }
   .breadcrumb-link:hover { text-decoration: underline; }
-  .project-name { min-width: 80px; width: min(210px, 18vw); height: 32px; border: 1px solid transparent; border-radius: 7px; padding: 0 7px; background: transparent; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
-  .project-name:hover, .project-name:focus { border-color: var(--studio-border); background: var(--secondary-background-color, #f3f5f6); outline: 0; }
+  .dashboard-name { min-width: 80px; width: min(210px, 18vw); height: 32px; border: 1px solid transparent; border-radius: 7px; padding: 0 7px; background: transparent; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+  .dashboard-name:hover, .dashboard-name:focus { border-color: var(--studio-border); background: var(--secondary-background-color, #f3f5f6); outline: 0; }
   .view-switch { display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--studio-border); border-radius: 9px; background: var(--secondary-background-color, #f3f5f6); }
   .view-switch button { min-height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; border-radius: 6px; color: var(--studio-muted); background: transparent; font-size: 11px; font-weight: 700; }
   .view-switch button.active { color: var(--studio-text); background: var(--studio-surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
@@ -854,7 +854,7 @@ var Me = {
   .code-panel textarea:focus { border-color: var(--studio-accent); box-shadow: 0 0 0 1px var(--studio-accent); }
   .copy-status { min-height: 16px; color: var(--studio-muted); font-size: 11px; text-align: end; }
 
-  .project-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
+  .dashboard-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
   ha-dialog { --dialog-content-padding: 0; }
   .new-dashboard-content { display: grid; gap: 16px; padding: 18px 22px 22px; }
   .dashboard-settings-content { padding: 18px 22px 22px; }
@@ -889,7 +889,7 @@ var Me = {
     .topbar { height: auto; min-height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'breadcrumb actions' 'switch switch'; gap: 5px 10px; padding: calc(var(--safe-area-inset-top, 0px) + 6px) 9px 6px; }
     .editor-breadcrumb { grid-area: breadcrumb; }
     .studio-name, .editor-actions .status { display: none; }
-    .project-name { width: min(180px, 36vw); }
+    .dashboard-name { width: min(180px, 36vw); }
     .view-switch { grid-area: switch; justify-self: center; }
     .editor-actions { grid-area: actions; }
     .layout { grid-template-columns: minmax(0, 1fr) !important; }
@@ -1215,7 +1215,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	let n = Be(t);
 	return {
 		id: "",
-		schemaVersion: 3,
+		schemaVersion: 1,
 		name: "",
 		status: "draft",
 		language: e || "en",
@@ -1267,10 +1267,10 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	};
 }, Q = (e) => e.kind === "widget" ? e.frame : tt(e.primitive), $ = class extends z {
 	constructor(...e) {
-		super(...e), this.projects = [], this.view = "dashboards", this.dashboardQuery = "", this.dashboardSort = "updated", this.widgets = [], this.primitives = [], this.selectedItemId = "", this.query = "", this.loading = !0, this.saving = !1, this.dirty = !1, this.draggingCatalog = !1, this.draggingLayerId = "", this.undoCount = 0, this.redoCount = 0, this.pendingDeleteItemId = "", this.error = "", this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.zoom = 1, this.panX = 0, this.panY = 0, this.snapEnabled = !0, this.newDashboardOpen = !1, this.newDashboard = et("en"), this.dashboardMenuProjectId = "", this.yamlCopyState = "idle", this.previewRequest = 0, this.bootstrapStarted = !1, this.suppressCatalogClick = !1, this.undoStack = [], this.redoStack = [], this.onDashboardOutsidePointerDown = (e) => {
-			this.dashboardMenuProjectId && (e.composedPath().some((e) => e instanceof HTMLElement && (e.classList.contains("dashboard-menu") || e.classList.contains("dashboard-menu-trigger"))) || (this.dashboardMenuProjectId = ""));
+		super(...e), this.dashboards = [], this.view = "dashboards", this.dashboardQuery = "", this.dashboardSort = "updated", this.widgets = [], this.primitives = [], this.selectedItemId = "", this.query = "", this.loading = !0, this.saving = !1, this.dirty = !1, this.draggingCatalog = !1, this.draggingLayerId = "", this.undoCount = 0, this.redoCount = 0, this.pendingDeleteItemId = "", this.error = "", this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.zoom = 1, this.panX = 0, this.panY = 0, this.snapEnabled = !0, this.newDashboardOpen = !1, this.newDashboard = et("en"), this.dashboardMenuDashboardId = "", this.yamlCopyState = "idle", this.previewRequest = 0, this.bootstrapStarted = !1, this.suppressCatalogClick = !1, this.undoStack = [], this.redoStack = [], this.onDashboardOutsidePointerDown = (e) => {
+			this.dashboardMenuDashboardId && (e.composedPath().some((e) => e instanceof HTMLElement && (e.classList.contains("dashboard-menu") || e.classList.contains("dashboard-menu-trigger"))) || (this.dashboardMenuDashboardId = ""));
 		}, this.onDashboardMenuKeyDown = (e) => {
-			e.key === "Escape" && (this.dashboardMenuProjectId ? (this.dashboardMenuProjectId = "", e.stopPropagation()) : this.dashboardDialog && (this.closeDashboardAction(), e.stopPropagation()));
+			e.key === "Escape" && (this.dashboardMenuDashboardId ? (this.dashboardMenuDashboardId = "", e.stopPropagation()) : this.dashboardDialog && (this.closeDashboardAction(), e.stopPropagation()));
 		}, this.undo = () => {
 			if (!this.current) return;
 			let e = this.undoStack.pop();
@@ -1329,7 +1329,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			}, !1, !1);
 		}, this.onPointerUp = () => {
 			let e = this.pointerEdit;
-			window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), this.pointerEdit = void 0, e?.changed && (this.recordHistory(e.beforeProject), this.schedulePreview());
+			window.removeEventListener("pointermove", this.onPointerMove), window.removeEventListener("pointerup", this.onPointerUp), this.pointerEdit = void 0, e?.changed && (this.recordHistory(e.beforeDashboard), this.schedulePreview());
 		}, this.onLayerPointerMove = (e) => {
 			let t = this.layerPointerDrag;
 			if (!t || !t.active && Math.hypot(e.clientX - t.startX, e.clientY - t.startY) < 4) return;
@@ -1386,7 +1386,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			this.loading = !0, this.error = "";
 			try {
 				let t = await e.callWS({ type: "opendisplay_studio/bootstrap" });
-				this.projects = t.projects, this.widgets = t.widgets, this.primitives = t.primitives, this.current = void 0, this.preview = void 0, this.view = "dashboards", this.clearHistory(), this.newDashboard = et(e.language);
+				this.dashboards = t.dashboards, this.widgets = t.widgets, this.primitives = t.primitives, this.current = void 0, this.preview = void 0, this.view = "dashboards", this.clearHistory(), this.newDashboard = et(e.language);
 			} catch (e) {
 				this.error = X(e, "Could not load OpenDisplay Studio");
 			} finally {
@@ -1407,7 +1407,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			snapSize: e.display.snapSize
 		};
 	}
-	projectFromForm(e, t) {
+	dashboardFromForm(e, t) {
 		let n = {
 			...this.dashboardFormData(e),
 			...t
@@ -1415,21 +1415,21 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return r.name = String(n.name), r.display.profileId = "custom", r.display.width = Math.round(Number(n.width) || 0), r.display.height = Math.round(Number(n.height) || 0), r.display.palette = n.palette in H ? n.palette : "bw", r.display.padding = Math.round(Number(n.padding) || 0), r.display.snapSize = Math.round(Number(n.snapSize) || 0), U[r.display.palette].includes(r.display.background) || (r.display.background = "white"), r;
 	}
 	updateNewDashboardForm(e) {
-		this.newDashboard = this.projectFromForm(this.newDashboard, e.detail.value);
+		this.newDashboard = this.dashboardFromForm(this.newDashboard, e.detail.value);
 	}
 	dashboardIsValid(e) {
 		let { width: t, height: n, padding: r, snapSize: i } = e.display;
 		return !!e.name.trim() && t >= 64 && t <= 4096 && n >= 64 && n <= 4096 && r >= 0 && r * 2 < Math.min(t, n) && i >= 1 && i <= 256;
 	}
-	async createProject() {
+	async createDashboard() {
 		if (this.hass) {
 			this.saving = !0, this.error = "";
 			try {
 				let e = await this.hass.callWS({
-					type: "opendisplay_studio/create_project",
-					project: this.newDashboard
+					type: "opendisplay_studio/create_dashboard",
+					dashboard: this.newDashboard
 				});
-				this.projects = [...this.projects, e.project], this.current = J(e.project), this.selectedItemId = "", this.dirty = !1, this.newDashboardOpen = !1, this.view = "design", this.clearHistory(), await this.composePreview(), await this.updateComplete, this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
+				this.dashboards = [...this.dashboards, e.dashboard], this.current = J(e.dashboard), this.selectedItemId = "", this.dirty = !1, this.newDashboardOpen = !1, this.view = "design", this.clearHistory(), await this.composePreview(), await this.updateComplete, this.resetCanvas(), requestAnimationFrame(() => this.fitCanvas());
 			} catch (e) {
 				this.error = X(e, "Could not create the dashboard");
 			} finally {
@@ -1437,16 +1437,16 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			}
 		}
 	}
-	async saveProject() {
+	async saveDashboard() {
 		if (!(!this.hass || !this.current)) {
 			this.saving = !0, this.error = "";
 			try {
 				let e = await this.hass.callWS({
-					type: "opendisplay_studio/update_project",
-					project_id: this.current.id,
-					project: this.current
+					type: "opendisplay_studio/update_dashboard",
+					dashboard_id: this.current.id,
+					dashboard: this.current
 				});
-				this.current = J(e.project), this.projects = this.projects.map((t) => t.id === e.project.id ? e.project : t), this.dirty = !1;
+				this.current = J(e.dashboard), this.dashboards = this.dashboards.map((t) => t.id === e.dashboard.id ? e.dashboard : t), this.dirty = !1;
 			} catch (e) {
 				this.error = X(e, "Could not save the dashboard");
 			} finally {
@@ -1454,23 +1454,23 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			}
 		}
 	}
-	async deleteProject() {
+	async deleteDashboard() {
 		if (!this.hass || !this.current) return;
 		let e = this.current.id;
 		try {
 			await this.hass.callWS({
-				type: "opendisplay_studio/delete_project",
-				project_id: e
-			}), this.projects = this.projects.filter((t) => t.id !== e), this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.view = "dashboards", this.clearHistory();
+				type: "opendisplay_studio/delete_dashboard",
+				dashboard_id: e
+			}), this.dashboards = this.dashboards.filter((t) => t.id !== e), this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.view = "dashboards", this.clearHistory();
 		} catch (e) {
 			this.error = X(e, "Could not delete the dashboard");
 		}
 	}
 	toggleDashboardMenu(e, t) {
-		e.stopPropagation(), this.dashboardMenuProjectId = this.dashboardMenuProjectId === t ? "" : t;
+		e.stopPropagation(), this.dashboardMenuDashboardId = this.dashboardMenuDashboardId === t ? "" : t;
 	}
 	openDashboardAction(e, t, n) {
-		e.stopPropagation(), this.dashboardMenuProjectId = "", this.dashboardDraft = J(t), this.dashboardDialog = n, n === "rename" && this.updateComplete.then(() => {
+		e.stopPropagation(), this.dashboardMenuDashboardId = "", this.dashboardDraft = J(t), this.dashboardDialog = n, n === "rename" && this.updateComplete.then(() => {
 			let e = this.renderRoot.querySelector(".dashboard-rename-input");
 			e?.focus(), e?.select();
 		});
@@ -1491,11 +1491,11 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			this.saving = !0, this.error = "";
 			try {
 				let t = await this.hass.callWS({
-					type: "opendisplay_studio/update_project",
-					project_id: e.id,
-					project: e
+					type: "opendisplay_studio/update_dashboard",
+					dashboard_id: e.id,
+					dashboard: e
 				});
-				return this.projects = this.projects.map((e) => e.id === t.project.id ? t.project : e), this.current?.id === t.project.id && (this.current = J(t.project), this.preview = void 0, this.dirty = !1), t.project;
+				return this.dashboards = this.dashboards.map((e) => e.id === t.dashboard.id ? t.dashboard : e), this.current?.id === t.dashboard.id && (this.current = J(t.dashboard), this.preview = void 0, this.dirty = !1), t.dashboard;
 			} catch (e) {
 				this.error = X(e, t);
 				return;
@@ -1511,28 +1511,28 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			this.error = "Dashboard name cannot be empty";
 			return;
 		}
-		if (this.projects.find((t) => t.id === e.id)?.name === e.name) {
+		if (this.dashboards.find((t) => t.id === e.id)?.name === e.name) {
 			this.closeDashboardAction();
 			return;
 		}
 		await this.updateDashboardFromGallery(e, "Could not rename the dashboard") && this.closeDashboardAction();
 	}
 	dashboardCopyName(e) {
-		let t = new Set(this.projects.map((e) => e.name.toLocaleLowerCase(this.hass?.language || "en"))), n = `${e.name} copy`, r = n, i = 2;
+		let t = new Set(this.dashboards.map((e) => e.name.toLocaleLowerCase(this.hass?.language || "en"))), n = `${e.name} copy`, r = n, i = 2;
 		for (; t.has(r.toLocaleLowerCase(this.hass?.language || "en"));) r = `${n} ${i++}`;
 		return r;
 	}
 	async duplicateDashboard(e, t) {
 		if (e.stopPropagation(), !this.hass || this.saving) return;
-		this.dashboardMenuProjectId = "", this.saving = !0, this.error = "";
+		this.dashboardMenuDashboardId = "", this.saving = !0, this.error = "";
 		let n = J(t);
 		n.id = "", n.name = this.dashboardCopyName(t), n.status = "draft", n.createdAt = "", n.updatedAt = "";
 		try {
 			let e = await this.hass.callWS({
-				type: "opendisplay_studio/create_project",
-				project: n
+				type: "opendisplay_studio/create_dashboard",
+				dashboard: n
 			});
-			this.projects = [...this.projects, e.project];
+			this.dashboards = [...this.dashboards, e.dashboard];
 		} catch (e) {
 			this.error = X(e, "Could not duplicate the dashboard");
 		} finally {
@@ -1540,7 +1540,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		}
 	}
 	updateDashboardSettings(e) {
-		this.dashboardDraft &&= this.projectFromForm(this.dashboardDraft, e.detail.value);
+		this.dashboardDraft &&= this.dashboardFromForm(this.dashboardDraft, e.detail.value);
 	}
 	async saveDashboardSettings() {
 		if (this.dashboardDialog !== "settings" || !this.dashboardDraft || !this.dashboardIsValid(this.dashboardDraft)) return;
@@ -1553,9 +1553,9 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		this.saving = !0, this.error = "";
 		try {
 			await this.hass.callWS({
-				type: "opendisplay_studio/delete_project",
-				project_id: e
-			}), this.projects = this.projects.filter((t) => t.id !== e), this.current?.id === e && (this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.clearHistory()), this.closeDashboardAction();
+				type: "opendisplay_studio/delete_dashboard",
+				dashboard_id: e
+			}), this.dashboards = this.dashboards.filter((t) => t.id !== e), this.current?.id === e && (this.current = void 0, this.selectedItemId = "", this.preview = void 0, this.dirty = !1, this.clearHistory()), this.closeDashboardAction();
 		} catch (e) {
 			this.error = X(e, "Could not delete the dashboard");
 		} finally {
@@ -1606,7 +1606,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		try {
 			let t = await this.hass.callWS({
 				type: "opendisplay_studio/compose_preview",
-				project: J(this.current)
+				dashboard: J(this.current)
 			});
 			e === this.previewRequest && (this.preview = t, this.yamlCopyState = "idle");
 		} catch (e) {
@@ -1823,7 +1823,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			startX: e.clientX,
 			startY: e.clientY,
 			original: J(t),
-			beforeProject: J(this.current),
+			beforeDashboard: J(this.current),
 			changed: !1
 		}, window.addEventListener("pointermove", this.onPointerMove), window.addEventListener("pointerup", this.onPointerUp)));
 	}
@@ -1949,7 +1949,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 	}
 	dashboardList() {
 		let e = this.dashboardQuery.trim().toLocaleLowerCase(this.hass?.language || "en");
-		return this.projects.filter((t) => !e || t.name.toLocaleLowerCase(this.hass?.language || "en").includes(e)).sort((e, t) => this.dashboardSort === "name" ? e.name.localeCompare(t.name, this.hass?.language || "en") : t.updatedAt.localeCompare(e.updatedAt) || e.name.localeCompare(t.name, this.hass?.language || "en"));
+		return this.dashboards.filter((t) => !e || t.name.toLocaleLowerCase(this.hass?.language || "en").includes(e)).sort((e, t) => this.dashboardSort === "name" ? e.name.localeCompare(t.name, this.hass?.language || "en") : t.updatedAt.localeCompare(e.updatedAt) || e.name.localeCompare(t.name, this.hass?.language || "en"));
 	}
 	dashboardDate(e) {
 		let t = new Date(e.updatedAt);
@@ -1959,7 +1959,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return e === "bwr" || e === "bwry" ? "#d32f2f" : e === "bwy" ? "#d6a800" : e === "spectra6" ? "#246bfd" : "#202124";
 	}
 	renderDashboardCard(e) {
-		let t = U[e.display.palette], n = this.dashboardMenuProjectId === e.id, r = this.dashboardDialog === "rename" && this.dashboardDraft?.id === e.id, i = `dashboard-menu-${e.id}`;
+		let t = U[e.display.palette], n = this.dashboardMenuDashboardId === e.id, r = this.dashboardDialog === "rename" && this.dashboardDraft?.id === e.id, i = `dashboard-menu-${e.id}`;
 		return N`
       <article class=${`dashboard-card${n ? " menu-open" : ""}`} data-dashboard-id=${e.id}>
         <div class="dashboard-card-preview">
@@ -2008,7 +2008,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return N`
       <main class="dashboard-library">
         <header class="dashboard-library-header">
-          <div><h1>Dashboards</h1><p>${this.projects.length} ${this.projects.length === 1 ? "dashboard" : "dashboards"}</p></div>
+          <div><h1>Dashboards</h1><p>${this.dashboards.length} ${this.dashboards.length === 1 ? "dashboard" : "dashboards"}</p></div>
           <ha-button class="dashboard-new-button" appearance="filled" aria-label="New dashboard" @click=${this.openNewDashboard}><span class="dashboard-new-button-label"><ha-icon icon="mdi:plus"></ha-icon><span>New dashboard</span></span></ha-button>
         </header>
         ${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}
@@ -2132,7 +2132,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
           <ha-button slot="secondaryAction" appearance="plain" @click=${() => {
 			this.newDashboardOpen = !1;
 		}}>Cancel</ha-button>
-          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(this.newDashboard)} @click=${this.createProject}>${this.saving ? "Creating…" : "Create dashboard"}</ha-button>
+          <ha-button slot="primaryAction" appearance="filled" .disabled=${this.saving || !this.dashboardIsValid(this.newDashboard)} @click=${this.createDashboard}>${this.saving ? "Creating…" : "Create dashboard"}</ha-button>
         </ha-dialog-footer>
       </ha-dialog>
     ` : F;
@@ -2336,7 +2336,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 			this.mutate((e) => {
 				e.display.background = t;
 			});
-		}}>${U[e.display.palette].map((t) => N`<option value=${t} ?selected=${t === e.display.background}>${t[0].toUpperCase()}${t.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField("Outer padding", e.display.padding, "padding", 0, 1024)}${this.screenNumberField("Snap size", e.display.snapSize, "snapSize", 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteProject}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`;
+		}}>${U[e.display.palette].map((t) => N`<option value=${t} ?selected=${t === e.display.background}>${t[0].toUpperCase()}${t.slice(1)}</option>`)}</select></label></div></div></details><details class="inspector-section" open><summary>Working area</summary><div class="section-body"><div class="field-grid">${this.screenNumberField("Outer padding", e.display.padding, "padding", 0, 1024)}${this.screenNumberField("Snap size", e.display.snapSize, "snapSize", 1, 256)}</div><p class="field-help">Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.</p></div></details><div class="danger-zone"><ha-button appearance="plain" @click=${this.deleteDashboard}><ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>Delete dashboard</ha-button></div>${this.renderMetrics()}`;
 	}
 	renderItemLayout(e) {
 		let t = e.locked;
@@ -2491,7 +2491,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
           <span class="breadcrumb-divider">/</span>
           <button class="breadcrumb-link" @click=${this.showDashboards}>Dashboards</button>
           <span class="breadcrumb-divider">/</span>
-          <input class="project-name" aria-label="Dashboard name" .value=${e.name} @input=${this.updateName}>
+          <input class="dashboard-name" aria-label="Dashboard name" .value=${e.name} @input=${this.updateName}>
         </div>
         <nav class="view-switch" aria-label="Dashboard view">
           <button class=${this.view === "design" ? "active" : ""} aria-pressed=${this.view === "design"} @click=${() => this.setEditorView("design")}><ha-icon icon="mdi:tools"></ha-icon>Design</button>
@@ -2500,7 +2500,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
         <div class="editor-actions">
           <span class="status ${e.status}">${e.status}</span>
           <ha-button appearance="plain" @click=${this.toggleReady}>${e.status === "ready" ? "Set Draft" : "Set Ready"}</ha-button>
-          <ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveProject}>${this.saving ? "Saving…" : "Save"}</ha-button>
+          <ha-button appearance="filled" .disabled=${!this.dirty || this.saving} @click=${this.saveDashboard}>${this.saving ? "Saving…" : "Save"}</ha-button>
         </div>
       </header>
     `;
@@ -2526,7 +2526,7 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
     `;
 	}
 	render() {
-		if (this.loading) return N`<div class="project-empty"><p>Loading OpenDisplay Studio…</p></div>`;
+		if (this.loading) return N`<div class="dashboard-empty"><p>Loading OpenDisplay Studio…</p></div>`;
 		if (this.view === "dashboards" || !this.current) return this.renderDashboardLibrary();
 		let e = V({
 			"--toolbox-width": this.leftCollapsed ? "48px" : "255px",
@@ -2535,6 +2535,6 @@ var J = (e) => structuredClone(e), Y = (e, t, n) => Math.max(t, Math.min(n, e)),
 		return N`<div class="shell">${this.renderEditorHeader()}${this.error ? N`<ha-alert alert-type="error">${this.error}</ha-alert>` : F}${this.view === "code" ? this.renderCodeView() : N`<div class="layout" style=${e}>${this.renderToolbox()}${this.renderCanvas()}${this.renderInspector()}</div>`}</div>`;
 	}
 };
-q([ke({ attribute: !1 })], $.prototype, "hass", void 0), q([B()], $.prototype, "projects", void 0), q([B()], $.prototype, "view", void 0), q([B()], $.prototype, "dashboardQuery", void 0), q([B()], $.prototype, "dashboardSort", void 0), q([B()], $.prototype, "widgets", void 0), q([B()], $.prototype, "primitives", void 0), q([B()], $.prototype, "current", void 0), q([B()], $.prototype, "selectedItemId", void 0), q([B()], $.prototype, "query", void 0), q([B()], $.prototype, "preview", void 0), q([B()], $.prototype, "loading", void 0), q([B()], $.prototype, "saving", void 0), q([B()], $.prototype, "dirty", void 0), q([B()], $.prototype, "draggingCatalog", void 0), q([B()], $.prototype, "draggingLayerId", void 0), q([B()], $.prototype, "catalogDragPosition", void 0), q([B()], $.prototype, "layerDropTarget", void 0), q([B()], $.prototype, "undoCount", void 0), q([B()], $.prototype, "redoCount", void 0), q([B()], $.prototype, "pendingDeleteItemId", void 0), q([B()], $.prototype, "error", void 0), q([B()], $.prototype, "leftCollapsed", void 0), q([B()], $.prototype, "rightCollapsed", void 0), q([B()], $.prototype, "inspectorWidth", void 0), q([B()], $.prototype, "zoom", void 0), q([B()], $.prototype, "panX", void 0), q([B()], $.prototype, "panY", void 0), q([B()], $.prototype, "snapEnabled", void 0), q([B()], $.prototype, "newDashboardOpen", void 0), q([B()], $.prototype, "newDashboard", void 0), q([B()], $.prototype, "dashboardMenuProjectId", void 0), q([B()], $.prototype, "dashboardDialog", void 0), q([B()], $.prototype, "dashboardDraft", void 0), q([B()], $.prototype, "yamlCopyState", void 0), q([je(".properties")], $.prototype, "propertiesPanel", void 0), $ = q([Ee("opendisplay-studio-panel")], $);
+q([ke({ attribute: !1 })], $.prototype, "hass", void 0), q([B()], $.prototype, "dashboards", void 0), q([B()], $.prototype, "view", void 0), q([B()], $.prototype, "dashboardQuery", void 0), q([B()], $.prototype, "dashboardSort", void 0), q([B()], $.prototype, "widgets", void 0), q([B()], $.prototype, "primitives", void 0), q([B()], $.prototype, "current", void 0), q([B()], $.prototype, "selectedItemId", void 0), q([B()], $.prototype, "query", void 0), q([B()], $.prototype, "preview", void 0), q([B()], $.prototype, "loading", void 0), q([B()], $.prototype, "saving", void 0), q([B()], $.prototype, "dirty", void 0), q([B()], $.prototype, "draggingCatalog", void 0), q([B()], $.prototype, "draggingLayerId", void 0), q([B()], $.prototype, "catalogDragPosition", void 0), q([B()], $.prototype, "layerDropTarget", void 0), q([B()], $.prototype, "undoCount", void 0), q([B()], $.prototype, "redoCount", void 0), q([B()], $.prototype, "pendingDeleteItemId", void 0), q([B()], $.prototype, "error", void 0), q([B()], $.prototype, "leftCollapsed", void 0), q([B()], $.prototype, "rightCollapsed", void 0), q([B()], $.prototype, "inspectorWidth", void 0), q([B()], $.prototype, "zoom", void 0), q([B()], $.prototype, "panX", void 0), q([B()], $.prototype, "panY", void 0), q([B()], $.prototype, "snapEnabled", void 0), q([B()], $.prototype, "newDashboardOpen", void 0), q([B()], $.prototype, "newDashboard", void 0), q([B()], $.prototype, "dashboardMenuDashboardId", void 0), q([B()], $.prototype, "dashboardDialog", void 0), q([B()], $.prototype, "dashboardDraft", void 0), q([B()], $.prototype, "yamlCopyState", void 0), q([je(".properties")], $.prototype, "propertiesPanel", void 0), $ = q([Ee("opendisplay-studio-panel")], $);
 //#endregion
 export { $ as OpenDisplayStudioPanel };

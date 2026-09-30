@@ -125,7 +125,9 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
 
 ## Document model rules
 
-- `schemaVersion` changes require an explicit migration in `dashboards.py`,
+- Until the first public release of the dashboard model, `schemaVersion` stays 1
+  and stored dashboards that stop validating are dropped (ROADMAP, Deviations).
+  After that release, `schemaVersion` changes require an explicit migration in `dashboards.py`,
   tested with a stored fixture of the previous version. Never rely on "records
   that fail validation are skipped".
 - TypeScript types and Python validation change together, in one change.

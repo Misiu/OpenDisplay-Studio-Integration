@@ -4,7 +4,7 @@ import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
 import './odx-app'
 import { createId } from './ids'
-import type { HomeAssistant, ScreenProject } from './types'
+import type { HomeAssistant, Dashboard } from './types'
 
 if (!customElements.get('ha-icon')) customElements.define('ha-icon', class extends HTMLElement {
   connectedCallback(): void { this.setAttribute('aria-hidden', 'true'); this.textContent = ({ 'mdi:thermometer': '♨', 'mdi:format-text': 'T', 'mdi:rectangle-outline': '□', 'mdi:vector-line': '╱', 'mdi:circle-outline': '○', 'mdi:ellipse-outline': '⬭', 'mdi:star-outline': '☆', 'mdi:qrcode': '▦', 'mdi:progress-helper': '◒', 'mdi:magnify': '⌕', 'mdi:plus': '+', 'mdi:plus-circle': '⊕', 'mdi:dots-horizontal': '⋯', 'mdi:pencil-outline': '✎', 'mdi:monitor-cog': '⚙', 'mdi:delete-outline': '×', 'mdi:monitor-edit': '▣', 'mdi:monitor': '▣', 'mdi:devices': '▦', 'mdi:tools': '⚒', 'mdi:code-tags': '</>', 'mdi:chevron-left': '‹', 'mdi:chevron-right': '›', 'mdi:content-copy': '⧉', 'mdi:check': '✓', 'mdi:alert-circle-outline': '!', 'mdi:close': '×', 'mdi:magnet': '∩', 'mdi:lock': '●', 'mdi:lock-open-variant-outline': '○', 'mdi:eye-outline': '◉', 'mdi:eye-off-outline': '⊘', 'mdi:drag-vertical': '⋮', 'mdi:undo': '↶', 'mdi:redo': '↷' } as Record<string, string>)[this.getAttribute('icon') ?? ''] ?? '•' }
@@ -157,8 +157,8 @@ if (!customElements.get('ha-dialog-footer')) customElements.define('ha-dialog-fo
 })
 
 const now = '2026-09-24T12:00:00+00:00'
-const demoProject: ScreenProject = {
-  id: 'demo', schemaVersion: 3, name: 'Kitchen display', status: 'draft', language: 'en',
+const demoDashboard: Dashboard = {
+  id: 'demo', schemaVersion: 1, name: 'Kitchen display', status: 'draft', language: 'en',
   display: { profileId: 'solum-7-5', width: 800, height: 480, palette: 'bwr', background: 'white', padding: 20, snapSize: 5 },
   items: [{
     id: 'temperature', kind: 'widget', locked: false, hidden: false,
@@ -168,27 +168,27 @@ const demoProject: ScreenProject = {
   }], createdAt: now, updatedAt: now,
 }
 
-const hallwayProject: ScreenProject = {
-  id: 'hallway', schemaVersion: 3, name: 'Hallway overview', status: 'ready', language: 'en',
+const hallwayDashboard: Dashboard = {
+  id: 'hallway', schemaVersion: 1, name: 'Hallway overview', status: 'ready', language: 'en',
   display: { profileId: 'custom', width: 1280, height: 800, palette: 'spectra6', background: 'white', padding: 0, snapSize: 5 },
   items: [], createdAt: '2026-09-20T08:00:00+00:00', updatedAt: '2026-09-23T16:30:00+00:00',
 }
 
-const officeProject: ScreenProject = {
-  id: 'office', schemaVersion: 3, name: 'Office status', status: 'draft', language: 'en',
+const officeDashboard: Dashboard = {
+  id: 'office', schemaVersion: 1, name: 'Office status', status: 'draft', language: 'en',
   display: { profileId: 'custom', width: 320, height: 240, palette: 'bw', background: 'white', padding: 0, snapSize: 5 },
   items: [], createdAt: '2026-09-18T10:00:00+00:00', updatedAt: '2026-09-22T09:15:00+00:00',
 }
 
-const preview = (project: ScreenProject): string => {
-  const { width, height } = project.display
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${project.display.background}"/><rect x="8" y="8" width="388" height="149" rx="3" fill="white" stroke="black"/><circle cx="42" cy="94" r="10" fill="black"/><rect x="38" y="45" width="8" height="50" rx="4" fill="black"/><text x="225" y="52" text-anchor="middle" font-family="Roboto" font-size="22">${project.items.length ? 'Kitchen' : ''}</text><text x="225" y="116" text-anchor="middle" font-family="Roboto" font-size="58">21.4 °C</text></svg>`
+const preview = (dashboard: Dashboard): string => {
+  const { width, height } = dashboard.display
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${dashboard.display.background}"/><rect x="8" y="8" width="388" height="149" rx="3" fill="white" stroke="black"/><circle cx="42" cy="94" r="10" fill="black"/><rect x="38" y="45" width="8" height="50" rx="4" fill="black"/><text x="225" y="52" text-anchor="middle" font-family="Roboto" font-size="22">${dashboard.items.length ? 'Kitchen' : ''}</text><text x="225" y="116" text-anchor="middle" font-family="Roboto" font-size="58">21.4 °C</text></svg>`
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-const itemBounds = (project: ScreenProject): Record<string, { x: number; y: number; width: number; height: number }> => {
+const itemBounds = (dashboard: Dashboard): Record<string, { x: number; y: number; width: number; height: number }> => {
   const result: Record<string, { x: number; y: number; width: number; height: number }> = {}
-  for (const item of project.items) {
+  for (const item of dashboard.items) {
     if (item.kind === 'widget') {
       result[item.id] = { ...item.frame }
     } else {
@@ -203,7 +203,7 @@ const itemBounds = (project: ScreenProject): Record<string, { x: number; y: numb
   return result
 }
 
-let projects = [demoProject, hallwayProject, officeProject].map(project => structuredClone(project))
+let dashboards = [demoDashboard, hallwayDashboard, officeDashboard].map(dashboard => structuredClone(dashboard))
 const calls: Array<Record<string, unknown>> = []
 const hass: HomeAssistant = {
   language: 'en',
@@ -214,7 +214,7 @@ const hass: HomeAssistant = {
       await new Promise(resolve => window.setTimeout(resolve, 60))
       return {
       version: '3.0.6',
-      projects,
+      dashboards,
       widgets: [{
         id: 'temperature', version: '1.0.0', name: 'Temperature', description: 'Current value of a Home Assistant temperature entity.', icon: 'mdi:thermometer',
         defaults: { entity: '', title: '', showIcon: true, showName: true, showUnit: true, accent: 'black' },
@@ -234,20 +234,20 @@ const hass: HomeAssistant = {
       } as T
     }
     if (message.type === 'opendisplay_studio/compose_preview') {
-      const project = message.project as ScreenProject
-      const yaml = project.items.map(item => item.kind === 'primitive' ? `- type: ${item.primitive.type}` : '- type: rectangle\n- type: icon\n- type: text').join('\n')
-      return { imageUrl: preview(project), yaml, itemBounds: itemBounds(project), warnings: [], timings: { queue: .1, data: .2, compile: .3, render: 7.4, encode: 1.2, pipeline: 9.2 } } as T
+      const dashboard = message.dashboard as Dashboard
+      const yaml = dashboard.items.map(item => item.kind === 'primitive' ? `- type: ${item.primitive.type}` : '- type: rectangle\n- type: icon\n- type: text').join('\n')
+      return { imageUrl: preview(dashboard), yaml, itemBounds: itemBounds(dashboard), warnings: [], timings: { queue: .1, data: .2, compile: .3, render: 7.4, encode: 1.2, pipeline: 9.2 } } as T
     }
-    if (message.type === 'opendisplay_studio/create_project') {
-      const project = { ...(message.project as ScreenProject), id: createId(), createdAt: now, updatedAt: now }
-      projects = [...projects, project]; return { project } as T
+    if (message.type === 'opendisplay_studio/create_dashboard') {
+      const dashboard = { ...(message.dashboard as Dashboard), id: createId(), createdAt: now, updatedAt: now }
+      dashboards = [...dashboards, dashboard]; return { dashboard } as T
     }
-    if (message.type === 'opendisplay_studio/update_project') {
-      const project = structuredClone(message.project as ScreenProject)
-      projects = projects.map(item => item.id === project.id ? project : item); return { project } as T
+    if (message.type === 'opendisplay_studio/update_dashboard') {
+      const dashboard = structuredClone(message.dashboard as Dashboard)
+      dashboards = dashboards.map(item => item.id === dashboard.id ? dashboard : item); return { dashboard } as T
     }
-    if (message.type === 'opendisplay_studio/delete_project') {
-      projects = projects.filter(item => item.id !== message.project_id); return {} as T
+    if (message.type === 'opendisplay_studio/delete_dashboard') {
+      dashboards = dashboards.filter(item => item.id !== message.dashboard_id); return {} as T
     }
     throw new Error(`Unsupported command ${String(message.type)}`)
   },
@@ -266,7 +266,7 @@ declare global {
   interface Window {
     __ODX_E2E__: {
       calls: () => Array<Record<string, unknown>>
-      projects: () => ScreenProject[]
+      dashboards: () => Dashboard[]
       replaceHass: () => void
       hassRevision: () => number
     }
@@ -274,7 +274,7 @@ declare global {
 }
 window.__ODX_E2E__ = {
   calls: () => cloneData(calls),
-  projects: () => cloneData(projects),
+  dashboards: () => cloneData(dashboards),
   replaceHass: assignFreshHass,
   hassRevision: () => hassRevision,
 }

@@ -1,18 +1,18 @@
-# OpenDisplay Studio v3 architecture
+# OpenDisplay Studio architecture
 
-The project document is the only persisted source of truth. It contains display
+The dashboard document is the only persisted source of truth. It contains display
 settings, a pixel-based working area, semantic widgets, and raw ODL primitives.
 The ordered item array is also the rendering layer order. Items may overlap and
 carry persistent visibility and position-lock flags.
 
 The frontend edits that document through Home Assistant WebSocket commands. It
-does not persist projects in `localStorage` and does not render widgets with a
+does not persist dashboards in `localStorage` and does not render widgets with a
 parallel HTML/CSS implementation.
 
 For both preview and Media Source resolution, the backend performs the same
 steps:
 
-1. validate the v3 project;
+1. validate the dashboard;
 2. collect and deduplicate widget data requirements;
 3. resolve normalized Home Assistant data;
 4. use the persisted absolute pixel frames and primitive coordinates;

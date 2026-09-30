@@ -1,7 +1,7 @@
 # OpenDisplay Studio Integration
 
 OpenDisplay Studio is a Home Assistant-native e-paper screen designer. Ready
-projects are exposed as dynamic image Media Sources rendered from current Home
+dashboards are exposed as dynamic image Media Sources rendered from current Home
 Assistant data.
 
 [![Open this integration in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Misiu&repository=OpenDisplay-Studio-Integration&category=integration)
@@ -15,7 +15,7 @@ integration embeds `odl-renderer` and owns the complete deterministic pipeline:
 ```text
 Home Assistant data
         ↓
-semantic project
+semantic dashboard
         ↓
 structured ODL elements
         ↓
@@ -51,16 +51,16 @@ The initial POC includes:
   and deletion controls;
 - compact display, pixel geometry, and widget padding controls;
 - versioned Home Assistant `Store` persistence;
-- Draft and Ready project states;
+- Draft and Ready dashboard states;
 - exact ODL YAML and queue/data/compile/render/encode/pipeline timings in the
   designer;
-- dynamic Ready project Media Sources.
+- dynamic Ready dashboard Media Sources.
 
-Every Ready project has a stable URI based on its immutable server-generated
+Every Ready dashboard has a stable URI based on its immutable server-generated
 ID:
 
 ```text
-media-source://opendisplay_studio/<project-id>
+media-source://opendisplay_studio/<dashboard-id>
 ```
 
 ## Installation

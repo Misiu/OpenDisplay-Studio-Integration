@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import type { ScreenProject } from '../src/types'
+import type { Dashboard } from '../src/types'
 
 const editorPosition = async (page: Page) => {
   const canvas = await page.locator('.canvas').boundingBox()
@@ -129,7 +129,7 @@ test.beforeEach(async ({ page }) => {
   await openKitchenDashboard(page)
 })
 
-test('loads a persisted project after HA assigns hass and ignores later hass object replacements', async ({ page }) => {
+test('loads a persisted dashboard after HA assigns hass and ignores later hass object replacements', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Dashboards', exact: true })).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Dashboard name' })).toHaveValue('Kitchen display')
   await expect(page.locator('.selection[data-item-id="temperature"]')).toBeVisible()
@@ -529,9 +529,9 @@ test('adds overlapping primitives and preserves each exact ODL type', async ({ p
   await page.locator('ha-button').filter({ hasText: /^Save$/ }).click()
   const savedTypes = await page.evaluate(() => {
     const calls = window.__ODX_E2E__.calls()
-    const update = calls.findLast(call => call.type === 'opendisplay_studio/update_project')
-    const project = update?.project as { items: Array<{ kind: string; primitive?: { type: string } }> }
-    return project.items.filter(item => item.kind === 'primitive').map(item => item.primitive?.type)
+    const update = calls.findLast(call => call.type === 'opendisplay_studio/update_dashboard')
+    const dashboard = update?.dashboard as { items: Array<{ kind: string; primitive?: { type: string } }> }
+    return dashboard.items.filter(item => item.kind === 'primitive').map(item => item.primitive?.type)
   })
   expect(savedTypes).toEqual(types.map(([, type]) => type))
 })
@@ -555,8 +555,8 @@ test('selects, hides, locks and reorders compact layers with an insertion marker
   await page.locator('ha-button').filter({ hasText: /^Save$/ }).click()
   const order = await page.evaluate(() => {
     const calls = window.__ODX_E2E__.calls()
-    const update = calls.findLast(call => call.type === 'opendisplay_studio/update_project')
-    return (update?.project as { items: Array<{ kind: string; primitive?: { type: string }; hidden: boolean; locked: boolean }> }).items
+    const update = calls.findLast(call => call.type === 'opendisplay_studio/update_dashboard')
+    return (update?.dashboard as { items: Array<{ kind: string; primitive?: { type: string }; hidden: boolean; locked: boolean }> }).items
   })
   const rectangle = order.find(item => item.primitive?.type === 'rectangle')
   expect(rectangle).toEqual(expect.objectContaining({ hidden: true, locked: true }))
@@ -670,7 +670,7 @@ declare global {
   interface Window {
     __ODX_E2E__: {
       calls: () => Array<Record<string, unknown>>
-      projects: () => ScreenProject[]
+      dashboards: () => Dashboard[]
       replaceHass: () => void
       hassRevision: () => number
     }

@@ -68,7 +68,7 @@
 - Make catalog drops reliable across the complete canvas stage and add
   click-to-add as an accessible fallback for every widget and primitive.
 - Reproduce Home Assistant's delayed and repeated `hass` assignments in the E2E
-  harness, covering project loading, selection/deselection, property editing,
+  harness, covering dashboard loading, selection/deselection, property editing,
   movement, and adding elements without a canvas position change.
 
 ## 3.0.0
@@ -101,8 +101,8 @@
   integration version in the panel header.
 - Replace the external Chromium Renderer App, Liquid, and TRMNL pipeline with
   the embedded `odl-renderer` package.
-- Introduce the v3 semantic project model with ordered widgets and raw ODL
-  primitives; earlier experimental projects are intentionally not migrated.
+- Introduce the v3 semantic dashboard model with ordered widgets and raw ODL
+  primitives; earlier experimental dashboards are intentionally not migrated.
 - Add the Temperature widget, Text and Rectangle primitives, direct canvas
   editing, and a shared searchable Widgets/Primitives catalog.
 - Use the exact backend ODL PNG as the designer preview and expose generated
@@ -112,7 +112,7 @@
 - Add mouse resizing for ODL primitives, compact screen/snap and
   element layout controls, persisted widget padding, collapsible side panels,
   and a resizable Inspector.
-- Add deterministic Playwright coverage for project layout persistence,
+- Add deterministic Playwright coverage for dashboard layout persistence,
   primitive resize gestures, viewport controls, and panel interactions.
 
 ## 0.9.5
@@ -189,7 +189,7 @@
   widgets render consistently in CLI previews, Studio previews, and final
   Renderer output.
 - Breaking: the widget ID `entity-state` is now `sensor`; existing test
-  projects using the old widget must select Sensor again.
+  dashboards using the old widget must select Sensor again.
 
 ## 0.6.1
 
@@ -215,8 +215,8 @@
   matching the supported non-I18n TRMNL Liquid 0.8.2 rendering surface.
 - Validate every bundled widget template against the shared TRMNL engine and
   cover lax missing-data and inline-template behavior with regression tests.
-- Add project-level light and dark TRMNL themes.
-- Add project-level default, classic, and TRMNL font families plus four text scales.
+- Add dashboard-level light and dark TRMNL themes.
+- Add dashboard-level default, classic, and TRMNL font families plus four text scales.
 - Add a short-wide Weather composition for dense grids such as 800×480 at 3×3.
 - Verify bundled Home Assistant brand icon dimensions in CI.
 
@@ -229,7 +229,7 @@
   expose backend-only community widgets in the Studio picker.
 - Scope providers to their owning package, preventing name collisions between
   independently installed community widgets.
-- Use the project language across live preview, Media Source, and physical
+- Use the dashboard language across live preview, Media Source, and physical
   output. Weather reuses Home Assistant condition translations and carries its
   own English and Polish presentation vocabulary.
 - Require Renderer App 0.5.0 so the public suite has one compatible release
@@ -239,7 +239,7 @@
   entity is not selected, forecast data is absent, or `weather.get_forecasts`
   fails.
 - Fix successful unsaved previews crashing in diagnostic logging when the
-  normalized project has no `id`.
+  normalized dashboard has no `id`.
 - Use the corrected Home Assistant discovery service name.
 
 ## 0.3.5
@@ -276,7 +276,7 @@
 - Rebuild Entity State as an adaptive square, wide, or tall tile with current
   Home Assistant state, unit, friendly name, and a local device-class icon.
 - Add Entity State controls for icon/name visibility and preserve their
-  defaults for projects created with earlier versions.
+  defaults for dashboards created with earlier versions.
 - Add the missing TRMNL screen-size classes and verify the 800 × 480 output in
   the persistent Renderer App at 178.5 ms warm render time.
 
@@ -292,14 +292,14 @@
 ## 0.3.0
 
 - Move the accepted ODX designer into an admin-only Home Assistant panel.
-- Add server-owned project IDs, versioned HA storage, Draft/Ready lifecycle,
+- Add server-owned dashboard IDs, versioned HA storage, Draft/Ready lifecycle,
   predefined/custom displays, editable grids, and graphical regions.
 - Add schema-driven Entity State, Calendar, and Text widget configuration with
   Home Assistant entity selectors.
 - Add declarative one/many/optional data requirements, deduplicated Entity State
   and Calendar providers, normalized widget data, and one-page Liquid/TRMNL
   composition.
-- Expose every Ready project at a stable dynamic Media Source URI.
+- Expose every Ready dashboard at a stable dynamic Media Source URI.
 - Add frontend CI, TypeScript checks, Vitest coverage, and committed local panel
   bundle verification.
 

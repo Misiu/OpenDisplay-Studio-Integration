@@ -6,13 +6,13 @@ from typing import Any, ClassVar, cast
 import pytest
 from PIL import Image
 
-from custom_components.opendisplay_studio.compiler import async_compile_project
+from custom_components.opendisplay_studio.compiler import async_compile_dashboard
+from custom_components.opendisplay_studio.dashboards import validate_dashboard
 from custom_components.opendisplay_studio.odl import (
     Box,
     DisplayContext,
     WidgetRenderContext,
 )
-from custom_components.opendisplay_studio.projects import validate_project
 from custom_components.opendisplay_studio.rendering import OdlRenderService
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
 from custom_components.opendisplay_studio.widgets.temperature.renderer import (
@@ -40,9 +40,9 @@ class FakeHass:
     states = FakeStates({"sensor.kitchen_temperature": FakeState()})
 
 
-def project() -> dict[str, Any]:
+def dashboard() -> dict[str, Any]:
     return {
-        "schemaVersion": 3,
+        "schemaVersion": 1,
         "name": "Kitchen",
         "status": "ready",
         "language": "en",
@@ -89,9 +89,9 @@ def project() -> dict[str, Any]:
     }
 
 
-def test_v3_project_accepts_freeform_widgets_and_raw_primitives() -> None:
-    validated = validate_project(project(), DEFAULT_REGISTRY)
-    assert validated["schemaVersion"] == 3
+def test_dashboard_accepts_freeform_widgets_and_raw_primitives() -> None:
+    validated = validate_dashboard(dashboard(), DEFAULT_REGISTRY)
+    assert validated["schemaVersion"] == 1
     assert [item["kind"] for item in validated["items"]] == [
         "widget",
         "primitive",
@@ -99,8 +99,8 @@ def test_v3_project_accepts_freeform_widgets_and_raw_primitives() -> None:
     assert validated["items"][0]["layout"] == {"padding": 0}
 
 
-def test_v3_project_accepts_the_complete_spectra6_palette() -> None:
-    value = project()
+def test_dashboard_accepts_the_complete_spectra6_palette() -> None:
+    value = dashboard()
     value["display"]["palette"] = "spectra6"
     value["items"][1]["primitive"]["color"] = "blue"
     value["items"].append(
@@ -121,7 +121,7 @@ def test_v3_project_accepts_the_complete_spectra6_palette() -> None:
         }
     )
 
-    validated = validate_project(value, DEFAULT_REGISTRY)
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
 
     assert validated["display"]["palette"] == "spectra6"
     assert validated["items"][1]["primitive"]["color"] == "blue"
@@ -157,7 +157,7 @@ def test_temperature_tile_keeps_title_icon_value_and_unit_aligned() -> None:
 
 @pytest.mark.asyncio
 async def test_native_odl_primitive_catalog_validates_and_renders() -> None:
-    value = project()
+    value = dashboard()
     value["items"] = [
         {
             "id": "line",
@@ -245,8 +245,8 @@ async def test_native_odl_primitive_catalog_validates_and_renders() -> None:
             },
         },
     ]
-    validated = validate_project(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_project(
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
+    compiled = await async_compile_dashboard(
         cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
     )
     assert {element["type"] for element in compiled.elements} == {
@@ -268,23 +268,23 @@ async def test_native_odl_primitive_catalog_validates_and_renders() -> None:
         assert image.size == (800, 480)
 
 
-def test_v3_project_accepts_overlapping_semantic_widgets() -> None:
-    value = project()
+def test_dashboard_accepts_overlapping_semantic_widgets() -> None:
+    value = dashboard()
     duplicate = dict(value["items"][0])
     duplicate["id"] = "overlap"
     value["items"].append(duplicate)
     duplicate["frame"] = {"x": 30, "y": 30, "width": 240, "height": 140}
-    validated = validate_project(value, DEFAULT_REGISTRY)
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
     assert [item["id"] for item in validated["items"][:2]] == ["temperature", "label"]
     assert validated["items"][-1]["frame"]["x"] == 30
 
 
 @pytest.mark.asyncio
 async def test_compiler_and_local_renderer_produce_exact_size_png() -> None:
-    value = project()
+    value = dashboard()
     value["items"][0]["layout"] = {"padding": 10}
-    validated = validate_project(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_project(
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
+    compiled = await async_compile_dashboard(
         cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
     )
     assert compiled.item_bounds["temperature"] == {
@@ -313,10 +313,10 @@ async def test_compiler_and_local_renderer_produce_exact_size_png() -> None:
 
 @pytest.mark.asyncio
 async def test_hidden_layers_keep_bounds_but_do_not_render() -> None:
-    value = project()
+    value = dashboard()
     value["items"][1]["hidden"] = True
-    validated = validate_project(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_project(
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
+    compiled = await async_compile_dashboard(
         cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
     )
     assert compiled.item_bounds["label"]["x"] == 20
@@ -324,11 +324,11 @@ async def test_hidden_layers_keep_bounds_but_do_not_render() -> None:
 
 
 @pytest.mark.asyncio
-async def test_project_item_order_is_render_layer_order() -> None:
-    value = project()
+async def test_dashboard_item_order_is_render_layer_order() -> None:
+    value = dashboard()
     value["items"] = list(reversed(value["items"]))
-    validated = validate_project(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_project(
+    validated = validate_dashboard(value, DEFAULT_REGISTRY)
+    compiled = await async_compile_dashboard(
         cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
     )
     assert compiled.elements[0]["type"] == "text"

@@ -19,9 +19,9 @@ from .const import (
     RENDER_CACHE_TTL_SECONDS,
     RENDER_CONCURRENCY,
 )
+from .dashboards import DashboardStore
 from .http import RenderedImageView
 from .panel import async_register_panel
-from .projects import ProjectStore
 from .rendering import OdlRenderService
 from .websocket import async_register_commands
 from .widgets import BUILTIN_WIDGET_DIRECTORY, WidgetRegistry
@@ -32,7 +32,7 @@ class OpenDisplayStudioData:
     """Domain-wide state shared by preview and Media Source rendering."""
 
     cache: RenderCache
-    projects: ProjectStore
+    dashboards: DashboardStore
     renderer: OdlRenderService
     widgets: WidgetRegistry
 
@@ -52,14 +52,14 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         WidgetRegistry.from_directories,
         [BUILTIN_WIDGET_DIRECTORY, installed_widgets],
     )
-    projects = ProjectStore(hass, widgets)
-    await projects.async_load()
+    dashboards = DashboardStore(hass, widgets)
+    await dashboards.async_load()
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(
             ttl_seconds=RENDER_CACHE_TTL_SECONDS,
             max_items=RENDER_CACHE_MAX_ITEMS,
         ),
-        projects=projects,
+        dashboards=dashboards,
         renderer=OdlRenderService(
             async_get_clientsession(hass), concurrency=RENDER_CONCURRENCY
         ),

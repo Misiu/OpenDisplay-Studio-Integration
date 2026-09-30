@@ -21,8 +21,8 @@ export const appStyles = css`
   .breadcrumb-divider { flex: none; color: var(--studio-border); }
   .breadcrumb-link { flex: none; min-height: 30px; padding: 0 3px; border: 0; color: var(--studio-accent); background: transparent; font-size: 12px; font-weight: 600; }
   .breadcrumb-link:hover { text-decoration: underline; }
-  .project-name { min-width: 80px; width: min(210px, 18vw); height: 32px; border: 1px solid transparent; border-radius: 7px; padding: 0 7px; background: transparent; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
-  .project-name:hover, .project-name:focus { border-color: var(--studio-border); background: var(--secondary-background-color, #f3f5f6); outline: 0; }
+  .dashboard-name { min-width: 80px; width: min(210px, 18vw); height: 32px; border: 1px solid transparent; border-radius: 7px; padding: 0 7px; background: transparent; font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+  .dashboard-name:hover, .dashboard-name:focus { border-color: var(--studio-border); background: var(--secondary-background-color, #f3f5f6); outline: 0; }
   .view-switch { display: inline-flex; align-items: center; padding: 3px; border: 1px solid var(--studio-border); border-radius: 9px; background: var(--secondary-background-color, #f3f5f6); }
   .view-switch button { min-height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; border-radius: 6px; color: var(--studio-muted); background: transparent; font-size: 11px; font-weight: 700; }
   .view-switch button.active { color: var(--studio-text); background: var(--studio-surface); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
@@ -216,7 +216,7 @@ export const appStyles = css`
   .code-panel textarea:focus { border-color: var(--studio-accent); box-shadow: 0 0 0 1px var(--studio-accent); }
   .copy-status { min-height: 16px; color: var(--studio-muted); font-size: 11px; text-align: end; }
 
-  .project-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
+  .dashboard-empty { position: relative; height: 100%; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--studio-accent) 12%, transparent), transparent 42%), var(--primary-background-color, #f5f7f8); }
   ha-dialog { --dialog-content-padding: 0; }
   .new-dashboard-content { display: grid; gap: 16px; padding: 18px 22px 22px; }
   .dashboard-settings-content { padding: 18px 22px 22px; }
@@ -251,7 +251,7 @@ export const appStyles = css`
     .topbar { height: auto; min-height: calc(var(--header-height, 56px) + var(--safe-area-inset-top, 0px)); grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'breadcrumb actions' 'switch switch'; gap: 5px 10px; padding: calc(var(--safe-area-inset-top, 0px) + 6px) 9px 6px; }
     .editor-breadcrumb { grid-area: breadcrumb; }
     .studio-name, .editor-actions .status { display: none; }
-    .project-name { width: min(180px, 36vw); }
+    .dashboard-name { width: min(180px, 36vw); }
     .view-switch { grid-area: switch; justify-self: center; }
     .editor-actions { grid-area: actions; }
     .layout { grid-template-columns: minmax(0, 1fr) !important; }

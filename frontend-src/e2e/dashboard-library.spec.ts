@@ -104,10 +104,10 @@ test('creates a custom dashboard and opens it in the editor', async ({ page }) =
   await expect(page.locator('.workspace-meta')).toContainText('640 × 384 px')
   await expect(page.getByRole('combobox', { name: 'Display type' })).toHaveValue('custom')
   await expect(page.getByRole('combobox', { name: 'Palette' })).toHaveValue('spectra6')
-  const createCall = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_project'))
+  const createCall = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
   expect(createCall).toMatchObject({
-    type: 'opendisplay_studio/create_project',
-    project: {
+    type: 'opendisplay_studio/create_dashboard',
+    dashboard: {
       name: 'Studio board',
       display: { width: 640, height: 384, palette: 'spectra6' },
     },
@@ -149,8 +149,8 @@ test('reveals an accessible dashboard menu on hover and renames in place', async
 
   await expect(page.getByRole('button', { name: 'Open dashboard Kitchen dashboard', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Dashboards', exact: true })).toBeVisible()
-  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_project'))
-  expect(update).toMatchObject({ project_id: 'demo', project: { id: 'demo', name: 'Kitchen dashboard' } })
+  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
+  expect(update).toMatchObject({ dashboard_id: 'demo', dashboard: { id: 'demo', name: 'Kitchen dashboard' } })
   expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)).toBe(0)
 })
 
@@ -161,8 +161,8 @@ test('duplicates a dashboard as Draft and edits its display settings', async ({ 
   await expect(page.getByText('4 dashboards', { exact: true })).toBeVisible()
   const duplicate = dashboardCard(page, 'Kitchen display copy')
   await expect(duplicate).toContainText(/draft/i)
-  const create = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_project'))
-  expect(create).toMatchObject({ project: { name: 'Kitchen display copy', status: 'draft', items: [{ id: 'temperature' }] } })
+  const create = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
+  expect(create).toMatchObject({ dashboard: { name: 'Kitchen display copy', status: 'draft', items: [{ id: 'temperature' }] } })
 
   menu = await openDashboardMenu(page, 'Kitchen display copy')
   await menu.getByRole('menuitem', { name: 'Display Settings', exact: true }).click()
@@ -175,8 +175,8 @@ test('duplicates a dashboard as Draft and edits its display settings', async ({ 
   await expect(duplicate).toContainText('640 × 384')
   await expect(duplicate).toContainText('Spectra 6')
 
-  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_project'))
-  expect(update).toMatchObject({ project: { name: 'Kitchen display copy', display: { width: 640, height: 384, palette: 'spectra6' } } })
+  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
+  expect(update).toMatchObject({ dashboard: { name: 'Kitchen display copy', display: { width: 640, height: 384, palette: 'spectra6' } } })
 })
 
 test('requires confirmation before deleting a dashboard', async ({ page }) => {
@@ -194,8 +194,8 @@ test('requires confirmation before deleting a dashboard', async ({ page }) => {
 
   await expect(page.getByText('2 dashboards', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Open dashboard Kitchen display', exact: true })).toHaveCount(0)
-  const deletion = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/delete_project'))
-  expect(deletion).toMatchObject({ project_id: 'demo' })
+  const deletion = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/delete_dashboard'))
+  expect(deletion).toMatchObject({ dashboard_id: 'demo' })
 })
 
 test('uses a light dotted canvas workspace', async ({ page }) => {

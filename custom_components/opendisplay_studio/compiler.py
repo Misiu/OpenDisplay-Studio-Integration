@@ -1,4 +1,4 @@
-"""Compile semantic Studio projects into structured ODL elements."""
+"""Compile semantic Studio dashboards into structured ODL elements."""
 
 from __future__ import annotations
 
@@ -14,12 +14,12 @@ from .palette import accent_color_for_palette
 from .widgets import WidgetRegistry, with_defaults
 
 
-class ProjectCompileError(RuntimeError):
+class DashboardCompileError(RuntimeError):
     """A semantic item could not be compiled into ODL."""
 
 
 @dataclass(frozen=True, slots=True)
-class CompiledProject:
+class CompiledDashboard:
     """Renderer-ready ODL plus editor metadata."""
 
     elements: list[dict[str, Any]]
@@ -87,11 +87,11 @@ def _primitive_bounds(primitive: dict[str, Any]) -> Box:
     )
 
 
-async def async_compile_project(  # noqa: PLR0915
+async def async_compile_dashboard(  # noqa: PLR0915
     hass: HomeAssistant,
-    project: dict[str, Any],
+    dashboard: dict[str, Any],
     registry: WidgetRegistry,
-) -> CompiledProject:
+) -> CompiledDashboard:
     """Resolve declared data once, then compile every item in z-order."""
     started = monotonic()
     aggregate: dict[tuple[str, str], object] = {}
@@ -99,7 +99,7 @@ async def async_compile_project(  # noqa: PLR0915
         tuple[dict[str, Any], dict[str, Any], list[tuple[dict[str, Any], list[str]]]]
     ] = []
     warnings: list[str] = []
-    for item in project["items"]:
+    for item in dashboard["items"]:
         if item["kind"] != "widget" or item.get("hidden", False):
             continue
         widget = item["widget"]
@@ -121,10 +121,10 @@ async def async_compile_project(  # noqa: PLR0915
     resolved: dict[tuple[str, str], object] = {}
     for key, request in aggregate.items():
         resolved[key] = await registry.provider(*key).async_resolve(
-            hass, request, project["language"]
+            hass, request, dashboard["language"]
         )
     data_done = monotonic()
-    display_value = project["display"]
+    display_value = dashboard["display"]
     display = DisplayContext(
         width=display_value["width"],
         height=display_value["height"],
@@ -146,7 +146,7 @@ async def async_compile_project(  # noqa: PLR0915
         widget_contexts[item["id"]] = (config, data)
     elements: list[dict[str, Any]] = []
     item_bounds: dict[str, dict[str, int]] = {}
-    for item in project["items"]:
+    for item in dashboard["items"]:
         try:
             if item["kind"] == "primitive":
                 primitive = dict(item["primitive"])
@@ -164,15 +164,15 @@ async def async_compile_project(  # noqa: PLR0915
                 instance_id=item["id"],
                 box=content_box,
                 display=display,
-                language=project["language"],
+                language=dashboard["language"],
                 config=config,
                 data=data,
             )
             elements.extend(registry.renderer(item["widget"]["type"])(context))
         except (KeyError, TypeError, ValueError) as err:
-            raise ProjectCompileError(f"Item {item['id']}: {err}") from err
+            raise DashboardCompileError(f"Item {item['id']}: {err}") from err
     compiled_done = monotonic()
-    return CompiledProject(
+    return CompiledDashboard(
         elements=elements,
         item_bounds=item_bounds,
         warnings=warnings,

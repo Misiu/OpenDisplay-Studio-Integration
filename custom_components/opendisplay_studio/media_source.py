@@ -1,4 +1,4 @@
-"""Expose Ready OpenDisplay Studio projects as dynamic image Media Sources."""
+"""Expose Ready OpenDisplay Studio dashboards as dynamic image Media Sources."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from homeassistant.components.media_source import (
 )
 from homeassistant.core import HomeAssistant
 
-from .compiler import ProjectCompileError, async_compile_project
+from .compiler import DashboardCompileError, async_compile_dashboard
 from .const import DOMAIN, LOGGER
 from .palette import accent_color_for_palette
 from .rendering import OdlRenderError
@@ -26,7 +26,7 @@ async def async_get_media_source(hass: HomeAssistant) -> OpenDisplayStudioMediaS
 
 
 class OpenDisplayStudioMediaSource(MediaSource):
-    """Render one authoritative PNG for every Ready project."""
+    """Render one authoritative PNG for every Ready dashboard."""
 
     name = "OpenDisplay Studio"
 
@@ -36,15 +36,15 @@ class OpenDisplayStudioMediaSource(MediaSource):
 
     @override
     async def async_resolve_media(self, item: MediaSourceItem) -> PlayMedia:
-        project = self.hass.data[DOMAIN].projects.get(item.identifier)
-        if project is None or project["status"] != "ready":
-            raise Unresolvable("Unknown or Draft OpenDisplay Studio project")
+        dashboard = self.hass.data[DOMAIN].dashboards.get(item.identifier)
+        if dashboard is None or dashboard["status"] != "ready":
+            raise Unresolvable("Unknown or Draft OpenDisplay Studio dashboard")
         started = monotonic()
         try:
-            compiled = await async_compile_project(
-                self.hass, project, self.hass.data[DOMAIN].widgets
+            compiled = await async_compile_dashboard(
+                self.hass, dashboard, self.hass.data[DOMAIN].widgets
             )
-            display = project["display"]
+            display = dashboard["display"]
             rendered = await self.hass.data[DOMAIN].renderer.async_render(
                 width=display["width"],
                 height=display["height"],
@@ -52,14 +52,14 @@ class OpenDisplayStudioMediaSource(MediaSource):
                 background=display["background"],
                 accent_color=accent_color_for_palette(display["palette"]),
             )
-        except (ProjectCompileError, OdlRenderError) as err:
+        except (DashboardCompileError, OdlRenderError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)
             raise Unresolvable(
                 translation_domain=DOMAIN, translation_key="render_failed"
             ) from err
         pipeline_ms = round((monotonic() - started) * 1000, 2)
         LOGGER.info(
-            "Rendered Media Source project=%s size=%dx%d queue=%.2f ms data=%.2f ms "
+            "Rendered Media Source dashboard=%s size=%dx%d queue=%.2f ms data=%.2f ms "
             "compile=%.2f ms render=%.2f ms encode=%.2f ms pipeline=%.2f ms",
             item.identifier,
             display["width"],
@@ -90,13 +90,13 @@ class OpenDisplayStudioMediaSource(MediaSource):
             children=[
                 BrowseMediaSource(
                     domain=DOMAIN,
-                    identifier=project["id"],
+                    identifier=dashboard["id"],
                     media_class=MediaClass.IMAGE,
                     media_content_type="image/png",
-                    title=project["name"],
+                    title=dashboard["name"],
                     can_play=True,
                     can_expand=False,
                 )
-                for project in self.hass.data[DOMAIN].projects.list(ready_only=True)
+                for dashboard in self.hass.data[DOMAIN].dashboards.list(ready_only=True)
             ],
         )

@@ -2,7 +2,7 @@
 
 The Playwright suite exercises the ODL-native designer with deterministic Home
 Assistant WebSocket responses. It uses real mouse pointer sequences to verify
-project loading, catalog-to-canvas drops across the panel shadow boundary,
+dashboard loading, catalog-to-canvas drops across the panel shadow boundary,
 selection, movement, resizing, visibility, locking, layer reordering and its
 insertion marker, Undo/Redo, confirmed deletion, canvas stability, pan/zoom,
 collapsible and resizable panels, generated ODL, and timing diagnostics.

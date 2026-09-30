@@ -16,14 +16,13 @@ Tick a step's box in the same change that completes it.
 - 8 of 16 ODL types (`text`, `rectangle`, `line`, `circle`, `ellipse`, `icon`,
   `qrcode`, `progress_bar`), each with a reduced field set, no expressions.
 - One semantic widget (`temperature`).
-- Legacy "project" vocabulary in code, storage key, WebSocket commands, tests.
 
 ## Phase overview
 
 | # | Phase | Depends on |
 |---|---|---|
 | 0 | Vocabulary: Projects → Dashboards | — |
-| 1 | Foundations (element split, strings, commands, definitions, schema v4) | 0 |
+| 1 | Foundations (element split, strings, commands, definitions, document model) | 0 |
 | 2 | LVGL shell and density | 1 |
 | 3 | Expressions | 1 |
 | 4 | All 16 ODL primitives | 1, 3 |
@@ -39,40 +38,31 @@ Phase 8 may start in parallel with phases 4–7.
 
 ---
 
-## Phase 0 — Vocabulary: Projects → Dashboards
+## Phase 0 — Vocabulary: Projects → Dashboards (done)
 
-We design and manage **Dashboards**. Remove every "project" occurrence we
-control (~400 today in `projects.py`, `websocket.py`, `compiler.py`,
-`media_source.py`, `__init__.py`, `const.py`, `odx-app.ts`, `types.ts`,
-`dev.ts`, `app-styles.ts`, e2e specs, `tests/test_v2_pipeline.py`, `README.md`,
-`ARCHITECTURE.md`). Exempt: `pyproject.toml` and its `[project]` table.
+We design and manage **Dashboards**; the old word no longer appears in code,
+storage keys, WebSocket commands, tests, or docs (exempt: `pyproject.toml` and
+its `[project]` table, `package-lock.json`, `playwright.config.ts`, whose
+`projects` key is imposed by Playwright, and the policy files `CLAUDE.md` /
+`ROADMAP.md`).
 
-- [ ] **0.1 Backend rename.** `projects.py` → `dashboards.py`,
-  `ProjectStore` → `DashboardStore`, `ProjectValidationError` →
-  `DashboardValidationError`, `ProjectCompileError` → `DashboardCompileError`,
-  `validate_project` → `validate_dashboard`, `MAX_PROJECTS` →
-  `MAX_DASHBOARDS`, all locals and log messages.
-- [ ] **0.2 Storage migration.** New key `opendisplay_studio.dashboards`. On
-  load, if the new key is empty and the legacy `opendisplay_studio.projects_v3`
-  exists, copy its records (`{"projects": [...]}` → `{"dashboards": [...]}`),
-  save under the new key, then remove the legacy store. Dashboard ids are kept,
-  so Media Source URIs stay valid.
-- [ ] **0.3 WebSocket API.** `create_project`/`update_project`/`delete_project`
-  → `create_dashboard`/`update_dashboard`/`delete_dashboard`; payload keys
-  `project`/`project_id` → `dashboard`/`dashboard_id`; bootstrap returns
-  `dashboards`. Frontend and backend ship together, so no aliases.
-- [ ] **0.4 Frontend rename.** `ScreenProject` → `Dashboard`, `freshProject` →
-  `newDashboard`, `projects` state → `dashboards`, CSS classes, test ids, e2e
-  specs and snapshots.
-- [ ] **0.5 Docs and guard.** Update README/ARCHITECTURE/DESIGN_SPECS. Add a
-  test that greps the source tree (excluding `pyproject.toml`, `node_modules`,
-  build output, and the two policy files `CLAUDE.md` / `ROADMAP.md`, which must
-  name the forbidden word to forbid it) and fails on `project`
-  (case-insensitive). When phase 0 is done, shorten this section so the legacy
-  identifiers listed above disappear from `ROADMAP.md` as well.
+- [x] **0.1 Backend rename.** Module, store, errors, compile and validate
+  functions, limits, locals and log messages use `dashboard`.
+- [x] **0.2 Storage.** No migration: the dashboard model is pre-release and its
+  shape still changes (flat list → tree). New key `opendisplay_studio.dashboards`,
+  `STORAGE_VERSION = 1`, document `schemaVersion = 1`. Data saved by earlier
+  builds under the old key is never read; it can be deleted from `.storage`.
+- [x] **0.3 WebSocket API.** `create_dashboard` / `update_dashboard` /
+  `delete_dashboard`, payload keys `dashboard` / `dashboard_id`, bootstrap
+  returns `dashboards`, error code `invalid_dashboard`. Backend and frontend
+  ship together, no aliases.
+- [x] **0.4 Frontend rename.** Type `Dashboard`, state, CSS classes, dev
+  harness, e2e specs.
+- [x] **0.5 Guard.** `tests/test_vocabulary.py` scans the source tree and file
+  names and fails on the forbidden word.
 
-**Accepted when:** the guard test passes; a v3 store fixture under the legacy
-key loads as dashboards with unchanged ids and renders byte-identical PNGs.
+**Accepted when:** the guard test passes and all backend and frontend tests are
+green. (Met.)
 
 ---
 
@@ -92,9 +82,11 @@ key loads as dashboards with unchanged ids and renders byte-identical PNGs.
   types (current fields only), a loader, `bootstrap` returning them, one generic
   backend validator replacing `_validate_primitive_item`, and definition-driven
   defaults replacing `createPrimitive` and `primitiveAppearanceSchema`.
-- [ ] **1.5 Schema v4 + migration.** Value model allows expression strings; items
+- [ ] **1.5 Document model.** Value model allows expression strings; items
   may be `container` with `children` (empty until phase 5); item `name`
-  (editable, defaults to `<type>_<n>`); migration v3 → v4 with fixture test.
+  (editable, defaults to `<type>_<n>`). `schemaVersion` stays 1 and there is no
+  migration until the first public release of the dashboard model (see
+  Deviations); stored dashboards that no longer validate are dropped.
 - [ ] **1.6 Renderer bump** to `odl-renderer` ≥ 0.5.13; replace bound
   heuristics (`len(value) * size * 0.62`, QR version-1 assumption) with real
   measurement (`measure_text`, rendered QR size).
@@ -715,3 +707,4 @@ deployment to devices.
 | Preview mode (`Ctrl+P`) | — | The canvas already is the rendered preview |
 | Styles/states, Tabview, Tileview, several screens | — | No ODL equivalent |
 | Shift+arrow nudges 10 px | Nudges by the dashboard snap size | Consistent with snap setting |
+| — (not an LVGL matter) | Document `schemaVersion` stays 1 and shape changes ship without migrations until the first public release of the dashboard model | Pre-release; the model changes shape every phase (flat list → tree → containers) |

@@ -18,7 +18,8 @@ RENDER_CONCURRENCY = 2
 PANEL_URL_PATH = "opendisplay-studio"
 PANEL_STATIC_URL = "/opendisplay_studio_frontend"
 PANEL_WEB_COMPONENT = "opendisplay-studio-panel"
-STORAGE_KEY = f"{DOMAIN}.projects_v3"
-STORAGE_VERSION = 3
+STORAGE_KEY = f"{DOMAIN}.dashboards"
+STORAGE_VERSION = 1
+SCHEMA_VERSION = 1
 
 LOGGER = logging.getLogger(__package__)

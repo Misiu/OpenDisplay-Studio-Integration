@@ -1,5 +1,5 @@
 export type PaletteId = 'bw' | 'bwr' | 'bwy' | 'bwry' | 'spectra6'
-export type ProjectStatus = 'draft' | 'ready'
+export type DashboardStatus = 'draft' | 'ready'
 
 export type WidgetConfigValue = string | number | boolean | string[]
 export type WidgetConfig = Record<string, WidgetConfigValue>
@@ -29,11 +29,11 @@ export type Primitive = TextPrimitive | RectanglePrimitive | LinePrimitive | Cir
 export interface PrimitiveItem extends ItemState { id: string; kind: 'primitive'; primitive: Primitive }
 export type StudioItem = WidgetItem | PrimitiveItem
 
-export interface ScreenProject {
+export interface Dashboard {
   id: string
-  schemaVersion: 3
+  schemaVersion: 1
   name: string
-  status: ProjectStatus
+  status: DashboardStatus
   language: string
   display: { profileId: string | null; width: number; height: number; palette: PaletteId; background: string; padding: number; snapSize: number }
   items: StudioItem[]
@@ -65,6 +65,6 @@ export interface ComposePreviewResponse {
   warnings: string[]
   timings: { queue: number; data: number; compile: number; render: number; encode: number; pipeline: number }
 }
-export interface BootstrapResponse { version: string; projects: ScreenProject[]; widgets: WidgetDefinition[]; primitives: PrimitiveDefinition[] }
+export interface BootstrapResponse { version: string; dashboards: Dashboard[]; widgets: WidgetDefinition[]; primitives: PrimitiveDefinition[] }
 export interface HomeAssistant { callWS<T>(message: Record<string, unknown>): Promise<T>; language: string; states?: Record<string, { state: string; attributes?: Record<string, unknown> }> }
 export interface HaFormSchema { name: string; label: string; required?: boolean; selector: Record<string, unknown> }
