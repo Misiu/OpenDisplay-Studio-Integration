@@ -133,17 +133,17 @@ test('loads a persisted dashboard after HA assigns hass and ignores later hass o
   await expect(page.getByRole('button', { name: 'Dashboards', exact: true })).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Dashboard name' })).toHaveValue('Kitchen display')
   await expect(page.locator('.selection[data-item-id="temperature"]')).toBeVisible()
-  expect(await page.evaluate(() => window.__ODX_E2E__.hassRevision())).toBe(2)
-  expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
+  expect(await page.evaluate(() => window.__ODS_E2E__.hassRevision())).toBe(2)
+  expect(await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
 
   await page.locator('.selection[data-item-id="temperature"]').click()
   const before = await editorPosition(page)
-  await page.evaluate(() => window.__ODX_E2E__.replaceHass())
+  await page.evaluate(() => window.__ODS_E2E__.replaceHass())
   await page.waitForTimeout(100)
 
   await expect(page.locator('.selection[data-item-id="temperature"].selected')).toHaveCount(1)
   expectStableCanvas(before, await editorPosition(page))
-  expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
+  expect(await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
 })
 
 test('shows dashboard navigation, a searchable catalog and pixel-based canvas settings', async ({ page }) => {
@@ -208,7 +208,7 @@ test('moves and resizes an absolute widget with pixel snapping', async ({ page }
 })
 
 test('matches the Home Assistant header height and exposes eight resize handles with a live size badge', async ({ page }) => {
-  const panel = page.locator('opendisplay-studio-panel')
+  const panel = page.locator('ods-app')
   await panel.evaluate(element => {
     element.style.setProperty('--header-height', '61px')
     element.style.setProperty('--safe-area-inset-top', '7px')
@@ -329,14 +329,14 @@ test('keeps the canvas fixed while selecting, moving upward and editing properti
   const properties = page.locator('.properties')
   await properties.evaluate(element => { element.scrollTop = element.scrollHeight })
   const beforeSelection = await editorPosition(page)
-  const composeCallsBefore = await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)
+  const composeCallsBefore = await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)
 
   await widget.click()
   await expect(page.getByRole('heading', { name: 'Kitchen' })).toBeVisible()
   await expect.poll(() => properties.evaluate(element => element.scrollTop)).toBe(0)
   await page.waitForTimeout(300)
   expectStableCanvas(beforeSelection, await editorPosition(page))
-  const composeCallsAfterSelection = await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)
+  const composeCallsAfterSelection = await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)
   expect(composeCallsAfterSelection).toBe(composeCallsBefore)
 
   const yField = page.locator('.properties input[data-field="y"]')
@@ -374,7 +374,7 @@ test('keeps the canvas fixed while selecting, moving upward and editing properti
 test('adds new elements by click and drag without moving or reloading the editor', async ({ page }) => {
   const canvas = page.locator('.canvas')
   const before = await editorPosition(page)
-  const bootstrapCalls = await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)
+  const bootstrapCalls = await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)
 
   await page.getByRole('button', { name: /Rectangle/ }).click()
   await expect(page.getByRole('heading', { name: 'Rectangle', exact: true })).toBeVisible()
@@ -388,11 +388,11 @@ test('adds new elements by click and drag without moving or reloading the editor
   await expect(page.locator('[data-item-id].selected')).toHaveCount(1)
   await page.waitForTimeout(300)
   expectStableCanvas(before, await editorPosition(page))
-  expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(bootstrapCalls)
+  expect(await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(bootstrapCalls)
 })
 
 test('keeps catalog dragging relative to the canvas across different HA sidebar widths', async ({ page }) => {
-  const panel = page.locator('opendisplay-studio-panel')
+  const panel = page.locator('ods-app')
   const scenarios = [
     { sidebarWidth: 176, name: /Ellipse/, value: 'primitive:ellipse' },
     { sidebarWidth: 324, name: /Line/, value: 'primitive:line' },
@@ -528,7 +528,7 @@ test('adds overlapping primitives and preserves each exact ODL type', async ({ p
   }
   await page.locator('ha-button').filter({ hasText: /^Save$/ }).click()
   const savedTypes = await page.evaluate(() => {
-    const calls = window.__ODX_E2E__.calls()
+    const calls = window.__ODS_E2E__.calls()
     const update = calls.findLast(call => call.type === 'opendisplay_studio/update_dashboard')
     const dashboard = update?.dashboard as { items: Array<{ kind: string; primitive?: { type: string } }> }
     return dashboard.items.filter(item => item.kind === 'primitive').map(item => item.primitive?.type)
@@ -554,7 +554,7 @@ test('selects, hides, locks and reorders compact layers with an insertion marker
   await expect(rectangleRow).not.toHaveClass(/drop-after/)
   await page.locator('ha-button').filter({ hasText: /^Save$/ }).click()
   const order = await page.evaluate(() => {
-    const calls = window.__ODX_E2E__.calls()
+    const calls = window.__ODS_E2E__.calls()
     const update = calls.findLast(call => call.type === 'opendisplay_studio/update_dashboard')
     return (update?.dashboard as { items: Array<{ kind: string; primitive?: { type: string }; hidden: boolean; locked: boolean }> }).items
   })
@@ -668,7 +668,7 @@ test('keeps the authoritative canvas usable on a narrow HA panel', async ({ page
 
 declare global {
   interface Window {
-    __ODX_E2E__: {
+    __ODS_E2E__: {
       calls: () => Array<Record<string, unknown>>
       dashboards: () => Dashboard[]
       replaceHass: () => void

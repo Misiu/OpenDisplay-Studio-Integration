@@ -7,6 +7,11 @@ selection, movement, resizing, visibility, locking, layer reordering and its
 insertion marker, Undo/Redo, confirmed deletion, canvas stability, pan/zoom,
 collapsible and resizable panels, generated ODL, and timing diagnostics.
 
+`elements.spec.ts` has one group per custom element (`ods-app`, `ods-header`,
+`ods-library`, `ods-structure`, `ods-inspector`, `ods-property-field`,
+`ods-zoom-bar`, `ods-canvas`, `ods-gallery` with `ods-context-menu`,
+`ods-new-dashboard-dialog`, `ods-code-view`); pure logic is covered by Vitest.
+
 ```shell
 npm run test:e2e
 ```

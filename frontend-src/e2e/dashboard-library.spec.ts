@@ -40,7 +40,7 @@ test('shows the dashboard gallery without rendering a dashboard first', async ({
   await expect(dashboardCard(page, 'Office status')).toContainText('320 × 240')
   await expect.poll(() => dashboardNames(page)).toEqual(['Kitchen display', 'Hallway overview', 'Office status'])
 
-  const calls = await page.evaluate(() => window.__ODX_E2E__.calls())
+  const calls = await page.evaluate(() => window.__ODS_E2E__.calls())
   expect(calls.filter(call => call.type === 'opendisplay_studio/bootstrap')).toHaveLength(1)
   expect(calls.filter(call => call.type === 'opendisplay_studio/compose_preview')).toHaveLength(0)
 
@@ -50,7 +50,7 @@ test('shows the dashboard gallery without rendering a dashboard first', async ({
     return Math.abs((icon.top + icon.height / 2) - (label.top + label.height / 2))
   })
   expect(newButtonAlignment).toBeLessThan(.5)
-  await expect(page.locator('opendisplay-studio-panel')).toHaveScreenshot('dashboard-gallery.png')
+  await expect(page.locator('ods-app')).toHaveScreenshot('dashboard-gallery.png')
 })
 
 test('filters dashboards and changes their sort order', async ({ page }) => {
@@ -104,7 +104,7 @@ test('creates a custom dashboard and opens it in the editor', async ({ page }) =
   await expect(page.locator('.workspace-meta')).toContainText('640 × 384 px')
   await expect(page.getByRole('combobox', { name: 'Display type' })).toHaveValue('custom')
   await expect(page.getByRole('combobox', { name: 'Palette' })).toHaveValue('spectra6')
-  const createCall = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
+  const createCall = await page.evaluate(() => window.__ODS_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
   expect(createCall).toMatchObject({
     type: 'opendisplay_studio/create_dashboard',
     dashboard: {
@@ -120,7 +120,7 @@ test('returns from the editor to the dashboard gallery', async ({ page }) => {
   await page.getByRole('button', { name: 'Dashboards', exact: true }).click()
 
   await expect(page.getByRole('heading', { name: 'Dashboards', exact: true })).toBeVisible()
-  expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
+  expect(await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/bootstrap').length)).toBe(1)
 })
 
 test('reveals an accessible dashboard menu on hover and renames in place', async ({ page }) => {
@@ -149,9 +149,9 @@ test('reveals an accessible dashboard menu on hover and renames in place', async
 
   await expect(page.getByRole('button', { name: 'Open dashboard Kitchen dashboard', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Dashboards', exact: true })).toBeVisible()
-  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
+  const update = await page.evaluate(() => window.__ODS_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
   expect(update).toMatchObject({ dashboard_id: 'demo', dashboard: { id: 'demo', name: 'Kitchen dashboard' } })
-  expect(await page.evaluate(() => window.__ODX_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)).toBe(0)
+  expect(await page.evaluate(() => window.__ODS_E2E__.calls().filter(call => call.type === 'opendisplay_studio/compose_preview').length)).toBe(0)
 })
 
 test('duplicates a dashboard as Draft and edits its display settings', async ({ page }) => {
@@ -161,7 +161,7 @@ test('duplicates a dashboard as Draft and edits its display settings', async ({ 
   await expect(page.getByText('4 dashboards', { exact: true })).toBeVisible()
   const duplicate = dashboardCard(page, 'Kitchen display copy')
   await expect(duplicate).toContainText(/draft/i)
-  const create = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
+  const create = await page.evaluate(() => window.__ODS_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/create_dashboard'))
   expect(create).toMatchObject({ dashboard: { name: 'Kitchen display copy', status: 'draft', items: [{ id: 'temperature' }] } })
 
   menu = await openDashboardMenu(page, 'Kitchen display copy')
@@ -175,7 +175,7 @@ test('duplicates a dashboard as Draft and edits its display settings', async ({ 
   await expect(duplicate).toContainText('640 × 384')
   await expect(duplicate).toContainText('Spectra 6')
 
-  const update = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
+  const update = await page.evaluate(() => window.__ODS_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/update_dashboard'))
   expect(update).toMatchObject({ dashboard: { name: 'Kitchen display copy', display: { width: 640, height: 384, palette: 'spectra6' } } })
 })
 
@@ -194,7 +194,7 @@ test('requires confirmation before deleting a dashboard', async ({ page }) => {
 
   await expect(page.getByText('2 dashboards', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Open dashboard Kitchen display', exact: true })).toHaveCount(0)
-  const deletion = await page.evaluate(() => window.__ODX_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/delete_dashboard'))
+  const deletion = await page.evaluate(() => window.__ODS_E2E__.calls().findLast(call => call.type === 'opendisplay_studio/delete_dashboard'))
   expect(deletion).toMatchObject({ dashboard_id: 'demo' })
 })
 
@@ -222,7 +222,7 @@ test('switches between Design and read-only Code without losing editor state', a
   const code = page.getByRole('textbox', { name: 'Generated ODL YAML' })
   await expect(code).toHaveJSProperty('readOnly', true)
   await expect(code).toHaveValue('- type: rectangle\n- type: icon\n- type: text')
-  await expect(page.locator('opendisplay-studio-panel')).toHaveScreenshot('dashboard-code-view.png')
+  await expect(page.locator('ods-app')).toHaveScreenshot('dashboard-code-view.png')
 
   await page.getByRole('button', { name: 'Copy generated ODL YAML' }).click()
   await expect(page.getByText('YAML copied to clipboard')).toBeVisible()
@@ -235,7 +235,7 @@ test('switches between Design and read-only Code without losing editor state', a
 
 declare global {
   interface Window {
-    __ODX_E2E__: {
+    __ODS_E2E__: {
       calls: () => Array<Record<string, unknown>>
     }
   }

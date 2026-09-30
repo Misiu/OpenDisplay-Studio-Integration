@@ -57,3 +57,5 @@ export const DISPLAY_PROFILES: DisplayProfile[] = [
 ]
 
 export const profileById = (id: string | null): DisplayProfile => DISPLAY_PROFILES.find(profile => profile.id === id) ?? DISPLAY_PROFILES[0]
+
+export const isPaletteId = (value: string): value is PaletteId => value in PALETTE_LABELS

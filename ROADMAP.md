@@ -9,8 +9,8 @@ Tick a step's box in the same change that completes it.
 
 ## Starting point (September 2026)
 
-- Lit panel (`odx-app.ts`, ~1200 lines, one element) + Python backend rendering
-  with `odl-renderer` 0.5.12. The backend PNG is the canvas image.
+- Lit panel: the `ods-app` shell and one element per area (see 1.1) + Python
+  backend rendering with `odl-renderer` 0.5.12. The backend PNG is the canvas image.
 - Dashboard gallery, New dashboard dialog, Design/Code views, undo/redo, pan and
   zoom, snap, 8 resize handles, flat layer list with hide/lock/delete/reorder.
 - 8 of 16 ODL types (`text`, `rectangle`, `line`, `circle`, `ellipse`, `icon`,
@@ -68,12 +68,18 @@ green. (Met.)
 
 ## Phase 1 — Foundations
 
-- [ ] **1.1 Split the panel into elements** (behaviour unchanged, existing e2e
-  green): `ods-app` (shell, owns dashboard/selection/history), `ods-gallery`,
-  `ods-new-dashboard-dialog`, `ods-header`, `ods-library`, `ods-canvas`
-  (image + overlay), `ods-structure`, `ods-inspector`, `ods-property-field`,
-  `ods-context-menu`, `ods-zoom-bar`. Pure logic moves to modules:
-  `history.ts`, `geometry.ts`, `pointer-gesture.ts`.
+- [x] **1.1 Split the panel into elements** (behaviour unchanged, existing e2e
+  green). Elements, one per file, tag `ods-<name>`: `ods-app` (shell, owns
+  dashboards, open dashboard, selection, history, viewport), `ods-gallery`,
+  `ods-new-dashboard-dialog`, `ods-header`, `ods-library`, `ods-canvas`,
+  `ods-zoom-bar`, `ods-structure`, `ods-inspector`, `ods-property-field`,
+  `ods-context-menu`, `ods-code-view`. The panel tag is now `ods-app`
+  (`PANEL_WEB_COMPONENT`). Children get data through properties and report
+  intent through the typed events in `events.ts`; only `ods-app` changes the
+  dashboard. Pure logic moved to framework-free modules with Vitest tests:
+  `history.ts`, `geometry.ts`, `pointer-gesture.ts`, `viewport.ts`,
+  `dashboard-ops.ts`, `dashboards.ts`, `item-fields.ts`, `item-labels.ts`,
+  `math.ts`. New e2e: `e2e/elements.spec.ts`, one group per element.
 - [ ] **1.2 Strings module** `strings.ts`; all UI text moves there.
 - [ ] **1.3 Command registry** `commands.ts`: `{ id, label, icon, shortcut,
   isEnabled(ctx), run(ctx) }`. Undo/redo, delete, hide, lock move into it first.
@@ -139,9 +145,38 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
   search, 3×3 anchor picker, segmented control for short enums, switch for
   booleans. Inline disclosure rows (`> Advanced`) 22 px. The trailing `{}`
   button is added in phase 3.
-- [ ] **2.7 Selection overlay.** Blue 1 px outline, 8 square handles, size
-  badge under the element (`100 × 100`, `auto` for intrinsic size), live during
-  gestures.
+- [ ] **2.7 Selection overlay.** Drawn in display pixels on a layer above the
+  canvas, with every measure divided by the zoom so it keeps its screen size:
+  1 px `#2196f3` outline, 8 px white square handles (1 px blue border) at four
+  corners and four edge midpoints, 12 px edge hit strips and 20 px corner hit
+  areas, dashed hover outline (offset 2 px), size badge under the element
+  (`W × H`; `auto`, `W × auto`, `auto × H` for intrinsic size), live during
+  gestures. Details: `docs/design/LVGL_CANVAS_BEHAVIOUR.md`.
+> **Priority.** 2.8–2.10 are important but not first: do them after the
+> element split (1.1) and the shell/properties work (2.1–2.7) are green and
+> tested. They only plug into seams the split creates (`snapping.ts`,
+> `viewport.ts`, the canvas element).
+
+- [ ] **2.8 Snapping and guides** (`snapping.ts`, pure, Vitest). While moving,
+  in this order: grid rounding to the dashboard snap size; edge magnet 8 px with
+  sticky release after 12 px; per-axis candidates — siblings 5 px (edges and
+  centres), canvas centre lines 8 px (wins ties by 2 px), equal spacing 8 px —
+  smallest distance wins; clamp to the working area. Magenta dashed guides for
+  every candidate matching the winner; spacing badges when both gaps are equal
+  within 3 px. `Ctrl`/`⌘` held, or the `Snap` toggle off, disables all of it.
+  Library drops place the element's **top-left** at the drop point.
+- [ ] **2.9 Resize and nudge rules.** West/north handles keep the opposite edge
+  fixed; `Shift` keeps the aspect ratio (corners follow the larger relative
+  change); minimum 10 px; rounding to the snap size unless `Alt`; edge snap 4 px
+  to the container with a guide; only the dragged axis gets an explicit size.
+  Arrows nudge 1 px, `Shift` by the snap size (lvgl: 5 px), clamped to −size … 2×size; one burst of
+  nudges is one history step (300 ms). `Esc` cancels a drag or resize in
+  progress and restores the pre-gesture state.
+- [ ] **2.10 Viewport** (`viewport.ts`). Zoom 0.25×–5×; wheel pans, `Ctrl`/`⌘` +
+  wheel zooms toward the cursor with exponential steps (`Pan` toggle off: wheel
+  zooms); pan with middle button, `Space` + drag or `Ctrl` + drag; touch: one
+  finger pans, two pinch; `Fit` = 95 % of the available size minus 32 px and
+  toggles back to 100 %; overlay sizes divided by zoom.
 
 **Accepted when:** Playwright visual snapshots of the workspace at 1440×900
 match the measurements above (checked by element box assertions, not only
@@ -707,4 +742,6 @@ deployment to devices.
 | Preview mode (`Ctrl+P`) | — | The canvas already is the rendered preview |
 | Styles/states, Tabview, Tileview, several screens | — | No ODL equivalent |
 | Shift+arrow nudges 10 px | Nudges by the dashboard snap size | Consistent with snap setting |
+| Drop from the library centres the element on the pointer | Top-left at the drop point, grid-rounded | Matches lvgl.espboards.dev (measured) |
+| Fixed 5 px grid | Grid step is the dashboard `snapSize`; all other thresholds as measured | Displays differ in resolution; user already sets snap size |
 | — (not an LVGL matter) | Document `schemaVersion` stays 1 and shape changes ship without migrations until the first public release of the dashboard model | Pre-release; the model changes shape every phase (flat list → tree → containers) |

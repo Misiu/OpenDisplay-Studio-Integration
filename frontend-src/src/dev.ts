@@ -2,7 +2,7 @@ import './index.css'
 import '@fontsource/roboto/400.css'
 import '@fontsource/roboto/500.css'
 import '@fontsource/roboto/700.css'
-import './odx-app'
+import './ods-app'
 import { createId } from './ids'
 import type { HomeAssistant, Dashboard } from './types'
 
@@ -253,7 +253,7 @@ const hass: HomeAssistant = {
   },
 }
 
-const panel = document.querySelector('opendisplay-studio-panel') as HTMLElement & { hass: HomeAssistant }
+const panel = document.querySelector('ods-app') as HTMLElement & { hass: HomeAssistant }
 
 const cloneData = <T>(value: T): T => structuredClone(value)
 let hassRevision = 0
@@ -264,7 +264,7 @@ const assignFreshHass = (): void => {
 
 declare global {
   interface Window {
-    __ODX_E2E__: {
+    __ODS_E2E__: {
       calls: () => Array<Record<string, unknown>>
       dashboards: () => Dashboard[]
       replaceHass: () => void
@@ -272,7 +272,7 @@ declare global {
     }
   }
 }
-window.__ODX_E2E__ = {
+window.__ODS_E2E__ = {
   calls: () => cloneData(calls),
   dashboards: () => cloneData(dashboards),
   replaceHass: assignFreshHass,

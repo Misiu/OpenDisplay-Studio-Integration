@@ -68,3 +68,5 @@ export interface ComposePreviewResponse {
 export interface BootstrapResponse { version: string; dashboards: Dashboard[]; widgets: WidgetDefinition[]; primitives: PrimitiveDefinition[] }
 export interface HomeAssistant { callWS<T>(message: Record<string, unknown>): Promise<T>; language: string; states?: Record<string, { state: string; attributes?: Record<string, unknown> }> }
 export interface HaFormSchema { name: string; label: string; required?: boolean; selector: Record<string, unknown> }
+export interface FormSectionSchema { name: string; type: 'grid' | 'expandable'; flatten: true; title?: string; expanded?: boolean; schema: StudioFormSchema[] }
+export type StudioFormSchema = HaFormSchema | FormSectionSchema

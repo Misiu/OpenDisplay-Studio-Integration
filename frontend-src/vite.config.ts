@@ -7,7 +7,7 @@ export default defineConfig({
     outDir: '../custom_components/opendisplay_studio/frontend',
     emptyOutDir: true,
     lib: {
-      entry: 'src/odx-app.ts',
+      entry: 'src/ods-app.ts',
       formats: ['es'],
       fileName: () => 'opendisplay-studio.js',
     },

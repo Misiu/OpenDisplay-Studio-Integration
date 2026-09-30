@@ -1,3 +1,4 @@
+import { clamp, snap } from './math'
 import type { ItemBounds } from './types'
 
 export const RESIZE_HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as const
@@ -16,10 +17,6 @@ interface ResizeBoundsOptions {
   snapSize: number
   snapEnabled: boolean
 }
-
-const clamp = (value: number, minimum: number, maximum: number): number => Math.max(minimum, Math.min(maximum, value))
-
-const snap = (value: number, size: number, origin: number): number => origin + Math.round((value - origin) / size) * size
 
 const hasHorizontalEdge = (handle: ResizeHandle): boolean => handle.includes('e') || handle.includes('w')
 
