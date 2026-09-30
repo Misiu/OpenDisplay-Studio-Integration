@@ -1,4 +1,9 @@
 import {
+  CLOCK_REFRESH_MS,
+  STATE_REFRESH_DELAY_MS,
+  dependenciesChanged,
+} from "./preview-refresh";
+import {
   css,
   html,
   LitElement,
@@ -17,6 +22,7 @@ import {
   removeItem,
   setBackground,
   setDisplayNumber,
+  setItemExpression,
   setItemNumber,
   setPalette,
   setWidgetConfig,
@@ -41,7 +47,6 @@ import { isTypingTarget } from "./dom";
 import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
-import { itemName } from "./item-labels";
 import { strings } from "./strings";
 import * as api from "./studio-api";
 import { clamp } from "./math";
@@ -182,6 +187,8 @@ export class OdsApp extends LitElement {
   @query("ods-canvas") private canvas?: OdsCanvas;
 
   private previewTimer?: number;
+  private stateTimer?: number;
+  private clockTimer?: number;
   private previewRequest = 0;
   private bootstrapStarted = false;
   private readonly history = new History<Dashboard>();
@@ -198,11 +205,16 @@ export class OdsApp extends LitElement {
     this.ensureBootstrap();
   }
   protected updated(changed: PropertyValues<this>): void {
-    if (changed.has("hass")) this.ensureBootstrap();
+    if (changed.has("hass")) {
+      this.ensureBootstrap();
+      this.refreshOnStateChange(changed.get("hass"));
+    }
   }
   disconnectedCallback(): void {
     super.disconnectedCallback();
     if (this.previewTimer) window.clearTimeout(this.previewTimer);
+    if (this.stateTimer) window.clearTimeout(this.stateTimer);
+    if (this.clockTimer) window.clearTimeout(this.clockTimer);
     window.removeEventListener("keydown", this.onKeyDown);
   }
 
@@ -543,13 +555,43 @@ export class OdsApp extends LitElement {
       PREVIEW_DELAY_MS
     );
   }
+
+  /** Compose again, a moment later, when a state the expressions read has changed. */
+  private refreshOnStateChange(previous: HomeAssistant | undefined): void {
+    const dependencies = this.preview?.dependencies;
+    if (
+      !dependencies ||
+      !dependenciesChanged(dependencies, previous?.states, this.hass?.states)
+    ) {
+      return;
+    }
+    if (this.stateTimer) window.clearTimeout(this.stateTimer);
+    this.stateTimer = window.setTimeout(
+      () => void this.composePreview(),
+      STATE_REFRESH_DELAY_MS
+    );
+  }
+
+  /** A preview that reads the clock is composed again every minute. */
+  private scheduleClockRefresh(): void {
+    if (this.clockTimer) window.clearTimeout(this.clockTimer);
+    if (!this.preview?.dependencies.usesTime) return;
+    this.clockTimer = window.setTimeout(
+      () => void this.composePreview(),
+      CLOCK_REFRESH_MS
+    );
+  }
+
   private async composePreview(): Promise<void> {
     if (!this.hass || !this.current) return;
     this.error = "";
     const request = ++this.previewRequest;
     try {
       const result = await api.composePreview(this.hass, this.current);
-      if (request === this.previewRequest) this.preview = result;
+      if (request === this.previewRequest) {
+        this.preview = result;
+        this.scheduleClockRefresh();
+      }
     } catch (error) {
       this.error = messageFrom(error, strings.app.previewFailed);
     }
@@ -765,6 +807,13 @@ export class OdsApp extends LitElement {
     );
   }
 
+  private onExpressionChange(event: OdsEvent<"expression-change">): void {
+    const { key, template } = event.detail;
+    this.mutate((next) =>
+      setItemExpression(next, this.selectedItemId, key, template)
+    );
+  }
+
   private onDisplayNumberChange(
     event: OdsEvent<"display-number-change">
   ): void {
@@ -811,7 +860,7 @@ export class OdsApp extends LitElement {
     return html`
       <ods-confirm-dialog
         eyebrow=${strings.app.confirmRemoval}
-        heading=${strings.app.deleteElementTitle(itemName(item, this.widgets, this.primitives))}
+        heading=${strings.app.deleteElementTitle(item.name)}
         body=${strings.app.deleteElementBody}
         confirmLabel=${strings.app.deleteElement}
         @confirm-accept=${this.confirmDeleteItem}
@@ -918,6 +967,7 @@ export class OdsApp extends LitElement {
           @background-change=${this.onBackgroundChange}
           @widget-config-change=${this.onWidgetConfigChange}
           @primitive-change=${this.onPrimitiveChange}
+          @expression-change=${this.onExpressionChange}
           @dashboard-delete-request=${this.deleteDashboard}
         ></ods-inspector>
       </div>

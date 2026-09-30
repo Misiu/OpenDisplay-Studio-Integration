@@ -14,11 +14,11 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import SCHEMA_VERSION, STORAGE_KEY, STORAGE_VERSION
+from .items import validate_items
 from .palette import PALETTE_COLORS
 from .primitives import DEFAULT_PRIMITIVES, PrimitiveRegistry
 from .validation import (
     DashboardValidationError,
-    boolean,
     color,
     integer,
     string,
@@ -28,72 +28,9 @@ from .widgets import WidgetRegistry
 type Dashboard = dict[str, Any]
 
 MAX_DASHBOARDS = 100
-MAX_ITEMS = 256
 MAX_NAME_LENGTH = 100
 LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 PALETTES = frozenset(PALETTE_COLORS)
-
-
-def _item_state(value: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "id": string(value.get("id"), "item.id", 64),
-        "locked": boolean(value.get("locked", False), "item.locked"),
-        "hidden": boolean(value.get("hidden", False), "item.hidden"),
-    }
-
-
-def _validate_frame(value: object, width: int, height: int) -> dict[str, int]:
-    if not isinstance(value, dict):
-        raise DashboardValidationError("widget frame must be an object")
-    x = integer(value.get("x"), "frame.x", 0, width - 1)
-    y = integer(value.get("y"), "frame.y", 0, height - 1)
-    frame_width = integer(value.get("width"), "frame.width", 1, width)
-    frame_height = integer(value.get("height"), "frame.height", 1, height)
-    if x + frame_width > width or y + frame_height > height:
-        raise DashboardValidationError("widget frame exceeds the display")
-    return {"x": x, "y": y, "width": frame_width, "height": frame_height}
-
-
-def _validate_widget_item(
-    value: dict[str, Any], registry: WidgetRegistry, width: int, height: int
-) -> dict[str, Any]:
-    widget = value.get("widget")
-    if not isinstance(widget, dict):
-        raise DashboardValidationError("widget item requires widget")
-    widget_type = string(widget.get("type"), "widget.type", 64)
-    definition = registry.definition(widget_type)
-    version = string(widget.get("version", definition["version"]), "widget.version", 64)
-    config = widget.get("config", {})
-    if not isinstance(config, dict):
-        raise DashboardValidationError("widget.config must be an object")
-    layout = value.get("layout", {})
-    if not isinstance(layout, dict):
-        raise DashboardValidationError("widget layout must be an object")
-    return {
-        **_item_state(value),
-        "kind": "widget",
-        "widget": {"type": widget_type, "version": version, "config": deepcopy(config)},
-        "frame": _validate_frame(value.get("frame"), width, height),
-        "layout": {
-            "padding": integer(layout.get("padding", 0), "layout.padding", 0, 128)
-        },
-    }
-
-
-def _validate_primitive_item(
-    value: dict[str, Any],
-    primitives: PrimitiveRegistry,
-    width: int,
-    height: int,
-) -> dict[str, Any]:
-    primitive = value.get("primitive")
-    if not isinstance(primitive, dict):
-        raise DashboardValidationError("primitive item requires primitive")
-    return {
-        **_item_state(value),
-        "kind": "primitive",
-        "primitive": primitives.normalize(primitive, width, height),
-    }
 
 
 def validate_dashboard(
@@ -118,24 +55,7 @@ def validate_dashboard(
     if padding * 2 >= min(width, height):
         raise DashboardValidationError("display.padding leaves no working area")
     snap_size = integer(display.get("snapSize", 5), "display.snapSize", 1, 256)
-    raw_items = value.get("items", [])
-    if not isinstance(raw_items, list) or len(raw_items) > MAX_ITEMS:
-        raise DashboardValidationError(f"items must contain at most {MAX_ITEMS} items")
-    items: list[dict[str, Any]] = []
-    item_ids: set[str] = set()
-    for raw_item in raw_items:
-        if not isinstance(raw_item, dict):
-            raise DashboardValidationError("every item must be an object")
-        if raw_item.get("kind") == "widget":
-            item = _validate_widget_item(raw_item, registry, width, height)
-        elif raw_item.get("kind") == "primitive":
-            item = _validate_primitive_item(raw_item, primitives, width, height)
-        else:
-            raise DashboardValidationError("item.kind must be widget or primitive")
-        if item["id"] in item_ids:
-            raise DashboardValidationError("item ids must be unique")
-        item_ids.add(item["id"])
-        items.append(item)
+    items = validate_items(value.get("items", []), registry, primitives, width, height)
     language = value.get("language", "en")
     if not isinstance(language, str) or LANGUAGE_PATTERN.fullmatch(language) is None:
         raise DashboardValidationError("language is invalid")

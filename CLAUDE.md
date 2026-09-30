@@ -158,7 +158,9 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
 - `items` is a **tree**. Sibling order is z-order: first drawn first; the last
   child is on top. Item kinds: `primitive` (exactly one ODL element), `widget`
   (zero or more ODL elements from its renderer), `container` (editor-side
-  parent, LVGL "Object"; optional background compiles to one `rectangle`).
+  parent, LVGL "Object"; optional background compiles to one `rectangle`; with
+  `grouped: true` it is a group and has no background). Every item has a `name`
+  (default `<type>_<n>`).
 - **Children of a container store coordinates relative to the container's
   top-left corner** (as LVGL does). The compiler adds the accumulated offsets
   after expression resolution, so ODL output is always absolute.
@@ -230,19 +232,31 @@ Shapes: `number`, `coordinate` (px or `%`), `boolean`, `enum`, `color`,
 
 ## Expressions
 
-- A value is a literal of the field's shape or a string containing `{{` or `{%`.
-  Expressions are stored and exported **verbatim** — never coerced, parsed, or
-  reformatted. `isExpressionValue` exists once in TS and once in Python.
-- Validation checks literals against the shape; expressions only against length.
-- **Evaluation is backend-only**, with HA's engine
-  (`homeassistant.helpers.template.Template(...).async_render(parse_result=True)`),
-  then coerced to the field shape. No client-side Jinja.
-- On error or wrong result type, the element is skipped and a warning names
-  item, field, and message. Never substitute a plausible-looking value.
-- The Code view keeps unresolved expressions (valid `drawcustom` input).
-- Expression-driven position fields lock drag/nudge/align for that item and every
-  container above it; expression-driven size fields lock only the affected resize
-  handles.
+- An item keeps its **literal fields** and an **`expressions` map** beside them
+  (`field key → template`, plus `visible` on any item). A template is a string
+  containing `{{` or `{%`. The literal stays valid, so switching the `{}` toggle
+  off loses nothing. `isExpressionValue` exists once in TS and once in Python
+  (`is_expression`); templates are validated only for type and length.
+- Templates are stored and exported **verbatim** — never coerced, parsed, or
+  reformatted.
+- **Evaluation is backend-only** (`expressions.py`), with HA's engine
+  (`Template(...).async_render_to_info(parse_result=True)`), then validated
+  against the field's shape like any literal. No client-side Jinja.
+- On error or wrong result type, the element is skipped and a warning
+  `<name>.<field>: <message>` is returned. Never substitute a plausible-looking
+  value. A hidden container is not resolved further.
+- `compose_preview` returns the entities, domains and clock use the templates
+  depend on; the panel composes again 500 ms after such a state changes and every
+  minute when the clock is read.
+- The Code view keeps unresolved expressions (valid `drawcustom` input). Inside a
+  container a coordinate template and any `visible` template must be a single
+  `{{ … }}` expression, so it can be emitted as
+  `{{ (<expr>) | float(0) + <offset> }}` and combined with the container's own.
+- Expression-driven position fields lock dragging for that item; expression-driven
+  size fields lock only the handles that would write them (`locks.ts`). Fields
+  outside the geometry lock nothing.
+- Reference for expression UX and ODL gaps: schlomo/odl-drawcustom-designer
+  (ADR-013); the renderer still wins on field semantics.
 
 ## UI rules
 

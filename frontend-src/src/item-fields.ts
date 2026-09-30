@@ -1,5 +1,5 @@
 import { PALETTE_COLORS } from "./display-profiles";
-import { isBoxPrimitive } from "./geometry";
+import { isBoxPrimitive, primitiveBounds } from "./geometry";
 import { resolveLimit } from "./primitives";
 import { strings } from "./strings";
 import type {
@@ -20,6 +20,8 @@ export interface LayoutField {
   value: number;
   min: number;
   max: number;
+  /** The field is one the primitive stores itself, so it can be an expression. */
+  stored: boolean;
 }
 
 /** The layout inputs of an item: a grid of position/size fields plus any that sit below it. */
@@ -38,6 +40,16 @@ export const definitionFor = (
 ): PrimitiveDefinition | undefined =>
   definitions.find((definition) => definition.type === item.primitive.type);
 
+/** A layout input; derived ones (a box's width, a widget's frame) are not stored fields. */
+const layoutField = (
+  label: string,
+  key: string,
+  value: number,
+  min: number,
+  max: number,
+  stored = false
+): LayoutField => ({ label, key, value, min, max, stored });
+
 const widgetLayoutFields = (
   item: WidgetItem,
   dashboard: Dashboard
@@ -46,31 +58,13 @@ const widgetLayoutFields = (
   const labels = strings.fields;
   return {
     grid: [
-      { label: labels.x, key: "x", value: item.frame.x, min: 0, max: width },
-      { label: labels.y, key: "y", value: item.frame.y, min: 0, max: height },
-      {
-        label: labels.width,
-        key: "width",
-        value: item.frame.width,
-        min: 1,
-        max: width,
-      },
-      {
-        label: labels.height,
-        key: "height",
-        value: item.frame.height,
-        min: 1,
-        max: height,
-      },
+      layoutField(labels.x, "x", item.frame.x, 0, width),
+      layoutField(labels.y, "y", item.frame.y, 0, height),
+      layoutField(labels.width, "width", item.frame.width, 1, width),
+      layoutField(labels.height, "height", item.frame.height, 1, height),
     ],
     extra: [
-      {
-        label: labels.innerPadding,
-        key: "padding",
-        value: item.layout.padding,
-        min: 0,
-        max: 128,
-      },
+      layoutField(labels.innerPadding, "padding", item.layout.padding, 0, 128),
     ],
   };
 };
@@ -86,42 +80,19 @@ const cornerLayoutFields = (
   }
   const { width, height } = dashboard.display;
   const labels = strings.fields;
+  const bounds = primitiveBounds(primitive);
   return {
     grid: [
-      {
-        label: labels.x,
-        key: "x",
-        value: Math.min(primitive.x_start, primitive.x_end),
-        min: 0,
-        max: width,
-      },
-      {
-        label: labels.y,
-        key: "y",
-        value: Math.min(primitive.y_start, primitive.y_end),
-        min: 0,
-        max: height,
-      },
-      {
-        label: labels.width,
-        key: "width",
-        value: Math.abs(primitive.x_end - primitive.x_start) + 1,
-        min: 1,
-        max: width,
-      },
-      {
-        label: labels.height,
-        key: "height",
-        value: Math.abs(primitive.y_end - primitive.y_start) + 1,
-        min: 1,
-        max: height,
-      },
+      layoutField(labels.x, "x", bounds.x, 0, width),
+      layoutField(labels.y, "y", bounds.y, 0, height),
+      layoutField(labels.width, "width", bounds.width, 1, width),
+      layoutField(labels.height, "height", bounds.height, 1, height),
     ],
     extra: [],
   };
 };
 
-const pointLayoutField = (
+const storedLayoutField = (
   field: PrimitiveField,
   values: Record<string, unknown>,
   dashboard: Dashboard
@@ -129,19 +100,20 @@ const pointLayoutField = (
   const display = dashboard.display;
   const coordinateLimit = field.axis === "x" ? display.width : display.height;
   const isCoordinate = field.shape === "coordinate";
-  return {
-    label: field.label,
-    key: field.key,
-    value: Number(values[field.key]),
-    min: isCoordinate ? 0 : resolveLimit(field.min, display, 0),
-    max: isCoordinate
+  return layoutField(
+    field.label,
+    field.key,
+    Number(values[field.key]),
+    isCoordinate ? 0 : resolveLimit(field.min, display, 0),
+    isCoordinate
       ? coordinateLimit
       : resolveLimit(field.max, display, coordinateLimit),
-  };
+    true
+  );
 };
 
-/** A point is edited through its own layout fields: its position and, say, a radius or size. */
-const pointLayoutFields = (
+/** The layout fields a primitive stores itself, straight from its definition. */
+const storedLayoutFields = (
   item: PrimitiveItem,
   definition: PrimitiveDefinition,
   dashboard: Dashboard
@@ -149,15 +121,27 @@ const pointLayoutFields = (
   const values: Record<string, unknown> = { ...item.primitive };
   const grid = definition.fields
     .filter((field) => field.section === "layout")
-    .map((field) => pointLayoutField(field, values, dashboard));
+    .map((field) => storedLayoutField(field, values, dashboard));
   return { grid, extra: [] };
 };
 
-/** The numeric layout fields the inspector shows for an item, from its definition. */
+/** Whether a box or line can also be edited by its corners, where each may be an expression. */
+export const hasCornerFields = (
+  item: StudioItem,
+  definitions: PrimitiveDefinition[]
+): boolean =>
+  item.kind === "primitive" &&
+  definitionFor(item, definitions)?.geometry !== "point";
+
+/**
+ * The numeric layout fields the inspector shows for an item, from its definition. A box
+ * or line shows left, top, width and height, or with `corners` the four stored corners.
+ */
 export const layoutFields = (
   item: StudioItem,
   dashboard: Dashboard,
-  definitions: PrimitiveDefinition[]
+  definitions: PrimitiveDefinition[],
+  corners = false
 ): LayoutFields => {
   if (item.kind === "widget") {
     return widgetLayoutFields(item, dashboard);
@@ -166,8 +150,8 @@ export const layoutFields = (
   if (!definition) {
     return NO_FIELDS;
   }
-  return definition.geometry === "point"
-    ? pointLayoutFields(item, definition, dashboard)
+  return definition.geometry === "point" || corners
+    ? storedLayoutFields(item, definition, dashboard)
     : cornerLayoutFields(item, dashboard);
 };
 

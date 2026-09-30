@@ -35,6 +35,10 @@ class Box:
             max(1, self.height - amount * 2),
         )
 
+    def moved(self, dx: int, dy: int) -> Box:
+        """Return the box shifted by the offset."""
+        return Box(self.x + dx, self.y + dy, self.width, self.height)
+
     def as_dict(self) -> dict[str, int]:
         """Return the frontend transport representation."""
         return {"x": self.x, "y": self.y, "width": self.width, "height": self.height}

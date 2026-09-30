@@ -1,3 +1,5 @@
+import { seedExpression, VISIBLE_KEY } from "./expressions";
+import { defaultItemName } from "./item-names";
 import {
   constrainItem,
   isBoxPrimitive,
@@ -19,6 +21,7 @@ import type {
   Primitive,
   PrimitiveDefinition,
   PrimitiveItem,
+  StudioItem,
   WidgetDefinition,
   WidgetItem,
 } from "./types";
@@ -264,6 +267,7 @@ export const createWidgetItem = (
   );
   return {
     id: createId(),
+    name: defaultItemName(dashboard.items, definition.id),
     kind: "widget",
     locked: false,
     hidden: false,
@@ -307,6 +311,7 @@ export const createPrimitiveItem = (
   if (!primitive) return undefined;
   const item: PrimitiveItem = {
     id: createId(),
+    name: defaultItemName(dashboard.items, primitive.type),
     kind: "primitive",
     locked: false,
     hidden: false,
@@ -343,4 +348,37 @@ export const catalogCascadePosition = (
       snapEnabled
     ),
   };
+};
+
+/** The current literal of a field, which a new expression starts from. */
+const literalOf = (item: StudioItem, key: string): unknown => {
+  if (key === VISIBLE_KEY) return !item.hidden;
+  if (item.kind !== "primitive") return undefined;
+  return Object.entries(item.primitive).find(([name]) => name === key)?.[1];
+};
+
+/**
+ * Give a field an expression, or with `null` take it back to its literal. The literal
+ * stays in the item either way. With `undefined` the field starts from an expression
+ * that yields its current value.
+ */
+export const setItemExpression = (
+  dashboard: Dashboard,
+  itemId: string,
+  key: string,
+  template: string | null | undefined
+): void => {
+  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  if (!item || item.locked) return;
+  const expressions = { ...item.expressions };
+  if (template === null) {
+    delete expressions[key];
+  } else {
+    expressions[key] = template ?? seedExpression(literalOf(item, key));
+  }
+  if (Object.keys(expressions).length === 0) {
+    delete item.expressions;
+  } else {
+    item.expressions = expressions;
+  }
 };

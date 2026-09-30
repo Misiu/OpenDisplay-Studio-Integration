@@ -10,7 +10,7 @@ import {
 import { isMacPlatform } from "./dom";
 import { emit } from "./events";
 import { strings } from "./strings";
-import { itemIcon, itemName } from "./item-labels";
+import { itemIcon } from "./item-labels";
 import { trackPointerGesture } from "./pointer-gesture";
 import { baseStyles, chromeStyles } from "./studio-styles";
 import type {
@@ -302,7 +302,7 @@ export class OdsStructure extends LitElement {
   }
 
   private renderRow(item: StudioItem): TemplateResult {
-    const name = itemName(item, this.widgets, this.primitives);
+    const name = item.name;
     const drop =
       this.dropTarget?.itemId === item.id ? this.dropTarget.edge : undefined;
     const rowClasses = classMap({

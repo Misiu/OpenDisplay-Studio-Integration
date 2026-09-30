@@ -168,6 +168,18 @@ export const strings = {
     },
   },
 
+  expression: {
+    toggleLabel: (field: string): string => `Expression for ${field}`,
+    toggleTooltip: "Expression (or type {)",
+    placeholder: "{{ states('sensor.example') }}",
+    visibleLabel: "Visible",
+    alwaysVisible: "Always shown",
+    positionLocked: (fields: string): string =>
+      `Position is driven by an expression (${fields})`,
+    cornerFields: "Edit corners",
+    derivedFields: "Edit position and size",
+  },
+
   canvas: {
     rendering: "Rendering…",
     previewAlt: "Authoritative rendered display preview",

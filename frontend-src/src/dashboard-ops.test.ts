@@ -8,6 +8,7 @@ import {
   removeItem,
   setBackground,
   setDisplayNumber,
+  setItemExpression,
   setItemNumber,
   setPalette,
   toggleItemState,
@@ -243,5 +244,63 @@ describe("editing point primitives through their definition", () => {
       primitiveDefinitions
     );
     expect(dashboard.items[0]).toMatchObject({ primitive: { fill: null } });
+  });
+});
+
+describe("setItemExpression", () => {
+  it("starts an expression from the current value, and keeps the literal", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+
+    setItemExpression(dashboard, "t", "size", undefined);
+
+    const item = dashboard.items[0];
+    expect(item?.expressions).toEqual({ size: "{{ 32 }}" });
+    expect(item?.kind === "primitive" && item.primitive).toMatchObject({
+      size: 32,
+    });
+  });
+
+  it("stores the template exactly as typed", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+
+    setItemExpression(
+      dashboard,
+      "t",
+      "value",
+      "{{ states('sensor.t')|round }}"
+    );
+
+    expect(dashboard.items[0]?.expressions).toEqual({
+      value: "{{ states('sensor.t')|round }}",
+    });
+  });
+
+  it("returns a field to its literal and drops an empty map", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+    setItemExpression(dashboard, "t", "size", undefined);
+
+    setItemExpression(dashboard, "t", "size", null);
+
+    expect(dashboard.items[0]).not.toHaveProperty("expressions");
+  });
+
+  it("starts visibility from whether the item is shown now", () => {
+    const shown = dashboardWith([textItem("t")]);
+    const hiddenItem = { ...textItem("h"), hidden: true };
+    const hidden = dashboardWith([hiddenItem]);
+
+    setItemExpression(shown, "t", "visible", undefined);
+    setItemExpression(hidden, "h", "visible", undefined);
+
+    expect(shown.items[0]?.expressions).toEqual({ visible: "{{ true }}" });
+    expect(hidden.items[0]?.expressions).toEqual({ visible: "{{ false }}" });
+  });
+
+  it("leaves a locked item alone", () => {
+    const dashboard = dashboardWith([{ ...textItem("t"), locked: true }]);
+
+    setItemExpression(dashboard, "t", "size", undefined);
+
+    expect(dashboard.items[0]).not.toHaveProperty("expressions");
   });
 });

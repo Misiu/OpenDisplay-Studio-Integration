@@ -11,8 +11,8 @@ import {
   workingArea,
   type ItemGesture,
 } from "./geometry";
-import { itemName } from "./item-labels";
 import { trackPointerGesture } from "./pointer-gesture";
+import { itemLocks } from "./locks";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
 import { baseStyles } from "./studio-styles";
 import { strings } from "./strings";
@@ -419,6 +419,11 @@ export class OdsCanvas extends LitElement {
     event.preventDefault();
     emit(this, "item-select", { itemId: item.id });
     if (item.locked) return;
+    const locks = itemLocks(item, this.primitives);
+    const blocked = handle
+      ? locks.handles.includes(handle)
+      : locks.position.length > 0;
+    if (blocked) return;
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
     const original = structuredClone(item);
@@ -506,10 +511,7 @@ export class OdsCanvas extends LitElement {
   }
 
   private resizeHandleLabel(item: StudioItem, handle: ResizeHandle): string {
-    return strings.canvas.resizeHandle(
-      itemName(item, this.widgets, this.primitives),
-      strings.canvas.sides[handle]
-    );
+    return strings.canvas.resizeHandle(item.name, strings.canvas.sides[handle]);
   }
 
   private renderBadges(item: StudioItem): TemplateResult {
@@ -526,8 +528,25 @@ export class OdsCanvas extends LitElement {
           ? html`
               <ha-icon class="lock-badge" icon="mdi:lock"></ha-icon>
             `
-          : nothing
+          : this.renderExpressionLock(item)
       }
+    `;
+  }
+
+  /** Says why an item cannot be dragged: a position field is an expression. */
+  private renderExpressionLock(
+    item: StudioItem
+  ): TemplateResult | typeof nothing {
+    const { position } = itemLocks(item, this.primitives);
+    if (position.length === 0) return nothing;
+    const reason = strings.expression.positionLocked(position.join(", "));
+    return html`
+      <ha-icon
+        class="lock-badge expression-lock"
+        icon="mdi:function-variant"
+        title=${reason}
+        aria-label=${reason}
+      ></ha-icon>
     `;
   }
 
@@ -542,7 +561,8 @@ export class OdsCanvas extends LitElement {
   }
 
   private renderHandles(item: StudioItem): TemplateResult[] {
-    return RESIZE_HANDLES.map(
+    const disabled = itemLocks(item, this.primitives).handles;
+    return RESIZE_HANDLES.filter((handle) => !disabled.includes(handle)).map(
       (handle) => html`
         <button
           data-resize-handle=${handle}

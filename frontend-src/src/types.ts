@@ -10,13 +10,19 @@ export interface ItemFrame {
   width: number;
   height: number;
 }
+/** Templates beside an item's literal fields, keyed by field (or `visible`). */
+export type ItemExpressions = Record<string, string>;
+
 export interface ItemState {
+  id: string;
+  /** What the structure tree and dialogs call the item; unique in a dashboard. */
+  name: string;
   locked: boolean;
   hidden: boolean;
+  expressions?: ItemExpressions;
 }
 
 export interface WidgetItem extends ItemState {
-  id: string;
   kind: "widget";
   widget: { type: string; version: string; config: WidgetConfig };
   frame: ItemFrame;
@@ -105,11 +111,35 @@ export type Primitive =
   | ProgressBarPrimitive;
 
 export interface PrimitiveItem extends ItemState {
-  id: string;
   kind: "primitive";
   primitive: Primitive;
 }
+
+export interface ContainerBackground {
+  fill: string | null;
+  outline: string;
+  width: number;
+  radius: number;
+}
+
+/**
+ * A parent of other items (LVGL "Object"). Children store coordinates relative to its
+ * top-left corner. A `grouped` container is a group: it has no background of its own.
+ */
+export interface ContainerItem extends ItemState {
+  kind: "container";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  grouped: boolean;
+  background: ContainerBackground | null;
+  children: TreeItem[];
+}
+
+/** What the panel draws and edits today: one flat list (containers arrive in phase 5). */
 export type StudioItem = WidgetItem | PrimitiveItem;
+export type TreeItem = StudioItem | ContainerItem;
 
 export interface Dashboard {
   id: string;
@@ -202,6 +232,13 @@ export interface PrimitiveDefinition {
   extent?: { x: number; y: number };
   fields: PrimitiveField[];
 }
+export interface PreviewDependencies {
+  entities: string[];
+  domains: string[];
+  allStates: boolean;
+  usesTime: boolean;
+}
+
 export interface ItemBounds {
   x: number;
   y: number;
@@ -213,6 +250,8 @@ export interface ComposePreviewResponse {
   yaml: string;
   itemBounds: Record<string, ItemBounds>;
   warnings: string[];
+  /** What the preview's expressions read; a change in any of it makes the preview stale. */
+  dependencies: PreviewDependencies;
   timings: {
     queue: number;
     data: number;

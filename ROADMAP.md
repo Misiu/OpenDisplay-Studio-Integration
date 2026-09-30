@@ -97,11 +97,17 @@ green. (Met.)
   `_validate_primitive_item`, and definition-driven new-item defaults, layout
   fields and appearance form in the panel. The dev harness and the unit tests read
   the real YAML files. Renderer deltas: `docs/odl-coverage.md`.
-- [ ] **1.5 Document model.** Value model allows expression strings; items
-  may be `container` with `children` (empty until phase 5); item `name`
-  (editable, defaults to `<type>_<n>`). `schemaVersion` stays 1 and there is no
-  migration until the first public release of the dashboard model (see
-  Deviations); stored dashboards that no longer validate are dropped.
+- [x] **1.5 Document model.** Items form a tree: `container` items hold `children`
+  whose coordinates are relative to the container, and `grouped` marks a group
+  (a container without background). Every item has a `name` (defaults to
+  `<type>_<n>`, numbered per type) and may carry an `expressions` map (see 3.1).
+  Backend: `items.py` validates the tree (unique ids, depth 8, 256 items), and
+  `flatten.py` + `compiler.py` turn it into absolute ODL (container background as
+  one `rectangle`, hidden container hides its subtree, `itemBounds` for every
+  node). Frontend: `name`, `ContainerItem`, `expressions` in `types.ts`; new items
+  get a default name and every label shows `item.name`. The panel still edits a
+  flat list until phase 5. `schemaVersion` stays 1 and there is no migration until
+  the first public release of the dashboard model (see Deviations).
 - [x] **1.6 Renderer bump** to `odl-renderer` 0.5.13; the bound heuristics
   (`len(value) * size * 0.62`, QR version-1 assumption) are replaced by real
   measurement (`measure.py`: `measure_text` and the rendered ink for text, the
@@ -197,24 +203,32 @@ pixels), in HA light and dark themes.
 
 ## Phase 3 — Expressions
 
-- [ ] **3.1 Value model helpers** (`isExpressionValue` TS + Python) and
-  validation: literals checked against the shape, expressions only against length.
-- [ ] **3.2 Backend resolution** in `expressions.py`: render each expression field
+- [x] **3.1 Value model.** An item keeps its literal fields and an `expressions`
+  map (`field key → template`, plus `visible` on any item) beside them. The literal
+  stays valid, so the item still renders when the template is switched off, and
+  the shape checks never see a template. `isExpressionValue` exists once in TS and
+  once in Python; templates are validated only for type and length (2048).
+  Container geometry cannot be an expression.
+- [x] **3.2 Backend resolution** in `expressions.py`: render each expression field
   with `Template(value, hass).async_render(parse_result=True)`, coerce to the
   field shape, skip the element and add a warning (`<name>.<field>: <message>`)
-  on failure. Group/container `visible` evaluated once for the subtree.
-- [ ] **3.3 Live refresh.** Collect referenced entities from rendered expressions;
+  on failure. Group/container `visible` evaluated once for the subtree. Implemented with
+  `RenderInfo` (`async_render_to_info`), so the same call yields the value and
+  the entities, domains and clock use the preview depends on.
+- [x] **3.3 Live refresh.** Collect referenced entities from rendered expressions;
   re-compose the preview (debounced 500 ms) when they change; refresh every
   minute when an expression uses `now()`. Media Source always renders fresh.
-- [ ] **3.4 Field UX.** Trailing 24 px `{}` button on every field row (tooltip
+- [x] **3.4 Field UX.** (`ods-expression-field` wraps each stored field; a box or
+  line offers its stored corners through *Edit corners*, because left/top/size are
+  derived.) Trailing 24 px `{}` button on every field row (tooltip
   "Expression (or type {)", highlighted when active). Typing `{` in a
   literal field switches to expression mode with `{{  }}`. Expression mode shows a
   monospace auto-growing textarea. Commit on blur; clearing the delimiters
   returns to literal; toggling off restores the definition default.
-- [ ] **3.5 Locks.** Expression-driven position fields lock drag, nudge, align, and
+- [x] **3.5 Locks.** Expression-driven position fields lock drag, nudge, align, and
   moving any container above the item; the overlay shows a lock badge with the
   reason. Expression-driven size fields disable only the handles that would write them.
-- [ ] **3.6 Code view** shows raw expressions; inside containers, expression-driven
+- [x] **3.6 Code view** shows raw expressions; inside containers, expression-driven
   coordinates are emitted as `{{ (<expr>) | float(0) + <offset> }}`.
 
 **Accepted when:** a `text` with `value: "{{ states('sensor.t') }}"` renders the
@@ -292,9 +306,23 @@ Reference behaviour observed on lvgl.espboards.dev (Sept 2026), adapted to ODL.
 - [ ] **5.1.4 Selection sync.** Tree ↔ canvas selection is bidirectional;
   selecting a row scrolls it into view and expands its ancestors.
 - [ ] **5.1.5 Keyboard.** Arrow Up/Down move selection, Left/Right
-  collapse/expand, Enter enters a group (see 5.4), F2 renames.
+  collapse/expand, Enter enters a group (see 5.2.12), F2 renames.
 
-### 5.2 Containers ("Object" in LVGL)
+### 5.2 Containers and groups (one concept)
+
+A **container** is the only editor-side parent (LVGL's "Object"). A **group** is
+not a second kind of item: it is a container with `grouped: true`. The flag
+changes behaviour, not structure, and the same commands and code paths serve
+both.
+
+| | Plain container | Group |
+|---|---|---|
+| Background | optional rectangle | none |
+| Click on a child (canvas) | selects the child | selects the whole group |
+| Move | moves the subtree | moves the subtree |
+| Resize (phase 7) | children unchanged | children scale |
+| Edit its children | directly | `Enter` / double-click first |
+| Created by | Library › `Container` | `Make group` on a selection, or on a container |
 
 - [ ] **5.2.1 Container item.** Added from the Library (`CONTAINERS ›
   Container`), default 100 × 100 with white fill and black 1 px outline (the
@@ -320,24 +348,32 @@ Reference behaviour observed on lvgl.espboards.dev (Sept 2026), adapted to ODL.
 - [ ] **5.2.7 Moving a container** moves the whole subtree (only its own X/Y
   change); resizing a plain container does not change children.
 - [ ] **5.2.8 Delete container** deletes the subtree after confirmation;
-  `Ungroup` (5.3) is the way to keep children.
-
-### 5.3 Groups
-
-- [ ] **5.3.1 Make group / Ungroup.** `Make group` on a container turns it into
-  a group: background removed (transparent), `Group` badge in the tree,
-  `Grouped` chip in the Properties header. `Ungroup` on a group removes the
-  group and moves its children to the group's parent at the same index, with
-  preserved visual positions. Both are one undo step.
-- [ ] **5.3.2 Group selection.** Clicking any child of a group on the canvas
+  `Ungroup` (5.2.10) is the way to keep children.
+- [ ] **5.2.9 Multi-selection.** `Shift`+click adds or removes an element
+  (canvas and tree); dragging a marquee on empty canvas selects every element of
+  the current level it touches. The selection is a set: dragging any selected
+  element, the arrow keys, alignment, hide, lock, delete, copy and duplicate all
+  act on every element of it at once, as one undo step. The overlay draws one
+  bounding box; resize handles are hidden for a multi-selection. Properties show
+  `N elements` with the X/Y of the bounding box.
+- [ ] **5.2.10 Make group / Ungroup** (`Ctrl+G` / `Ctrl+Shift+G`). `Make group`
+  on a multi-selection (elements of one parent) wraps them in a new container
+  with `grouped: true`, no background, the size of their bounding box, placed
+  where the topmost of them was; every child keeps its visual position. On a
+  single plain container it removes the background and sets the flag. `Ungroup`
+  on a group moves its children to the group's parent at the group's index with
+  visual positions preserved and removes the group. Groups show a `Group` badge
+  in the tree and a `Grouped` chip in the Properties header. Each is one undo
+  step.
+- [ ] **5.2.11 Group selection.** Clicking any child of a group on the canvas
   selects the **group**; its box shows handles and the hint
   "Enter / double-click to edit".
-- [ ] **5.3.3 Enter / exit group.** Enter or double-click enters the selected
+- [ ] **5.2.12 Enter / exit group.** Enter or double-click enters the selected
   group: the tree shows a breadcrumb bar `Root › <group>` with an `Exit` button,
   the group row is outlined, the group box is dashed, and its children become
   individually selectable. Escape (or `Exit`, or clicking outside the group)
   exits and re-selects the group.
-- [ ] **5.3.4 Group resize scales children** — phase 7.
+- [ ] **5.2.13 Group resize scales children** — phase 7.
 
 **Accepted when:** e2e covers each 5.x behaviour with real pointer sequences;
 pytest proves container offsets and group flattening produce the same PNG as the
@@ -756,3 +792,4 @@ deployment to devices.
 | Drop from the library centres the element on the pointer | Top-left at the drop point, grid-rounded | Matches lvgl.espboards.dev (measured) |
 | Fixed 5 px grid | Grid step is the dashboard `snapSize`; all other thresholds as measured | Displays differ in resolution; user already sets snap size |
 | — (not an LVGL matter) | Document `schemaVersion` stays 1 and shape changes ship without migrations until the first public release of the dashboard model | Pre-release; the model changes shape every phase (flat list → tree → containers) |
+| One field holds either a literal or an expression | Item `expressions` map beside the literals | Literals keep their shape (typed TS/Python, `ha-form`), switching the `{}` toggle off restores the value without loss |

@@ -209,10 +209,10 @@ test.describe("ods-library", () => {
     await openKitchen(page);
     await page.getByRole("button", { name: /Circle/ }).click();
     await expect(
-      page.getByRole("heading", { name: "Circle", exact: true })
+      page.getByRole("heading", { name: "circle_1", exact: true })
     ).toBeVisible();
     await expect(page.locator(".layer-row")).toHaveCount(2);
-    await expect(page.locator(".layer-row.active")).toContainText("Circle");
+    await expect(page.locator(".layer-row.active")).toContainText("circle_1");
   });
 });
 
@@ -232,7 +232,7 @@ test.describe("ods-structure", () => {
 
     await page.getByRole("button", { name: "Dashboards", exact: true }).click();
     page.once("dialog", (dialog) => void dialog.accept());
-    await openDashboard(page, "Hallway overview");
+    await openDashboard(page, "Office status");
     await expect(
       page.getByText("Drag widgets or primitives onto the canvas.")
     ).toBeVisible();
@@ -243,7 +243,7 @@ test.describe("ods-structure", () => {
     await openKitchen(page);
     await page.getByRole("button", { name: /Circle/ }).click();
     const names = await page.locator(".layer-row strong").allTextContents();
-    expect(names).toEqual(["Circle", "Kitchen"]);
+    expect(names).toEqual(["circle_1", "Kitchen"]);
   });
 
   test("asks before deleting and keeps the element when cancelled or dismissed", async ({

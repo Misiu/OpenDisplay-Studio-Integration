@@ -341,6 +341,7 @@ const demoDashboard: Dashboard = {
   items: [
     {
       id: "temperature",
+      name: "Kitchen",
       kind: "widget",
       locked: false,
       hidden: false,
@@ -379,7 +380,24 @@ const hallwayDashboard: Dashboard = {
     padding: 0,
     snapSize: 5,
   },
-  items: [],
+  items: [
+    {
+      id: "reading",
+      name: "Reading",
+      kind: "primitive",
+      locked: false,
+      hidden: false,
+      primitive: {
+        type: "text",
+        value: "21.4",
+        x: 40,
+        y: 40,
+        size: 32,
+        color: "black",
+      },
+      expressions: { value: "{{ states('sensor.kitchen_temperature') }}" },
+    },
+  ],
   createdAt: "2026-09-20T08:00:00+00:00",
   updatedAt: "2026-09-23T16:30:00+00:00",
 };
@@ -488,6 +506,17 @@ let dashboards = [demoDashboard, hallwayDashboard, officeDashboard].map(
   (dashboard) => structuredClone(dashboard)
 );
 const calls: Array<Record<string, unknown>> = [];
+
+/** The entities the backend would report for the templates of a dashboard. */
+const expressionEntities = (dashboard: Dashboard): string[] => [
+  ...new Set(
+    dashboard.items.flatMap((item) =>
+      Object.values(item.expressions ?? {}).flatMap((template) =>
+        [...template.matchAll(/states\('([^']+)'\)/g)].map((match) => match[1])
+      )
+    )
+  ),
+];
 const hass: HomeAssistant = {
   language: "en",
   states: {
@@ -554,6 +583,12 @@ const hass: HomeAssistant = {
         yaml,
         itemBounds: itemBounds(dashboard),
         warnings: [],
+        dependencies: {
+          entities: expressionEntities(dashboard),
+          domains: [],
+          allStates: false,
+          usesTime: false,
+        },
         timings: {
           queue: 0.1,
           data: 0.2,
@@ -601,7 +636,7 @@ const assignFreshHass = (): void => {
   hassRevision += 1;
   panel.hass = {
     ...hass,
-    states: cloneData(hass.states),
+    states: { ...hass.states },
     language: hass.language,
   };
 };
@@ -612,6 +647,7 @@ declare global {
       calls: () => Array<Record<string, unknown>>;
       dashboards: () => Dashboard[];
       replaceHass: () => void;
+      setState: (entityId: string, state: string) => void;
       hassRevision: () => number;
     };
   }
@@ -620,6 +656,10 @@ window.__ODS_E2E__ = {
   calls: () => cloneData(calls),
   dashboards: () => cloneData(dashboards),
   replaceHass: assignFreshHass,
+  setState: (entityId, state) => {
+    hass.states = { ...hass.states, [entityId]: { state } };
+    assignFreshHass();
+  },
   hassRevision: () => hassRevision,
 };
 

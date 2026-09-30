@@ -6,6 +6,7 @@ export const rectangleItem = (
   overrides: Partial<PrimitiveItem["primitive"]> = {}
 ): PrimitiveItem => ({
   id,
+  name: id,
   kind: "primitive",
   locked: false,
   hidden: false,
@@ -24,6 +25,7 @@ export const rectangleItem = (
 
 export const circleItem = (id = "circle"): PrimitiveItem => ({
   id,
+  name: id,
   kind: "primitive",
   locked: false,
   hidden: false,
@@ -40,6 +42,7 @@ export const circleItem = (id = "circle"): PrimitiveItem => ({
 
 export const textItem = (id = "text"): PrimitiveItem => ({
   id,
+  name: id,
   kind: "primitive",
   locked: false,
   hidden: false,
@@ -55,6 +58,7 @@ export const textItem = (id = "text"): PrimitiveItem => ({
 
 export const widgetItem = (id = "widget"): WidgetItem => ({
   id,
+  name: id,
   kind: "widget",
   locked: false,
   hidden: false,

@@ -534,7 +534,7 @@ test("adds new elements by click and drag without moving or reloading the editor
 
   await page.getByRole("button", { name: /Rectangle/ }).click();
   await expect(
-    page.getByRole("heading", { name: "Rectangle", exact: true })
+    page.getByRole("heading", { name: "rectangle_1", exact: true })
   ).toBeVisible();
   await expect(page.locator(".layer-row")).toHaveCount(2);
   await expect(page.locator("[data-item-id].selected")).toHaveCount(1);
@@ -542,7 +542,7 @@ test("adds new elements by click and drag without moving or reloading the editor
 
   await dragCatalogItemToCanvas(page, /Circle/);
   await expect(
-    page.getByRole("heading", { name: "Circle", exact: true })
+    page.getByRole("heading", { name: "circle_1", exact: true })
   ).toBeVisible();
   await expect(page.locator(".layer-row")).toHaveCount(3);
   await expect(page.locator("[data-item-id].selected")).toHaveCount(1);
@@ -635,7 +635,7 @@ test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", 
 
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 1);
   await expect(
-    page.getByRole("heading", { name: "Temperature", exact: true })
+    page.getByRole("heading", { name: "temperature_2", exact: true })
   ).toBeVisible();
   const selected = page.locator(".selection.selected");
   await expect(selected).not.toHaveClass(/locked/);
@@ -696,7 +696,7 @@ test("supports consecutive catalog drops, immediate movement and cancellation ou
   await dragCatalogItemToCanvas(page, /Line/, { x: 0.38, y: 0.38 });
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 1);
   await expect(
-    page.getByRole("heading", { name: "Line", exact: true })
+    page.getByRole("heading", { name: "line_1", exact: true })
   ).toBeVisible();
   await expect(page.locator(".selection.selected")).toHaveAttribute(
     "data-item-id",
@@ -706,7 +706,7 @@ test("supports consecutive catalog drops, immediate movement and cancellation ou
   await dragCatalogItemToCanvas(page, /QR code/, { x: 0.7, y: 0.64 });
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 2);
   await expect(
-    page.getByRole("heading", { name: "QR code", exact: true })
+    page.getByRole("heading", { name: "qrcode_1", exact: true })
   ).toBeVisible();
   const selected = page.locator(".selection.selected");
   const selectedId = await selected.getAttribute("data-item-id");
@@ -789,10 +789,10 @@ test("adds overlapping primitives and preserves each exact ODL type", async ({
     ["QR code", "qrcode"],
     ["Progress bar", "progress_bar"],
   ] as const;
-  for (const [name] of types) {
+  for (const [name, type] of types) {
     await dragCatalogItemToCanvas(page, new RegExp(name));
     await expect(
-      page.getByRole("heading", { name, exact: true })
+      page.getByRole("heading", { name: `${type}_1`, exact: true })
     ).toBeVisible();
   }
   await page.getByRole("button", { name: "Save", exact: true }).click();
@@ -819,7 +819,7 @@ test("selects, hides, locks and reorders compact layers with an insertion marker
 
   const rectangleRow = page
     .locator(".layer-row")
-    .filter({ hasText: "Rectangle" });
+    .filter({ hasText: "rectangle_1" });
   const textRow = page.locator(".layer-row").filter({ hasText: "Text" });
   await rectangleRow.click();
   await expect(page.locator("[data-item-id].selected")).toHaveCount(1);
@@ -868,12 +868,12 @@ test("supports undo and redo for movement, visibility and layer order", async ({
   await dragCatalogItemToCanvas(page, /Text/, { x: 0.78, y: 0.72 });
   const rectangleRow = page
     .locator(".layer-row")
-    .filter({ hasText: "Rectangle" });
+    .filter({ hasText: "rectangle_1" });
   const textRow = page.locator(".layer-row").filter({ hasText: "Text" });
 
   await rectangleRow.click();
   await expect(
-    page.getByRole("heading", { name: "Rectangle", exact: true })
+    page.getByRole("heading", { name: "rectangle_1", exact: true })
   ).toBeVisible();
   const xField = page.locator('.properties input[data-field="x"]');
   const xBefore = Number(await xField.inputValue());
@@ -921,14 +921,14 @@ test("requires confirmation before deleting a layer and supports undo", async ({
   page,
 }) => {
   await dragCatalogItemToCanvas(page, /Text/, { x: 0.72, y: 0.66 });
-  const textRow = page.locator(".layer-row").filter({ hasText: "Text" });
-  await textRow.getByRole("button", { name: "Delete Text" }).click();
-  const dialog = page.getByRole("dialog", { name: "Delete Text?" });
+  const textRow = page.locator(".layer-row").filter({ hasText: "text_1" });
+  await textRow.getByRole("button", { name: "Delete text_1" }).click();
+  const dialog = page.getByRole("dialog", { name: "Delete text_1?" });
   await expect(dialog).toBeVisible();
   await dialog.getByText("Cancel", { exact: true }).click();
   await expect(textRow).toHaveCount(1);
 
-  await textRow.getByRole("button", { name: "Delete Text" }).click();
+  await textRow.getByRole("button", { name: "Delete text_1" }).click();
   await dialog.getByText("Delete element", { exact: true }).click();
   await expect(textRow).toHaveCount(0);
   await page.getByRole("button", { name: "Undo" }).click();

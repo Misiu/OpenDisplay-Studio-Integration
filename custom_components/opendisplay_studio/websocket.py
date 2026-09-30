@@ -184,6 +184,12 @@ async def websocket_compose_preview(
             "yaml": compiled.yaml,
             "itemBounds": compiled.item_bounds,
             "warnings": compiled.warnings,
+            "dependencies": {
+                "entities": sorted(compiled.dependencies.entities),
+                "domains": sorted(compiled.dependencies.domains),
+                "allStates": compiled.dependencies.all_states,
+                "usesTime": compiled.dependencies.uses_time,
+            },
             "timings": {
                 "queue": rendered.timings["queue"],
                 "data": compiled.data_ms,

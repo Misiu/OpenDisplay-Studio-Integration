@@ -10,9 +10,20 @@ from typing import Any
 import yaml  # type: ignore[import-untyped]
 from homeassistant.core import HomeAssistant
 
+from .expressions import (
+    Resolution,
+    async_resolve_expressions,
+    has_expressions,
+)
+from .flatten import (
+    background_element,
+    flatten_items,
+    shift_primitive,
+)
 from .measure import primitive_box
 from .odl import Box, DisplayContext, WidgetRenderContext
 from .palette import accent_color_for_palette
+from .raw_yaml import raw_elements
 from .widgets import WidgetRegistry, with_defaults
 
 
@@ -27,6 +38,7 @@ class CompiledDashboard:
     elements: list[dict[str, Any]]
     item_bounds: dict[str, dict[str, int]]
     warnings: list[str]
+    dependencies: Resolution
     yaml: str
     data_ms: float
     compile_ms: float
@@ -70,8 +82,20 @@ async def async_compile_dashboard(  # noqa: PLR0915
         tuple[dict[str, Any], dict[str, Any], list[tuple[dict[str, Any], list[str]]]]
     ] = []
     warnings: list[str] = []
-    for item in dashboard["items"]:
-        if item["kind"] != "widget" or item.get("hidden", False):
+    display_value = dashboard["display"]
+    resolution = Resolution(items=dashboard["items"])
+    if has_expressions(dashboard["items"]):
+        resolution = await async_resolve_expressions(
+            hass,
+            dashboard["items"],
+            display_value["width"],
+            display_value["height"],
+        )
+    warnings.extend(resolution.warnings)
+    placed_items = flatten_items(resolution.items)
+    for placed in placed_items:
+        item = placed.item
+        if item["kind"] != "widget" or placed.hidden:
             continue
         widget = item["widget"]
         config = with_defaults(widget["type"], widget["config"], registry)
@@ -95,7 +119,6 @@ async def async_compile_dashboard(  # noqa: PLR0915
             hass, request, dashboard["language"]
         )
     data_done = monotonic()
-    display_value = dashboard["display"]
     display = DisplayContext(
         width=display_value["width"],
         height=display_value["height"],
@@ -118,24 +141,39 @@ async def async_compile_dashboard(  # noqa: PLR0915
     primitive_bounds = await asyncio.to_thread(
         _measure_primitives,
         {
-            item["id"]: item["primitive"]
-            for item in dashboard["items"]
-            if item["kind"] == "primitive"
+            placed.item["id"]: shift_primitive(
+                placed.item["primitive"], placed.x, placed.y
+            )
+            for placed in placed_items
+            if placed.item["kind"] == "primitive"
         },
     )
     elements: list[dict[str, Any]] = []
+    widget_elements: dict[str, list[dict[str, Any]]] = {}
     item_bounds: dict[str, dict[str, int]] = {}
-    for item in dashboard["items"]:
+    for placed in placed_items:
+        item = placed.item
         try:
-            if item["kind"] == "primitive":
-                primitive = dict(item["primitive"])
-                item_bounds[item["id"]] = primitive_bounds[item["id"]]
-                if not item.get("hidden", False):
-                    elements.append(primitive)
+            if item["kind"] == "container":
+                item_bounds[item["id"]] = Box(
+                    placed.x + item["x"],
+                    placed.y + item["y"],
+                    item["width"],
+                    item["height"],
+                ).as_dict()
+                if item["background"] is not None and not placed.hidden:
+                    elements.append(background_element(item, placed.x, placed.y))
                 continue
-            box = _frame_box(item["frame"])
+            if item["kind"] == "primitive":
+                item_bounds[item["id"]] = primitive_bounds[item["id"]]
+                if not placed.hidden:
+                    elements.append(
+                        shift_primitive(item["primitive"], placed.x, placed.y)
+                    )
+                continue
+            box = _frame_box(item["frame"]).moved(placed.x, placed.y)
             item_bounds[item["id"]] = box.as_dict()
-            if item.get("hidden", False):
+            if placed.hidden:
                 continue
             content_box = box.inset(item.get("layout", {}).get("padding", 0))
             config, data = widget_contexts[item["id"]]
@@ -147,7 +185,9 @@ async def async_compile_dashboard(  # noqa: PLR0915
                 config=config,
                 data=data,
             )
-            elements.extend(registry.renderer(item["widget"]["type"])(context))
+            rendered = registry.renderer(item["widget"]["type"])(context)
+            widget_elements[item["id"]] = rendered
+            elements.extend(rendered)
         except (KeyError, TypeError, ValueError) as err:
             raise DashboardCompileError(f"Item {item['id']}: {err}") from err
     compiled_done = monotonic()
@@ -155,7 +195,12 @@ async def async_compile_dashboard(  # noqa: PLR0915
         elements=elements,
         item_bounds=item_bounds,
         warnings=warnings,
-        yaml=yaml.safe_dump(elements, sort_keys=False, allow_unicode=True),
+        dependencies=resolution,
+        yaml=yaml.safe_dump(
+            raw_elements(flatten_items(dashboard["items"]), widget_elements),
+            sort_keys=False,
+            allow_unicode=True,
+        ),
         data_ms=round((data_done - started) * 1000, 2),
         compile_ms=round((compiled_done - data_done) * 1000, 2),
     )

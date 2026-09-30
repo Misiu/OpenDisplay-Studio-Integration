@@ -138,10 +138,40 @@ class PrimitiveRegistry:
         """One definition; raises `KeyError` for an unknown type."""
         return deepcopy(self._definitions[primitive_type])
 
+    def field_keys(self, primitive_type: str) -> frozenset[str]:
+        """Return the keys of the fields a type defines; none for an unknown type."""
+        definition = self._definitions.get(primitive_type)
+        if definition is None:
+            return frozenset()
+        return frozenset(field["key"] for field in definition["fields"])
+
+    def coordinate_keys(self, primitive_type: str) -> frozenset[str]:
+        """Return the keys of a type's position fields; none for an unknown type."""
+        definition = self._definitions.get(primitive_type)
+        if definition is None:
+            return frozenset()
+        return frozenset(
+            field["key"]
+            for field in definition["fields"]
+            if field["shape"] == "coordinate"
+        )
+
     def normalize(
-        self, primitive: dict[str, Any], width: int, height: int
+        self,
+        primitive: dict[str, Any],
+        width: int,
+        height: int,
+        *,
+        relative: bool = False,
+        expressed: frozenset[str] = frozenset(),
     ) -> dict[str, Any]:
-        """Validate one primitive against its definition for a display size."""
+        """
+        Validate one primitive against its definition for a display size.
+
+        Inside a container coordinates are relative to it, so they may lie outside
+        the display (`relative`). Fields driven by an expression (`expressed`) keep
+        their literal, but the checks that compare fields with each other are skipped.
+        """
         primitive_type = primitive.get("type")
         if (
             not isinstance(primitive_type, str)
@@ -152,13 +182,49 @@ class PrimitiveRegistry:
         normalized: dict[str, Any] = {"type": primitive_type}
         for field in definition["fields"]:
             normalized[field["key"]] = self._normalize_field(
-                field, primitive, width, height
+                field, primitive, width, height, relative=relative
             )
-        self._check_geometry(definition, normalized)
+        if not expressed & self.coordinate_keys(primitive_type):
+            self.check_geometry(normalized)
         return normalized
 
+    def normalize_field(
+        self,
+        primitive_type: str,
+        key: str,
+        value: object,
+        display: tuple[int, int],
+        *,
+        relative: bool = False,
+    ) -> Any:
+        """
+        Validate one value for one field of a primitive type on a display.
+
+        Used for values that arrive after the dashboard was stored, such as the
+        result of an expression. Raises `KeyError` for an unknown type or field.
+        """
+        return self._normalize_field(
+            self.field(primitive_type, key),
+            {key: value},
+            *display,
+            relative=relative,
+        )
+
+    def field(self, primitive_type: str, key: str) -> dict[str, Any]:
+        """One field definition; raises `KeyError` for an unknown type or field."""
+        for field in self._definitions[primitive_type]["fields"]:
+            if field["key"] == key:
+                return deepcopy(field)
+        raise KeyError(key)
+
     def _normalize_field(
-        self, field: dict[str, Any], primitive: dict[str, Any], width: int, height: int
+        self,
+        field: dict[str, Any],
+        primitive: dict[str, Any],
+        width: int,
+        height: int,
+        *,
+        relative: bool,
     ) -> Any:
         key = field["key"]
         name = f"primitive.{key}"
@@ -178,7 +244,7 @@ class PrimitiveRegistry:
             )
         if shape == "coordinate":
             extent = width if field["axis"] == "x" else height
-            return integer(value, name, 0, extent - 1)
+            return _coordinate(value, name, extent, relative=relative)
         if shape == "boolean":
             return boolean(value, name)
         if shape == "enum":
@@ -189,10 +255,10 @@ class PrimitiveRegistry:
             return color(value, name, allow_none=bool(field.get("nullable")))
         return _normalize_text(field, value, name)
 
-    @staticmethod
-    def _check_geometry(definition: dict[str, Any], value: dict[str, Any]) -> None:
-        geometry = definition["geometry"]
-        primitive_type = definition["type"]
+    def check_geometry(self, value: dict[str, Any]) -> None:
+        """Reject a box or line whose fields, taken together, draw nothing."""
+        primitive_type = value["type"]
+        geometry = self._definitions[primitive_type]["geometry"]
         if geometry == "box" and (
             value["x_end"] <= value["x_start"] or value["y_end"] <= value["y_start"]
         ):
@@ -203,6 +269,12 @@ class PrimitiveRegistry:
             and value["y_start"] == value["y_end"]
         ):
             fail("line must have two distinct points")
+
+
+def _coordinate(value: object, name: str, extent: int, *, relative: bool) -> int:
+    if relative:
+        return integer(value, name, -extent, extent)
+    return integer(value, name, 0, extent - 1)
 
 
 def _limit(value: int | str, width: int, height: int) -> int:

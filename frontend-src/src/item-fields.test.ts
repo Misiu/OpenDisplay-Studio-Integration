@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   appearanceFormData,
   definitionFor,
+  hasCornerFields,
   layoutFields,
   primitiveAppearanceSchema,
   primitiveValuesFromForm,
@@ -39,6 +40,37 @@ describe("layoutFields", () => {
       primitiveDefinitions
     );
     expect(grid.map((field) => field.value)).toEqual([20, 30, 100, 50]);
+  });
+
+  it("offers the four stored corners of a box, each of which can be an expression", () => {
+    const { grid } = layoutFields(
+      rectangleItem(),
+      dashboard,
+      primitiveDefinitions,
+      true
+    );
+
+    expect(keys(grid)).toEqual(["x_start", "y_start", "x_end", "y_end"]);
+    expect(grid.map((field) => field.value)).toEqual([20, 30, 119, 79]);
+    expect(grid.every((field) => field.stored)).toBe(true);
+  });
+
+  it("marks only fields the primitive stores as able to be expressions", () => {
+    const derived = layoutFields(
+      rectangleItem(),
+      dashboard,
+      primitiveDefinitions
+    );
+    const point = layoutFields(circleItem(), dashboard, primitiveDefinitions);
+
+    expect(derived.grid.some((field) => field.stored)).toBe(false);
+    expect(point.grid.every((field) => field.stored)).toBe(true);
+  });
+
+  it("knows which primitives have corners to edit", () => {
+    expect(hasCornerFields(rectangleItem(), primitiveDefinitions)).toBe(true);
+    expect(hasCornerFields(circleItem(), primitiveDefinitions)).toBe(false);
+    expect(hasCornerFields(widgetItem(), primitiveDefinitions)).toBe(false);
   });
 
   it("reports a reversed line by its top-left corner", () => {

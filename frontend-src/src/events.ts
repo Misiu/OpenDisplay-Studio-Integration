@@ -67,6 +67,8 @@ export interface OdsEventMap {
   "background-change": { color: string };
   "widget-config-change": { value: Record<string, unknown> };
   "primitive-change": { value: Record<string, unknown> };
+  /** `template` is the new expression, `null` for back to the literal, `undefined` to start one. */
+  "expression-change": { key: string; template: string | null | undefined };
   "dashboard-delete-request": undefined;
   // confirm dialog
   "confirm-accept": undefined;

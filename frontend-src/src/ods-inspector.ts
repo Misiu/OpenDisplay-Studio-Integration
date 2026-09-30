@@ -6,7 +6,7 @@ import {
   type PropertyValues,
   type TemplateResult,
 } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import { customElement, property, query, state } from "lit/decorators.js";
 import {
   DISPLAY_PROFILES,
   isPaletteId,
@@ -19,11 +19,13 @@ import { emit, type OdsEvent } from "./events";
 import { strings } from "./strings";
 import {
   appearanceFormData,
+  hasCornerFields,
   layoutFields,
   primitiveAppearanceSchema,
   type LayoutField,
 } from "./item-fields";
-import { itemIcon, itemName } from "./item-labels";
+import { VISIBLE_KEY } from "./expressions";
+import { itemIcon } from "./item-labels";
 import { clamp } from "./math";
 import { trackPointerGesture } from "./pointer-gesture";
 import { baseStyles, chromeStyles } from "./studio-styles";
@@ -39,6 +41,7 @@ import type {
   WidgetDefinition,
   WidgetItem,
 } from "./types";
+import "./ods-expression-field";
 import "./ods-property-field";
 import "./ods-structure";
 
@@ -172,8 +175,17 @@ export class OdsInspector extends LitElement {
         background: var(--secondary-background-color, #f3f5f6);
         color: var(--studio-text);
       }
-      .section-body > ods-property-field {
+      .section-body > ods-property-field,
+      .section-body > ods-expression-field,
+      .section-body > .text-button {
         margin-top: 10px;
+      }
+      .text-button {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--primary-color);
+        font-size: 11px;
       }
       .field-grid + .field-grid,
       .field-grid + .stack-field,
@@ -259,9 +271,15 @@ export class OdsInspector extends LitElement {
   @property({ type: Boolean }) public collapsed = false;
   @property({ type: Number }) public width = 350;
 
+  /** A box or line shows its four stored corners instead of left, top and size. */
+  @state() private showCorners = false;
+
   @query(".properties") private propertiesPanel?: HTMLElement;
   private stopGesture?: () => void;
 
+  protected willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has("selectedItemId")) this.showCorners = false;
+  }
   protected updated(changed: PropertyValues<this>): void {
     if (changed.has("selectedItemId") && this.propertiesPanel) {
       this.propertiesPanel.scrollTop = 0;
@@ -298,11 +316,17 @@ export class OdsInspector extends LitElement {
     return Number.isFinite(value) ? value : undefined;
   }
 
-  private onItemFieldChange(event: OdsEvent<"field-change">): void {
+  private onItemFieldChange(
+    event: OdsEvent<"field-change">,
+    field: LayoutField
+  ): void {
     event.stopPropagation();
     const value = this.numberFrom(event);
-    if (value !== undefined) {
-      emit(this, "item-number-change", { key: event.detail.key, value });
+    if (value === undefined) return;
+    if (field.stored && field.key.includes("_")) {
+      emit(this, "primitive-change", { value: { [field.key]: value } });
+    } else {
+      emit(this, "item-number-change", { key: field.key, value });
     }
   }
 
@@ -535,18 +559,71 @@ export class OdsInspector extends LitElement {
 
   private renderLayoutField(
     field: LayoutField,
-    disabled: boolean
+    item: StudioItem
   ): TemplateResult {
-    return html`
+    const control = html`
       <ods-property-field
         .label=${field.label}
         .fieldKey=${field.key}
         .value=${field.value}
         .min=${field.min}
         .max=${field.max}
-        .disabled=${disabled}
-        @field-change=${this.onItemFieldChange}
+        .disabled=${item.locked}
+        @field-change=${(event: OdsEvent<"field-change">) =>
+          this.onItemFieldChange(event, field)}
       ></ods-property-field>
+    `;
+    return field.stored
+      ? this.renderExpressible(item, field.key, field.label, control)
+      : control;
+  }
+
+  /** A field's control with the `{}` toggle that swaps it for an expression. */
+  private renderExpressible(
+    item: StudioItem,
+    key: string,
+    label: string,
+    control: TemplateResult
+  ): TemplateResult {
+    return html`
+      <ods-expression-field
+        .label=${label}
+        .fieldKey=${key}
+        .expression=${item.expressions?.[key]}
+        .disabled=${item.locked}
+      >
+        ${control}
+      </ods-expression-field>
+    `;
+  }
+
+  private renderVisibility(item: StudioItem): TemplateResult {
+    return this.renderExpressible(
+      item,
+      VISIBLE_KEY,
+      strings.expression.visibleLabel,
+      html`
+        <span class="field-help">${strings.expression.alwaysVisible}</span>
+      `
+    );
+  }
+
+  private renderCornerToggle(
+    item: StudioItem
+  ): TemplateResult | typeof nothing {
+    if (!hasCornerFields(item, this.primitives)) return nothing;
+    return html`
+      <button
+        type="button"
+        class="text-button"
+        @click=${() => (this.showCorners = !this.showCorners)}
+      >
+        ${
+          this.showCorners
+            ? strings.expression.derivedFields
+            : strings.expression.cornerFields
+        }
+      </button>
     `;
   }
 
@@ -574,15 +651,21 @@ export class OdsInspector extends LitElement {
   }
 
   private renderLayoutSection(item: StudioItem): TemplateResult {
-    const { grid, extra } = layoutFields(item, this.dashboard, this.primitives);
+    const { grid, extra } = layoutFields(
+      item,
+      this.dashboard,
+      this.primitives,
+      this.showCorners
+    );
     return html`
       <details class="inspector-section" open>
         <summary>${strings.inspector.layout}</summary>
         <div class="section-body">
           <div class="field-grid">
-            ${grid.map((field) => this.renderLayoutField(field, item.locked))}
+            ${grid.map((field) => this.renderLayoutField(field, item))}
           </div>
-          ${extra.map((field) => this.renderLayoutField(field, item.locked))}
+          ${extra.map((field) => this.renderLayoutField(field, item))}
+          ${this.renderCornerToggle(item)} ${this.renderVisibility(item)}
         </div>
       </details>
     `;
@@ -615,6 +698,27 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  private renderAppearanceField(
+    item: PrimitiveItem,
+    entry: HaFormSchema,
+    data: Record<string, unknown>
+  ): TemplateResult {
+    return this.renderExpressible(
+      item,
+      entry.name,
+      entry.label,
+      html`
+        <ha-form
+          .hass=${this.hass}
+          .data=${data}
+          .schema=${[entry]}
+          .computeLabel=${formFieldLabel}
+          @value-changed=${this.onPrimitiveChange}
+        ></ha-form>
+      `
+    );
+  }
+
   private renderAppearance(item: PrimitiveItem): TemplateResult {
     const data = appearanceFormData(item, this.primitives);
     const schema = primitiveAppearanceSchema(
@@ -626,13 +730,7 @@ export class OdsInspector extends LitElement {
       <details class="inspector-section" open>
         <summary>${strings.inspector.appearance}</summary>
         <div class="section-body">
-          <ha-form
-            .hass=${this.hass}
-            .data=${data}
-            .schema=${schema}
-            .computeLabel=${formFieldLabel}
-            @value-changed=${this.onPrimitiveChange}
-          ></ha-form>
+          ${schema.map((entry) => this.renderAppearanceField(item, entry, data))}
         </div>
       </details>
     `;
@@ -645,7 +743,7 @@ export class OdsInspector extends LitElement {
         : strings.inspector.kindPrimitive;
     return html`
       ${this.renderHeader(
-        itemName(item, this.widgets, this.primitives),
+        item.name,
         strings.inspector.subtitle(kind, item.locked),
         itemIcon(item, this.widgets, this.primitives)
       )}

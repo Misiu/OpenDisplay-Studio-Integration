@@ -7,6 +7,7 @@ from typing import NoReturn
 from custom_components.opendisplay_studio.palette import SUPPORTED_COLORS
 
 MAX_TEXT_LENGTH = 4096
+MAX_EXPRESSION_LENGTH = 2048
 COLORS = SUPPORTED_COLORS | {"accent", "transparent"}
 
 
@@ -52,3 +53,29 @@ def color(value: object, name: str, *, allow_none: bool = False) -> str | None:
     if not isinstance(value, str) or value not in COLORS - {"transparent"}:
         fail(f"{name} is not a supported palette color")
     return value
+
+
+def is_expression(value: object) -> bool:
+    """Return whether a value is a Home Assistant template (`{{ }}` or `{% %}`)."""
+    return isinstance(value, str) and ("{{" in value or "{%" in value)
+
+
+def expression(value: object, name: str) -> str:
+    """Return a template unchanged; only its type and length are checked."""
+    if not is_expression(value):
+        fail(f"{name} must be a template ({{{{ … }}}} or {{% … %}})")
+    assert isinstance(value, str)
+    if len(value) > MAX_EXPRESSION_LENGTH:
+        fail(f"{name} must be at most {MAX_EXPRESSION_LENGTH} characters")
+    return value
+
+
+def single_expression_body(value: str) -> str | None:
+    """Return the inside of a lone `{{ ... }}` template, or None for anything else."""
+    text = value.strip()
+    if not (text.startswith("{{") and text.endswith("}}")):
+        return None
+    body = text[2:-2]
+    if any(token in body for token in ("{{", "}}", "{%", "%}")):
+        return None
+    return body.strip()
