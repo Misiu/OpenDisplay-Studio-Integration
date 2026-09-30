@@ -1,0 +1,6 @@
+node_modules
+package-lock.json
+playwright-report
+test-results
+# Build output of this project, committed but never edited by hand.
+../custom_components/opendisplay_studio/frontend

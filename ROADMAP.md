@@ -80,7 +80,11 @@ green. (Met.)
   `history.ts`, `geometry.ts`, `pointer-gesture.ts`, `viewport.ts`,
   `dashboard-ops.ts`, `dashboards.ts`, `item-fields.ts`, `item-labels.ts`,
   `math.ts`. New e2e: `e2e/elements.spec.ts`, one group per element.
-- [ ] **1.2 Strings module** `strings.ts`; all UI text moves there.
+- [x] **1.2 Strings module** `strings.ts`; all UI text moves there. One entry
+  per concept (field labels are shared by the inspector and the forms); text
+  with a value is a function. `strings.guard.test.ts` fails on text written
+  inline in templates, attributes, labels, errors or conditions; the hardware
+  catalogue in `display-profiles.ts` is data and exempt from the last rule.
 - [ ] **1.3 Command registry** `commands.ts`: `{ id, label, icon, shortcut,
   isEnabled(ctx), run(ctx) }`. Undo/redo, delete, hide, lock move into it first.
   The keyboard handler dispatches through the registry.

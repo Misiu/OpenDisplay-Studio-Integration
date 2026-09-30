@@ -8,6 +8,30 @@ update the older doc in the same change.
 
 ## Coding guidelines (non-negotiable)
 
+- **Code is written for people to read, and the Home Assistant team will review
+  all of it.** Every file we produce — TypeScript, Python, tests, e2e specs,
+  config, generated output — is readable and formatted by the project's
+  formatter. Never hand in dense, minified, or "clever" code, and never a
+  template or query returned as one long string.
+  - Formatting is done by tools, not by hand: Prettier with the Home Assistant
+    frontend configuration (`frontend-src/prettier.config.js`) and `ruff format`.
+    Run `npm run format` / `ruff format .` before finishing; CI fails on
+    unformatted code.
+  - Lit templates are multi-line, one attribute per line, indented as the
+    formatter leaves them. A `render()` method that grows past a screen is split
+    into small `render<Part>()` methods, each returning one readable template.
+  - Event handlers and callbacks in templates are named private methods
+    (`@click=${this.save}`), not inline lambdas that contain logic. A one-line
+    delegating arrow (`() => this.select(item)`) is the only inline form.
+  - One statement per line. No nested ternaries (use early returns or a helper);
+    braces around any multi-line `if`/`else`; lines at most 100 columns,
+    comments included. Comments explain *why*, are wrapped, and are not
+    decoration banners.
+  - Names say what a thing is or does; no abbreviations a reviewer has to decode.
+    Functions do one thing and stay short; extract a helper instead of adding a
+    comment that narrates a block.
+  - The same applies to code you generate through a script or codemod: run the
+    formatter over the result and read it before handing it in.
 - **Vocabulary: we design and manage Dashboards.** The word "project" /
   "Projects" must not appear anywhere we control: UI text, identifiers, file
   names, WebSocket commands, storage keys, CSS classes, tests, docs, commit
@@ -259,6 +283,10 @@ the information architecture.
   implemented twice.
 - `@property({ attribute: false })` for objects passed in, `@state()` for
   internal state. Immutable updates only.
+- Handlers are named private methods; templates stay declarative (see the
+  readability rule above). Conditional and repeated parts of a template are
+  their own `render<Part>()` methods with early returns, not nested inline
+  expressions.
 - `static styles = css` per element; shared tokens/control styles in one shared
   module. No document-level styles — the panel lives in HA's shadow DOM.
 - Listeners added to `window`/`document` are removed in `disconnectedCallback`
@@ -318,6 +346,8 @@ python -m pytest
 
 # frontend (frontend-src/)
 npm ci
+npm run lint          # ESLint (Lit + a11y), Prettier --check, tsc --noEmit
+npm run format        # ESLint --fix + Prettier --write
 npm test              # vitest run
 npm run build         # tsc + vite → custom_components/opendisplay_studio/frontend/
 npm run test:e2e      # Playwright, own Vite server on 127.0.0.1:4173

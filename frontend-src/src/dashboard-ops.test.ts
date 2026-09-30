@@ -1,119 +1,195 @@
-import { describe, expect, it } from 'vitest'
-import { applyProfile, catalogCascadePosition, createPrimitiveItem, createWidgetItem, moveLayer, removeItem, setBackground, setDisplayNumber, setItemNumber, setPalette, toggleItemState } from './dashboard-ops'
-import { itemBounds } from './geometry'
-import { circleItem, dashboardWith, rectangleItem, textItem, widgetItem } from './test-support'
-import type { WidgetDefinition } from './types'
+import { describe, expect, it } from "vitest";
+import {
+  applyProfile,
+  catalogCascadePosition,
+  createPrimitiveItem,
+  createWidgetItem,
+  moveLayer,
+  removeItem,
+  setBackground,
+  setDisplayNumber,
+  setItemNumber,
+  setPalette,
+  toggleItemState,
+} from "./dashboard-ops";
+import { itemBounds } from "./geometry";
+import {
+  circleItem,
+  dashboardWith,
+  rectangleItem,
+  textItem,
+  widgetItem,
+} from "./test-support";
+import type { WidgetDefinition } from "./types";
 
 const sensor: WidgetDefinition = {
-  id: 'sensor', version: '2', name: 'Sensor', description: '', icon: 'mdi:gauge', defaults: { title: 'Kitchen' }, fields: [],
-  layout: { defaultSize: { width: 240, height: 144 }, minSize: { width: 60, height: 48 } }, dataRequirements: [],
-}
+  id: "sensor",
+  version: "2",
+  name: "Sensor",
+  description: "",
+  icon: "mdi:gauge",
+  defaults: { title: "Kitchen" },
+  fields: [],
+  layout: {
+    defaultSize: { width: 240, height: 144 },
+    minSize: { width: 60, height: 48 },
+  },
+  dataRequirements: [],
+};
 
-describe('setItemNumber', () => {
-  it('moves a rectangle while keeping its size and staying inside the working area', () => {
-    const dashboard = dashboardWith([rectangleItem('r')])
-    setItemNumber(dashboard, 'r', 'x', 1000)
-    expect(itemBounds(dashboard.items[0])).toMatchObject({ x: 300, width: 100 })
-  })
+describe("setItemNumber", () => {
+  it("moves a rectangle while keeping its size and staying inside the working area", () => {
+    const dashboard = dashboardWith([rectangleItem("r")]);
+    setItemNumber(dashboard, "r", "x", 1000);
+    expect(itemBounds(dashboard.items[0])).toMatchObject({
+      x: 300,
+      width: 100,
+    });
+  });
 
-  it('resizes widgets within the remaining working area', () => {
-    const dashboard = dashboardWith([widgetItem('w')])
-    setItemNumber(dashboard, 'w', 'width', 5000)
-    expect(itemBounds(dashboard.items[0]).width).toBe(390)
-  })
+  it("resizes widgets within the remaining working area", () => {
+    const dashboard = dashboardWith([widgetItem("w")]);
+    setItemNumber(dashboard, "w", "width", 5000);
+    expect(itemBounds(dashboard.items[0]).width).toBe(390);
+  });
 
-  it('changes the circle radius and the QR module size', () => {
-    const dashboard = dashboardWith([circleItem('c')])
-    setItemNumber(dashboard, 'c', 'radius', 30)
-    expect(itemBounds(dashboard.items[0]).width).toBe(61)
-  })
+  it("changes the circle radius and the QR module size", () => {
+    const dashboard = dashboardWith([circleItem("c")]);
+    setItemNumber(dashboard, "c", "radius", 30);
+    expect(itemBounds(dashboard.items[0]).width).toBe(61);
+  });
 
-  it('leaves locked items untouched', () => {
-    const item = rectangleItem('r'); item.locked = true
-    const dashboard = dashboardWith([item])
-    setItemNumber(dashboard, 'r', 'x', 200)
-    expect(itemBounds(dashboard.items[0]).x).toBe(20)
-  })
-})
+  it("leaves locked items untouched", () => {
+    const item = rectangleItem("r");
+    item.locked = true;
+    const dashboard = dashboardWith([item]);
+    setItemNumber(dashboard, "r", "x", 200);
+    expect(itemBounds(dashboard.items[0]).x).toBe(20);
+  });
+});
 
-describe('display settings', () => {
-  it('re-constrains every item when the display shrinks', () => {
-    const dashboard = dashboardWith([rectangleItem('r', { x_start: 300, x_end: 399 })])
-    setDisplayNumber(dashboard, 'width', 200)
-    expect(itemBounds(dashboard.items[0]).x).toBe(100)
-  })
+describe("display settings", () => {
+  it("re-constrains every item when the display shrinks", () => {
+    const dashboard = dashboardWith([
+      rectangleItem("r", { x_start: 300, x_end: 399 }),
+    ]);
+    setDisplayNumber(dashboard, "width", 200);
+    expect(itemBounds(dashboard.items[0]).x).toBe(100);
+  });
 
-  it('clamps padding to half of the smaller side', () => {
-    const dashboard = dashboardWith()
-    setDisplayNumber(dashboard, 'padding', 9999)
-    expect(dashboard.display.padding).toBe(149)
-  })
+  it("clamps padding to half of the smaller side", () => {
+    const dashboard = dashboardWith();
+    setDisplayNumber(dashboard, "padding", 9999);
+    expect(dashboard.display.padding).toBe(149);
+  });
 
-  it('applies a display profile: size, palette and profile id', () => {
-    const dashboard = dashboardWith([widgetItem('w')])
-    applyProfile(dashboard, { id: 'p', manufacturer: 'M', name: 'N', width: 296, height: 128, palettes: ['bwr'], defaultPalette: 'bwr' })
-    expect(dashboard.display).toMatchObject({ profileId: 'p', width: 296, height: 128, palette: 'bwr' })
-    expect(itemBounds(dashboard.items[0]).height).toBeLessThanOrEqual(128)
-  })
+  it("applies a display profile: size, palette and profile id", () => {
+    const dashboard = dashboardWith([widgetItem("w")]);
+    applyProfile(dashboard, {
+      id: "p",
+      manufacturer: "M",
+      name: "N",
+      width: 296,
+      height: 128,
+      palettes: ["bwr"],
+      defaultPalette: "bwr",
+    });
+    expect(dashboard.display).toMatchObject({
+      profileId: "p",
+      width: 296,
+      height: 128,
+      palette: "bwr",
+    });
+    expect(itemBounds(dashboard.items[0]).height).toBeLessThanOrEqual(128);
+  });
 
-  it('resets the background when the new palette does not contain it', () => {
-    const dashboard = dashboardWith([], { palette: 'bwr', background: 'red' })
-    setPalette(dashboard, 'bw')
-    expect(dashboard.display.background).toBe('white')
-    setBackground(dashboard, 'black')
-    expect(dashboard.display.background).toBe('black')
-  })
-})
+  it("resets the background when the new palette does not contain it", () => {
+    const dashboard = dashboardWith([], { palette: "bwr", background: "red" });
+    setPalette(dashboard, "bw");
+    expect(dashboard.display.background).toBe("white");
+    setBackground(dashboard, "black");
+    expect(dashboard.display.background).toBe("black");
+  });
+});
 
-describe('item list operations', () => {
-  it('toggles hidden and locked, and removes an item', () => {
-    const dashboard = dashboardWith([rectangleItem('a'), textItem('b')])
-    toggleItemState(dashboard, 'a', 'hidden'); toggleItemState(dashboard, 'a', 'locked')
-    expect(dashboard.items[0]).toMatchObject({ hidden: true, locked: true })
-    removeItem(dashboard, 'a')
-    expect(dashboard.items.map(item => item.id)).toEqual(['b'])
-  })
+describe("item list operations", () => {
+  it("toggles hidden and locked, and removes an item", () => {
+    const dashboard = dashboardWith([rectangleItem("a"), textItem("b")]);
+    toggleItemState(dashboard, "a", "hidden");
+    toggleItemState(dashboard, "a", "locked");
+    expect(dashboard.items[0]).toMatchObject({ hidden: true, locked: true });
+    removeItem(dashboard, "a");
+    expect(dashboard.items.map((item) => item.id)).toEqual(["b"]);
+  });
 
-  it('reorders layers: the layer list shows the top item first', () => {
-    const dashboard = dashboardWith([rectangleItem('bottom'), textItem('middle'), circleItem('top')])
-    moveLayer(dashboard, 'bottom', 'top', 'before')
-    expect(dashboard.items.map(item => item.id)).toEqual(['middle', 'top', 'bottom'])
-    moveLayer(dashboard, 'bottom', 'middle', 'after')
-    expect(dashboard.items.map(item => item.id)).toEqual(['bottom', 'middle', 'top'])
-  })
+  it("reorders layers: the layer list shows the top item first", () => {
+    const dashboard = dashboardWith([
+      rectangleItem("bottom"),
+      textItem("middle"),
+      circleItem("top"),
+    ]);
+    moveLayer(dashboard, "bottom", "top", "before");
+    expect(dashboard.items.map((item) => item.id)).toEqual([
+      "middle",
+      "top",
+      "bottom",
+    ]);
+    moveLayer(dashboard, "bottom", "middle", "after");
+    expect(dashboard.items.map((item) => item.id)).toEqual([
+      "bottom",
+      "middle",
+      "top",
+    ]);
+  });
 
-  it('ignores a reorder that names an unknown layer', () => {
-    const dashboard = dashboardWith([rectangleItem('a')])
-    moveLayer(dashboard, 'a', 'missing', 'after')
-    expect(dashboard.items.map(item => item.id)).toEqual(['a'])
-  })
-})
+  it("ignores a reorder that names an unknown layer", () => {
+    const dashboard = dashboardWith([rectangleItem("a")]);
+    moveLayer(dashboard, "a", "missing", "after");
+    expect(dashboard.items.map((item) => item.id)).toEqual(["a"]);
+  });
+});
 
-describe('creating items from the catalog', () => {
-  it('centres a new widget on the drop point inside the working area', () => {
-    const item = createWidgetItem(sensor, 200, 150, dashboardWith())
-    expect(item).toMatchObject({ kind: 'widget', widget: { type: 'sensor', version: '2', config: { title: 'Kitchen' } } })
-    expect(item.frame).toEqual({ x: 80, y: 78, width: 240, height: 144 })
-  })
+describe("creating items from the catalog", () => {
+  it("centres a new widget on the drop point inside the working area", () => {
+    const item = createWidgetItem(sensor, 200, 150, dashboardWith());
+    expect(item).toMatchObject({
+      kind: "widget",
+      widget: { type: "sensor", version: "2", config: { title: "Kitchen" } },
+    });
+    expect(item.frame).toEqual({ x: 80, y: 78, width: 240, height: 144 });
+  });
 
-  it('never makes a widget larger than the working area', () => {
-    const item = createWidgetItem(sensor, 10, 10, dashboardWith([], { width: 100, height: 80 }))
-    expect(item.frame).toMatchObject({ width: 100, height: 80, x: 0, y: 0 })
-  })
+  it("never makes a widget larger than the working area", () => {
+    const item = createWidgetItem(
+      sensor,
+      10,
+      10,
+      dashboardWith([], { width: 100, height: 80 })
+    );
+    expect(item.frame).toMatchObject({ width: 100, height: 80, x: 0, y: 0 });
+  });
 
-  it('centres a new primitive on the drop point', () => {
-    const item = createPrimitiveItem('circle', 200, 150, dashboardWith())
-    expect(item).toMatchObject({ kind: 'primitive', primitive: { type: 'circle', x: 200, y: 150 } })
-  })
+  it("centres a new primitive on the drop point", () => {
+    const item = createPrimitiveItem("circle", 200, 150, dashboardWith());
+    expect(item).toMatchObject({
+      kind: "primitive",
+      primitive: { type: "circle", x: 200, y: 150 },
+    });
+  });
 
-  it('returns undefined for an unsupported primitive type', () => {
-    expect(createPrimitiveItem('hexagon', 10, 10, dashboardWith())).toBeUndefined()
-  })
+  it("returns undefined for an unsupported primitive type", () => {
+    expect(
+      createPrimitiveItem("hexagon", 10, 10, dashboardWith())
+    ).toBeUndefined();
+  });
 
-  it('cascades click-added items so they do not stack exactly', () => {
-    const empty = catalogCascadePosition(dashboardWith(), true)
-    const busy = catalogCascadePosition(dashboardWith([rectangleItem('a'), textItem('b')]), true)
-    expect(empty).toEqual({ x: 25, y: 25 })
-    expect(busy.x).toBeGreaterThan(empty.x)
-  })
-})
+  it("cascades click-added items so they do not stack exactly", () => {
+    const empty = catalogCascadePosition(dashboardWith(), true);
+    const busy = catalogCascadePosition(
+      dashboardWith([rectangleItem("a"), textItem("b")]),
+      true
+    );
+    expect(empty).toEqual({ x: 25, y: 25 });
+    expect(busy.x).toBeGreaterThan(empty.x);
+  });
+});
