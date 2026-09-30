@@ -3,28 +3,38 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from time import monotonic
-from typing import Any
+from typing import TYPE_CHECKING, Any, Final
 
 import yaml  # type: ignore[import-untyped]
-from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
+from .data_providers.resolver import DataResolver, RequestKey, provider_params
 from .expressions import (
     Resolution,
     async_resolve_expressions,
     has_expressions,
 )
 from .flatten import (
+    Placed,
     background_element,
     flatten_items,
     shift_primitive,
 )
 from .measure import primitive_box
-from .odl import Box, DisplayContext, WidgetRenderContext
+from .odl import Box, DisplayContext, WidgetContext, rectangle, text
 from .palette import accent_color_for_palette
 from .raw_yaml import raw_elements
-from .widgets import WidgetRegistry, with_defaults
+from .widgets import WidgetPackage, WidgetPackageError, WidgetRegistry
+from .widgets.options import option_defaults
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
+
+RENDER_BUDGET_SECONDS: Final = 0.05
+PLACEHOLDER_SIZE: Final = 14
 
 
 class DashboardCompileError(RuntimeError):
@@ -44,16 +54,15 @@ class CompiledDashboard:
     compile_ms: float
 
 
-def _sources(config: dict[str, Any], requirement: dict[str, Any]) -> list[str]:
-    config_key = requirement.get("configKey")
-    if not isinstance(config_key, str):
-        return []
-    value = config.get(config_key)
-    if isinstance(value, str):
-        return [value] if value else []
-    if isinstance(value, list):
-        return [item for item in value if isinstance(item, str) and item]
-    return []
+@dataclass(slots=True)
+class _WidgetJob:
+    """One widget instance to render, and where its data will come from."""
+
+    placed: Placed
+    package: WidgetPackage
+    options: dict[str, Any]
+    picks: dict[str, list[dict[str, Any]]]
+    requests: dict[str, list[RequestKey]] = field(default_factory=dict)
 
 
 def _frame_box(frame: dict[str, int]) -> Box:
@@ -70,17 +79,119 @@ def _measure_primitives(
     }
 
 
-async def async_compile_dashboard(  # noqa: PLR0915
+def _plan_widgets(
+    placed_items: list[Placed],
+    registry: WidgetRegistry,
+    resolver: DataResolver,
+    warnings: list[str],
+) -> dict[str, _WidgetJob]:
+    """Register the data every visible, installed widget needs."""
+    jobs: dict[str, _WidgetJob] = {}
+    for placed in placed_items:
+        item = placed.item
+        if item["kind"] != "widget" or placed.hidden:
+            continue
+        widget = item["widget"]
+        try:
+            package = registry.package(widget["type"])
+        except WidgetPackageError:
+            warnings.append(f"{item['name']}: widget {widget['type']} is not installed")
+            continue
+        manifest = package.manifest
+        options = {**option_defaults(manifest), **widget.get("options", {})}
+        job = _WidgetJob(placed, package, options, widget.get("sources", {}))
+        for source in manifest["sources"]:
+            provider_name = source.get("data")
+            if provider_name is None:
+                continue
+            params = provider_params(manifest, provider_name, options)
+            job.requests[source["key"]] = [
+                resolver.request(provider_name, pick["id"], params)
+                for pick in job.picks.get(source["key"], [])
+            ]
+        jobs[item["id"]] = job
+    return jobs
+
+
+def _missing_widget_elements(box: Box, widget_type: str) -> list[dict[str, Any]]:
+    """Draw a hatched frame naming a widget that is not installed."""
+    elements = [rectangle(box, fill="white", outline="black", width=1)]
+    step = 12
+    for offset in range(step, box.width + box.height, step):
+        start = (box.x + min(offset, box.width - 1), box.y + max(0, offset - box.width))
+        end = (box.x + max(0, offset - box.height), box.y + min(offset, box.height - 1))
+        elements.append(
+            {
+                "type": "line",
+                "x_start": start[0],
+                "y_start": start[1],
+                "x_end": end[0],
+                "y_end": end[1],
+                "fill": "black",
+                "width": 1,
+            }
+        )
+    elements.append(
+        text(
+            widget_type,
+            x=box.x + box.width // 2,
+            y=box.y + box.height // 2,
+            size=PLACEHOLDER_SIZE,
+            anchor="mm",
+        )
+    )
+    return elements
+
+
+def _inside(box: Box, element: dict[str, Any]) -> bool:
+    """Whether an element's anchor lies in the frame (right and bottom edges included)."""
+    x = element.get("x", element.get("x_start"))
+    y = element.get("y", element.get("y_start"))
+    if not isinstance(x, int) or not isinstance(y, int):
+        return True
+    return box.x <= x <= box.right and box.y <= y <= box.bottom
+
+
+def _render_widget(
+    job: _WidgetJob,
+    resolver: DataResolver,
+    context_parts: tuple[Box, DisplayContext, str, datetime],
+    registry: WidgetRegistry,
+    warnings: list[str],
+) -> list[dict[str, Any]]:
+    box, display, language, now = context_parts
+    item = job.placed.item
+    context = WidgetContext(
+        instance_id=item["id"],
+        box=box,
+        display=display,
+        language=language,
+        options=job.options,
+        sources=job.picks,
+        data={
+            key: [resolver.value(request) for request in requests]
+            for key, requests in job.requests.items()
+        },
+        now=now,
+        strings=registry.strings(item["widget"]["type"], language),
+    )
+    started = monotonic()
+    rendered = job.package.renderer(context)
+    if monotonic() - started > RENDER_BUDGET_SECONDS:
+        warnings.append(f"{item['name']}: rendering took longer than 50 ms")
+    kept = [element for element in rendered if _inside(box, element)]
+    if len(kept) != len(rendered):
+        warnings.append(f"{item['name']}: elements outside the frame were dropped")
+    return kept
+
+
+async def async_compile_dashboard(
     hass: HomeAssistant,
     dashboard: dict[str, Any],
     registry: WidgetRegistry,
 ) -> CompiledDashboard:
     """Resolve declared data once, then compile every item in z-order."""
     started = monotonic()
-    aggregate: dict[tuple[str, str], object] = {}
-    widget_specs: list[
-        tuple[dict[str, Any], dict[str, Any], list[tuple[dict[str, Any], list[str]]]]
-    ] = []
     warnings: list[str] = []
     display_value = dashboard["display"]
     resolution = Resolution(items=dashboard["items"])
@@ -93,31 +204,11 @@ async def async_compile_dashboard(  # noqa: PLR0915
         )
     warnings.extend(resolution.warnings)
     placed_items = flatten_items(resolution.items)
-    for placed in placed_items:
-        item = placed.item
-        if item["kind"] != "widget" or placed.hidden:
-            continue
-        widget = item["widget"]
-        config = with_defaults(widget["type"], widget["config"], registry)
-        requirement_specs: list[tuple[dict[str, Any], list[str]]] = []
-        for requirement in registry.definition(widget["type"])["dataRequirements"]:
-            sources = _sources(config, requirement)
-            if not sources and not requirement.get("optional", False):
-                warnings.append(
-                    f"{registry.definition(widget['type'])['name']}: choose {requirement['configKey']}"
-                )
-            provider_name = requirement["provider"]
-            key = (widget["type"], provider_name)
-            provider = registry.provider(*key)
-            request = aggregate.setdefault(key, provider.new_request())
-            provider.add_request(request, sources, config, requirement)
-            requirement_specs.append((requirement, sources))
-        widget_specs.append((item, config, requirement_specs))
-    resolved: dict[tuple[str, str], object] = {}
-    for key, request in aggregate.items():
-        resolved[key] = await registry.provider(*key).async_resolve(
-            hass, request, dashboard["language"]
-        )
+    resolver = DataResolver(registry.providers)
+    jobs = _plan_widgets(placed_items, registry, resolver, warnings)
+    await resolver.async_resolve(hass, dashboard["language"])
+    warnings.extend(resolver.warnings)
+    resolution.entities |= resolver.source_ids
     data_done = monotonic()
     display = DisplayContext(
         width=display_value["width"],
@@ -126,18 +217,6 @@ async def async_compile_dashboard(  # noqa: PLR0915
         background=display_value["background"],
         accent_color=accent_color_for_palette(display_value["palette"]),
     )
-    widget_contexts: dict[str, tuple[dict[str, Any], dict[str, Any]]] = {}
-    for item, config, requirements in widget_specs:
-        data: dict[str, Any] = {}
-        for requirement, sources in requirements:
-            key = (item["widget"]["type"], requirement["provider"])
-            values = registry.provider(*key).values(
-                resolved[key], sources, config, requirement
-            )
-            data[requirement["key"]] = (
-                values if requirement.get("cardinality") == "many" else values[0]
-            )
-        widget_contexts[item["id"]] = (config, data)
     primitive_bounds = await asyncio.to_thread(
         _measure_primitives,
         {
@@ -151,6 +230,7 @@ async def async_compile_dashboard(  # noqa: PLR0915
     elements: list[dict[str, Any]] = []
     widget_elements: dict[str, list[dict[str, Any]]] = {}
     item_bounds: dict[str, dict[str, int]] = {}
+    now = dt_util.now()
     for placed in placed_items:
         item = placed.item
         try:
@@ -171,21 +251,21 @@ async def async_compile_dashboard(  # noqa: PLR0915
                         shift_primitive(item["primitive"], placed.x, placed.y)
                     )
                 continue
-            box = _frame_box(item["frame"]).moved(placed.x, placed.y)
-            item_bounds[item["id"]] = box.as_dict()
+            frame = _frame_box(item["frame"]).moved(placed.x, placed.y)
+            item_bounds[item["id"]] = frame.as_dict()
             if placed.hidden:
                 continue
-            content_box = box.inset(item.get("layout", {}).get("padding", 0))
-            config, data = widget_contexts[item["id"]]
-            context = WidgetRenderContext(
-                instance_id=item["id"],
-                box=content_box,
-                display=display,
-                language=dashboard["language"],
-                config=config,
-                data=data,
+            if item["id"] not in jobs:
+                elements.extend(_missing_widget_elements(frame, item["widget"]["type"]))
+                continue
+            content_box = frame.inset(item.get("layout", {}).get("padding", 0))
+            rendered = _render_widget(
+                jobs[item["id"]],
+                resolver,
+                (content_box, display, dashboard["language"], now),
+                registry,
+                warnings,
             )
-            rendered = registry.renderer(item["widget"]["type"])(context)
             widget_elements[item["id"]] = rendered
             elements.extend(rendered)
         except (KeyError, TypeError, ValueError) as err:

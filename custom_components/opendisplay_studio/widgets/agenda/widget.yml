@@ -1,0 +1,70 @@
+api: 1
+id: agenda
+name: Agenda
+version: 1.0.0
+description: Upcoming events from one or more calendars on one list.
+icon: mdi:calendar-text
+category: Calendar
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 360, height: 240 }
+  minSize: { width: 180, height: 90 }
+
+sources:
+  - key: calendars
+    label: Calendars
+    selector:
+      entity: { filter: { domain: calendar }, multiple: true }
+    required: true
+    max: 10
+    data: calendar_events
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: color
+        label: Color
+        selector: { opendisplay_color: {} }
+
+options:
+  - section: content
+    fields:
+      - key: maxEvents
+        label: Number of events
+        default: 5
+        selector: { number: { min: 1, max: 20, mode: box } }
+      - key: days
+        label: Look ahead (days)
+        default: 14
+        selector: { number: { min: 1, max: 60, mode: box } }
+      - key: emptyText
+        label: Text when there are no events
+        default: ""
+        selector: { text: {} }
+  - section: presentation
+    fields:
+      - key: groupByDay
+        label: Group by day
+        default: true
+        selector: { boolean: {} }
+      - key: showTime
+        label: Show time
+        default: true
+        selector: { boolean: {} }
+      - key: showLocation
+        label: Show location
+        default: false
+        selector: { boolean: {} }
+      - key: showCalendarLabel
+        label: Show calendar label
+        default: true
+        selector: { boolean: {} }
+      - key: use24h
+        label: 24 h clock
+        default: true
+        selector: { boolean: {} }
+
+data:
+  calendar_events:
+    days: "@options.days"

@@ -93,7 +93,7 @@ class DashboardStore:
 
     def __init__(self, hass: HomeAssistant, registry: WidgetRegistry) -> None:
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, STORAGE_KEY)
-        self._registry = registry
+        self.registry = registry
         self._dashboards: dict[str, Dashboard] = {}
         self._lock = asyncio.Lock()
 
@@ -105,7 +105,7 @@ class DashboardStore:
             return
         for value in dashboards:
             try:
-                dashboard = validate_dashboard(value, self._registry)
+                dashboard = validate_dashboard(value, self.registry)
             except DashboardValidationError:
                 continue
             dashboard_id = dashboard.get("id")
@@ -130,7 +130,7 @@ class DashboardStore:
         async with self._lock:
             if len(self._dashboards) >= MAX_DASHBOARDS:
                 raise DashboardValidationError("dashboard limit reached")
-            dashboard = validate_dashboard(value, self._registry)
+            dashboard = validate_dashboard(value, self.registry)
             dashboard_id = str(uuid4())
             now = datetime.now(UTC).isoformat()
             dashboard.update({"id": dashboard_id, "createdAt": now, "updatedAt": now})
@@ -143,7 +143,7 @@ class DashboardStore:
             current = self._dashboards.get(dashboard_id)
             if current is None:
                 raise KeyError(dashboard_id)
-            dashboard = validate_dashboard(value, self._registry)
+            dashboard = validate_dashboard(value, self.registry)
             dashboard.update(
                 {
                     "id": dashboard_id,

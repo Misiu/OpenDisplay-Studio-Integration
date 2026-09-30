@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 
@@ -56,15 +57,29 @@ class DisplayContext:
 
 
 @dataclass(frozen=True, slots=True)
-class WidgetRenderContext:
-    """Pure input supplied to a widget ODL renderer."""
+class WidgetContext:
+    """
+    Pure input supplied to a widget's ODL renderer.
+
+    `sources` holds what the user picked for each source key, in pick order, with
+    its per-source fields; `data` holds what the provider resolved for the same
+    picks, so `data[key][i]` belongs to `sources[key][i]`.
+    """
 
     instance_id: str
     box: Box
     display: DisplayContext
     language: str
-    config: dict[str, Any]
-    data: dict[str, Any]
+    options: dict[str, Any]
+    sources: dict[str, list[dict[str, Any]]]
+    data: dict[str, list[Any]]
+    now: datetime
+    strings: dict[str, str] = field(default_factory=dict)
+
+    def t(self, key: str, **values: object) -> str:
+        """Return the package's runtime string for the dashboard language."""
+        template = self.strings.get(key, key)
+        return template.format(**values) if values else template
 
 
 def clamp(value: int, minimum: int, maximum: int) -> int:
@@ -118,4 +133,69 @@ def rectangle(
         "outline": outline,
         "width": width,
         "radius": radius,
+    }
+
+
+def icon(
+    name: str,
+    *,
+    x: int,
+    y: int,
+    size: int,
+    color: str = "black",
+    anchor: str = "lt",
+) -> dict[str, Any]:
+    """Build one ODL icon element; `name` is a Material Design Icons name."""
+    return {
+        "type": "icon",
+        "value": name,
+        "x": x,
+        "y": y,
+        "size": size,
+        "color": color,
+        "anchor": anchor,
+    }
+
+
+def line(
+    start: tuple[int, int],
+    end: tuple[int, int],
+    *,
+    color: str = "black",
+    width: int = 1,
+) -> dict[str, Any]:
+    """Build one ODL line element between two points."""
+    return {
+        "type": "line",
+        "x_start": start[0],
+        "y_start": start[1],
+        "x_end": end[0],
+        "y_end": end[1],
+        "fill": color,
+        "width": width,
+    }
+
+
+def progress_bar(
+    box: Box,
+    *,
+    progress: int,
+    fill: str = "black",
+    background: str = "white",
+    outline: str = "black",
+) -> dict[str, Any]:
+    """Build one ODL progress bar filling `box` to `progress` percent."""
+    return {
+        "type": "progress_bar",
+        "x_start": box.x,
+        "y_start": box.y,
+        "x_end": box.right - 1,
+        "y_end": box.bottom - 1,
+        "progress": clamp(progress, 0, 100),
+        "direction": "right",
+        "fill": fill,
+        "background": background,
+        "outline": outline,
+        "width": 1,
+        "show_percentage": False,
     }

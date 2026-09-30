@@ -1,0 +1,9 @@
+{
+  "name": "Witaj świecie",
+  "description": "Wita wybraną osobę. Najmniejszy użyteczny pakiet widżetu.",
+  "categories.Examples": "Przykłady",
+  "sections.content": "Zawartość",
+  "options.who": "Kogo powitać",
+  "options.color": "Kolor",
+  "runtime.greeting": "Witaj, {who}!"
+}

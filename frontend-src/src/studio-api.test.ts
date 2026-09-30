@@ -24,7 +24,19 @@ describe("studio API", () => {
       primitives: [],
     });
     await api.bootstrap(hass);
-    expect(messages).toEqual([{ type: "opendisplay_studio/bootstrap" }]);
+    expect(messages).toEqual([
+      { type: "opendisplay_studio/bootstrap", language: "en" },
+    ]);
+  });
+
+  it("reloads the widgets in the language of the panel", async () => {
+    const reply = { widgets: [], widgetErrors: [] };
+    const { hass, messages } = fakeHass(reply);
+
+    expect(await api.reloadWidgets(hass)).toBe(reply);
+    expect(messages).toEqual([
+      { type: "opendisplay_studio/reload_widgets", language: "en" },
+    ]);
   });
 
   it("creates a dashboard and returns the stored copy", async () => {

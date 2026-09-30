@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { openKitchen, withoutRandomUuid } from "./helpers";
+import { libraryItem, openKitchen, withoutRandomUuid } from "./helpers";
 
 /**
  * Every ODL primitive the backend defines is offered in the panel, is editable through
@@ -83,11 +83,6 @@ const PRIMITIVES: PrimitiveExpectation[] = [
     ],
   },
 ];
-
-const libraryItem = (page: Page, name: string) =>
-  page.locator("ods-library .catalog-item").filter({
-    has: page.locator("strong", { hasText: new RegExp(`^${name}$`) }),
-  });
 
 const selectedChip = (page: Page) => page.locator(".selection-size");
 

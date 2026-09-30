@@ -1,3 +1,4 @@
+import { optionsFromForm } from "./widget-fields";
 import {
   CLOCK_REFRESH_MS,
   STATE_REFRESH_DELAY_MS,
@@ -25,7 +26,8 @@ import {
   setItemExpression,
   setItemNumber,
   setPalette,
-  setWidgetConfig,
+  setWidgetOptions,
+  setWidgetPicks,
   toggleItemState,
   updatePrimitiveFields,
 } from "./dashboard-ops";
@@ -58,7 +60,7 @@ import type {
   HomeAssistant,
   PrimitiveDefinition,
   StudioItem,
-  WidgetConfig,
+  WidgetLoadError,
   WidgetDefinition,
 } from "./types";
 import type { OdsCanvas } from "./ods-canvas";
@@ -72,6 +74,7 @@ import "./ods-library";
 import "./ods-new-dashboard-dialog";
 
 const PREVIEW_DELAY_MS = 220;
+const NOTICE_MS = 5000;
 const messageFrom = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -162,6 +165,9 @@ export class OdsApp extends LitElement {
   @state() private dashboards: Dashboard[] = [];
   @state() private view: EditorView = "dashboards";
   @state() private widgets: WidgetDefinition[] = [];
+  @state() private widgetErrors: WidgetLoadError[] = [];
+  @state() private notice = "";
+  private noticeTimer?: number;
   @state() private primitives: PrimitiveDefinition[] = [];
   @state() private current?: Dashboard;
   @state() private selectedItemId = "";
@@ -215,6 +221,7 @@ export class OdsApp extends LitElement {
     if (this.previewTimer) window.clearTimeout(this.previewTimer);
     if (this.stateTimer) window.clearTimeout(this.stateTimer);
     if (this.clockTimer) window.clearTimeout(this.clockTimer);
+    if (this.noticeTimer) window.clearTimeout(this.noticeTimer);
     window.removeEventListener("keydown", this.onKeyDown);
   }
 
@@ -234,6 +241,7 @@ export class OdsApp extends LitElement {
       const data = await api.bootstrap(hass);
       this.dashboards = data.dashboards;
       this.widgets = data.widgets;
+      this.widgetErrors = data.widgetErrors;
       this.primitives = data.primitives;
       this.current = undefined;
       this.preview = undefined;
@@ -835,10 +843,50 @@ export class OdsApp extends LitElement {
     this.mutate((next) => setBackground(next, event.detail.color));
   }
 
-  private onWidgetConfigChange(event: OdsEvent<"widget-config-change">): void {
-    // The value comes from `ha-form`, which is typed loosely at this boundary.
-    const config = event.detail.value as WidgetConfig;
-    this.mutate((next) => setWidgetConfig(next, this.selectedItemId, config));
+  private onWidgetOptionsChange(
+    event: OdsEvent<"widget-options-change">
+  ): void {
+    const item = this.selectedItem;
+    if (item?.kind !== "widget") return;
+    const definition = this.widgets.find(
+      (widget) => widget.id === item.widget.type
+    );
+    if (!definition) return;
+    const options = optionsFromForm(event.detail.value, definition);
+    this.mutate((next) => setWidgetOptions(next, item.id, options));
+  }
+
+  private onWidgetPicksChange(event: OdsEvent<"widget-picks-change">): void {
+    const { sourceKey, picks } = event.detail;
+    this.mutate((next) =>
+      setWidgetPicks(next, this.selectedItemId, sourceKey, picks)
+    );
+  }
+
+  private async reloadWidgets(): Promise<void> {
+    if (!this.hass) return;
+    try {
+      const result = await api.reloadWidgets(this.hass);
+      this.widgets = result.widgets;
+      this.widgetErrors = result.widgetErrors;
+      this.showNotice(
+        strings.library.widgetsReloaded(
+          result.widgets.length,
+          result.widgetErrors.length
+        )
+      );
+      void this.composePreview();
+    } catch (error) {
+      this.error = messageFrom(error, strings.library.reloadFailed);
+    }
+  }
+
+  private showNotice(message: string): void {
+    this.notice = message;
+    if (this.noticeTimer) window.clearTimeout(this.noticeTimer);
+    this.noticeTimer = window.setTimeout(() => {
+      this.notice = "";
+    }, NOTICE_MS);
   }
 
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
@@ -925,8 +973,10 @@ export class OdsApp extends LitElement {
       >
         <ods-library
           .widgets=${this.widgets}
+          .widgetErrors=${this.widgetErrors}
           .primitives=${this.primitives}
           .collapsed=${this.leftCollapsed}
+          @widgets-reload=${this.reloadWidgets}
           @library-collapse=${this.onLibraryCollapse}
           @catalog-add=${this.onCatalogAdd}
           @catalog-drag=${this.onCatalogDrag}
@@ -965,7 +1015,9 @@ export class OdsApp extends LitElement {
           @profile-change=${this.onProfileChange}
           @palette-change=${this.onPaletteChange}
           @background-change=${this.onBackgroundChange}
-          @widget-config-change=${this.onWidgetConfigChange}
+          @widget-options-change=${this.onWidgetOptionsChange}
+          @widget-picks-change=${this.onWidgetPicksChange}
+          @widgets-reload=${this.reloadWidgets}
           @primitive-change=${this.onPrimitiveChange}
           @expression-change=${this.onExpressionChange}
           @dashboard-delete-request=${this.deleteDashboard}
@@ -984,6 +1036,15 @@ export class OdsApp extends LitElement {
     `;
   }
 
+  private renderNotice(): TemplateResult | typeof nothing {
+    if (!this.notice) {
+      return nothing;
+    }
+    return html`
+      <ha-alert alert-type="success" class="notice">${this.notice}</ha-alert>
+    `;
+  }
+
   private renderEditor(dashboard: Dashboard): TemplateResult {
     return html`
       <div class="shell">
@@ -998,7 +1059,7 @@ export class OdsApp extends LitElement {
           @toggle-ready=${this.toggleReady}
           @dashboard-save=${this.saveDashboard}
         ></ods-header>
-        ${this.renderError()}
+        ${this.renderError()} ${this.renderNotice()}
         ${
           this.view === "code"
             ? html`

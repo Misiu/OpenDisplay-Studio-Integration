@@ -1,4 +1,5 @@
 import { seedExpression, VISIBLE_KEY } from "./expressions";
+import { optionDefaults } from "./widget-fields";
 import { defaultItemName } from "./item-names";
 import {
   constrainItem,
@@ -23,6 +24,8 @@ import type {
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
+  WidgetOptions,
+  WidgetPick,
   WidgetItem,
 } from "./types";
 
@@ -224,13 +227,27 @@ export const moveLayer = (
   dashboard.items = topFirst.reverse();
 };
 
-export const setWidgetConfig = (
+export const setWidgetOptions = (
   dashboard: Dashboard,
   itemId: string,
-  config: WidgetItem["widget"]["config"]
+  options: WidgetOptions
 ): void => {
   const item = dashboard.items.find((candidate) => candidate.id === itemId);
-  if (item?.kind === "widget") item.widget.config = config;
+  if (item?.kind === "widget") {
+    item.widget.options = { ...item.widget.options, ...options };
+  }
+};
+
+export const setWidgetPicks = (
+  dashboard: Dashboard,
+  itemId: string,
+  sourceKey: string,
+  picks: WidgetPick[]
+): void => {
+  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  if (item?.kind === "widget") {
+    item.widget.sources = { ...item.widget.sources, [sourceKey]: picks };
+  }
 };
 
 export const updatePrimitiveFields = (
@@ -274,7 +291,10 @@ export const createWidgetItem = (
     widget: {
       type: definition.id,
       version: definition.version,
-      config: structuredClone(definition.defaults),
+      sources: Object.fromEntries(
+        definition.sources.map((source) => [source.key, []])
+      ),
+      options: optionDefaults(definition),
     },
     frame: {
       x: clamp(Math.round(x - width / 2), area.x, area.x + area.width - width),

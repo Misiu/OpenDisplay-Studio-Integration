@@ -18,6 +18,7 @@ from .validation import (
     string,
 )
 from .widgets import WidgetRegistry
+from .widgets.options import normalize_options, normalize_sources
 
 MAX_ITEMS: Final = 256
 MAX_DEPTH: Final = 8
@@ -113,6 +114,31 @@ def _validate_frame(
     return {"x": x, "y": y, "width": frame_width, "height": frame_height}
 
 
+def _widget_body(widget: dict[str, Any], walk: _Walk) -> dict[str, Any]:
+    """Validate a widget's sources and options; keep those of an uninstalled widget."""
+    widget_type = string(widget.get("type"), "widget.type", 64)
+    sources = widget.get("sources", {})
+    options = widget.get("options", {})
+    if widget_type not in walk.registry.widget_types:
+        # The package may return; until then the item keeps everything it had.
+        version = string(widget.get("version", "0.0.0"), "widget.version", 64)
+        return {
+            "type": widget_type,
+            "version": version,
+            "sources": deepcopy(sources),
+            "options": deepcopy(options),
+        }
+    definition = walk.registry.definition(widget_type)
+    return {
+        "type": widget_type,
+        "version": string(
+            widget.get("version", definition["version"]), "widget.version", 64
+        ),
+        "sources": normalize_sources(definition, sources),
+        "options": normalize_options(definition, options),
+    }
+
+
 def _validate_widget(
     value: dict[str, Any], walk: _Walk, *, relative: bool
 ) -> dict[str, Any]:
@@ -120,19 +146,14 @@ def _validate_widget(
     widget = value.get("widget")
     if not isinstance(widget, dict):
         fail("widget item requires widget")
-    widget_type = string(widget.get("type"), "widget.type", 64)
-    definition = walk.registry.definition(widget_type)
-    version = string(widget.get("version", definition["version"]), "widget.version", 64)
-    config = widget.get("config", {})
-    if not isinstance(config, dict):
-        fail("widget.config must be an object")
     layout = value.get("layout", {})
     if not isinstance(layout, dict):
         fail("widget layout must be an object")
+    body = _widget_body(widget, walk)
     item = {
         **state,
         "kind": "widget",
-        "widget": {"type": widget_type, "version": version, "config": deepcopy(config)},
+        "widget": body,
         "frame": _validate_frame(
             value.get("frame"), walk.width, walk.height, relative=relative
         ),
@@ -143,7 +164,7 @@ def _validate_widget(
     _with_expressions(
         item, _expressions(value, ITEM_EXPRESSIONS, single=_single(relative=relative))
     )
-    item["_type"] = widget_type
+    item["_type"] = body["type"]
     return item
 
 

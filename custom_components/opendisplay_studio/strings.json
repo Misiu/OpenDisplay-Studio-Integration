@@ -15,5 +15,11 @@
     "render_failed": {
       "message": "OpenDisplay Studio could not generate this screen."
     }
+  },
+  "services": {
+    "reload_widgets": {
+      "name": "Reload widgets",
+      "description": "Loads the widget packages in the OpenDisplay Studio widgets folder again, without restarting Home Assistant."
+    }
   }
 }

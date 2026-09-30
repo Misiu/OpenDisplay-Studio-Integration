@@ -15,6 +15,7 @@ from .dashboards import DashboardStore, DashboardValidationError, validate_dashb
 from .palette import accent_color_for_palette
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
+from .widget_reload import async_reload_widgets
 from .widgets import WidgetRegistry
 
 
@@ -39,7 +40,12 @@ def _error(
     connection.send_error(msg["id"], code, str(err))
 
 
-@websocket_api.websocket_command({vol.Required("type"): "opendisplay_studio/bootstrap"})
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/bootstrap",
+        vol.Optional("language", default="en"): str,
+    }
+)
 @websocket_api.require_admin
 def websocket_bootstrap(
     hass: HomeAssistant,
@@ -52,7 +58,8 @@ def websocket_bootstrap(
         {
             "version": INTEGRATION_VERSION,
             "dashboards": _store(hass).list(),
-            "widgets": _widgets(hass).definitions,
+            "widgets": _widgets(hass).definitions(msg.get("language", "en")),
+            "widgetErrors": [error.as_dict() for error in _widgets(hass).errors],
             "primitives": DEFAULT_PRIMITIVES.definitions,
         },
     )
@@ -202,8 +209,33 @@ async def websocket_compose_preview(
     )
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/reload_widgets",
+        vol.Optional("language", default="en"): str,
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def websocket_reload_widgets(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Load the widget packages again and return the new catalog."""
+    registry = await async_reload_widgets(hass)
+    connection.send_result(
+        msg["id"],
+        {
+            "widgets": registry.definitions(msg["language"]),
+            "widgetErrors": [error.as_dict() for error in registry.errors],
+        },
+    )
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_bootstrap)
+    websocket_api.async_register_command(hass, websocket_reload_widgets)
     websocket_api.async_register_command(hass, websocket_create_dashboard)
     websocket_api.async_register_command(hass, websocket_update_dashboard)
     websocket_api.async_register_command(hass, websocket_delete_dashboard)

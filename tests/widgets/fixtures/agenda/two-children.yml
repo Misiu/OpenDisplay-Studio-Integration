@@ -1,0 +1,23 @@
+name: Two children's calendars merged
+language: en
+now: "2026-09-30T08:30:00+02:00"
+options:
+  showLocation: true
+sources:
+  calendars:
+    - {id: calendar.ola, label: Ola, color: red}
+    - {id: calendar.jan, label: Jan, color: black}
+data:
+  calendars:
+    - id: calendar.ola
+      missing: false
+      events:
+        - {summary: Swimming, start: "2026-09-30T16:00:00+02:00", end: "2026-09-30T17:00:00+02:00", all_day: false, location: City pool, description: "", source: calendar.ola}
+        - {summary: Piano lesson, start: "2026-10-01T15:30:00+02:00", end: "2026-10-01T16:15:00+02:00", all_day: false, location: "", description: "", source: calendar.ola}
+        - {summary: School trip to the science museum, start: "2026-10-02T08:00:00+02:00", end: "2026-10-02T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.ola}
+    - id: calendar.jan
+      missing: false
+      events:
+        - {summary: Football, start: "2026-09-30T17:30:00+02:00", end: "2026-09-30T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.jan}
+        - {summary: Dentist, start: "2026-10-01T09:00:00+02:00", end: "2026-10-01T09:30:00+02:00", all_day: false, location: Main street 4, description: "", source: calendar.jan}
+        - {summary: Class photo day, start: "2026-10-01T00:00:00+02:00", end: "2026-10-02T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.jan}

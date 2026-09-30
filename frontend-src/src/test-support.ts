@@ -1,5 +1,12 @@
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
-import type { Dashboard, PrimitiveItem, StudioItem, WidgetItem } from "./types";
+import { loadWidgetDefinitions } from "./widget-definitions";
+import type {
+  Dashboard,
+  PrimitiveItem,
+  StudioItem,
+  WidgetDefinition,
+  WidgetItem,
+} from "./types";
 
 export const rectangleItem = (
   id = "rect",
@@ -62,7 +69,7 @@ export const widgetItem = (id = "widget"): WidgetItem => ({
   kind: "widget",
   locked: false,
   hidden: false,
-  widget: { type: "sensor", version: "1", config: {} },
+  widget: { type: "sensor-card", version: "1", sources: {}, options: {} },
   frame: { x: 10, y: 10, width: 200, height: 100 },
   layout: { padding: 0 },
 });
@@ -93,3 +100,11 @@ export const dashboardWith = (
 
 /** The definitions the backend ships, read from the repository. */
 export const primitiveDefinitions = loadPrimitiveDefinitions();
+export const widgetDefinitions = loadWidgetDefinitions();
+
+/** One built-in widget's definition, as the backend ships it. */
+export const widgetDefinition = (id: string): WidgetDefinition => {
+  const definition = widgetDefinitions.find((widget) => widget.id === id);
+  if (!definition) throw new Error(`No built-in widget ${id}`);
+  return definition;
+};

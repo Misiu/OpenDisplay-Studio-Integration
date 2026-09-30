@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from functools import partial
-from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -24,7 +22,8 @@ from .http import RenderedImageView
 from .panel import async_register_panel
 from .rendering import OdlRenderService
 from .websocket import async_register_commands
-from .widgets import BUILTIN_WIDGET_DIRECTORY, WidgetRegistry
+from .widget_reload import async_load_registry, async_register_reload_service
+from .widgets import WidgetRegistry
 
 
 @dataclass(slots=True)
@@ -44,14 +43,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     """Set up storage, the ODL renderer, panel APIs, and PNG endpoint."""
-    installed_widgets = Path(hass.config.path(DOMAIN, "widgets"))
-    await hass.async_add_executor_job(
-        partial(installed_widgets.mkdir, parents=True, exist_ok=True)
-    )
-    widgets = await hass.async_add_executor_job(
-        WidgetRegistry.from_directories,
-        [BUILTIN_WIDGET_DIRECTORY, installed_widgets],
-    )
+    widgets = await async_load_registry(hass)
     dashboards = DashboardStore(hass, widgets)
     await dashboards.async_load()
     hass.data[DOMAIN] = OpenDisplayStudioData(
@@ -67,6 +59,7 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     )
     hass.http.register_view(RenderedImageView(hass))
     async_register_commands(hass)
+    async_register_reload_service(hass)
     await async_register_panel(hass)
     return True
 

@@ -22,23 +22,10 @@ import {
   textItem,
   widgetItem,
   primitiveDefinitions,
+  widgetDefinition,
 } from "./test-support";
-import type { WidgetDefinition } from "./types";
 
-const sensor: WidgetDefinition = {
-  id: "sensor",
-  version: "2",
-  name: "Sensor",
-  description: "",
-  icon: "mdi:gauge",
-  defaults: { title: "Kitchen" },
-  fields: [],
-  layout: {
-    defaultSize: { width: 240, height: 144 },
-    minSize: { width: 60, height: 48 },
-  },
-  dataRequirements: [],
-};
+const sensor = widgetDefinition("sensor-card");
 
 describe("setItemNumber", () => {
   it("moves a rectangle while keeping its size and staying inside the working area", () => {
@@ -157,9 +144,14 @@ describe("creating items from the catalog", () => {
     const item = createWidgetItem(sensor, 200, 150, dashboardWith());
     expect(item).toMatchObject({
       kind: "widget",
-      widget: { type: "sensor", version: "2", config: { title: "Kitchen" } },
+      widget: {
+        type: "sensor-card",
+        version: "1.0.0",
+        sources: { entities: [] },
+        options: { layout: "single", showIcon: true, decimals: "auto" },
+      },
     });
-    expect(item.frame).toEqual({ x: 80, y: 78, width: 240, height: 144 });
+    expect(item.frame).toEqual({ x: 60, y: 70, width: 280, height: 160 });
   });
 
   it("never makes a widget larger than the working area", () => {

@@ -544,23 +544,23 @@ data:                               # provider parameters, may reference options
     days: "@options.days"
 ```
 
-- [ ] **8.1.1 Manifest schema** (voluptuous) with precise error messages
+- [x] **8.1.1 Manifest schema** (voluptuous) with precise error messages
   (`agenda/widget.yml: sources[0].selector: …`). Required: `api`, `id`, `name`,
   `version`, `description`, `icon`, `layout`, `renderer.py`, `translations/en.json`.
-- [ ] **8.1.2 Sources.** Selectors support `entity` (single/multiple, domain /
+- [x] **8.1.2 Sources.** Selectors support `entity` (single/multiple, domain /
   device_class filters), `device` (single/multiple, integration/manufacturer
   filters), and `area`. `perSource` fields are stored per picked item
   (`{ id: "calendar.kid_1", label: "Ola", color: "red" }`), so a widget can tell
   the items apart on screen.
-- [ ] **8.1.3 Options.** Any HA selector; `default` per field; sections map to
+- [x] **8.1.3 Options.** Any HA selector; `default` per field; sections map to
   Properties accordions. Colors use `opendisplay_color` (our palette dropdown).
-- [ ] **8.1.4 Stored item shape.**
+- [x] **8.1.4 Stored item shape.**
   `{ kind: "widget", widget: { type, version, sources: { <key>: [ {id, …perSource} ] }, options: { … } }, frame, name, hidden, locked, visible }`.
   `visible` accepts an expression like any primitive field.
 
 ### 8.2 Data providers
 
-- [ ] **8.2.1 Shared built-in providers** in
+- [ ] **8.2.1 Shared built-in providers** *(3 of 6: `entity_state`, `calendar_events`, `weather_forecast`; `todo_items`, `history`, `device_entities` arrive with 9.7–9.11)* in
   `custom_components/opendisplay_studio/data_providers/`, one per data kind,
   deduplicated across **all** widget instances of a render:
 
@@ -575,10 +575,10 @@ data:                               # provider parameters, may reference options
 
   Values are already localized (`display_state` uses HA translations for the
   dashboard language; timestamps in HA's time zone).
-- [ ] **8.2.2 Widget-specific providers.** A package may ship `provider.py`
+- [x] **8.2.2 Widget-specific providers.** A package may ship `provider.py`
   exporting `PROVIDER` (same protocol as today); its name is namespaced as
   `<widget_id>:<name>` so packages cannot collide.
-- [ ] **8.2.3 Refresh.** Entities read by providers are registered with the
+- [x] **8.2.3 Refresh.** Entities read by providers are registered with the
   preview refresh mechanism from phase 3.3; the preview re-composes when they
   change.
 
@@ -594,37 +594,37 @@ def render(ctx: WidgetContext) -> list[dict]:
 RENDERER = render
 ```
 
-- [ ] **8.3.1 `WidgetContext`**: `box` (content box after padding), `display`
+- [x] **8.3.1 `WidgetContext`**: `box` (content box after padding), `display`
   (size, palette, accent), `language`, `t(key, **values)` (package
   translations), `options`, `sources` (with `perSource` values), `data` (keyed
   by source key; always a list, one entry per picked item, in pick order),
   `now` (aware datetime, fixed per render).
-- [ ] **8.3.2 `sdk.odl` helpers** (built on `odl.py`): `text`, `multiline`,
+- [ ] **8.3.2 `sdk.odl` helpers** *(done: `text`, `icon`, `rectangle`, `line`, `progress_bar`, layout helpers, `fit_text`, `truncate`, dates, weekday, icons; pending: `multiline`, `plot`)* (built on `odl.py`): `text`, `multiline`,
   `icon`, `rectangle`, `line`, `progress_bar`, `plot`; layout helpers `rows`,
   `columns`, `grid`, `inset`; `fit_text` using the renderer's real
   `measure_text`; `truncate`; `format_datetime`, `format_relative_day`
   ("Today", "Tomorrow", weekday) localized; `condition_icon` for weather states;
   `entity_icon` for domain/device_class defaults.
-- [ ] **8.3.3 Renderer contract** (update `WIDGET_CONTRACT.md`): pure and
+- [x] **8.3.3 Renderer contract** (update `WIDGET_CONTRACT.md`): pure and
   deterministic; no HA access, I/O, or network; must stay inside `ctx.box`
   (compiler drops elements outside the frame and warns); adapts to the box
   (compact / regular / large); renders a readable placeholder when a required
   source is missing ("Choose calendars"); may return warnings. Time budget per
   render: 50 ms (measured, warning above).
-- [ ] **8.3.4 Config migrations.** When the stored `version` is older than the
+- [ ] **8.3.4 Config migrations.** *(not started)* When the stored `version` is older than the
   package, `migrations.py` (`MIGRATIONS = {"1.x→2.0": fn}`) upgrades the stored
   options before rendering and on save.
 
 ### 8.4 Dynamic loading and reload
 
-- [ ] **8.4.1 Two roots.** Built-in: `custom_components/opendisplay_studio/widgets/`.
+- [x] **8.4.1 Two roots.** Built-in: `custom_components/opendisplay_studio/widgets/`.
   User packages: `/config/opendisplay_studio/widgets/<widget_id>/` (created on
   setup). A user package with an id that already exists is rejected with an
   error (to customise a built-in, copy it under a new id).
-- [ ] **8.4.2 Isolation.** Each package loads independently; a broken package
+- [x] **8.4.2 Isolation.** Each package loads independently; a broken package
   is skipped and reported (`widgetErrors: [{ folder, message }]`), never
   stopping setup or other widgets.
-- [ ] **8.4.3 Reload without restart.** Three triggers, one code path:
+- [x] **8.4.3 Reload without restart.** Three triggers, one code path:
   a **Reload widgets** button in the Library `WIDGETS` header, the WebSocket
   command `opendisplay_studio/reload_widgets`, and the HA action
   `opendisplay_studio.reload_widgets` (usable in automations; also run on
@@ -632,25 +632,27 @@ RENDERER = render
   atomically; modules get a fresh name per content hash so changed code is
   really re-imported. The panel re-bootstraps the catalog and shows a toast:
   "Widgets reloaded — 9 loaded, 1 failed (details)".
-- [ ] **8.4.4 Missing widgets never lose data.** A dashboard item whose widget
+  *Not yet:* the reload on an integration reload; the panel and the service are done.
+- [x] **8.4.4 Missing widgets never lose data.** A dashboard item whose widget
   type is not installed is kept as-is, drawn as a hatched placeholder frame with
   the type name, and reported as a warning; it renders again once the package
   returns.
-- [ ] **8.4.5 Library.** `WIDGETS` groups tiles by `category`; user packages
+- [x] **8.4.5 Library.** `WIDGETS` groups tiles by `category`; user packages
   get a small "user" badge; the Library header shows a warning icon when some
   packages failed, opening the error list.
-- [ ] **8.4.6 Security note.** Packages are Python code executed inside HA.
+- [x] **8.4.6 Security note.** Packages are Python code executed inside HA.
   Only files placed by an HA administrator in the config folder are loaded; no
   upload or download from the panel in this phase. The docs say so plainly.
 
 ### 8.5 Editor integration
 
-- [ ] **8.5.1 Adding a widget** from the Library creates it at `defaultSize`.
+- [x] **8.5.1 Adding a widget** from the Library creates it at `defaultSize`.
   Properties order: header, **Data sources** (one picker per `sources` entry,
   multi-select as chips, drag to reorder, per-source fields in an expandable
   row under each chip), then option sections, then `Layout`, `Visibility`.
-- [ ] **8.5.2 Resize** is limited by `minSize`; the live size badge shows it.
-- [ ] **8.5.3 Widgets are leaves** in the structure tree and can live inside
+  *Done with:* Home Assistant's selectors for the pickers (chips, reorder), one expandable row of per-source fields under each pick.
+- [x] **8.5.2 Resize** is limited by `minSize`; the live size badge shows it.
+- [ ] **8.5.3 Widgets are leaves** *(leaves already; inside containers with phase 5)* in the structure tree and can live inside
   containers and groups like primitives.
 - [ ] **8.5.4 Convert to elements** (context menu, later step): replace a widget
   with a container holding the ODL primitives it currently produces — a static
@@ -658,14 +660,15 @@ RENDERER = render
 
 ### 8.6 Tooling
 
-- [ ] **8.6.1 Test harness** `tests/widgets/`: render every built-in widget at
+- [x] **8.6.1 Test harness** `tests/widgets/`: render every built-in widget at
   `minSize`, `defaultSize`, and a large size with fixture data (and with
   missing sources); assert no element leaves the box, no exception, and compare
   against golden PNGs.
-- [ ] **8.6.2 `docs/widget-sdk.md`**: how to write, test, install, and reload a
+- [x] **8.6.2 `docs/widget-sdk.md`**: how to write, test, install, and reload a
   package, with the Agenda widget as the worked example.
-- [ ] **8.6.3 Example user package** in `examples/widgets/hello_world/` used by
+- [x] **8.6.3 Example user package** in `examples/widgets/hello_world/` used by
   an e2e test: copy into the user folder → reload → tile appears → drop → renders.
+  *Done as a backend test* (`tests/test_example_widget.py`) that copies the package into a user folder, reloads and renders it; the panel side is covered by `e2e/widgets.spec.ts` with a simulated install.
 
 **Accepted when:** dropping a new package folder into
 `/config/opendisplay_studio/widgets/` and pressing **Reload widgets** shows it
@@ -681,7 +684,7 @@ Built-in widgets, each a package following phase 8, with translations `en` and
 renderer is pure Python producing ODL — **no Liquid, no HTML, no browser
 rendering**. The 0.9.5 widgets are reference for data handling only.
 
-- [ ] **9.1 Sensor card** (replaces `temperature`). Sources: one or more
+- [x] **9.1 Sensor card** (replaces `temperature`). Sources: one or more
   entities (any domain), per-source `label` and `icon` override. Options:
   layout `single | list | grid`, show icon/name/unit, decimals, value size,
   accent color for values out of `min`/`max` thresholds. Single entity = big
@@ -689,7 +692,8 @@ rendering**. The 0.9.5 widgets are reference for data handling only.
   Migration: stored `temperature` items become `sensor-card` with
   `sources.entities = [entity]` and matching options; the `temperature` package
   is removed.
-- [ ] **9.2 Agenda.** Sources: one or more calendars with per-source `label`
+  *Deviation:* no migration from `temperature`; the package was removed with the model reset (Deviations, schemaVersion). Thresholds are text options.
+- [x] **9.2 Agenda.** Sources: one or more calendars with per-source `label`
   and `color`. Options: number of events (default 5), look-ahead days, group by
   day, show time / location / calendar label, 24 h clock, empty-state text.
   Behaviour: events from all picked calendars are merged into **one list**
@@ -697,7 +701,7 @@ rendering**. The 0.9.5 widgets are reference for data handling only.
   each row carries the source's label/color, so with calendars for two children
   the widget shows the next 5 events of both together, each marked with the
   child's label. Long titles are truncated to the row width.
-- [ ] **9.3 Weather.** Source: one weather entity. Options: forecast daily or
+- [x] **9.3 Weather.** Source: one weather entity. Options: forecast daily or
   hourly, number of forecast items, show humidity / feels like / wind. Current
   condition icon + temperature, then a forecast row or column depending on the
   frame's aspect ratio.
@@ -757,6 +761,30 @@ rendering**. The 0.9.5 widgets are reference for data handling only.
   scales to any frame instead of fixed 800 × 480 coordinates; palette-aware
   colors.
 
+- [ ] **9.13 Community compositions** (reference: `docs/design/community/`, eight
+  mockups from the community). We realise them over time and as far as they fit.
+  The rule is **isolate the widgets that let people build, and do not make every
+  block a widget**: a block that is only a layout of other blocks is a *group*.
+  - *Widgets and options the mockups need that the catalog lacks:* **Gauge card**
+    (value as bar or ring, min/max, colour thresholds, orientation, list of several);
+    **Table** (rows of picked entities × columns of attributes, with a totals row);
+    Sensor card options — secondary text, min/max range, sparkline, colour by
+    state, strip layout; Agenda options — category icons, "+N more events" line;
+    a hero layout of Weather (large temperature, min/max, condition text).
+  - *Compositions as groups:* "hero weather + metric strip", "status card row" and
+    "agenda column" are built once as groups of primitives and widgets, then moved,
+    duplicated and copied as one (5.2, 6).
+  - *Group templates:* save a group as a named template and drop it from the
+    Library (`TEMPLATES`), stored as a document fragment with the same relative
+    coordinates; import/export as a single file so a composition can be shared
+    without code. Depends on groups (5.2) and the clipboard (phase 6).
+  - *Backgrounds:* the `image` primitive (phase 4) placed at the back of a group;
+    widgets have no background of their own.
+  - *Grid preset:* the editor offers a column grid (e.g. 12 × 8 with margin and
+    gutter) that snapping can use, as in sheet 01.
+  - *Acceptance:* the main dashboard of mockup 02 is rebuilt at 800 × 480 from
+    catalog widgets, groups and one background, with no widget created just for it.
+
 **Accepted when:** every catalog widget renders correctly at its minimum,
 default, and a large size with fixture data, in `bw` and `spectra6` palettes,
 and the Temperature → Sensor card migration is covered by a stored-dashboard
@@ -770,6 +798,34 @@ fixture.
 - [ ] **10.2 Update `DESIGN_SPECS.md`, `ARCHITECTURE.md`, `WIDGET_CONTRACT.md`,
   `README.md`** to the final behaviour; remove outdated statements (e.g. "Text
   and Rectangle only", "one Temperature widget").
+- [ ] **10.3 Widget development environment.** People must be able to write a
+  widget outside Home Assistant and see exactly what `odl-renderer` draws for it,
+  the way TRMNL's tooling lets its developers do. Nothing here needs a running
+  Home Assistant.
+  - A command (`python -m opendisplay_studio.devkit preview <widget_folder>`, and
+    a `watch` mode) that loads the package with the same loader as the
+    integration and renders it through the real `odl-renderer`.
+  - **Fixtures as YAML.** Each file in `<widget_folder>/fixtures/*.yml` holds
+    one scenario: frame size, palette, language, `now`, `options`, `sources`, and
+    the data each source would resolve to (the provider's normalized output).
+    One PNG is rendered per fixture and per size (`minSize`, `defaultSize`, a
+    large one), so a widget is seen at once with the first, the second, the fifth
+    data set, and with missing sources.
+  - A local preview page (`preview` starts it, `watch` refreshes it when a
+    `.py`, `.yml`, `.json` or fixture file changes) showing all renders in a
+    grid with the fixture name, the generated ODL YAML and the warnings; the
+    same page is the review surface for golden images.
+  - A VS Code setup shipped in `examples/widgets/hello_world/`: `.vscode/tasks.json`
+    (start the watch), `launch.json` (debug a renderer against one fixture),
+    `settings.json` (YAML schema for `widget.yml` and fixtures), and a
+    `widget.schema.json` published from the manifest schema of 8.1.1.
+  - `docs/widget-sdk.md` gets a *Develop and preview* chapter: install, create a
+    package, add fixtures, start the watch, read a warning, then copy the folder
+    into `/config/opendisplay_studio/widgets/` and press **Reload widgets**.
+  - The test harness of 8.6.1 runs on the same fixtures, so a fixture is at once
+    a preview, a regression test and documentation.
+  - A widget written this way imports into any editor install unchanged: the
+    package folder is the only artefact.
 
 Not planned without a separate decision: editable Code view / YAML import,
 multi-select, several screens per dashboard, "From OpenDisplay device" setup,

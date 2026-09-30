@@ -1,0 +1,53 @@
+api: 1
+id: weather
+name: Weather
+version: 1.0.0
+description: Current conditions and a daily or hourly forecast of a weather entity.
+icon: mdi:weather-partly-cloudy
+category: Weather
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 360, height: 200 }
+  minSize: { width: 160, height: 100 }
+
+sources:
+  - key: weather
+    label: Weather entity
+    selector:
+      entity: { filter: { domain: weather } }
+    required: true
+    max: 1
+    data: weather_forecast
+
+options:
+  - section: forecast
+    fields:
+      - key: forecastType
+        label: Forecast
+        default: daily
+        selector:
+          select:
+            options: [daily, hourly]
+      - key: forecastItems
+        label: Number of forecast items
+        default: 5
+        selector: { number: { min: 1, max: 8, mode: box } }
+  - section: details
+    fields:
+      - key: showHumidity
+        label: Show humidity
+        default: true
+        selector: { boolean: {} }
+      - key: showFeelsLike
+        label: Show feels like
+        default: false
+        selector: { boolean: {} }
+      - key: showWind
+        label: Show wind
+        default: false
+        selector: { boolean: {} }
+
+data:
+  weather_forecast:
+    type: "@options.forecastType"

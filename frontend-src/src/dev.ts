@@ -5,7 +5,14 @@ import "@fontsource/roboto/700.css";
 import "./ods-app";
 import { createId } from "./ids";
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
-import type { HomeAssistant, Dashboard } from "./types";
+import { optionDefaults } from "./widget-fields";
+import { loadWidgetDefinitions } from "./widget-definitions";
+import type {
+  WidgetDefinition,
+  WidgetLoadError,
+  HomeAssistant,
+  Dashboard,
+} from "./types";
 
 if (!customElements.get("ha-icon")) {
   customElements.define(
@@ -249,10 +256,23 @@ if (!customElements.get("ha-form")) {
             input.step = String(numberConfig.step);
           }
         }
-        if (isBoolean) input.checked = Boolean(this.formData[name]);
-        else input.value = String(this.formData[name] ?? "");
+        const entityConfig = selector.entity as
+          { multiple?: boolean } | undefined;
+        const picksSeveral = Boolean(entityConfig?.multiple);
+        const current = this.formData[name];
+        if (isBoolean) input.checked = Boolean(current);
+        else if (Array.isArray(current)) input.value = current.join(", ");
+        else input.value = String(current ?? "");
         input.addEventListener(isBoolean ? "change" : "input", () =>
-          this.updateValue(name, controlValue(input))
+          this.updateValue(
+            name,
+            picksSeveral
+              ? input.value
+                  .split(",")
+                  .map((id) => id.trim())
+                  .filter(Boolean)
+              : controlValue(input)
+          )
         );
         label.append(input);
         return label;
@@ -323,6 +343,14 @@ if (!customElements.get("ha-dialog-footer")) {
 }
 
 const now = "2026-09-24T12:00:00+00:00";
+const sensorCardDefinition = ((): WidgetDefinition => {
+  const definition = loadWidgetDefinitions("en").find(
+    (widget) => widget.id === "sensor-card"
+  );
+  if (!definition) throw new Error("The sensor-card package is missing");
+  return definition;
+})();
+
 const demoDashboard: Dashboard = {
   id: "demo",
   schemaVersion: 1,
@@ -346,16 +374,10 @@ const demoDashboard: Dashboard = {
       locked: false,
       hidden: false,
       widget: {
-        type: "temperature",
+        type: "sensor-card",
         version: "1.0.0",
-        config: {
-          entity: "sensor.kitchen_temperature",
-          title: "Kitchen",
-          showIcon: true,
-          showName: true,
-          showUnit: true,
-          accent: "black",
-        },
+        sources: { entities: [{ id: "sensor.kitchen_temperature" }] },
+        options: optionDefaults(sensorCardDefinition),
       },
       frame: { x: 40, y: 40, width: 320, height: 180 },
       layout: { padding: 0 },
@@ -507,6 +529,37 @@ let dashboards = [demoDashboard, hallwayDashboard, officeDashboard].map(
 );
 const calls: Array<Record<string, unknown>> = [];
 
+/** Packages an e2e test "installs" in the user folder; a reload picks them up. */
+const installedPackages = new Set<"hello" | "broken">();
+let loadedPackages = new Set<"hello" | "broken">();
+
+const helloWidget = (): WidgetDefinition => ({
+  ...sensorCardDefinition,
+  id: "hello-world",
+  name: "Hello world",
+  description: "Says hello.",
+  icon: "mdi:hand-wave",
+  category: "Examples",
+  builtin: false,
+  sources: [],
+  options: [],
+});
+
+const installedWidgets = (language: string): WidgetDefinition[] => [
+  ...loadWidgetDefinitions(language),
+  ...(loadedPackages.has("hello") ? [helloWidget()] : []),
+];
+
+const widgetErrors = (): WidgetLoadError[] =>
+  loadedPackages.has("broken")
+    ? [
+        {
+          folder: "broken",
+          message: "broken/widget.yml: api: unsupported widget API 2",
+        },
+      ]
+    : [];
+
 /** The entities the backend would report for the templates of a dashboard. */
 const expressionEntities = (dashboard: Dashboard): string[] => [
   ...new Set(
@@ -535,38 +588,16 @@ const hass: HomeAssistant = {
       return {
         version: "3.0.6",
         dashboards,
-        widgets: [
-          {
-            id: "temperature",
-            version: "1.0.0",
-            name: "Temperature",
-            description:
-              "Current value of a Home Assistant temperature entity.",
-            icon: "mdi:thermometer",
-            defaults: {
-              entity: "",
-              title: "",
-              showIcon: true,
-              showName: true,
-              showUnit: true,
-              accent: "black",
-            },
-            fields: [
-              {
-                key: "entity",
-                label: "Temperature entity",
-                selector: { entity: {} },
-              },
-              { key: "title", label: "Title", selector: { text: {} } },
-            ],
-            layout: {
-              defaultSize: { width: 280, height: 160 },
-              minSize: { width: 120, height: 80 },
-            },
-            dataRequirements: [],
-          },
-        ],
+        widgets: installedWidgets(hass.language),
+        widgetErrors: widgetErrors(),
         primitives: loadPrimitiveDefinitions(),
+      } as T;
+    }
+    if (message.type === "opendisplay_studio/reload_widgets") {
+      loadedPackages = new Set(installedPackages);
+      return {
+        widgets: installedWidgets(hass.language),
+        widgetErrors: widgetErrors(),
       } as T;
     }
     if (message.type === "opendisplay_studio/compose_preview") {
@@ -648,6 +679,8 @@ declare global {
       dashboards: () => Dashboard[];
       replaceHass: () => void;
       setState: (entityId: string, state: string) => void;
+      installPackage: (name: "hello" | "broken") => void;
+      uninstallPackage: (name: "hello" | "broken") => void;
       hassRevision: () => number;
     };
   }
@@ -656,6 +689,12 @@ window.__ODS_E2E__ = {
   calls: () => cloneData(calls),
   dashboards: () => cloneData(dashboards),
   replaceHass: assignFreshHass,
+  installPackage: (name) => {
+    installedPackages.add(name);
+  },
+  uninstallPackage: (name) => {
+    installedPackages.delete(name);
+  },
   setState: (entityId, state) => {
     hass.states = { ...hass.states, [entityId]: { state } };
     assignFreshHass();

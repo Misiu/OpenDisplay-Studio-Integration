@@ -1,0 +1,9 @@
+{
+  "name": "Hello world",
+  "description": "Greets someone. The smallest useful widget package.",
+  "categories.Examples": "Examples",
+  "sections.content": "Content",
+  "options.who": "Who to greet",
+  "options.color": "Color",
+  "runtime.greeting": "Hello, {who}!"
+}

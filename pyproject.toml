@@ -36,6 +36,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"examples/**" = ["INP001"]
 "tests/*" = ["ANN", "D", "PLR2004", "S101", "SLF001"]
 "custom_components/opendisplay_studio/compiler.py" = ["E501", "EM102"]
 "custom_components/opendisplay_studio/media_source.py" = ["D103", "D107"]
@@ -43,9 +44,7 @@ ignore = [
 "custom_components/opendisplay_studio/dashboards.py" = ["D102", "D107", "EM102", "PLR0915"]
 "custom_components/opendisplay_studio/rendering.py" = ["D107"]
 "custom_components/opendisplay_studio/websocket.py" = ["D103"]
-"custom_components/opendisplay_studio/widgets/__init__.py" = ["D102", "D107", "EM102", "TID252"]
-"custom_components/opendisplay_studio/widgets/temperature/provider.py" = ["D102"]
-"custom_components/opendisplay_studio/widgets/temperature/renderer.py" = ["TID252"]
+"custom_components/opendisplay_studio/widgets/__init__.py" = ["D102", "D107", "EM102"]
 
 [tool.mypy]
 python_version = "3.14"

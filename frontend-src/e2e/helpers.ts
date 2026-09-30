@@ -47,3 +47,9 @@ export const callCount = (page: Page, type: string) =>
       window.__ODS_E2E__.calls().filter((call) => call.type === wanted).length,
     type
   );
+
+/** A tile of the element library. Its name starts with an icon glyph, so match by text. */
+export const libraryItem = (page: Page, name: string) =>
+  page.locator("ods-library .catalog-item").filter({
+    has: page.locator("strong", { hasText: new RegExp(`^${name}$`) }),
+  });

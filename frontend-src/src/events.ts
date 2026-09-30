@@ -1,6 +1,6 @@
 import type { CommandId } from "./commands";
 import type { DashboardFormData } from "./dashboards";
-import type { Dashboard, PaletteId, StudioItem } from "./types";
+import type { Dashboard, PaletteId, StudioItem, WidgetPick } from "./types";
 import type { Viewport } from "./viewport";
 
 export type EditorView = "dashboards" | "design" | "code";
@@ -65,7 +65,9 @@ export interface OdsEventMap {
   "profile-change": { profileId: string };
   "palette-change": { palette: PaletteId };
   "background-change": { color: string };
-  "widget-config-change": { value: Record<string, unknown> };
+  "widget-options-change": { value: Record<string, unknown> };
+  "widget-picks-change": { sourceKey: string; picks: WidgetPick[] };
+  "widgets-reload": undefined;
   "primitive-change": { value: Record<string, unknown> };
   /** `template` is the new expression, `null` for back to the literal, `undefined` to start one. */
   "expression-change": { key: string; template: string | null | undefined };

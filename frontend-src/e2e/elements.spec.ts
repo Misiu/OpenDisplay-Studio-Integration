@@ -201,7 +201,7 @@ test.describe("ods-library", () => {
     await search.fill("");
     await expect(page.getByRole("button", { name: /Rectangle/ })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Temperature/ })
+      page.getByRole("button", { name: /Sensor card/ })
     ).toBeVisible();
   });
 

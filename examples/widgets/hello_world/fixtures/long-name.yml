@@ -1,0 +1,8 @@
+name: A name that needs a smaller font, in Polish
+language: pl
+now: "2026-09-30T08:30:00+02:00"
+options:
+  who: wszystkich uczestników demonstracji
+  color: red
+sources: {}
+data: {}

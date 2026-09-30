@@ -1,0 +1,21 @@
+{
+  "name": "Sensor card",
+  "description": "The value of one or more entities, as a big tile, a list or a grid.",
+  "categories.Sensors": "Sensors",
+  "sources.entities": "Entities",
+  "sources.entities.label": "Label",
+  "sources.entities.icon": "Icon",
+  "sections.layout": "Layout",
+  "sections.content": "Content",
+  "sections.thresholds": "Thresholds",
+  "options.layout": "Layout",
+  "options.showIcon": "Show icon",
+  "options.showName": "Show name",
+  "options.showUnit": "Show unit",
+  "options.decimals": "Decimals",
+  "options.valueSize": "Value size",
+  "options.alertBelow": "Alert below",
+  "options.alertAbove": "Alert above",
+  "options.alertColor": "Alert color",
+  "runtime.choose_entities": "Choose entities"
+}

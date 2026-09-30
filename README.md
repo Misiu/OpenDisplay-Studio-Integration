@@ -44,7 +44,7 @@ The initial POC includes:
 - an exact-size freeform canvas with configurable outer padding and pixel snap;
 - a searchable element catalog with separate **Widgets** and **Primitives**
   sections;
-- a semantic Temperature widget backed by a real Home Assistant entity;
+- built-in widgets — Sensor card, Agenda and Weather — that read real Home Assistant entities, calendars and forecasts, plus widget packages you can add yourself (see `docs/widget-sdk.md`);
 - Text and Rectangle ODL primitives;
 - direct mouse movement and resizing for widgets and primitives;
 - overlapping elements with draggable layer order, visibility, position lock,

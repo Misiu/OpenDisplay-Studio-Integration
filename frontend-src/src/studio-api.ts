@@ -3,12 +3,25 @@ import type {
   ComposePreviewResponse,
   Dashboard,
   HomeAssistant,
+  ReloadWidgetsResponse,
 } from "./types";
 
 /** The `opendisplay_studio/*` WebSocket commands, one function each. */
 
 export const bootstrap = (hass: HomeAssistant): Promise<BootstrapResponse> =>
-  hass.callWS<BootstrapResponse>({ type: "opendisplay_studio/bootstrap" });
+  hass.callWS<BootstrapResponse>({
+    type: "opendisplay_studio/bootstrap",
+    language: hass.language,
+  });
+
+/** Loads the widget packages again, without restarting Home Assistant. */
+export const reloadWidgets = (
+  hass: HomeAssistant
+): Promise<ReloadWidgetsResponse> =>
+  hass.callWS<ReloadWidgetsResponse>({
+    type: "opendisplay_studio/reload_widgets",
+    language: hass.language,
+  });
 
 export const createDashboard = async (
   hass: HomeAssistant,

@@ -119,6 +119,15 @@ export const strings = {
     widgets: "Widgets",
     primitives: "Primitives",
     noWidgets: "No matching widgets",
+    reloadWidgets: "Reload widgets",
+    userWidget: "user",
+    widgetErrors: (count: number): string =>
+      `${count} widget ${count === 1 ? "package" : "packages"} could not be loaded`,
+    widgetsReloaded: (loaded: number, failed: number): string =>
+      failed === 0
+        ? `Widgets reloaded — ${loaded} loaded`
+        : `Widgets reloaded — ${loaded} loaded, ${failed} failed`,
+    reloadFailed: "Could not reload the widgets",
     noPrimitives: "No matching primitives",
     entryHint: (description: string): string =>
       `${description} Click or drag to add.`,
@@ -147,6 +156,10 @@ export const strings = {
       "Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.",
     layout: "Layout",
     widgetSettings: "Widget settings",
+    dataSources: "Data sources",
+    widgetMissing: (type: string): string =>
+      `The widget ${type} is not installed. ` +
+      "It keeps its settings and draws again once the package returns.",
     appearance: "Appearance",
     diagnostics: "Render diagnostics",
     deleteDashboard: "Delete dashboard",

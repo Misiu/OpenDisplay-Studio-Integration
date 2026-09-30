@@ -105,8 +105,9 @@ integration/
 │   ├── odl.py            # typed ODL builders used by widget renderers
 │   ├── palette.py        # palettes and colors (backend source of truth)
 │   ├── primitives/       # <type>.yml primitive definitions (single source of truth)
-│   ├── widgets/          # built-in widget packages (widget.yml + renderer.py [+ provider.py] + translations/)
-│   ├── data_providers/   # shared HA data providers used by widgets (entity_state, calendar_events, …)
+│   ├── widgets/          # widget registry, manifest, options + built-in packages (widget.yml + renderer.py [+ provider.py] + translations/)
+│   ├── data_providers/   # shared HA data providers used by widgets (entity_state, calendar_events, weather_forecast) + resolver
+│   ├── widget_reload.py  # loading packages and reloading them without a restart
 │   ├── sdk/              # widget SDK: WidgetContext, ODL + layout + formatting helpers
 │   └── frontend/         # BUILD OUTPUT of frontend-src — never edit by hand
 ├── frontend-src/         # Lit panel (TypeScript, Vite, Vitest, Playwright)
@@ -184,6 +185,7 @@ phase 8 and `WIDGET_CONTRACT.md`; the rules:
   `renderer.py`, optional `provider.py` / `migrations.py`, `translations/`
   (`en` required, `pl` for built-ins). Built-ins and user packages use the same
   format and loader; nothing in the core may special-case a widget id.
+- **Stored shape:** `widget: { type, version, sources: { <key>: [{ id, …perSource }] }, options }`.
 - **Sources vs options.** `sources` declare what the user picks via HA
   selectors (entity/device/area, single or multiple, with optional per-source
   fields such as label and color); `options` declare presentation. A widget that
@@ -205,7 +207,10 @@ phase 8 and `WIDGET_CONTRACT.md`; the rules:
 - **Versioned config.** Stored widget items carry the package version; breaking
   option changes ship a migration in `migrations.py`.
 - **Every built-in widget** has golden-image tests at minimum, default, and a
-  large size, with fixture data and with missing sources.
+  large size, from YAML fixtures in `tests/widgets/fixtures/<id>/`, including one
+  with missing sources.
+- Absolute imports in new Python (`custom_components.opendisplay_studio.…`) —
+  ruff's `TID252` forbids `..`; user packages import `opendisplay_studio.sdk`.
 
 ## Primitive definitions (single source of truth)
 

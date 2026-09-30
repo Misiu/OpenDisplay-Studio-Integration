@@ -1,0 +1,7 @@
+name: A short name
+language: en
+now: "2026-09-30T08:30:00+02:00"
+options:
+  who: world
+sources: {}
+data: {}

@@ -196,7 +196,7 @@ class TestContainers:
         widget = {
             "id": "w",
             "kind": "widget",
-            "widget": {"type": "temperature", "version": "1.0.0", "config": {}},
+            "widget": {"type": "weather", "version": "1.0.0"},
             "frame": {"x": 5, "y": 5, "width": 100, "height": 60},
         }
 

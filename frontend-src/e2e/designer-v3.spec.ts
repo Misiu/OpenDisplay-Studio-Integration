@@ -215,7 +215,7 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
   await expect(
     page.getByRole("textbox", { name: "Dashboard name" })
   ).toHaveValue("Kitchen display");
-  await expect(page.getByRole("button", { name: /Temperature/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Sensor card/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Rectangle/ })).toBeVisible();
   await expect(
     page.getByRole("button", { name: /Progress bar/ })
@@ -233,7 +233,7 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
   await expect(page.getByRole("combobox", { name: "Background" })).toHaveValue(
     "white"
   );
-  await expect(page.getByText(/grid/i)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /grid/i })).toHaveCount(0);
 
   const toolboxBox = await page.locator(".toolbox").boundingBox();
   const searchBox = await page.locator(".search").boundingBox();
@@ -616,7 +616,7 @@ test("keeps catalog dragging relative to the canvas across different HA sidebar 
   }
 });
 
-test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", async ({
+test("adds and moves an unlocked Sensor card widget without Crypto.randomUUID", async ({
   page,
 }) => {
   expect(await page.evaluate(() => typeof globalThis.crypto.randomUUID)).toBe(
@@ -624,18 +624,18 @@ test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", 
   );
   const initialCount = await page.locator(".layer-row").count();
 
-  const pointer = await moveCatalogPointerToCanvas(page, /Temperature/, {
+  const pointer = await moveCatalogPointerToCanvas(page, /Sensor card/, {
     x: 0.7,
     y: 0.66,
   });
   await expect(page.locator(".catalog-drag-ghost")).toContainText(
-    "Temperature"
+    "Sensor card"
   );
   await page.mouse.up();
 
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 1);
   await expect(
-    page.getByRole("heading", { name: "temperature_2", exact: true })
+    page.getByRole("heading", { name: "sensor-card_2", exact: true })
   ).toBeVisible();
   const selected = page.locator(".selection.selected");
   await expect(selected).not.toHaveClass(/locked/);
@@ -649,7 +649,7 @@ test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", 
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
   );
   const droppedBox = await selected.boundingBox();
-  if (!droppedBox) throw new Error("Dropped Temperature widget is not visible");
+  if (!droppedBox) throw new Error("Dropped Sensor card widget is not visible");
   expect(
     Math.abs(droppedBox.x + droppedBox.width / 2 - pointer.targetX)
   ).toBeLessThan(3);
@@ -659,9 +659,9 @@ test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", 
 
   const layer = page
     .locator(".layer-row")
-    .filter({ hasText: "Temperature" })
+    .filter({ hasText: "sensor-card_2" })
     .first();
-  await layer.getByRole("button", { name: "Lock Temperature" }).click();
+  await layer.getByRole("button", { name: "Lock sensor-card_2" }).click();
   await expect(selected).toHaveClass(/locked/);
   await page.getByRole("button", { name: "Unlock element position" }).click();
   await expect(selected).not.toHaveClass(/locked/);
@@ -670,7 +670,7 @@ test("adds and moves an unlocked Temperature widget without Crypto.randomUUID", 
   const xBefore = Number(await xField.inputValue());
   const movableBox = await selected.boundingBox();
   if (!movableBox) {
-    throw new Error("Unlocked Temperature widget is not visible");
+    throw new Error("Unlocked Sensor card widget is not visible");
   }
   await page.mouse.move(
     movableBox.x + movableBox.width / 2,

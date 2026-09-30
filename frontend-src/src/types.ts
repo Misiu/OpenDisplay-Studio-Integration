@@ -1,8 +1,15 @@
 export type PaletteId = "bw" | "bwr" | "bwy" | "bwry" | "spectra6";
 export type DashboardStatus = "draft" | "ready";
 
-export type WidgetConfigValue = string | number | boolean | string[];
-export type WidgetConfig = Record<string, WidgetConfigValue>;
+export type WidgetValue = string | number | boolean | string[];
+export type WidgetOptions = Record<string, WidgetValue>;
+
+/** One thing the user picked for a source (an entity, a calendar), with its per-source fields. */
+export interface WidgetPick {
+  id: string;
+  [field: string]: string | number | boolean;
+}
+export type WidgetSources = Record<string, WidgetPick[]>;
 
 export interface ItemFrame {
   x: number;
@@ -24,7 +31,12 @@ export interface ItemState {
 
 export interface WidgetItem extends ItemState {
   kind: "widget";
-  widget: { type: string; version: string; config: WidgetConfig };
+  widget: {
+    type: string;
+    version: string;
+    sources: WidgetSources;
+    options: WidgetOptions;
+  };
   frame: ItemFrame;
   layout: { padding: number };
 }
@@ -171,11 +183,22 @@ export interface DisplayProfile {
   defaultPalette: PaletteId;
 }
 
-export interface WidgetField {
+export interface WidgetFieldDefinition {
   key: string;
   label: string;
-  required?: boolean;
   selector: Record<string, unknown>;
+  default?: WidgetValue;
+}
+export interface WidgetSourceDefinition extends WidgetFieldDefinition {
+  required: boolean;
+  max: number;
+  /** The data provider that resolves the picks on the backend. */
+  data?: string;
+  perSource: WidgetFieldDefinition[];
+}
+export interface WidgetOptionSection {
+  section: string;
+  fields: WidgetFieldDefinition[];
 }
 export interface WidgetDefinition {
   id: string;
@@ -183,15 +206,22 @@ export interface WidgetDefinition {
   name: string;
   description: string;
   icon: string;
-  defaults: WidgetConfig;
-  fields: WidgetField[];
+  category: string;
+  author: string;
+  /** False for a package an administrator installed in the config folder. */
+  builtin: boolean;
   layout: {
     defaultSize: { width: number; height: number };
     minSize: { width: number; height: number };
   };
-  dataRequirements: Array<Record<string, unknown>>;
+  sources: WidgetSourceDefinition[];
+  options: WidgetOptionSection[];
 }
-
+/** A widget package that could not be loaded, and why. */
+export interface WidgetLoadError {
+  folder: string;
+  message: string;
+}
 export type FieldShape =
   "number" | "coordinate" | "boolean" | "enum" | "color" | "string" | "text";
 
@@ -265,7 +295,13 @@ export interface BootstrapResponse {
   version: string;
   dashboards: Dashboard[];
   widgets: WidgetDefinition[];
+  widgetErrors: WidgetLoadError[];
   primitives: PrimitiveDefinition[];
+}
+
+export interface ReloadWidgetsResponse {
+  widgets: WidgetDefinition[];
+  widgetErrors: WidgetLoadError[];
 }
 export interface HomeAssistant {
   callWS<T>(message: Record<string, unknown>): Promise<T>;

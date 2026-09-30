@@ -1,0 +1,21 @@
+{
+  "name": "Karta czujnika",
+  "description": "Wartość jednej lub kilku encji: duży kafel, lista albo siatka.",
+  "categories.Sensors": "Czujniki",
+  "sources.entities": "Encje",
+  "sources.entities.label": "Etykieta",
+  "sources.entities.icon": "Ikona",
+  "sections.layout": "Układ",
+  "sections.content": "Zawartość",
+  "sections.thresholds": "Progi",
+  "options.layout": "Układ",
+  "options.showIcon": "Pokaż ikonę",
+  "options.showName": "Pokaż nazwę",
+  "options.showUnit": "Pokaż jednostkę",
+  "options.decimals": "Miejsca po przecinku",
+  "options.valueSize": "Rozmiar wartości",
+  "options.alertBelow": "Alarm poniżej",
+  "options.alertAbove": "Alarm powyżej",
+  "options.alertColor": "Kolor alarmu",
+  "runtime.choose_entities": "Wybierz encje"
+}

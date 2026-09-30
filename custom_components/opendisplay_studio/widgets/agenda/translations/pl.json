@@ -1,0 +1,23 @@
+{
+  "name": "Agenda",
+  "description": "Nadchodzące wydarzenia z jednego lub kilku kalendarzy na jednej liście.",
+  "categories.Calendar": "Kalendarz",
+  "sources.calendars": "Kalendarze",
+  "sources.calendars.label": "Etykieta",
+  "sources.calendars.color": "Kolor",
+  "sections.content": "Zawartość",
+  "sections.presentation": "Wygląd",
+  "options.maxEvents": "Liczba wydarzeń",
+  "options.days": "Wyprzedzenie (dni)",
+  "options.emptyText": "Tekst, gdy brak wydarzeń",
+  "options.groupByDay": "Grupuj po dniach",
+  "options.showTime": "Pokaż godzinę",
+  "options.showLocation": "Pokaż miejsce",
+  "options.showCalendarLabel": "Pokaż etykietę kalendarza",
+  "options.use24h": "Zegar 24 h",
+  "runtime.choose_calendars": "Wybierz kalendarze",
+  "runtime.no_events": "Brak nadchodzących wydarzeń",
+  "runtime.today": "Dzisiaj",
+  "runtime.tomorrow": "Jutro",
+  "runtime.all_day": "Cały dzień"
+}

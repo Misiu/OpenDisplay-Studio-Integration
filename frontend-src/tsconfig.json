@@ -62,6 +62,8 @@
     "src/studio-api.ts",
     "src/studio-styles.ts",
     "src/viewport.ts",
+    "src/widget-definitions.ts",
+    "src/widget-fields.ts",
     "src/dev.ts",
     "src/**/*.d.ts"
   ],

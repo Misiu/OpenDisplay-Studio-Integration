@@ -1,43 +1,26 @@
 from __future__ import annotations
 
 from io import BytesIO
-from typing import Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 from PIL import Image
 
 from custom_components.opendisplay_studio.compiler import async_compile_dashboard
 from custom_components.opendisplay_studio.dashboards import validate_dashboard
-from custom_components.opendisplay_studio.odl import (
-    Box,
-    DisplayContext,
-    WidgetRenderContext,
-)
 from custom_components.opendisplay_studio.rendering import OdlRenderService
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
-from custom_components.opendisplay_studio.widgets.temperature.renderer import (
-    render_temperature,
-)
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
 
 
-class FakeStates:
-    def __init__(self, values: dict[str, Any]) -> None:
-        self.values = values
-
-    def get(self, entity_id: str) -> Any:
-        return self.values.get(entity_id)
-
-
-class FakeState:
-    state = "21.4"
-    attributes: ClassVar[dict[str, str]] = {
-        "friendly_name": "Kitchen temperature",
-        "unit_of_measurement": "°C",
-    }
-
-
-class FakeHass:
-    states = FakeStates({"sensor.kitchen_temperature": FakeState()})
+def kitchen_temperature(hass: HomeAssistant) -> None:
+    hass.states.async_set(
+        "sensor.kitchen_temperature",
+        "21.4",
+        {"friendly_name": "Kitchen temperature", "unit_of_measurement": "°C"},
+    )
 
 
 def dashboard() -> dict[str, Any]:
@@ -62,12 +45,9 @@ def dashboard() -> dict[str, Any]:
                 "locked": False,
                 "hidden": False,
                 "widget": {
-                    "type": "temperature",
+                    "type": "sensor-card",
                     "version": "1.0.0",
-                    "config": {
-                        "entity": "sensor.kitchen_temperature",
-                        "title": "Kitchen",
-                    },
+                    "sources": {"entities": [{"id": "sensor.kitchen_temperature"}]},
                 },
                 "frame": {"x": 20, "y": 20, "width": 240, "height": 140},
             },
@@ -128,35 +108,10 @@ def test_dashboard_accepts_the_complete_spectra6_palette() -> None:
     assert validated["items"][2]["primitive"]["fill"] == "green"
 
 
-def test_temperature_tile_keeps_title_icon_value_and_unit_aligned() -> None:
-    context = WidgetRenderContext(
-        instance_id="temperature",
-        box=Box(11, 11, 224, 143),
-        display=DisplayContext(800, 480, "bwr", "white", "red"),
-        language="en",
-        config={
-            "title": "Living room",
-            "showIcon": True,
-            "showName": True,
-            "showUnit": True,
-            "accent": "black",
-        },
-        data={"entity": {"state": "22.4", "unit": "°C", "name": "Living room"}},
-    )
-    elements = render_temperature(context)
-    icon = next(element for element in elements if element["type"] == "icon")
-    labels = [element for element in elements if element["type"] == "text"]
-    title, reading = labels
-
-    assert title["x"] == context.box.x + context.box.width // 2
-    assert reading["value"] == "22.4 °C"
-    assert reading["y"] == icon["y"]
-    assert reading["anchor"] == icon["anchor"] == "mm"
-    assert "max_width" not in reading
-
-
 @pytest.mark.asyncio
-async def test_native_odl_primitive_catalog_validates_and_renders() -> None:
+async def test_native_odl_primitive_catalog_validates_and_renders(
+    hass: HomeAssistant,
+) -> None:
     value = dashboard()
     value["items"] = [
         {
@@ -246,9 +201,7 @@ async def test_native_odl_primitive_catalog_validates_and_renders() -> None:
         },
     ]
     validated = validate_dashboard(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_dashboard(
-        cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
-    )
+    compiled = await async_compile_dashboard(hass, validated, DEFAULT_REGISTRY)
     assert {element["type"] for element in compiled.elements} == {
         "line",
         "circle",
@@ -280,13 +233,14 @@ def test_dashboard_accepts_overlapping_semantic_widgets() -> None:
 
 
 @pytest.mark.asyncio
-async def test_compiler_and_local_renderer_produce_exact_size_png() -> None:
+async def test_compiler_and_local_renderer_produce_exact_size_png(
+    hass: HomeAssistant,
+) -> None:
+    kitchen_temperature(hass)
     value = dashboard()
     value["items"][0]["layout"] = {"padding": 10}
     validated = validate_dashboard(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_dashboard(
-        cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
-    )
+    compiled = await async_compile_dashboard(hass, validated, DEFAULT_REGISTRY)
     assert compiled.item_bounds["temperature"] == {
         "x": 20,
         "y": 20,
@@ -294,8 +248,8 @@ async def test_compiler_and_local_renderer_produce_exact_size_png() -> None:
         "height": 140,
     }
     assert any(element["type"] == "text" for element in compiled.elements)
-    assert compiled.elements[0]["x_start"] == 33
-    assert compiled.elements[0]["y_start"] == 33
+    assert compiled.elements[0]["x_start"] == 30
+    assert compiled.elements[0]["y_start"] == 30
     assert "21.4 °C" in compiled.yaml
 
     renderer = OdlRenderService(cast("Any", None), concurrency=1)
@@ -312,24 +266,24 @@ async def test_compiler_and_local_renderer_produce_exact_size_png() -> None:
 
 
 @pytest.mark.asyncio
-async def test_hidden_layers_keep_bounds_but_do_not_render() -> None:
+async def test_hidden_layers_keep_bounds_but_do_not_render(
+    hass: HomeAssistant,
+) -> None:
     value = dashboard()
     value["items"][1]["hidden"] = True
     validated = validate_dashboard(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_dashboard(
-        cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
-    )
+    compiled = await async_compile_dashboard(hass, validated, DEFAULT_REGISTRY)
     assert compiled.item_bounds["label"]["x"] == 20
     assert "Home" not in compiled.yaml
 
 
 @pytest.mark.asyncio
-async def test_dashboard_item_order_is_render_layer_order() -> None:
+async def test_dashboard_item_order_is_render_layer_order(
+    hass: HomeAssistant,
+) -> None:
     value = dashboard()
     value["items"] = list(reversed(value["items"]))
     validated = validate_dashboard(value, DEFAULT_REGISTRY)
-    compiled = await async_compile_dashboard(
-        cast("Any", FakeHass()), validated, DEFAULT_REGISTRY
-    )
+    compiled = await async_compile_dashboard(hass, validated, DEFAULT_REGISTRY)
     assert compiled.elements[0]["type"] == "text"
     assert compiled.elements[0]["value"] == "Home"

@@ -1,31 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { itemIcon } from "./item-labels";
-import { circleItem, widgetItem, primitiveDefinitions } from "./test-support";
-import type { WidgetDefinition } from "./types";
-
-const sensor: WidgetDefinition = {
-  id: "sensor",
-  version: "1",
-  name: "Sensor",
-  description: "",
-  icon: "mdi:gauge",
-  defaults: {},
-  fields: [],
-  layout: {
-    defaultSize: { width: 1, height: 1 },
-    minSize: { width: 1, height: 1 },
-  },
-  dataRequirements: [],
-};
+import {
+  circleItem,
+  primitiveDefinitions,
+  widgetDefinition,
+  widgetItem,
+} from "./test-support";
 
 describe("item labels", () => {
   it("picks the primitive icon, the widget icon, or a puzzle piece for unknown widgets", () => {
     expect(itemIcon(circleItem(), [], primitiveDefinitions)).toBe(
       "mdi:circle-outline"
     );
-    expect(itemIcon(widgetItem(), [sensor], primitiveDefinitions)).toBe(
-      "mdi:gauge"
-    );
+    expect(
+      itemIcon(
+        widgetItem(),
+        [widgetDefinition("sensor-card")],
+        primitiveDefinitions
+      )
+    ).toBe("mdi:gauge");
     expect(itemIcon(widgetItem(), [], primitiveDefinitions)).toBe("mdi:puzzle");
   });
 });

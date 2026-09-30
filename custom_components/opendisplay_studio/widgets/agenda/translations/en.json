@@ -1,0 +1,23 @@
+{
+  "name": "Agenda",
+  "description": "Upcoming events from one or more calendars on one list.",
+  "categories.Calendar": "Calendar",
+  "sources.calendars": "Calendars",
+  "sources.calendars.label": "Label",
+  "sources.calendars.color": "Color",
+  "sections.content": "Content",
+  "sections.presentation": "Presentation",
+  "options.maxEvents": "Number of events",
+  "options.days": "Look ahead (days)",
+  "options.emptyText": "Text when there are no events",
+  "options.groupByDay": "Group by day",
+  "options.showTime": "Show time",
+  "options.showLocation": "Show location",
+  "options.showCalendarLabel": "Show calendar label",
+  "options.use24h": "24 h clock",
+  "runtime.choose_calendars": "Choose calendars",
+  "runtime.no_events": "No upcoming events",
+  "runtime.today": "Today",
+  "runtime.tomorrow": "Tomorrow",
+  "runtime.all_day": "All day"
+}

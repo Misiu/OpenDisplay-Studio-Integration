@@ -1,13 +1,17 @@
 import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { filterCatalog } from "./catalog";
+import { filterCatalog, groupByCategory } from "./catalog";
 import { inputValue } from "./dom";
 import { emit } from "./events";
 import { strings } from "./strings";
 import { trackPointerGesture } from "./pointer-gesture";
 import { baseStyles, chromeStyles } from "./studio-styles";
-import type { PrimitiveDefinition, WidgetDefinition } from "./types";
+import type {
+  PrimitiveDefinition,
+  WidgetDefinition,
+  WidgetLoadError,
+} from "./types";
 
 type EntryKind = "widget" | "primitive";
 
@@ -16,6 +20,8 @@ interface CatalogEntry {
   name: string;
   description: string;
   icon: string;
+  /** An installed package, not one that ships with the integration. */
+  user?: boolean;
 }
 interface DragGhost {
   value: string;
@@ -102,6 +108,36 @@ export class OdsLibrary extends LitElement {
         font: 700 10px var(--code-font-family, monospace);
         letter-spacing: 0.11em;
         text-transform: uppercase;
+      }
+      .catalog-category {
+        margin: 10px 0 6px;
+        color: var(--studio-muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .user-badge {
+        justify-self: start;
+        padding: 1px 6px;
+        border: 1px solid var(--studio-border);
+        border-radius: 999px;
+        color: var(--studio-muted);
+        font-size: 9px;
+      }
+      .widget-errors {
+        margin: 6px 0;
+        padding: 6px 8px;
+        border: 1px solid var(--warning-color, #ffa600);
+        border-radius: 7px;
+        font-size: 11px;
+      }
+      .widget-errors summary {
+        cursor: pointer;
+      }
+      .widget-errors ul {
+        margin: 6px 0 0;
+        padding-left: 16px;
       }
       .catalog-grid {
         display: grid;
@@ -210,6 +246,7 @@ export class OdsLibrary extends LitElement {
   ];
 
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
+  @property({ attribute: false }) public widgetErrors: WidgetLoadError[] = [];
   @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property({ type: Boolean }) public collapsed = false;
 
@@ -301,6 +338,13 @@ export class OdsLibrary extends LitElement {
       >
         <ha-icon .icon=${entry.icon}></ha-icon>
         <strong>${entry.name}</strong>
+        ${
+          entry.user
+            ? html`
+                <span class="user-badge">${strings.library.userWidget}</span>
+              `
+            : nothing
+        }
         <small>${entry.description}</small>
       </button>
     `;
@@ -318,6 +362,52 @@ export class OdsLibrary extends LitElement {
     }
     return html`
       ${entries.map((entry) => this.renderEntry(entry, kind))}
+    `;
+  }
+
+  private reloadWidgets(): void {
+    emit(this, "widgets-reload");
+  }
+
+  private renderWidgetErrors(): TemplateResult | typeof nothing {
+    if (this.widgetErrors.length === 0) return nothing;
+    return html`
+      <details class="widget-errors">
+        <summary>
+          <ha-icon icon="mdi:alert-outline"></ha-icon>
+          ${strings.library.widgetErrors(this.widgetErrors.length)}
+        </summary>
+        <ul>
+          ${this.widgetErrors.map(
+            (error) => html`
+              <li>
+                <strong>${error.folder}</strong>
+                ${error.message}
+              </li>
+            `
+          )}
+        </ul>
+      </details>
+    `;
+  }
+
+  private renderWidgetEntries(widgets: WidgetDefinition[]): TemplateResult {
+    if (widgets.length === 0) {
+      return html`
+        <p class="empty-result">${strings.library.noWidgets}</p>
+      `;
+    }
+    return html`
+      ${groupByCategory(widgets).map(
+        ([category, members]) => html`
+          <h4 class="catalog-category">${category}</h4>
+          <div class="catalog-grid">
+            ${members.map((widget) =>
+              this.renderEntry({ ...widget, user: !widget.builtin }, "widget")
+            )}
+          </div>
+        `
+      )}
     `;
   }
 
@@ -397,10 +487,16 @@ export class OdsLibrary extends LitElement {
             <header>
               <span>${strings.library.widgets}</span>
               <span class="count">${widgets.length}</span>
+              <button
+                class="icon-button"
+                title=${strings.library.reloadWidgets}
+                aria-label=${strings.library.reloadWidgets}
+                @click=${this.reloadWidgets}
+              >
+                <ha-icon icon="mdi:refresh"></ha-icon>
+              </button>
             </header>
-            <div class="catalog-grid">
-              ${this.renderEntries(widgets, "widget", strings.library.noWidgets)}
-            </div>
+            ${this.renderWidgetErrors()} ${this.renderWidgetEntries(widgets)}
           </section>
           <section class="catalog-section">
             <header>

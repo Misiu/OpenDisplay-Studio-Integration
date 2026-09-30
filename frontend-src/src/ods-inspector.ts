@@ -39,8 +39,18 @@ import type {
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
+  WidgetFieldDefinition,
   WidgetItem,
+  WidgetOptionSection,
+  WidgetPick,
+  WidgetSourceDefinition,
 } from "./types";
+import {
+  formSelector,
+  idsFromPicks,
+  picksFromIds,
+  withPickFields,
+} from "./widget-fields";
 import "./ods-expression-field";
 import "./ods-property-field";
 import "./ods-structure";
@@ -354,8 +364,40 @@ export class OdsInspector extends LitElement {
     emit(this, "background-change", { color: inputValue(event) });
   }
 
-  private onWidgetConfigChange(event: OdsEvent<"widget-config-change">): void {
-    emit(this, "widget-config-change", { value: event.detail.value });
+  private onWidgetOptionsChange(
+    event: OdsEvent<"widget-options-change">
+  ): void {
+    emit(this, "widget-options-change", { value: event.detail.value });
+  }
+
+  private onPicksChange(
+    event: OdsEvent<"widget-options-change">,
+    source: WidgetSourceDefinition,
+    item: WidgetItem
+  ): void {
+    const previous = item.widget.sources[source.key] ?? [];
+    const chosen = event.detail.value[source.key];
+    emit(this, "widget-picks-change", {
+      sourceKey: source.key,
+      picks: picksFromIds(previous, chosen),
+    });
+  }
+
+  private onPickFieldsChange(
+    event: OdsEvent<"widget-options-change">,
+    source: WidgetSourceDefinition,
+    item: WidgetItem,
+    pickId: string
+  ): void {
+    const picks = item.widget.sources[source.key] ?? [];
+    emit(this, "widget-picks-change", {
+      sourceKey: source.key,
+      picks: withPickFields(picks, pickId, event.detail.value, source),
+    });
+  }
+
+  private reloadWidgets(): void {
+    emit(this, "widgets-reload");
   }
 
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
@@ -671,30 +713,130 @@ export class OdsInspector extends LitElement {
     `;
   }
 
-  private renderWidgetSettings(item: WidgetItem): TemplateResult {
-    const definition = this.widgets.find(
-      (widget) => widget.id === item.widget.type
-    );
-    const schema =
-      definition?.fields.map((field) => ({
-        name: field.key,
-        label: field.label,
-        required: field.required,
-        selector: field.selector,
-      })) ?? [];
+  private formSchema(
+    field: WidgetFieldDefinition,
+    required = false
+  ): HaFormSchema {
+    return {
+      name: field.key,
+      label: field.label,
+      required,
+      selector: formSelector(field.selector, this.dashboard.display.palette),
+    };
+  }
+
+  private renderPickFields(
+    item: WidgetItem,
+    source: WidgetSourceDefinition,
+    pick: WidgetPick
+  ): TemplateResult {
+    const label =
+      typeof pick.label === "string" && pick.label ? pick.label : pick.id;
+    return html`
+      <details class="pick-fields" data-pick=${pick.id}>
+        <summary>${label}</summary>
+        <ha-form
+          .hass=${this.hass}
+          .data=${pick}
+          .schema=${source.perSource.map((field) => this.formSchema(field))}
+          .computeLabel=${formFieldLabel}
+          @value-changed=${(event: OdsEvent<"widget-options-change">) =>
+            this.onPickFieldsChange(event, source, item, pick.id)}
+        ></ha-form>
+      </details>
+    `;
+  }
+
+  private renderSource(
+    item: WidgetItem,
+    source: WidgetSourceDefinition
+  ): TemplateResult {
+    const picks = item.widget.sources[source.key] ?? [];
+    return html`
+      <div class="widget-source" data-source=${source.key}>
+        <ha-form
+          .hass=${this.hass}
+          .data=${{ [source.key]: idsFromPicks(source, picks) }}
+          .schema=${[this.formSchema(source, source.required)]}
+          .computeLabel=${formFieldLabel}
+          @value-changed=${(event: OdsEvent<"widget-options-change">) =>
+            this.onPicksChange(event, source, item)}
+        ></ha-form>
+        ${
+          source.perSource.length > 0
+            ? picks.map((pick) => this.renderPickFields(item, source, pick))
+            : nothing
+        }
+      </div>
+    `;
+  }
+
+  private renderSources(
+    item: WidgetItem,
+    definition: WidgetDefinition
+  ): TemplateResult | typeof nothing {
+    if (definition.sources.length === 0) return nothing;
+    return html`
+      <details class="inspector-section" open>
+        <summary>${strings.inspector.dataSources}</summary>
+        <div class="section-body">
+          ${definition.sources.map((source) => this.renderSource(item, source))}
+        </div>
+      </details>
+    `;
+  }
+
+  private renderOptionSection(
+    item: WidgetItem,
+    section: WidgetOptionSection,
+    open: boolean
+  ): TemplateResult {
+    return html`
+      <details class="inspector-section" ?open=${open}>
+        <summary>${section.section}</summary>
+        <div class="section-body">
+          <ha-form
+            .hass=${this.hass}
+            .data=${item.widget.options}
+            .schema=${section.fields.map((field) => this.formSchema(field))}
+            .computeLabel=${formFieldLabel}
+            @value-changed=${this.onWidgetOptionsChange}
+          ></ha-form>
+        </div>
+      </details>
+    `;
+  }
+
+  private renderMissingWidget(item: WidgetItem): TemplateResult {
     return html`
       <details class="inspector-section" open>
         <summary>${strings.inspector.widgetSettings}</summary>
         <div class="section-body">
-          <ha-form
-            .hass=${this.hass}
-            .data=${item.widget.config}
-            .schema=${schema}
-            .computeLabel=${formFieldLabel}
-            @value-changed=${this.onWidgetConfigChange}
-          ></ha-form>
+          <ha-alert alert-type="warning">
+            ${strings.inspector.widgetMissing(item.widget.type)}
+          </ha-alert>
+          <button
+            type="button"
+            class="text-button"
+            @click=${this.reloadWidgets}
+          >
+            ${strings.library.reloadWidgets}
+          </button>
         </div>
       </details>
+    `;
+  }
+
+  private renderWidgetSettings(item: WidgetItem): TemplateResult {
+    const definition = this.widgets.find(
+      (widget) => widget.id === item.widget.type
+    );
+    if (!definition) return this.renderMissingWidget(item);
+    return html`
+      ${this.renderSources(item, definition)}
+      ${definition.options.map((section, index) =>
+        this.renderOptionSection(item, section, index === 0)
+      )}
     `;
   }
 
@@ -736,6 +878,18 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  /** A widget asks for its data first and its layout last; a primitive the other way. */
+  private renderItemSections(item: StudioItem): TemplateResult {
+    if (item.kind === "widget") {
+      return html`
+        ${this.renderWidgetSettings(item)} ${this.renderLayoutSection(item)}
+      `;
+    }
+    return html`
+      ${this.renderLayoutSection(item)} ${this.renderAppearance(item)}
+    `;
+  }
+
   private renderItemInspector(item: StudioItem): TemplateResult {
     const kind =
       item.kind === "widget"
@@ -747,12 +901,7 @@ export class OdsInspector extends LitElement {
         strings.inspector.subtitle(kind, item.locked),
         itemIcon(item, this.widgets, this.primitives)
       )}
-      ${this.renderLockedNotice(item)} ${this.renderLayoutSection(item)}
-      ${
-        item.kind === "widget"
-          ? this.renderWidgetSettings(item)
-          : this.renderAppearance(item)
-      }
+      ${this.renderLockedNotice(item)} ${this.renderItemSections(item)}
       ${this.renderDangerZone(strings.inspector.removeElement, () =>
         this.requestItemDelete(item)
       )}

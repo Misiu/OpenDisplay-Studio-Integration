@@ -1,0 +1,17 @@
+name: A list where one value is past its threshold
+language: en
+now: "2026-09-30T08:30:00+02:00"
+options:
+  layout: list
+  alertAbove: "60"
+  alertColor: accent
+sources:
+  entities:
+    - {id: sensor.living_temperature, label: Living room}
+    - {id: sensor.hall_humidity, label: Hall}
+    - {id: sensor.garage_humidity, label: Garage}
+data:
+  entities:
+    - {id: sensor.living_temperature, missing: false, name: Living room temperature, state: "22.1", display_state: "22.1", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+    - {id: sensor.hall_humidity, missing: false, name: Hall humidity, state: "48", display_state: "48", unit: "%", icon: water-percent, device_class: humidity, available: true, last_changed: ""}
+    - {id: sensor.garage_humidity, missing: false, name: Garage humidity, state: "71", display_state: "71", unit: "%", icon: water-percent, device_class: humidity, available: true, last_changed: ""}

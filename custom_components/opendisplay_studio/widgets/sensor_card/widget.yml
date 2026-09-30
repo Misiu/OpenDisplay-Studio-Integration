@@ -1,0 +1,78 @@
+api: 1
+id: sensor-card
+name: Sensor card
+version: 1.0.0
+description: The value of one or more entities, as a big tile, a list or a grid.
+icon: mdi:gauge
+category: Sensors
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 280, height: 160 }
+  minSize: { width: 120, height: 80 }
+
+sources:
+  - key: entities
+    label: Entities
+    selector:
+      entity: { multiple: true }
+    required: true
+    max: 12
+    data: entity_state
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: icon
+        label: Icon
+        selector: { text: {} }
+
+options:
+  - section: layout
+    fields:
+      - key: layout
+        label: Layout
+        default: single
+        selector:
+          select:
+            options: [single, list, grid]
+  - section: content
+    fields:
+      - key: showIcon
+        label: Show icon
+        default: true
+        selector: { boolean: {} }
+      - key: showName
+        label: Show name
+        default: true
+        selector: { boolean: {} }
+      - key: showUnit
+        label: Show unit
+        default: true
+        selector: { boolean: {} }
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
+      - key: valueSize
+        label: Value size
+        default: auto
+        selector:
+          select:
+            options: [auto, small, medium, large]
+  - section: thresholds
+    fields:
+      - key: alertBelow
+        label: Alert below
+        default: ""
+        selector: { text: {} }
+      - key: alertAbove
+        label: Alert above
+        default: ""
+        selector: { text: {} }
+      - key: alertColor
+        label: Alert color
+        default: accent
+        selector: { opendisplay_color: {} }
