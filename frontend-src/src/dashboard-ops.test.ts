@@ -11,6 +11,7 @@ import {
   setItemNumber,
   setPalette,
   toggleItemState,
+  updatePrimitiveFields,
 } from "./dashboard-ops";
 import { itemBounds } from "./geometry";
 import {
@@ -19,6 +20,7 @@ import {
   rectangleItem,
   textItem,
   widgetItem,
+  primitiveDefinitions,
 } from "./test-support";
 import type { WidgetDefinition } from "./types";
 
@@ -40,7 +42,7 @@ const sensor: WidgetDefinition = {
 describe("setItemNumber", () => {
   it("moves a rectangle while keeping its size and staying inside the working area", () => {
     const dashboard = dashboardWith([rectangleItem("r")]);
-    setItemNumber(dashboard, "r", "x", 1000);
+    setItemNumber(dashboard, "r", "x", 1000, primitiveDefinitions);
     expect(itemBounds(dashboard.items[0])).toMatchObject({
       x: 300,
       width: 100,
@@ -49,13 +51,13 @@ describe("setItemNumber", () => {
 
   it("resizes widgets within the remaining working area", () => {
     const dashboard = dashboardWith([widgetItem("w")]);
-    setItemNumber(dashboard, "w", "width", 5000);
+    setItemNumber(dashboard, "w", "width", 5000, primitiveDefinitions);
     expect(itemBounds(dashboard.items[0]).width).toBe(390);
   });
 
   it("changes the circle radius and the QR module size", () => {
     const dashboard = dashboardWith([circleItem("c")]);
-    setItemNumber(dashboard, "c", "radius", 30);
+    setItemNumber(dashboard, "c", "radius", 30, primitiveDefinitions);
     expect(itemBounds(dashboard.items[0]).width).toBe(61);
   });
 
@@ -63,7 +65,7 @@ describe("setItemNumber", () => {
     const item = rectangleItem("r");
     item.locked = true;
     const dashboard = dashboardWith([item]);
-    setItemNumber(dashboard, "r", "x", 200);
+    setItemNumber(dashboard, "r", "x", 200, primitiveDefinitions);
     expect(itemBounds(dashboard.items[0]).x).toBe(20);
   });
 });
@@ -170,7 +172,13 @@ describe("creating items from the catalog", () => {
   });
 
   it("centres a new primitive on the drop point", () => {
-    const item = createPrimitiveItem("circle", 200, 150, dashboardWith());
+    const item = createPrimitiveItem(
+      primitiveDefinitions,
+      "circle",
+      200,
+      150,
+      dashboardWith()
+    );
     expect(item).toMatchObject({
       kind: "primitive",
       primitive: { type: "circle", x: 200, y: 150 },
@@ -179,7 +187,13 @@ describe("creating items from the catalog", () => {
 
   it("returns undefined for an unsupported primitive type", () => {
     expect(
-      createPrimitiveItem("hexagon", 10, 10, dashboardWith())
+      createPrimitiveItem(
+        primitiveDefinitions,
+        "hexagon",
+        10,
+        10,
+        dashboardWith()
+      )
     ).toBeUndefined();
   });
 
@@ -191,5 +205,43 @@ describe("creating items from the catalog", () => {
     );
     expect(empty).toEqual({ x: 25, y: 25 });
     expect(busy.x).toBeGreaterThan(empty.x);
+  });
+});
+
+describe("editing point primitives through their definition", () => {
+  it("keeps a text size within the limits its definition declares", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+    setItemNumber(dashboard, "t", "size", 9999, primitiveDefinitions);
+    expect(dashboard.items[0]).toMatchObject({ primitive: { size: 256 } });
+    setItemNumber(dashboard, "t", "size", 1, primitiveDefinitions);
+    expect(dashboard.items[0]).toMatchObject({ primitive: { size: 6 } });
+  });
+
+  it("keeps a circle inside the working area when its centre moves", () => {
+    const dashboard = dashboardWith([circleItem("c")]);
+    setItemNumber(dashboard, "c", "x", 9999, primitiveDefinitions);
+    expect(
+      itemBounds(dashboard.items[0]).x + itemBounds(dashboard.items[0]).width
+    ).toBeLessThanOrEqual(400);
+    setItemNumber(dashboard, "c", "x", -9999, primitiveDefinitions);
+    expect(itemBounds(dashboard.items[0]).x).toBe(0);
+  });
+
+  it("ignores a key that is not a layout field of the primitive", () => {
+    const dashboard = dashboardWith([circleItem("c")]);
+    const before = structuredClone(dashboard);
+    setItemNumber(dashboard, "c", "boxsize", 5, primitiveDefinitions);
+    expect(dashboard).toEqual(before);
+  });
+
+  it("stores an empty optional colour as none when the form reports transparent", () => {
+    const dashboard = dashboardWith([rectangleItem("r", { fill: "red" })]);
+    updatePrimitiveFields(
+      dashboard,
+      "r",
+      { fill: "transparent" },
+      primitiveDefinitions
+    );
+    expect(dashboard.items[0]).toMatchObject({ primitive: { fill: null } });
   });
 });

@@ -8,24 +8,76 @@ import {
 } from "./geometry";
 import { createId } from "./ids";
 import { clamp } from "./math";
-import { createPrimitive } from "./primitives";
+import { definitionFor, primitiveValuesFromForm } from "./item-fields";
+import { createPrimitive, resolveLimit } from "./primitives";
 import { PALETTE_COLORS } from "./display-profiles";
 import type {
   Dashboard,
   DisplayProfile,
+  ItemBounds,
   PaletteId,
   Primitive,
+  PrimitiveDefinition,
   PrimitiveItem,
   WidgetDefinition,
   WidgetItem,
 } from "./types";
+
+/**
+ * Edit one numeric field of a point primitive: its position keeps the whole
+ * element inside the working area, any other field stays within its definition's limits.
+ */
+const setPointField = (
+  item: PrimitiveItem,
+  key: string,
+  value: number,
+  area: ItemBounds,
+  display: Dashboard["display"],
+  definition: PrimitiveDefinition | undefined
+): void => {
+  const primitive = item.primitive;
+  if (isBoxPrimitive(primitive)) {
+    return;
+  }
+  const bounds = itemBounds(item);
+  if (key === "x") {
+    const offset = bounds.x - primitive.x;
+    const lowest = area.x - offset;
+    const highest = area.x + area.width - bounds.width - offset;
+    Object.assign(primitive, {
+      x: clamp(value, lowest, Math.max(lowest, highest)),
+    });
+    return;
+  }
+  if (key === "y") {
+    const offset = bounds.y - primitive.y;
+    const lowest = area.y - offset;
+    const highest = area.y + area.height - bounds.height - offset;
+    Object.assign(primitive, {
+      y: clamp(value, lowest, Math.max(lowest, highest)),
+    });
+    return;
+  }
+  const field = definition?.fields.find(
+    (candidate) =>
+      candidate.key === key &&
+      candidate.shape === "number" &&
+      candidate.section === "layout"
+  );
+  if (field) {
+    const minimum = resolveLimit(field.min, display, value);
+    const maximum = resolveLimit(field.max, display, value);
+    Object.assign(primitive, { [key]: clamp(value, minimum, maximum) });
+  }
+};
 
 /** Edit one numeric layout field of an item, keeping it inside the working area. */
 export const setItemNumber = (
   dashboard: Dashboard,
   itemId: string,
   key: string,
-  value: number
+  value: number,
+  definitions: PrimitiveDefinition[]
 ): void => {
   const item = dashboard.items.find((candidate) => candidate.id === itemId);
   if (!item || item.locked) return;
@@ -55,6 +107,7 @@ export const setItemNumber = (
     return;
   }
   const primitive = item.primitive;
+  const definition = definitionFor(item, definitions);
   if (isBoxPrimitive(primitive)) {
     if (key === "x") {
       const width = primitive.x_end - primitive.x_start;
@@ -84,41 +137,8 @@ export const setItemNumber = (
         area.y + area.height - 1
       );
     }
-  } else if (primitive.type === "circle") {
-    if (key === "x") {
-      primitive.x = clamp(
-        value,
-        area.x + primitive.radius,
-        area.x + area.width - primitive.radius
-      );
-    }
-    if (key === "y") {
-      primitive.y = clamp(
-        value,
-        area.y + primitive.radius,
-        area.y + area.height - primitive.radius
-      );
-    }
-    if (key === "radius") {
-      primitive.radius = clamp(
-        value,
-        1,
-        Math.floor(Math.min(area.width, area.height) / 2)
-      );
-    }
   } else {
-    if (key === "x") {
-      primitive.x = clamp(value, area.x, area.x + area.width - 1);
-    }
-    if (key === "y") {
-      primitive.y = clamp(value, area.y, area.y + area.height - 1);
-    }
-    if (key === "size" && primitive.type !== "qrcode") {
-      primitive.size = clamp(value, primitive.type === "text" ? 6 : 8, 256);
-    }
-    if (key === "boxsize" && primitive.type === "qrcode") {
-      primitive.boxsize = clamp(value, 1, 16);
-    }
+    setPointField(item, key, value, area, dashboard.display, definition);
   }
 };
 
@@ -213,15 +233,17 @@ export const setWidgetConfig = (
 export const updatePrimitiveFields = (
   dashboard: Dashboard,
   itemId: string,
-  fields: Record<string, unknown>
+  fields: Record<string, unknown>,
+  definitions: PrimitiveDefinition[]
 ): void => {
   const item = dashboard.items.find((candidate) => candidate.id === itemId);
   if (item?.kind !== "primitive") return;
-  const normalized = { ...item.primitive, ...fields } as Primitive;
-  if ("fill" in normalized && normalized.fill === "transparent") {
-    normalized.fill = null;
-  }
-  item.primitive = normalized;
+  const values = primitiveValuesFromForm(
+    fields,
+    definitionFor(item, definitions)
+  );
+  // Form values are typed loosely; the definition already decided what they may hold.
+  item.primitive = { ...item.primitive, ...values } as Primitive;
 };
 
 /** A widget of its default size, centred on (x, y) and kept inside the working area. */
@@ -266,13 +288,17 @@ export const createWidgetItem = (
 
 /** A primitive centred on (x, y) inside the working area, or undefined for an unknown type. */
 export const createPrimitiveItem = (
+  definitions: PrimitiveDefinition[],
   type: string,
   x: number,
   y: number,
   dashboard: Dashboard
 ): PrimitiveItem | undefined => {
   const { width, height } = dashboard.display;
-  const primitive = createPrimitive(type.trim(), {
+  const definition = definitions.find(
+    (candidate) => candidate.type === type.trim()
+  );
+  const primitive = createPrimitive(definition, {
     x: Math.round(width / 2),
     y: Math.round(height / 2),
     displayWidth: width,

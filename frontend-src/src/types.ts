@@ -162,11 +162,45 @@ export interface WidgetDefinition {
   dataRequirements: Array<Record<string, unknown>>;
 }
 
+export type FieldShape =
+  "number" | "coordinate" | "boolean" | "enum" | "color" | "string" | "text";
+
+/** A number limit: a fixed value, or one taken from the display size. */
+export type FieldLimit =
+  number | "display_width" | "display_height" | "display_shorter_side";
+
+export interface PrimitiveField {
+  key: string;
+  label: string;
+  shape: FieldShape;
+  section: "layout" | "appearance";
+  required?: boolean;
+  default?: string | number | boolean;
+  /** A colour that may be "no colour" (stored as null, shown as transparent). */
+  nullable?: boolean;
+  axis?: "x" | "y";
+  min?: FieldLimit;
+  max?: FieldLimit;
+  unit?: string;
+  options?: string[];
+  maxLength?: number;
+  maxBytes?: number;
+  /** False for fields the backend fixes and the panel never shows. */
+  visible?: boolean;
+}
+
+/** One ODL primitive, exactly as the backend's `primitives/<type>.yml` declares it. */
 export interface PrimitiveDefinition {
-  id: Primitive["type"];
+  type: Primitive["type"];
+  order: number;
   name: string;
   description: string;
   icon: string;
+  category: string;
+  geometry: "point" | "box" | "line";
+  /** How far a new box or line reaches from where it is dropped. */
+  extent?: { x: number; y: number };
+  fields: PrimitiveField[];
 }
 export interface ItemBounds {
   x: number;

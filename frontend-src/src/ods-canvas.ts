@@ -2,6 +2,8 @@ import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
+import { commandById, commandView, type CommandId } from "./commands";
+import { isMacPlatform } from "./dom";
 import { emit, type OdsEvent } from "./events";
 import {
   itemBounds,
@@ -18,6 +20,7 @@ import type {
   ComposePreviewResponse,
   Dashboard,
   ItemBounds,
+  PrimitiveDefinition,
   StudioItem,
   WidgetDefinition,
 } from "./types";
@@ -339,12 +342,13 @@ export class OdsCanvas extends LitElement {
   @property({ attribute: false }) public dashboard!: Dashboard;
   @property({ attribute: false }) public preview?: ComposePreviewResponse;
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
+  @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property() public selectedItemId = "";
   @property({ type: Boolean }) public snapEnabled = true;
   /** True while a catalog drag is in progress, so the stage shows it accepts a drop. */
   @property({ type: Boolean }) public acceptingDrop = false;
-  @property({ type: Number }) public undoCount = 0;
-  @property({ type: Number }) public redoCount = 0;
+  @property({ type: Boolean }) public canUndo = false;
+  @property({ type: Boolean }) public canRedo = false;
 
   /** Pan and zoom live in the shell so they survive a trip to the code view. */
   @property({ attribute: false }) public viewport: Viewport = DEFAULT_VIEWPORT;
@@ -418,6 +422,7 @@ export class OdsCanvas extends LitElement {
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
     const original = structuredClone(item);
+    const measured = this.measuredBounds(item);
     const minSize =
       item.kind === "widget"
         ? this.widgets.find((widget) => widget.id === item.widget.type)?.layout
@@ -444,6 +449,7 @@ export class OdsCanvas extends LitElement {
           item: transformItem(original, gesture, dx, dy, this.dashboard, {
             snapEnabled: this.snapEnabled,
             minSize,
+            measured,
           }),
         });
       },
@@ -455,12 +461,8 @@ export class OdsCanvas extends LitElement {
 
   // --- events from the toolbar and the stage -------------------------------
 
-  private requestUndo(): void {
-    emit(this, "undo");
-  }
-
-  private requestRedo(): void {
-    emit(this, "redo");
+  private runCommand(id: CommandId): void {
+    emit(this, "command", { id });
   }
 
   private toggleSnap(): void {
@@ -498,9 +500,14 @@ export class OdsCanvas extends LitElement {
 
   // --- items -----------------------------------------------------------------
 
+  /** What the backend measured for an item in the last preview, if anything. */
+  private measuredBounds(item: StudioItem): ItemBounds | undefined {
+    return this.preview?.itemBounds[item.id];
+  }
+
   private resizeHandleLabel(item: StudioItem, handle: ResizeHandle): string {
     return strings.canvas.resizeHandle(
-      itemName(item, this.widgets),
+      itemName(item, this.widgets, this.primitives),
       strings.canvas.sides[handle]
     );
   }
@@ -550,7 +557,7 @@ export class OdsCanvas extends LitElement {
   }
 
   private renderItem(item: StudioItem): TemplateResult {
-    const box = itemBounds(item);
+    const box = itemBounds(item, this.measuredBounds(item));
     const selected = item.id === this.selectedItemId;
     const classes = classMap({
       selection: true,
@@ -574,6 +581,24 @@ export class OdsCanvas extends LitElement {
 
   // --- the canvas ------------------------------------------------------------
 
+  private renderHistoryButton(id: "undo" | "redo"): TemplateResult {
+    const view = commandView(
+      commandById(id),
+      { canUndo: this.canUndo, canRedo: this.canRedo },
+      isMacPlatform()
+    );
+    return html`
+      <button
+        aria-label=${view.label}
+        title=${view.title}
+        ?disabled=${!view.enabled}
+        @click=${() => this.runCommand(id)}
+      >
+        <ha-icon icon=${view.icon}></ha-icon>
+      </button>
+    `;
+  }
+
   private renderToolbar(): TemplateResult {
     const dashboard = this.dashboard;
     const { width, height, padding, snapSize } = dashboard.display;
@@ -587,22 +612,8 @@ export class OdsCanvas extends LitElement {
         <span>${strings.canvas.layers(dashboard.items.length)}</span>
         <span>${strings.canvas.padding(padding)}</span>
         <div class="history-controls">
-          <button
-            aria-label=${strings.canvas.undo}
-            title=${strings.canvas.undoTitle}
-            ?disabled=${!this.undoCount}
-            @click=${this.requestUndo}
-          >
-            <ha-icon icon="mdi:undo"></ha-icon>
-          </button>
-          <button
-            aria-label=${strings.canvas.redo}
-            title=${strings.canvas.redoTitle}
-            ?disabled=${!this.redoCount}
-            @click=${this.requestRedo}
-          >
-            <ha-icon icon="mdi:redo"></ha-icon>
-          </button>
+          ${this.renderHistoryButton("undo")}
+          ${this.renderHistoryButton("redo")}
         </div>
         <button
           class=${snapClasses}

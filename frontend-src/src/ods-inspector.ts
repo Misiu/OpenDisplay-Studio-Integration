@@ -18,6 +18,7 @@ import { inputValue } from "./dom";
 import { emit, type OdsEvent } from "./events";
 import { strings } from "./strings";
 import {
+  appearanceFormData,
   layoutFields,
   primitiveAppearanceSchema,
   type LayoutField,
@@ -32,6 +33,7 @@ import type {
   HaFormSchema,
   HomeAssistant,
   PaletteId,
+  PrimitiveDefinition,
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
@@ -251,6 +253,7 @@ export class OdsInspector extends LitElement {
   @property({ attribute: false }) public hass?: HomeAssistant;
   @property({ attribute: false }) public dashboard!: Dashboard;
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
+  @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property({ attribute: false }) public preview?: ComposePreviewResponse;
   @property() public selectedItemId = "";
   @property({ type: Boolean }) public collapsed = false;
@@ -340,11 +343,11 @@ export class OdsInspector extends LitElement {
   }
 
   private unlock(item: StudioItem): void {
-    emit(this, "item-flag-toggle", { itemId: item.id, flag: "locked" });
+    emit(this, "command", { id: "toggle-locked", itemId: item.id });
   }
 
   private requestItemDelete(item: StudioItem): void {
-    emit(this, "item-delete-request", { itemId: item.id });
+    emit(this, "command", { id: "delete-item", itemId: item.id });
   }
 
   // --- shared pieces ---------------------------------------------------------
@@ -571,7 +574,7 @@ export class OdsInspector extends LitElement {
   }
 
   private renderLayoutSection(item: StudioItem): TemplateResult {
-    const { grid, extra } = layoutFields(item, this.dashboard);
+    const { grid, extra } = layoutFields(item, this.dashboard, this.primitives);
     return html`
       <details class="inspector-section" open>
         <summary>${strings.inspector.layout}</summary>
@@ -613,13 +616,11 @@ export class OdsInspector extends LitElement {
   }
 
   private renderAppearance(item: PrimitiveItem): TemplateResult {
-    const data =
-      "fill" in item.primitive
-        ? { ...item.primitive, fill: item.primitive.fill ?? "transparent" }
-        : item.primitive;
+    const data = appearanceFormData(item, this.primitives);
     const schema = primitiveAppearanceSchema(
       item,
-      this.dashboard.display.palette
+      this.dashboard.display.palette,
+      this.primitives
     );
     return html`
       <details class="inspector-section" open>
@@ -644,9 +645,9 @@ export class OdsInspector extends LitElement {
         : strings.inspector.kindPrimitive;
     return html`
       ${this.renderHeader(
-        itemName(item, this.widgets),
+        itemName(item, this.widgets, this.primitives),
         strings.inspector.subtitle(kind, item.locked),
-        itemIcon(item, this.widgets)
+        itemIcon(item, this.widgets, this.primitives)
       )}
       ${this.renderLockedNotice(item)} ${this.renderLayoutSection(item)}
       ${
@@ -698,6 +699,7 @@ export class OdsInspector extends LitElement {
         <ods-structure
           .items=${this.dashboard.items}
           .widgets=${this.widgets}
+          .primitives=${this.primitives}
           .selectedItemId=${this.selectedItemId}
         ></ods-structure>
         <section class="properties">

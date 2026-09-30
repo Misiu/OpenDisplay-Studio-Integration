@@ -31,8 +31,11 @@ const USER_FACING_LITERAL =
   /\b(?:label|title|description|error)\s*[:=]\s*'([^']*[A-Za-z]{2}[^']*)'/g;
 const FAILURE_MESSAGE =
   /'(Could not [^']*|Unsupported [^']*|[^']* cannot be empty)'/g;
+/** A template literal in an attribute; only its own words count, not the `${values}` in it. */
 const TEXT_ATTRIBUTE_TEMPLATE =
-  /\b(?:aria-label|title|placeholder|header-title|header-subtitle|label)=\$\{`([^`]*[A-Za-z]{2}[^`]*)`\}/g;
+  /\b(?:aria-label|title|placeholder|header-title|header-subtitle|label)=\$\{`([^`]*)`\}/g;
+const hasOwnWords = (template: string): boolean =>
+  /[A-Za-z]{2}/.test(template.replace(/\$\{[^}]*\}/g, ""));
 const TEXT_AFTER_INTERPOLATION =
   /\}([^<>${}=&|;()"`\n]*[A-Za-z]{2}[^<>${}=&|;()"`\n]*)</g;
 const TEXT_BEFORE_INTERPOLATION =
@@ -72,7 +75,9 @@ describe("UI text is centralised in strings.ts", () => {
 
   it("has no text mixed with a value written inline", () => {
     expect([
-      ...findings(TEXT_ATTRIBUTE_TEMPLATE),
+      ...findings(TEXT_ATTRIBUTE_TEMPLATE).filter((finding) =>
+        hasOwnWords(finding.slice(finding.indexOf(": ") + 2))
+      ),
       ...findings(TEXT_AFTER_INTERPOLATION),
       ...findings(TEXT_BEFORE_INTERPOLATION),
     ]).toEqual([]);

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from time import monotonic
 from typing import Any
@@ -9,6 +10,7 @@ from typing import Any
 import yaml  # type: ignore[import-untyped]
 from homeassistant.core import HomeAssistant
 
+from .measure import primitive_box
 from .odl import Box, DisplayContext, WidgetRenderContext
 from .palette import accent_color_for_palette
 from .widgets import WidgetRegistry, with_defaults
@@ -46,45 +48,14 @@ def _frame_box(frame: dict[str, int]) -> Box:
     return Box(frame["x"], frame["y"], frame["width"], frame["height"])
 
 
-def _primitive_bounds(primitive: dict[str, Any]) -> Box:
-    primitive_type = primitive["type"]
-    if primitive_type in {"rectangle", "ellipse", "progress_bar"}:
-        return Box(
-            primitive["x_start"],
-            primitive["y_start"],
-            primitive["x_end"] - primitive["x_start"] + 1,
-            primitive["y_end"] - primitive["y_start"] + 1,
-        )
-    if primitive_type == "line":
-        left = min(primitive["x_start"], primitive["x_end"])
-        top = min(primitive["y_start"], primitive["y_end"])
-        return Box(
-            left,
-            top,
-            max(1, abs(primitive["x_end"] - primitive["x_start"]) + 1),
-            max(1, abs(primitive["y_end"] - primitive["y_start"]) + 1),
-        )
-    if primitive_type == "circle":
-        radius = primitive["radius"]
-        return Box(
-            primitive["x"] - radius,
-            primitive["y"] - radius,
-            radius * 2 + 1,
-            radius * 2 + 1,
-        )
-    if primitive_type == "icon":
-        return Box(primitive["x"], primitive["y"], primitive["size"], primitive["size"])
-    if primitive_type == "qrcode":
-        # Version 1 with the configured quiet zone is 21 + 2 * border modules.
-        size = (21 + primitive["border"] * 2) * primitive["boxsize"]
-        return Box(primitive["x"], primitive["y"], size, size)
-    size = primitive["size"]
-    return Box(
-        primitive["x"],
-        primitive["y"],
-        max(size, round(len(primitive["value"]) * size * 0.62)),
-        max(1, round(size * 1.25)),
-    )
+def _measure_primitives(
+    primitives: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, int]]:
+    """Measure every primitive as the renderer draws it (loads fonts, so not async)."""
+    return {
+        item_id: primitive_box(primitive).as_dict()
+        for item_id, primitive in primitives.items()
+    }
 
 
 async def async_compile_dashboard(  # noqa: PLR0915
@@ -144,13 +115,21 @@ async def async_compile_dashboard(  # noqa: PLR0915
                 values if requirement.get("cardinality") == "many" else values[0]
             )
         widget_contexts[item["id"]] = (config, data)
+    primitive_bounds = await asyncio.to_thread(
+        _measure_primitives,
+        {
+            item["id"]: item["primitive"]
+            for item in dashboard["items"]
+            if item["kind"] == "primitive"
+        },
+    )
     elements: list[dict[str, Any]] = []
     item_bounds: dict[str, dict[str, int]] = {}
     for item in dashboard["items"]:
         try:
             if item["kind"] == "primitive":
                 primitive = dict(item["primitive"])
-                item_bounds[item["id"]] = _primitive_bounds(primitive).as_dict()
+                item_bounds[item["id"]] = primitive_bounds[item["id"]]
                 if not item.get("hidden", False):
                     elements.append(primitive)
                 continue

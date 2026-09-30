@@ -4,6 +4,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./ods-app";
 import { createId } from "./ids";
+import { loadPrimitiveDefinitions } from "./primitive-definitions";
 import type { HomeAssistant, Dashboard } from "./types";
 
 if (!customElements.get("ha-icon")) {
@@ -409,6 +410,24 @@ const preview = (dashboard: Dashboard): string => {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 };
 
+/** QR capacity in bytes at the renderer's error correction, for versions 1 to 10. */
+const QR_CAPACITY = [7, 14, 24, 34, 44, 58, 64, 84, 98, 119];
+
+/**
+ * How many modules wide the backend makes a QR code: it grows with the data.
+ * The harness has no `qrcode` library, so this follows the capacity table.
+ */
+const qrModules = (data: string): number => {
+  const bytes = new TextEncoder().encode(data).length;
+  const version = QR_CAPACITY.findIndex((capacity) => bytes <= capacity) + 1;
+  return 17 + 4 * (version || QR_CAPACITY.length);
+};
+
+/**
+ * What the backend reports as item bounds. Text and QR codes are measured, not
+ * computed from their fields, so the harness deliberately differs from the
+ * panel's own first guess and tests can tell them apart.
+ */
 const itemBounds = (
   dashboard: Dashboard
 ): Record<string, { x: number; y: number; width: number; height: number }> => {
@@ -436,7 +455,9 @@ const itemBounds = (
           height: primitive.radius * 2 + 1,
         };
       } else if (primitive.type === "qrcode") {
-        const size = (21 + primitive.border * 2) * primitive.boxsize;
+        const size =
+          (qrModules(primitive.data) + primitive.border * 2) *
+          primitive.boxsize;
         result[item.id] = {
           x: primitive.x,
           y: primitive.y,
@@ -454,11 +475,8 @@ const itemBounds = (
         result[item.id] = {
           x: primitive.x,
           y: primitive.y,
-          width: Math.max(
-            primitive.size,
-            primitive.value.length * primitive.size * 0.62
-          ),
-          height: primitive.size * 1.25,
+          width: Math.round(primitive.value.length * primitive.size * 0.55),
+          height: Math.round(primitive.size * 1.4),
         };
       }
     }
@@ -519,56 +537,7 @@ const hass: HomeAssistant = {
             dataRequirements: [],
           },
         ],
-        primitives: [
-          {
-            id: "text",
-            name: "Text",
-            description: "Pixel-positioned text",
-            icon: "mdi:format-text",
-          },
-          {
-            id: "rectangle",
-            name: "Rectangle",
-            description: "Filled or outlined rectangle",
-            icon: "mdi:rectangle-outline",
-          },
-          {
-            id: "line",
-            name: "Line",
-            description: "Solid or dashed line between two points",
-            icon: "mdi:vector-line",
-          },
-          {
-            id: "circle",
-            name: "Circle",
-            description: "Filled or outlined circle",
-            icon: "mdi:circle-outline",
-          },
-          {
-            id: "ellipse",
-            name: "Ellipse",
-            description: "Filled or outlined ellipse",
-            icon: "mdi:ellipse-outline",
-          },
-          {
-            id: "icon",
-            name: "Icon",
-            description: "Material Design icon from the bundled ODL font",
-            icon: "mdi:star-outline",
-          },
-          {
-            id: "qrcode",
-            name: "QR code",
-            description: "Locally generated QR code",
-            icon: "mdi:qrcode",
-          },
-          {
-            id: "progress_bar",
-            name: "Progress bar",
-            description: "Directional progress indicator",
-            icon: "mdi:progress-helper",
-          },
-        ],
+        primitives: loadPrimitiveDefinitions(),
       } as T;
     }
     if (message.type === "opendisplay_studio/compose_preview") {

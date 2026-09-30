@@ -1,0 +1,53 @@
+type: ellipse
+order: 50
+name: Ellipse
+description: Filled or outlined ellipse
+icon: mdi:ellipse-outline
+category: shapes
+geometry: box
+extent:
+  x: 160
+  y: 90
+fields:
+  - key: x_start
+    label: Left
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_start
+    label: Top
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: x_end
+    label: Right
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_end
+    label: Bottom
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: fill
+    label: Fill
+    shape: color
+    nullable: true
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: Outline width
+    shape: number
+    min: 0
+    max: 32
+    default: 2
+    unit: px
+    section: appearance

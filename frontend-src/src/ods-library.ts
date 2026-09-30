@@ -362,7 +362,9 @@ export class OdsLibrary extends LitElement {
       `;
     }
     const widgets = filterCatalog(this.widgets, this.searchText);
-    const primitives = filterCatalog(this.primitives, this.searchText);
+    const primitives = filterCatalog(this.primitives, this.searchText).map(
+      (definition): CatalogEntry => ({ ...definition, id: definition.type })
+    );
     return html`
       ${this.renderGhost()}
       <aside class="panel toolbox">

@@ -1,32 +1,18 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import {
+  callCount,
+  lastCall,
+  openDashboard,
+  openGallery,
+  openKitchen,
+  withoutRandomUuid,
+} from "./helpers";
 
 /**
  * One group of tests per custom element: what the user sees and does in that area,
  * through real pointer and keyboard input. The wiring between elements is covered by
  * `designer-v3.spec.ts` and `dashboard-library.spec.ts`.
  */
-
-const openGallery = async (page: Page) => {
-  await page.goto("/");
-  await expect(
-    page.getByRole("heading", { name: "Dashboards", exact: true })
-  ).toBeVisible();
-};
-
-const openDashboard = async (page: Page, name: string) => {
-  await page.getByRole("button", { name: `Open dashboard ${name}` }).click();
-  await expect(
-    page.getByRole("button", { name: "Dashboards", exact: true })
-  ).toBeVisible();
-};
-
-const openKitchen = async (page: Page) => {
-  await openGallery(page);
-  await openDashboard(page, "Kitchen display");
-  await expect(
-    page.getByAltText("Authoritative rendered display preview")
-  ).toBeVisible();
-};
 
 const kitchenWidget = (page: Page) =>
   page.locator('.selection[data-item-id="temperature"]');
@@ -48,26 +34,8 @@ const dragBy = async (page: Page, target: Locator, dx: number, dy = 0) => {
   await page.mouse.up();
 };
 
-const lastCall = (page: Page, type: string) =>
-  page.evaluate(
-    (wanted) =>
-      window.__ODS_E2E__.calls().findLast((call) => call.type === wanted),
-    type
-  );
-const callCount = (page: Page, type: string) =>
-  page.evaluate(
-    (wanted) =>
-      window.__ODS_E2E__.calls().filter((call) => call.type === wanted).length,
-    type
-  );
-
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(globalThis.crypto, "randomUUID", {
-      configurable: true,
-      value: undefined,
-    });
-  });
+  await withoutRandomUuid(page);
 });
 
 test.describe("ods-app", () => {

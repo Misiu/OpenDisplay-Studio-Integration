@@ -1,0 +1,53 @@
+type: line
+order: 30
+name: Line
+description: Solid or dashed line between two points
+icon: mdi:vector-line
+category: shapes
+geometry: line
+extent:
+  x: 160
+  y: 90
+fields:
+  - key: x_start
+    label: Start X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_start
+    label: Start Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: x_end
+    label: End X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_end
+    label: End Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: fill
+    label: Color
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: Line width
+    shape: number
+    min: 1
+    max: 32
+    default: 2
+    unit: px
+    section: appearance
+  - key: dashed
+    label: Dashed
+    shape: boolean
+    default: false
+    section: appearance

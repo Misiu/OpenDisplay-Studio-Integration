@@ -13,6 +13,7 @@ from .compiler import DashboardCompileError, async_compile_dashboard
 from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
 from .palette import accent_color_for_palette
+from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
 from .widgets import WidgetRegistry
 
@@ -52,56 +53,7 @@ def websocket_bootstrap(
             "version": INTEGRATION_VERSION,
             "dashboards": _store(hass).list(),
             "widgets": _widgets(hass).definitions,
-            "primitives": [
-                {
-                    "id": "text",
-                    "name": "Text",
-                    "description": "Pixel-positioned text",
-                    "icon": "mdi:format-text",
-                },
-                {
-                    "id": "rectangle",
-                    "name": "Rectangle",
-                    "description": "Filled or outlined rectangle",
-                    "icon": "mdi:rectangle-outline",
-                },
-                {
-                    "id": "line",
-                    "name": "Line",
-                    "description": "Solid or dashed line between two points",
-                    "icon": "mdi:vector-line",
-                },
-                {
-                    "id": "circle",
-                    "name": "Circle",
-                    "description": "Filled or outlined circle",
-                    "icon": "mdi:circle-outline",
-                },
-                {
-                    "id": "ellipse",
-                    "name": "Ellipse",
-                    "description": "Filled or outlined ellipse",
-                    "icon": "mdi:ellipse-outline",
-                },
-                {
-                    "id": "icon",
-                    "name": "Icon",
-                    "description": "Material Design icon from the bundled ODL font",
-                    "icon": "mdi:star-outline",
-                },
-                {
-                    "id": "qrcode",
-                    "name": "QR code",
-                    "description": "Locally generated QR code",
-                    "icon": "mdi:qrcode",
-                },
-                {
-                    "id": "progress_bar",
-                    "name": "Progress bar",
-                    "description": "Directional progress indicator",
-                    "icon": "mdi:progress-helper",
-                },
-            ],
+            "primitives": DEFAULT_PRIMITIVES.definitions,
         },
     )
 

@@ -1,0 +1,81 @@
+type: progress_bar
+order: 80
+name: Progress bar
+description: Directional progress indicator
+icon: mdi:progress-helper
+category: data
+geometry: box
+extent:
+  x: 160
+  y: 32
+fields:
+  - key: x_start
+    label: Left
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_start
+    label: Top
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: x_end
+    label: Right
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_end
+    label: Bottom
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: progress
+    label: Progress
+    shape: number
+    min: 0
+    max: 100
+    default: 50
+    unit: "%"
+    section: appearance
+  - key: direction
+    label: Direction
+    shape: enum
+    options:
+      - right
+      - left
+      - up
+      - down
+    default: right
+    section: appearance
+  - key: background
+    label: Background
+    shape: color
+    default: white
+    section: appearance
+  - key: fill
+    label: Fill
+    shape: color
+    default: accent
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: Outline width
+    shape: number
+    min: 0
+    max: 32
+    default: 1
+    unit: px
+    section: appearance
+  - key: show_percentage
+    label: Show percentage
+    shape: boolean
+    default: true
+    section: appearance

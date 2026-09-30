@@ -1,3 +1,4 @@
+import type { CommandId } from "./commands";
 import type { DashboardFormData } from "./dashboards";
 import type { Dashboard, PaletteId, StudioItem } from "./types";
 import type { Viewport } from "./viewport";
@@ -5,7 +6,6 @@ import type { Viewport } from "./viewport";
 export type EditorView = "dashboards" | "design" | "code";
 export type DashboardAction = "rename" | "duplicate" | "settings" | "delete";
 export type DashboardDialog = Exclude<DashboardAction, "duplicate">;
-export type ItemFlag = "locked" | "hidden";
 
 /**
  * Every intent an element reports to its owner. Children never change the dashboard;
@@ -43,15 +43,13 @@ export interface OdsEventMap {
   "item-transform": { item: StudioItem };
   "item-transform-end": { before: Dashboard };
   "snap-toggle": undefined;
+  /** Run a registered command; `itemId` when it is about a particular item. */
+  command: { id: CommandId; itemId?: string };
   "viewport-change": Viewport;
-  undo: undefined;
-  redo: undefined;
   "zoom-change": { zoom: number };
   "zoom-reset": undefined;
   "zoom-fit": undefined;
   // structure and inspector
-  "item-flag-toggle": { itemId: string; flag: ItemFlag };
-  "item-delete-request": { itemId: string };
   "layers-reorder": {
     itemId: string;
     targetId: string;

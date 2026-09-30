@@ -1,12 +1,16 @@
-import { isBoxPrimitive } from "./geometry";
 import { PALETTE_COLORS } from "./display-profiles";
+import { isBoxPrimitive } from "./geometry";
+import { resolveLimit } from "./primitives";
 import { strings } from "./strings";
 import type {
   Dashboard,
   HaFormSchema,
   PaletteId,
+  PrimitiveDefinition,
+  PrimitiveField,
   PrimitiveItem,
   StudioItem,
+  WidgetItem,
 } from "./types";
 
 /** One numeric layout input of the inspector. */
@@ -24,164 +28,222 @@ export interface LayoutFields {
   extra: LayoutField[];
 }
 
-/** The numeric layout fields the inspector shows for an item, by kind and primitive type. */
-export const layoutFields = (
-  item: StudioItem,
+const NO_FIELDS: LayoutFields = { grid: [], extra: [] };
+const TRANSPARENT = "transparent";
+
+/** The definition of a primitive item, if the backend offers that type. */
+export const definitionFor = (
+  item: PrimitiveItem,
+  definitions: PrimitiveDefinition[]
+): PrimitiveDefinition | undefined =>
+  definitions.find((definition) => definition.type === item.primitive.type);
+
+const widgetLayoutFields = (
+  item: WidgetItem,
   dashboard: Dashboard
 ): LayoutFields => {
   const { width, height } = dashboard.display;
   const labels = strings.fields;
-  const field = (
-    label: string,
-    key: string,
-    value: number,
-    min: number,
-    max: number
-  ): LayoutField => ({ label, key, value, min, max });
-  if (item.kind === "widget") {
-    return {
-      grid: [
-        field(labels.x, "x", item.frame.x, 0, width),
-        field(labels.y, "y", item.frame.y, 0, height),
-        field(labels.width, "width", item.frame.width, 1, width),
-        field(labels.height, "height", item.frame.height, 1, height),
-      ],
-      extra: [
-        field(labels.innerPadding, "padding", item.layout.padding, 0, 128),
-      ],
-    };
-  }
-  const primitive = item.primitive;
-  if (isBoxPrimitive(primitive)) {
-    return {
-      grid: [
-        field(
-          labels.x,
-          "x",
-          Math.min(primitive.x_start, primitive.x_end),
-          0,
-          width
-        ),
-        field(
-          labels.y,
-          "y",
-          Math.min(primitive.y_start, primitive.y_end),
-          0,
-          height
-        ),
-        field(
-          labels.width,
-          "width",
-          Math.abs(primitive.x_end - primitive.x_start) + 1,
-          1,
-          width
-        ),
-        field(
-          labels.height,
-          "height",
-          Math.abs(primitive.y_end - primitive.y_start) + 1,
-          1,
-          height
-        ),
-      ],
-      extra: [],
-    };
-  }
-  if (primitive.type === "circle") {
-    return {
-      grid: [
-        field(labels.centerX, "x", primitive.x, 0, width),
-        field(labels.centerY, "y", primitive.y, 0, height),
-        field(
-          labels.radius,
-          "radius",
-          primitive.radius,
-          1,
-          Math.min(width, height)
-        ),
-      ],
-      extra: [],
-    };
-  }
-  if (primitive.type === "qrcode") {
-    return {
-      grid: [
-        field(labels.x, "x", primitive.x, 0, width),
-        field(labels.y, "y", primitive.y, 0, height),
-        field(labels.moduleSize, "boxsize", primitive.boxsize, 1, 16),
-      ],
-      extra: [],
-    };
-  }
   return {
     grid: [
-      field(labels.x, "x", primitive.x, 0, width),
-      field(labels.y, "y", primitive.y, 0, height),
-      field(labels.size, "size", primitive.size, 6, 256),
+      { label: labels.x, key: "x", value: item.frame.x, min: 0, max: width },
+      { label: labels.y, key: "y", value: item.frame.y, min: 0, max: height },
+      {
+        label: labels.width,
+        key: "width",
+        value: item.frame.width,
+        min: 1,
+        max: width,
+      },
+      {
+        label: labels.height,
+        key: "height",
+        value: item.frame.height,
+        min: 1,
+        max: height,
+      },
+    ],
+    extra: [
+      {
+        label: labels.innerPadding,
+        key: "padding",
+        value: item.layout.padding,
+        min: 0,
+        max: 128,
+      },
+    ],
+  };
+};
+
+/** A box or line is edited as left, top, width and height, whichever way it was drawn. */
+const cornerLayoutFields = (
+  item: PrimitiveItem,
+  dashboard: Dashboard
+): LayoutFields => {
+  const primitive = item.primitive;
+  if (!isBoxPrimitive(primitive)) {
+    return NO_FIELDS;
+  }
+  const { width, height } = dashboard.display;
+  const labels = strings.fields;
+  return {
+    grid: [
+      {
+        label: labels.x,
+        key: "x",
+        value: Math.min(primitive.x_start, primitive.x_end),
+        min: 0,
+        max: width,
+      },
+      {
+        label: labels.y,
+        key: "y",
+        value: Math.min(primitive.y_start, primitive.y_end),
+        min: 0,
+        max: height,
+      },
+      {
+        label: labels.width,
+        key: "width",
+        value: Math.abs(primitive.x_end - primitive.x_start) + 1,
+        min: 1,
+        max: width,
+      },
+      {
+        label: labels.height,
+        key: "height",
+        value: Math.abs(primitive.y_end - primitive.y_start) + 1,
+        min: 1,
+        max: height,
+      },
     ],
     extra: [],
   };
 };
 
+const pointLayoutField = (
+  field: PrimitiveField,
+  values: Record<string, unknown>,
+  dashboard: Dashboard
+): LayoutField => {
+  const display = dashboard.display;
+  const coordinateLimit = field.axis === "x" ? display.width : display.height;
+  const isCoordinate = field.shape === "coordinate";
+  return {
+    label: field.label,
+    key: field.key,
+    value: Number(values[field.key]),
+    min: isCoordinate ? 0 : resolveLimit(field.min, display, 0),
+    max: isCoordinate
+      ? coordinateLimit
+      : resolveLimit(field.max, display, coordinateLimit),
+  };
+};
+
+/** A point is edited through its own layout fields: its position and, say, a radius or size. */
+const pointLayoutFields = (
+  item: PrimitiveItem,
+  definition: PrimitiveDefinition,
+  dashboard: Dashboard
+): LayoutFields => {
+  const values: Record<string, unknown> = { ...item.primitive };
+  const grid = definition.fields
+    .filter((field) => field.section === "layout")
+    .map((field) => pointLayoutField(field, values, dashboard));
+  return { grid, extra: [] };
+};
+
+/** The numeric layout fields the inspector shows for an item, from its definition. */
+export const layoutFields = (
+  item: StudioItem,
+  dashboard: Dashboard,
+  definitions: PrimitiveDefinition[]
+): LayoutFields => {
+  if (item.kind === "widget") {
+    return widgetLayoutFields(item, dashboard);
+  }
+  const definition = definitionFor(item, definitions);
+  if (!definition) {
+    return NO_FIELDS;
+  }
+  return definition.geometry === "point"
+    ? pointLayoutFields(item, definition, dashboard)
+    : cornerLayoutFields(item, dashboard);
+};
+
+const formSelector = (
+  field: PrimitiveField,
+  colors: string[]
+): Record<string, unknown> => {
+  switch (field.shape) {
+    case "boolean":
+      return { boolean: {} };
+    case "enum":
+      return { select: { options: field.options ?? [] } };
+    case "color":
+      return {
+        select: {
+          options: field.nullable ? [TRANSPARENT, ...colors] : colors,
+        },
+      };
+    case "number":
+      return {
+        number: {
+          min: typeof field.min === "number" ? field.min : undefined,
+          max: typeof field.max === "number" ? field.max : undefined,
+        },
+      };
+    default:
+      return { text: {} };
+  }
+};
+
+const isShownInForm = (field: PrimitiveField): boolean =>
+  field.section === "appearance" && field.visible !== false;
+
 /** The `ha-form` schema for a primitive's appearance, with colours limited to the palette. */
 export const primitiveAppearanceSchema = (
   item: PrimitiveItem,
-  palette: PaletteId
+  palette: PaletteId,
+  definitions: PrimitiveDefinition[]
 ): HaFormSchema[] => {
-  const colors = [...PALETTE_COLORS[palette], "accent"];
-  const labels = strings.fields;
-  const color = (
-    name: string,
-    label: string,
-    options: string[] = colors
-  ): HaFormSchema => ({ name, label, selector: { select: { options } } });
-  const number = (
-    name: string,
-    label: string,
-    min: number,
-    max: number
-  ): HaFormSchema => ({ name, label, selector: { number: { min, max } } });
-  const text = (name: string, label: string): HaFormSchema => ({
-    name,
-    label,
-    selector: { text: {} },
-  });
-  const toggle = (name: string, label: string): HaFormSchema => ({
-    name,
-    label,
-    selector: { boolean: {} },
-  });
-  switch (item.primitive.type) {
-    case "text":
-      return [text("value", labels.text), color("color", labels.color)];
-    case "line":
-      return [
-        color("fill", labels.color),
-        number("width", labels.lineWidth, 1, 32),
-        toggle("dashed", labels.dashed),
-      ];
-    case "icon":
-      return [text("value", labels.iconName), color("color", labels.color)];
-    case "qrcode":
-      return [
-        text("data", labels.content),
-        number("border", labels.quietZone, 0, 8),
-        color("color", labels.foreground),
-        color("bgcolor", labels.background),
-      ];
-    case "progress_bar":
-      return [
-        number("progress", labels.progress, 0, 100),
-        color("direction", labels.direction, ["right", "left", "up", "down"]),
-        color("fill", labels.fill),
-        color("background", labels.background),
-        toggle("show_percentage", labels.showPercentage),
-      ];
-    default:
-      return [
-        color("fill", labels.fill, ["transparent", ...colors]),
-        color("outline", labels.outline),
-        number("width", labels.outlineWidth, 0, 32),
-      ];
+  const definition = definitionFor(item, definitions);
+  if (!definition) {
+    return [];
   }
+  const colors = [...PALETTE_COLORS[palette], "accent"];
+  return definition.fields.filter(isShownInForm).map((field) => ({
+    name: field.key,
+    label: field.label,
+    selector: formSelector(field, colors),
+  }));
+};
+
+/** The values the appearance form shows: an empty optional colour reads as transparent. */
+export const appearanceFormData = (
+  item: PrimitiveItem,
+  definitions: PrimitiveDefinition[]
+): Record<string, unknown> => {
+  const data: Record<string, unknown> = { ...item.primitive };
+  const definition = definitionFor(item, definitions);
+  for (const field of definition?.fields ?? []) {
+    if (field.nullable && data[field.key] === null) {
+      data[field.key] = TRANSPARENT;
+    }
+  }
+  return data;
+};
+
+/** Turn what the appearance form reports back into primitive values. */
+export const primitiveValuesFromForm = (
+  values: Record<string, unknown>,
+  definition: PrimitiveDefinition | undefined
+): Record<string, unknown> => {
+  const result = { ...values };
+  for (const field of definition?.fields ?? []) {
+    if (field.nullable && result[field.key] === TRANSPARENT) {
+      result[field.key] = null;
+    }
+  }
+  return result;
 };

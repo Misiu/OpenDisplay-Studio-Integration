@@ -54,8 +54,37 @@ export const primitiveBounds = (primitive: Primitive): ItemBounds => {
   };
 };
 
-export const itemBounds = (item: StudioItem): ItemBounds =>
-  item.kind === "widget" ? item.frame : primitiveBounds(item.primitive);
+/** Primitives whose size the backend measures: it depends on data and fonts. */
+const isMeasured = (primitive: Primitive): boolean =>
+  primitive.type === "text" || primitive.type === "qrcode";
+
+/**
+ * Where an item is drawn. Text and QR codes take their size from `measured`, what
+ * the backend reports for the last render; until there is one, or for shapes whose
+ * size follows from their fields, the panel works it out itself.
+ */
+export const itemBounds = (
+  item: StudioItem,
+  measured?: ItemBounds
+): ItemBounds => {
+  if (item.kind === "widget") {
+    return item.frame;
+  }
+  const local = primitiveBounds(item.primitive);
+  if (measured && isMeasured(item.primitive)) {
+    return { ...local, width: measured.width, height: measured.height };
+  }
+  return local;
+};
+
+/** Modules along one side of a QR code including its quiet zone. */
+const qrModuleCount = (
+  primitive: Extract<Primitive, { type: "qrcode" }>,
+  measured?: ItemBounds
+): number =>
+  measured
+    ? Math.max(1, Math.round(measured.width / primitive.boxsize))
+    : 21 + primitive.border * 2;
 
 /** The editable area: the display minus its padding on every side. */
 export const workingArea = (dashboard: Dashboard): ItemBounds => {
@@ -100,9 +129,13 @@ export const translateItem = (
 };
 
 /** Move an item back inside the working area; widgets larger than it are shrunk. */
-export const constrainItem = (item: StudioItem, dashboard: Dashboard): void => {
+export const constrainItem = (
+  item: StudioItem,
+  dashboard: Dashboard,
+  measured?: ItemBounds
+): void => {
   const area = workingArea(dashboard);
-  const bounds = itemBounds(item);
+  const bounds = itemBounds(item, measured);
   const dx =
     clamp(
       bounds.x,
@@ -124,6 +157,8 @@ export const constrainItem = (item: StudioItem, dashboard: Dashboard): void => {
 
 interface ResizeItemOptions {
   snapEnabled: boolean;
+  /** What the backend measured for this item, if it has rendered it. */
+  measured?: ItemBounds;
   /** Smallest size a widget may take; comes from its definition. */
   minSize?: { width: number; height: number };
 }
@@ -138,7 +173,8 @@ interface ResizeConstraints {
 
 const resizeConstraints = (
   item: StudioItem,
-  minSize: { width: number; height: number }
+  minSize: { width: number; height: number },
+  measured?: ItemBounds
 ): ResizeConstraints => {
   if (item.kind === "widget") {
     return {
@@ -152,7 +188,7 @@ const resizeConstraints = (
     return { minimumWidth: 3, minimumHeight: 3, intrinsicAspect: true };
   }
   if (primitive.type === "qrcode") {
-    const modules = 21 + primitive.border * 2;
+    const modules = qrModuleCount(primitive, measured);
     return {
       minimumWidth: modules,
       minimumHeight: modules,
@@ -163,7 +199,7 @@ const resizeConstraints = (
     return { minimumWidth: 8, minimumHeight: 8, intrinsicAspect: true };
   }
   if (primitive.type === "text") {
-    const minimum = primitiveBounds({ ...primitive, size: 6 });
+    const minimum = textBoxAtSize(primitive, 6, measured);
     return {
       minimumWidth: minimum.width,
       minimumHeight: minimum.height,
@@ -174,6 +210,24 @@ const resizeConstraints = (
     return { minimumWidth: 1, minimumHeight: 1, intrinsicAspect: false };
   }
   return { minimumWidth: 2, minimumHeight: 2, intrinsicAspect: false };
+};
+
+/** The text block at another font size: scaled from the measurement when there is one. */
+const textBoxAtSize = (
+  primitive: Extract<Primitive, { type: "text" }>,
+  size: number,
+  measured?: ItemBounds
+): ItemBounds => {
+  if (!measured) {
+    return primitiveBounds({ ...primitive, size });
+  }
+  const scale = size / primitive.size;
+  return {
+    x: primitive.x,
+    y: primitive.y,
+    width: Math.max(1, Math.round(measured.width * scale)),
+    height: Math.max(1, Math.round(measured.height * scale)),
+  };
 };
 
 const INTRINSIC_HANDLE: Partial<Record<ResizeHandle, ResizeHandle>> = {
@@ -196,10 +250,11 @@ export const resizeItem = (
   dashboard: Dashboard,
   options: ResizeItemOptions
 ): void => {
-  const before = itemBounds(item);
+  const before = itemBounds(item, options.measured);
   const { minimumWidth, minimumHeight, intrinsicAspect } = resizeConstraints(
     item,
-    options.minSize ?? DEFAULT_WIDGET_MIN_SIZE
+    options.minSize ?? DEFAULT_WIDGET_MIN_SIZE,
+    options.measured
   );
   const geometryHandle: ResizeHandle = intrinsicAspect
     ? (INTRINSIC_HANDLE[handle] ?? handle)
@@ -270,7 +325,7 @@ export const resizeItem = (
   }
 
   if (primitive.type === "qrcode") {
-    const modules = 21 + primitive.border * 2;
+    const modules = qrModuleCount(primitive, options.measured);
     primitive.boxsize = clamp(
       Math.floor(Math.min(requested.width, requested.height) / modules),
       1,
@@ -300,12 +355,19 @@ export const resizeItem = (
     return;
   }
 
+  const previousSize = primitive.size;
   primitive.size = clamp(
-    Math.round((primitive.size * requested.width) / Math.max(1, before.width)),
+    Math.round((previousSize * requested.width) / Math.max(1, before.width)),
     6,
     256
   );
-  const actual = primitiveBounds(primitive);
+  const actual = options.measured
+    ? textBoxAtSize(
+        { ...primitive, size: previousSize },
+        primitive.size,
+        options.measured
+      )
+    : primitiveBounds(primitive);
   const aligned = alignIntrinsicBounds(
     requested,
     actual.width,
@@ -348,7 +410,7 @@ export const transformItem = (
     return item;
   }
   const area = workingArea(dashboard);
-  const before = itemBounds(item);
+  const before = itemBounds(item, options.measured);
   const nextX = clamp(
     snapToGrid(before.x + dx, dashboard, options.snapEnabled),
     area.x,

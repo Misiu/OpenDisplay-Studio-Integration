@@ -10,7 +10,7 @@ Tick a step's box in the same change that completes it.
 ## Starting point (September 2026)
 
 - Lit panel: the `ods-app` shell and one element per area (see 1.1) + Python
-  backend rendering with `odl-renderer` 0.5.12. The backend PNG is the canvas image.
+  backend rendering with `odl-renderer` 0.5.13. The backend PNG is the canvas image.
 - Dashboard gallery, New dashboard dialog, Design/Code views, undo/redo, pan and
   zoom, snap, 8 resize handles, flat layer list with hide/lock/delete/reorder.
 - 8 of 16 ODL types (`text`, `rectangle`, `line`, `circle`, `ellipse`, `icon`,
@@ -85,21 +85,28 @@ green. (Met.)
   with a value is a function. `strings.guard.test.ts` fails on text written
   inline in templates, attributes, labels, errors or conditions; the hardware
   catalogue in `display-profiles.ts` is data and exempt from the last rule.
-- [ ] **1.3 Command registry** `commands.ts`: `{ id, label, icon, shortcut,
-  isEnabled(ctx), run(ctx) }`. Undo/redo, delete, hide, lock move into it first.
-  The keyboard handler dispatches through the registry.
-- [ ] **1.4 Primitive definitions.** `primitives/<type>.yml` for the 8 existing
-  types (current fields only), a loader, `bootstrap` returning them, one generic
-  backend validator replacing `_validate_primitive_item`, and definition-driven
-  defaults replacing `createPrimitive` and `primitiveAppearanceSchema`.
+- [x] **1.3 Command registry** `commands.ts`: `{ id, label, icon, shortcuts,
+  isEnabled(ctx), run(ctx, actions) }`. Undo/redo, delete, hide and lock are in
+  it. Buttons (canvas history, layer rows) describe themselves from the registry
+  (`commandView`) and fire one `command` event; the keyboard handler in
+  `ods-app` dispatches through `commandForKey`. `Del`/`Backspace` now delete the
+  selected element (with confirmation).
+- [x] **1.4 Primitive definitions.** `primitives/<type>.yml` for the 8 existing
+  types (current fields only), a loader (`PrimitiveRegistry`), `bootstrap`
+  returning them, one generic backend validator (`normalize`) replacing
+  `_validate_primitive_item`, and definition-driven new-item defaults, layout
+  fields and appearance form in the panel. The dev harness and the unit tests read
+  the real YAML files. Renderer deltas: `docs/odl-coverage.md`.
 - [ ] **1.5 Document model.** Value model allows expression strings; items
   may be `container` with `children` (empty until phase 5); item `name`
   (editable, defaults to `<type>_<n>`). `schemaVersion` stays 1 and there is no
   migration until the first public release of the dashboard model (see
   Deviations); stored dashboards that no longer validate are dropped.
-- [ ] **1.6 Renderer bump** to `odl-renderer` ≥ 0.5.13; replace bound
-  heuristics (`len(value) * size * 0.62`, QR version-1 assumption) with real
-  measurement (`measure_text`, rendered QR size).
+- [x] **1.6 Renderer bump** to `odl-renderer` 0.5.13; the bound heuristics
+  (`len(value) * size * 0.62`, QR version-1 assumption) are replaced by real
+  measurement (`measure.py`: `measure_text` and the rendered ink for text, the
+  renderer's own QR parameters for QR codes). The panel's overlay and gesture
+  maths take the size of text and QR codes from `itemBounds`.
 
 **Accepted when:** all existing tests pass, a new test proves `itemBounds` of
 text equals the ink box of the rendered PNG within 1 px.

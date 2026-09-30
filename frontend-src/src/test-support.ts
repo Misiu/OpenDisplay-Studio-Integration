@@ -1,3 +1,4 @@
+import { loadPrimitiveDefinitions } from "./primitive-definitions";
 import type { Dashboard, PrimitiveItem, StudioItem, WidgetItem } from "./types";
 
 export const rectangleItem = (
@@ -85,3 +86,6 @@ export const dashboardWith = (
   createdAt: "",
   updatedAt: "",
 });
+
+/** The definitions the backend ships, read from the repository. */
+export const primitiveDefinitions = loadPrimitiveDefinitions();

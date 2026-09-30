@@ -1,0 +1,46 @@
+type: circle
+order: 40
+name: Circle
+description: Filled or outlined circle
+icon: mdi:circle-outline
+category: shapes
+geometry: point
+fields:
+  - key: x
+    label: Center X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y
+    label: Center Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: radius
+    label: Radius
+    shape: number
+    min: 1
+    max: display_shorter_side
+    default: 40
+    unit: px
+    section: layout
+  - key: fill
+    label: Fill
+    shape: color
+    nullable: true
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: Outline width
+    shape: number
+    min: 0
+    max: 32
+    default: 2
+    unit: px
+    section: appearance

@@ -1,12 +1,23 @@
 import { css, html, LitElement, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
-import { emit, type ItemFlag } from "./events";
+import {
+  commandById,
+  commandView,
+  itemContext,
+  type CommandId,
+} from "./commands";
+import { isMacPlatform } from "./dom";
+import { emit } from "./events";
 import { strings } from "./strings";
 import { itemIcon, itemName } from "./item-labels";
 import { trackPointerGesture } from "./pointer-gesture";
 import { baseStyles, chromeStyles } from "./studio-styles";
-import type { StudioItem, WidgetDefinition } from "./types";
+import type {
+  StudioItem,
+  WidgetDefinition,
+  PrimitiveDefinition,
+} from "./types";
 
 interface DropTarget {
   itemId: string;
@@ -186,6 +197,7 @@ export class OdsStructure extends LitElement {
 
   @property({ attribute: false }) public items: StudioItem[] = [];
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
+  @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property() public selectedItemId = "";
 
   @state() private draggingId = "";
@@ -242,55 +254,30 @@ export class OdsStructure extends LitElement {
     this.dropTarget = undefined;
   }
 
-  /** Title, accessible label and icon of a hide/lock button in its current state. */
-  private flagView(
-    flag: ItemFlag,
-    on: boolean,
-    name: string
-  ): { title: string; label: string; icon: string } {
-    const text = strings.structure;
-    if (flag === "hidden") {
-      return on
-        ? {
-            title: text.showTitle,
-            label: text.show(name),
-            icon: "mdi:eye-off-outline",
-          }
-        : {
-            title: text.hideTitle,
-            label: text.hide(name),
-            icon: "mdi:eye-outline",
-          };
-    }
-    return on
-      ? {
-          title: text.unlockTitle,
-          label: text.unlock(name),
-          icon: "mdi:lock",
-        }
-      : {
-          title: text.lockTitle,
-          label: text.lock(name),
-          icon: "mdi:lock-open-variant-outline",
-        };
+  private runCommand(event: Event, id: CommandId, item: StudioItem): void {
+    event.stopPropagation();
+    emit(this, "command", { id, itemId: item.id });
   }
 
-  private flagButton(
+  /** A button for a command about one row's item, described by the registry. */
+  private renderCommandButton(
+    id: CommandId,
     item: StudioItem,
-    flag: ItemFlag,
     name: string
   ): TemplateResult {
-    const { title, label, icon } = this.flagView(flag, item[flag], name);
+    const view = commandView(
+      commandById(id),
+      itemContext(item),
+      isMacPlatform()
+    );
     return html`
       <button
-        title=${title}
-        aria-label=${label}
-        @click=${(event: Event) => {
-          event.stopPropagation();
-          emit(this, "item-flag-toggle", { itemId: item.id, flag });
-        }}
+        class=${id === "delete-item" ? "delete" : ""}
+        title=${view.title}
+        aria-label=${`${view.label} ${name}`}
+        @click=${(event: Event) => this.runCommand(event, id, item)}
       >
-        <ha-icon .icon=${icon}></ha-icon>
+        <ha-icon .icon=${view.icon}></ha-icon>
       </button>
     `;
   }
@@ -314,13 +301,8 @@ export class OdsStructure extends LitElement {
     }
   }
 
-  private requestDelete(event: Event, item: StudioItem): void {
-    event.stopPropagation();
-    emit(this, "item-delete-request", { itemId: item.id });
-  }
-
   private renderRow(item: StudioItem): TemplateResult {
-    const name = itemName(item, this.widgets);
+    const name = itemName(item, this.widgets, this.primitives);
     const drop =
       this.dropTarget?.itemId === item.id ? this.dropTarget.edge : undefined;
     const rowClasses = classMap({
@@ -353,23 +335,16 @@ export class OdsStructure extends LitElement {
         </button>
         <ha-icon
           class="layer-type-icon"
-          .icon=${itemIcon(item, this.widgets)}
+          .icon=${itemIcon(item, this.widgets, this.primitives)}
         ></ha-icon>
         <span>
           <strong>${name}</strong>
           <small>${this.kindLabel(item)}</small>
         </span>
         <div class="layer-actions">
-          ${this.flagButton(item, "hidden", name)}
-          ${this.flagButton(item, "locked", name)}
-          <button
-            class="delete"
-            title=${strings.structure.deleteTitle}
-            aria-label=${strings.structure.delete(name)}
-            @click=${(event: Event) => this.requestDelete(event, item)}
-          >
-            <ha-icon icon="mdi:delete-outline"></ha-icon>
-          </button>
+          ${this.renderCommandButton("toggle-hidden", item, name)}
+          ${this.renderCommandButton("toggle-locked", item, name)}
+          ${this.renderCommandButton("delete-item", item, name)}
         </div>
       </div>
     `;

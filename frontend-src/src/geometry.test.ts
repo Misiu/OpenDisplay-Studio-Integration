@@ -249,3 +249,99 @@ describe("transformItem", () => {
     expect(itemBounds(resized)).toMatchObject({ width: 110, height: 55 });
   });
 });
+
+describe("measured bounds", () => {
+  const qr = (): PrimitiveItem => ({
+    id: "qr",
+    kind: "primitive",
+    locked: false,
+    hidden: false,
+    primitive: {
+      type: "qrcode",
+      data: "https://example.org/a/longer/address",
+      x: 40,
+      y: 40,
+      boxsize: 3,
+      border: 1,
+      color: "black",
+      bgcolor: "white",
+    },
+  });
+  // 25 modules of data plus a quiet zone of 1 on each side, at 3 px per module.
+  const measuredQr = { x: 40, y: 40, width: 81, height: 81 };
+
+  it("takes the size of text and QR codes from the measurement", () => {
+    expect(itemBounds(qr(), measuredQr)).toEqual(measuredQr);
+    expect(
+      itemBounds(textItem(), { x: 10, y: 10, width: 77, height: 46 })
+    ).toEqual({
+      x: 10,
+      y: 10,
+      width: 77,
+      height: 46,
+    });
+  });
+
+  it("keeps the live position while the measured size is from the last render", () => {
+    const item = qr();
+    translateItem(item, 25, 5);
+    expect(itemBounds(item, measuredQr)).toEqual({
+      x: 65,
+      y: 45,
+      width: 81,
+      height: 81,
+    });
+  });
+
+  it("does not let a measurement change a shape whose size follows from its fields", () => {
+    const rectangle = rectangleItem();
+    expect(
+      itemBounds(rectangle, { x: 0, y: 0, width: 999, height: 999 })
+    ).toEqual(itemBounds(rectangle));
+  });
+
+  it("falls back to its own estimate until the backend has measured", () => {
+    expect(itemBounds(qr()).width).toBe(69);
+  });
+
+  it("resizes a QR code by its real module count, not by 21 modules", () => {
+    const resized = qr();
+    resizeItem(resized, "se", 81, 81, false, dashboardWith(), {
+      snapEnabled: false,
+      measured: measuredQr,
+    });
+    // 162 px over 27 modules (25 + quiet zone) is 6 px per module, not 162 / 23.
+    expect(resized.primitive).toMatchObject({ boxsize: 6 });
+  });
+
+  it("never shrinks a QR code below one pixel per module", () => {
+    const resized = qr();
+    resizeItem(resized, "se", -500, -500, false, dashboardWith(), {
+      snapEnabled: false,
+      measured: measuredQr,
+    });
+    expect(resized.primitive).toMatchObject({ boxsize: 1 });
+  });
+
+  it("scales the font size of text from its measured box", () => {
+    const text = textItem();
+    resizeItem(text, "se", 40, 40, false, dashboardWith(), {
+      snapEnabled: false,
+      measured: { x: 10, y: 10, width: 80, height: 46 },
+    });
+    // The pull is 86 / 46 in height and the aspect ratio is kept: 32 px grows to about 60 px.
+    expect(text.primitive).toMatchObject({ size: 60 });
+  });
+
+  it("moves an item using its measured size to stay inside the display", () => {
+    const moved = transformItem(
+      qr(),
+      { mode: "move" },
+      9999,
+      0,
+      dashboardWith(),
+      { snapEnabled: false, measured: measuredQr }
+    );
+    expect(itemBounds(moved, measuredQr).x).toBe(400 - 81);
+  });
+});

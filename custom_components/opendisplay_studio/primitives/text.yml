@@ -1,0 +1,39 @@
+type: text
+order: 10
+name: Text
+description: Pixel-positioned text
+icon: mdi:format-text
+category: text
+geometry: point
+fields:
+  - key: value
+    label: Text
+    shape: text
+    required: true
+    default: Text
+    section: appearance
+  - key: x
+    label: X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y
+    label: Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: size
+    label: Size
+    shape: number
+    min: 6
+    max: 256
+    default: 32
+    unit: px
+    section: layout
+  - key: color
+    label: Color
+    shape: color
+    default: black
+    section: appearance

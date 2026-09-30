@@ -24,12 +24,20 @@ import {
   updatePrimitiveFields,
 } from "./dashboard-ops";
 import {
+  commandById,
+  commandForKey,
+  type CommandActions,
+  type CommandContext,
+  type CommandId,
+} from "./commands";
+import {
   copyName,
   dashboardFromForm,
   dashboardIsValid,
   freshDashboard,
 } from "./dashboards";
 import { profileById } from "./display-profiles";
+import { isTypingTarget } from "./dom";
 import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
@@ -184,7 +192,7 @@ export class OdsApp extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
-    window.addEventListener("keydown", this.onHistoryKeyDown);
+    window.addEventListener("keydown", this.onKeyDown);
   }
   protected firstUpdated(): void {
     this.ensureBootstrap();
@@ -195,7 +203,7 @@ export class OdsApp extends LitElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     if (this.previewTimer) window.clearTimeout(this.previewTimer);
-    window.removeEventListener("keydown", this.onHistoryKeyDown);
+    window.removeEventListener("keydown", this.onKeyDown);
   }
 
   // --- loading -------------------------------------------------------------------------------
@@ -475,33 +483,59 @@ export class OdsApp extends LitElement {
   private redo = (): void => {
     if (this.current) this.restore(this.history.redo(this.current));
   };
-  private onHistoryKeyDown = (event: KeyboardEvent): void => {
-    if (!event.ctrlKey && !event.metaKey) return;
-    const editing = event
-      .composedPath()
-      .some(
-        (target) =>
-          target instanceof HTMLElement &&
-          (target.matches("input, textarea, select") ||
-            target.isContentEditable)
-      );
-    if (editing) return;
-    const key = event.key.toLowerCase();
-    if (key === "z" && event.shiftKey) {
-      event.preventDefault();
-      this.redo();
+  // --- commands ----------------------------------------------------------------
+
+  private readonly commandActions: CommandActions = {
+    undo: () => this.undo(),
+    redo: () => this.redo(),
+    requestDelete: (itemId) => {
+      this.pendingDeleteItemId = itemId;
+    },
+    toggleFlag: (itemId, flag) =>
+      this.mutate((next) => toggleItemState(next, itemId, flag)),
+  };
+
+  private commandContext(item?: StudioItem): CommandContext {
+    return {
+      canUndo: this.undoCount > 0,
+      canRedo: this.redoCount > 0,
+      item,
+    };
+  }
+
+  private get selectedItem(): StudioItem | undefined {
+    return this.current?.items.find(
+      (candidate) => candidate.id === this.selectedItemId
+    );
+  }
+
+  private runCommand(id: CommandId, item = this.selectedItem): void {
+    const command = commandById(id);
+    const context = this.commandContext(item);
+    if (command.isEnabled(context)) {
+      command.run(context, this.commandActions);
+    }
+  }
+
+  private onCommand(event: OdsEvent<"command">): void {
+    const { id, itemId } = event.detail;
+    const item = itemId
+      ? this.current?.items.find((candidate) => candidate.id === itemId)
+      : undefined;
+    this.runCommand(id, item ?? this.selectedItem);
+  }
+
+  private onKeyDown = (event: KeyboardEvent): void => {
+    if (this.view !== "design" || isTypingTarget(event)) {
       return;
     }
-    if (key === "z") {
+    const command = commandForKey(event);
+    if (command?.isEnabled(this.commandContext(this.selectedItem))) {
       event.preventDefault();
-      this.undo();
-      return;
-    }
-    if (key === "y") {
-      event.preventDefault();
-      this.redo();
+      this.runCommand(command.id);
     }
   };
+
   private schedulePreview(): void {
     if (this.previewTimer) window.clearTimeout(this.previewTimer);
     this.previewTimer = window.setTimeout(
@@ -544,7 +578,7 @@ export class OdsApp extends LitElement {
       const definition = this.widgets.find((widget) => widget.id === type);
       if (definition) item = createWidgetItem(definition, x, y, dashboard);
     } else if (kind === "primitive") {
-      item = createPrimitiveItem(type, x, y, dashboard);
+      item = createPrimitiveItem(this.primitives, type, x, y, dashboard);
       if (!item) {
         this.error = strings.app.unsupportedPrimitive(type);
         return;
@@ -660,15 +694,6 @@ export class OdsApp extends LitElement {
     this.selectItem(event.detail.itemId);
   }
 
-  private onItemFlagToggle(event: OdsEvent<"item-flag-toggle">): void {
-    const { itemId, flag } = event.detail;
-    this.mutate((next) => toggleItemState(next, itemId, flag));
-  }
-
-  private onItemDeleteRequest(event: OdsEvent<"item-delete-request">): void {
-    this.pendingDeleteItemId = event.detail.itemId;
-  }
-
   private cancelDeleteItem(): void {
     this.pendingDeleteItemId = "";
   }
@@ -735,7 +760,9 @@ export class OdsApp extends LitElement {
 
   private onItemNumberChange(event: OdsEvent<"item-number-change">): void {
     const { key, value } = event.detail;
-    this.mutate((next) => setItemNumber(next, this.selectedItemId, key, value));
+    this.mutate((next) =>
+      setItemNumber(next, this.selectedItemId, key, value, this.primitives)
+    );
   }
 
   private onDisplayNumberChange(
@@ -768,7 +795,7 @@ export class OdsApp extends LitElement {
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
     const { value } = event.detail;
     this.mutate((next) =>
-      updatePrimitiveFields(next, this.selectedItemId, value)
+      updatePrimitiveFields(next, this.selectedItemId, value, this.primitives)
     );
   }
 
@@ -784,7 +811,7 @@ export class OdsApp extends LitElement {
     return html`
       <ods-confirm-dialog
         eyebrow=${strings.app.confirmRemoval}
-        heading=${strings.app.deleteElementTitle(itemName(item, this.widgets))}
+        heading=${strings.app.deleteElementTitle(itemName(item, this.widgets, this.primitives))}
         body=${strings.app.deleteElementBody}
         confirmLabel=${strings.app.deleteElement}
         @confirm-accept=${this.confirmDeleteItem}
@@ -845,8 +872,7 @@ export class OdsApp extends LitElement {
         class="layout"
         style=${layoutStyle}
         @item-select=${this.onItemSelect}
-        @item-flag-toggle=${this.onItemFlagToggle}
-        @item-delete-request=${this.onItemDeleteRequest}
+        @command=${this.onCommand}
       >
         <ods-library
           .widgets=${this.widgets}
@@ -861,23 +887,23 @@ export class OdsApp extends LitElement {
           .dashboard=${dashboard}
           .preview=${this.preview}
           .widgets=${this.widgets}
+          .primitives=${this.primitives}
           .selectedItemId=${this.selectedItemId}
           .snapEnabled=${this.snapEnabled}
           .acceptingDrop=${this.draggingCatalog}
-          .undoCount=${this.undoCount}
-          .redoCount=${this.redoCount}
+          .canUndo=${this.undoCount > 0}
+          .canRedo=${this.redoCount > 0}
           .viewport=${this.viewport}
           @viewport-change=${this.onViewportChange}
           @item-transform=${this.onItemTransform}
           @item-transform-end=${this.onItemTransformEnd}
           @snap-toggle=${this.toggleSnap}
-          @undo=${this.undo}
-          @redo=${this.redo}
         ></ods-canvas>
         <ods-inspector
           .hass=${this.hass}
           .dashboard=${dashboard}
           .widgets=${this.widgets}
+          .primitives=${this.primitives}
           .preview=${this.preview}
           .selectedItemId=${this.selectedItemId}
           .collapsed=${this.rightCollapsed}

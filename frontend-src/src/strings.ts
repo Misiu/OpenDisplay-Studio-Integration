@@ -15,6 +15,16 @@ export const strings = {
     milliseconds: (value: number): string => `${value.toFixed(1)} ms`,
   },
 
+  commands: {
+    undo: "Undo",
+    redo: "Redo",
+    delete: "Delete",
+    hide: "Hide",
+    show: "Show",
+    lock: "Lock",
+    unlock: "Unlock",
+  },
+
   app: {
     loading: "Loading OpenDisplay Studio…",
     loadFailed: "Could not load OpenDisplay Studio",
@@ -122,16 +132,6 @@ export const strings = {
     widget: "Widget",
     reorderTitle: "Reorder layer",
     reorder: (name: string): string => `Reorder ${name}`,
-    deleteTitle: "Delete layer",
-    delete: (name: string): string => `Delete ${name}`,
-    showTitle: "Show layer",
-    hideTitle: "Hide layer",
-    show: (name: string): string => `Show ${name}`,
-    hide: (name: string): string => `Hide ${name}`,
-    unlockTitle: "Unlock position",
-    lockTitle: "Lock position",
-    unlock: (name: string): string => `Unlock ${name}`,
-    lock: (name: string): string => `Lock ${name}`,
   },
 
   inspector: {
@@ -172,10 +172,6 @@ export const strings = {
     rendering: "Rendering…",
     previewAlt: "Authoritative rendered display preview",
     hidden: "Hidden",
-    undo: "Undo",
-    undoTitle: "Undo (Ctrl+Z)",
-    redo: "Redo",
-    redoTitle: "Redo (Ctrl+Shift+Z)",
     layers: (count: number): string => `${count} layers`,
     padding: (pixels: number): string => `Padding ${pixels}px`,
     snap: (pixels: number): string => `Snap ${pixels}px`,
@@ -231,43 +227,10 @@ export const strings = {
     x: "X",
     y: "Y",
     innerPadding: "Inner padding",
-    centerX: "Center X",
-    centerY: "Center Y",
-    radius: "Radius",
-    moduleSize: "Module size",
-    size: "Size",
-    text: "Text",
-    color: "Color",
-    lineWidth: "Line width",
-    dashed: "Dashed",
-    iconName: "MDI icon name",
-    content: "Content",
-    quietZone: "Quiet zone",
-    foreground: "Foreground",
-    progress: "Progress",
-    direction: "Direction",
-    fill: "Fill",
-    showPercentage: "Show percentage",
-    outline: "Outline",
-    outlineWidth: "Outline width",
-  },
-
-  primitives: {
-    text: "Text",
-    rectangle: "Rectangle",
-    line: "Line",
-    circle: "Circle",
-    ellipse: "Ellipse",
-    icon: "Icon",
-    qrcode: "QR code",
-    progress_bar: "Progress bar",
   },
 
   /** The generic display offered when none of the catalogued panels fits. */
   customDisplay: { manufacturer: "Custom", name: "Custom display" },
-
-  /** Content a newly added element starts with. */
-  defaults: { text: "Text" },
 
   palettes: {
     bw: "Black / white",

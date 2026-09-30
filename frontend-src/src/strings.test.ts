@@ -20,7 +20,7 @@ describe("strings with values", () => {
     expect(strings.gallery.updated("Sep 30, 2026")).toBe(
       "Updated Sep 30, 2026"
     );
-    expect(strings.structure.lock("Kitchen")).toBe("Lock Kitchen");
+    expect(strings.commands.lock).toBe("Lock");
     expect(strings.app.deleteElementTitle("Circle")).toBe("Delete Circle?");
     expect(strings.canvas.resizeHandle("Circle", strings.canvas.sides.se)).toBe(
       "Resize Circle from south east"
@@ -51,17 +51,7 @@ describe("strings with values", () => {
 });
 
 describe("strings coverage", () => {
-  it("has a name for every primitive type and a label for every palette", () => {
-    expect(Object.keys(strings.primitives).sort()).toEqual([
-      "circle",
-      "ellipse",
-      "icon",
-      "line",
-      "progress_bar",
-      "qrcode",
-      "rectangle",
-      "text",
-    ]);
+  it("has a label for every palette", () => {
     expect(Object.keys(strings.palettes).sort()).toEqual([
       "bw",
       "bwr",

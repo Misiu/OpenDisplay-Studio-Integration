@@ -1,5 +1,15 @@
-import { strings } from "./strings";
-import type { Primitive } from "./types";
+import { clamp } from "./math";
+import type {
+  FieldLimit,
+  Primitive,
+  PrimitiveDefinition,
+  PrimitiveField,
+} from "./types";
+
+interface DisplaySize {
+  width: number;
+  height: number;
+}
 
 interface PrimitiveFactoryContext {
   x: number;
@@ -8,110 +18,82 @@ interface PrimitiveFactoryContext {
   displayHeight: number;
 }
 
-/** Build the exact ODL primitive selected in the catalog. */
+/** A field limit as a number for a display of the given size. */
+export const resolveLimit = (
+  limit: FieldLimit | undefined,
+  display: DisplaySize,
+  fallback: number
+): number => {
+  if (limit === "display_width") {
+    return display.width;
+  }
+  if (limit === "display_height") {
+    return display.height;
+  }
+  if (limit === "display_shorter_side") {
+    return Math.min(display.width, display.height);
+  }
+  return limit ?? fallback;
+};
+
+/** What a new item starts with for one field, before it is placed on the display. */
+const startingValue = (
+  field: PrimitiveField,
+  display: DisplaySize
+): string | number | boolean | null => {
+  if (field.default === undefined) {
+    return field.nullable ? null : 0;
+  }
+  if (field.shape !== "number" || typeof field.default !== "number") {
+    return field.default;
+  }
+  return clamp(
+    field.default,
+    resolveLimit(field.min, display, Number.NEGATIVE_INFINITY),
+    resolveLimit(field.max, display, Number.POSITIVE_INFINITY)
+  );
+};
+
+/** Put a point, box or line where the item is dropped, inside the display. */
+const place = (
+  definition: PrimitiveDefinition,
+  values: Record<string, unknown>,
+  context: PrimitiveFactoryContext
+): void => {
+  const { x, y, displayWidth, displayHeight } = context;
+  if (definition.geometry === "point") {
+    values.x = x;
+    values.y = y;
+    return;
+  }
+  const extent = definition.extent ?? { x: 0, y: 0 };
+  values.x_start = x;
+  values.y_start = y;
+  values.x_end = Math.min(displayWidth - 1, x + extent.x);
+  values.y_end = Math.min(displayHeight - 1, y + extent.y);
+};
+
+/**
+ * Build the primitive a definition describes, with every field at its default,
+ * placed at the given point. `undefined` when there is no definition, so an
+ * unknown catalog entry never turns into some other element.
+ */
 export const createPrimitive = (
-  type: string,
+  definition: PrimitiveDefinition | undefined,
   context: PrimitiveFactoryContext
 ): Primitive | undefined => {
-  const { x, y, displayWidth, displayHeight } = context;
-  const right = Math.min(displayWidth - 1, x + 160);
-  const bottom = Math.min(displayHeight - 1, y + 90);
-
-  switch (type) {
-    case "text":
-      return {
-        type: "text",
-        value: strings.defaults.text,
-        x,
-        y,
-        size: 32,
-        color: "black",
-      };
-    case "rectangle":
-      return {
-        type: "rectangle",
-        x_start: x,
-        y_start: y,
-        x_end: right,
-        y_end: bottom,
-        fill: null,
-        outline: "black",
-        width: 2,
-      };
-    case "line":
-      return {
-        type: "line",
-        x_start: x,
-        y_start: y,
-        x_end: right,
-        y_end: bottom,
-        fill: "black",
-        width: 2,
-        dashed: false,
-      };
-    case "circle": {
-      const radius = Math.max(
-        8,
-        Math.min(40, x, y, displayWidth - x - 1, displayHeight - y - 1)
-      );
-      return {
-        type: "circle",
-        x,
-        y,
-        radius,
-        fill: null,
-        outline: "black",
-        width: 2,
-      };
-    }
-    case "ellipse":
-      return {
-        type: "ellipse",
-        x_start: x,
-        y_start: y,
-        x_end: right,
-        y_end: bottom,
-        fill: null,
-        outline: "black",
-        width: 2,
-      };
-    case "icon":
-      return {
-        type: "icon",
-        value: "star-outline",
-        x,
-        y,
-        size: 48,
-        color: "black",
-        anchor: "lt",
-      };
-    case "qrcode":
-      return {
-        type: "qrcode",
-        data: "ODX",
-        x,
-        y,
-        boxsize: 3,
-        border: 1,
-        color: "black",
-        bgcolor: "white",
-      };
-    case "progress_bar":
-      return {
-        type: "progress_bar",
-        x_start: x,
-        y_start: y,
-        x_end: right,
-        y_end: Math.min(displayHeight - 1, y + 32),
-        progress: 50,
-        direction: "right",
-        background: "white",
-        fill: "accent",
-        outline: "black",
-        width: 1,
-        show_percentage: true,
-      };
-    default:
-      return undefined;
+  if (!definition) {
+    return undefined;
   }
+  const display = {
+    width: context.displayWidth,
+    height: context.displayHeight,
+  };
+  const values: Record<string, unknown> = { type: definition.type };
+  for (const field of definition.fields) {
+    values[field.key] = startingValue(field, display);
+  }
+  place(definition, values, context);
+  // The definitions are the schema; this is the one place their data becomes a typed primitive.
+  return values as unknown as Primitive;
 };
