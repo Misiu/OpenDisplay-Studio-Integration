@@ -9,6 +9,7 @@ builds its controls and new-item defaults from these definitions, and
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Final, NoReturn
@@ -115,10 +116,15 @@ def _check_definition(raw: object, path: Path) -> dict[str, Any]:
 class PrimitiveRegistry:
     """The loaded primitive definitions and the validator built on them."""
 
-    def __init__(self, definitions: list[dict[str, Any]]) -> None:
+    def __init__(
+        self,
+        definitions: list[dict[str, Any]],
+        translations: dict[str, dict[str, str]] | None = None,
+    ) -> None:
         """Index already-checked definitions by type, in library order."""
         ordered = sorted(definitions, key=lambda definition: definition["order"])
         self._definitions = {definition["type"]: definition for definition in ordered}
+        self._translations = translations or {}
 
     @classmethod
     def from_directory(cls, directory: Path) -> PrimitiveRegistry:
@@ -127,7 +133,25 @@ class PrimitiveRegistry:
         for path in sorted(directory.glob("*.yml")):
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
             definitions.append(_check_definition(raw, path))
-        return cls(definitions)
+        translations = {
+            path.stem: json.loads(path.read_text(encoding="utf-8"))
+            for path in sorted((directory / "translations").glob("*.json"))
+        }
+        return cls(definitions, translations)
+
+    def localized(self, language: str) -> list[dict[str, Any]]:
+        """Return the definitions with names, descriptions and labels in `language`."""
+        texts = self._translations.get(language.split("-", maxsplit=1)[0], {})
+        result = self.definitions
+        for definition in result:
+            prefix = definition["type"]
+            definition["name"] = texts.get(f"{prefix}.name", definition["name"])
+            definition["description"] = texts.get(
+                f"{prefix}.description", definition["description"]
+            )
+            for field in definition["fields"]:
+                field["label"] = texts.get(f"{prefix}.{field['key']}", field["label"])
+        return result
 
     @property
     def definitions(self) -> list[dict[str, Any]]:

@@ -58,9 +58,9 @@ def websocket_bootstrap(
         {
             "version": INTEGRATION_VERSION,
             "dashboards": _store(hass).list(),
-            "widgets": _widgets(hass).definitions(msg.get("language", "en")),
+            "widgets": _widgets(hass).definitions(msg["language"]),
             "widgetErrors": [error.as_dict() for error in _widgets(hass).errors],
-            "primitives": DEFAULT_PRIMITIVES.definitions,
+            "primitives": DEFAULT_PRIMITIVES.localized(msg["language"]),
         },
     )
 

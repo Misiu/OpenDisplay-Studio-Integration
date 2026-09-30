@@ -7,7 +7,14 @@ import { describe, expect, it } from "vitest";
  * inline in a template or in a user-facing attribute, error or label.
  */
 const SRC = import.meta.dirname;
-const EXEMPT = new Set(["strings.ts", "dev.ts", "test-support.ts", "types.ts"]);
+const EXEMPT = new Set([
+  "strings.ts",
+  "strings.pl.ts",
+  "strings.de.ts",
+  "dev.ts",
+  "test-support.ts",
+  "types.ts",
+]);
 
 const sources = readdirSync(SRC)
   .filter(

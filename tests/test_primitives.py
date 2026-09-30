@@ -278,3 +278,30 @@ class TestLoader:
 
         with pytest.raises(PrimitiveDefinitionError, match="default"):
             PrimitiveRegistry.from_directory(tmp_path)
+
+
+def test_primitives_are_labelled_in_the_language_asked_for() -> None:
+    polish = {d["type"]: d for d in DEFAULT_PRIMITIVES.localized("pl-PL")}
+    english = {d["type"]: d for d in DEFAULT_PRIMITIVES.localized("xx")}
+
+    assert polish["rectangle"]["name"] == "Prostokąt"
+    assert polish["rectangle"]["fields"][0]["label"] == "Lewa"
+    assert english["rectangle"]["name"] == "Rectangle"
+    assert english["rectangle"]["fields"][0]["label"] == "Left"
+
+
+@pytest.mark.parametrize("language", ["pl", "de"])
+def test_every_translated_primitive_label_matches_a_real_field(language: str) -> None:
+    path = Path(__file__).parent.parent / "custom_components/opendisplay_studio"
+    translations = json.loads(
+        (path / f"primitives/translations/{language}.json").read_text(encoding="utf-8")
+    )
+    expected = set()
+    for definition in DEFAULT_PRIMITIVES.definitions:
+        kind = definition["type"]
+        expected |= {f"{kind}.name", f"{kind}.description"}
+        expected |= {
+            f"{kind}.{f['key']}" for f in definition["fields"] if f.get("visible", True)
+        }
+
+    assert set(translations) == expected

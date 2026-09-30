@@ -437,7 +437,7 @@ export class OdsInspector extends LitElement {
   private renderDangerZone(label: string, onClick: () => void): TemplateResult {
     return html`
       <div class="danger-zone">
-        <ha-button appearance="plain" @click=${onClick}>
+        <ha-button appearance="plain" variant="danger" @click=${onClick}>
           <ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>
           ${label}
         </ha-button>

@@ -8,6 +8,7 @@ from custom_components.opendisplay_studio.odl import WidgetContext
 
 _WEEKDAYS = {
     "en": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "de": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
     "pl": ["pon.", "wt.", "śr.", "czw.", "pt.", "sob.", "niedz."],
 }
 

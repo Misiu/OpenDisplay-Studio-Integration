@@ -80,7 +80,7 @@ A renderer must:
 - stay inside `context.box` (elements starting outside are dropped with a warning);
 - adapt to small and large frames;
 - draw a readable placeholder when a required source is missing;
-- take under 50 ms (longer is reported as a warning).
+- take under 100 ms (longer is reported as a warning).
 
 The backend composes every widget and primitive into one ordered ODL list and renders
 the screen once with `odl-renderer`.

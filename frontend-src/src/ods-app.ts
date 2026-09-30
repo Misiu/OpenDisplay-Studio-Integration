@@ -1,3 +1,4 @@
+import { applyLanguage } from "./i18n";
 import { optionsFromForm } from "./widget-fields";
 import {
   CLOCK_REFRESH_MS,
@@ -209,6 +210,9 @@ export class OdsApp extends LitElement {
   }
   protected firstUpdated(): void {
     this.ensureBootstrap();
+  }
+  protected willUpdate(changed: PropertyValues<this>): void {
+    if (changed.has("hass") && this.hass) applyLanguage(this.hass.language);
   }
   protected updated(changed: PropertyValues<this>): void {
     if (changed.has("hass")) {

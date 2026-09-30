@@ -1,0 +1,25 @@
+{
+  "title": "OpenDisplay Studio",
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenDisplay Studio",
+        "description": "Twórz dynamiczne ekrany e-papieru bezpośrednio w Home Assistant. Renderowanie jest wbudowane w integrację."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "OpenDisplay Studio jest już skonfigurowane"
+    }
+  },
+  "exceptions": {
+    "render_failed": {
+      "message": "OpenDisplay Studio nie mogło wygenerować tego ekranu."
+    }
+  },
+  "services": {
+    "reload_widgets": {
+      "name": "Przeładuj widżety",
+      "description": "Ładuje ponownie pakiety widżetów z folderu widżetów OpenDisplay Studio, bez restartu Home Assistant."
+    }
+  }
+}

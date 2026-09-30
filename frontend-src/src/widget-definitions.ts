@@ -81,6 +81,22 @@ const defaultFor = (field: RawField): WidgetValue => {
   return "";
 };
 
+/** A select's choices with their translated labels, as `WidgetRegistry` sends them. */
+const labelledSelector = (
+  field: RawField,
+  texts: Translations
+): Record<string, unknown> => {
+  if (!("select" in field.selector)) return field.selector;
+  return {
+    select: {
+      options: selectOptions(field.selector).map((value) => ({
+        value,
+        label: texts[`options.${field.key}.${value}`] ?? value,
+      })),
+    },
+  };
+};
+
 const localizedSource = (
   source: NonNullable<RawManifest["sources"]>[number],
   texts: Translations
@@ -105,7 +121,7 @@ const localizedSection = (
   section: texts[`sections.${section.section}`] ?? section.section,
   fields: section.fields.map((field) => ({
     key: field.key,
-    selector: field.selector,
+    selector: labelledSelector(field, texts),
     label: texts[`options.${field.key}`] ?? field.label,
     default: defaultFor(field),
   })),

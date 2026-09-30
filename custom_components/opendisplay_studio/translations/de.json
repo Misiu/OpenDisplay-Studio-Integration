@@ -1,0 +1,25 @@
+{
+  "title": "OpenDisplay Studio",
+  "config": {
+    "step": {
+      "user": {
+        "title": "OpenDisplay Studio",
+        "description": "Erstelle dynamische E-Paper-Bildschirme direkt in Home Assistant. Das Rendering ist in die Integration eingebaut."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "OpenDisplay Studio ist bereits eingerichtet"
+    }
+  },
+  "exceptions": {
+    "render_failed": {
+      "message": "OpenDisplay Studio konnte diesen Bildschirm nicht erzeugen."
+    }
+  },
+  "services": {
+    "reload_widgets": {
+      "name": "Widgets neu laden",
+      "description": "Lädt die Widget-Pakete im Widget-Ordner von OpenDisplay Studio neu, ohne Home Assistant neu zu starten."
+    }
+  }
+}

@@ -161,6 +161,20 @@ def _translate(
     return fallback
 
 
+def _label_choices(option: dict[str, Any], label: Callable[[str, str], str]) -> None:
+    """Give the choices of a select their translated labels, keeping their values."""
+    config = option["selector"].get("select")
+    if not isinstance(config, dict):
+        return
+    config["options"] = [
+        {
+            "value": str(choice["value"] if isinstance(choice, dict) else choice),
+            "label": label(f"options.{option['key']}.{choice}", str(choice)),
+        }
+        for choice in config.get("options", [])
+    ]
+
+
 class WidgetRegistry:
     """All installed widgets, loaded independently so one bad package harms no other."""
 
@@ -280,6 +294,7 @@ class WidgetRegistry:
             )
             for option in section["fields"]:
                 option["label"] = label(f"options.{option['key']}", option["label"])
+                _label_choices(option, label)
                 option["default"] = option_defaults(
                     {**manifest, "options": [{"fields": [option]}]}
                 )[option["key"]]

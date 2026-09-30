@@ -1,0 +1,9 @@
+{
+  "name": "Hallo Welt",
+  "description": "Begrüßt jemanden. Das kleinste nützliche Widget-Paket.",
+  "categories.Examples": "Beispiele",
+  "sections.content": "Inhalt",
+  "options.who": "Wen begrüßen",
+  "options.color": "Farbe",
+  "runtime.greeting": "Hallo, {who}!"
+}

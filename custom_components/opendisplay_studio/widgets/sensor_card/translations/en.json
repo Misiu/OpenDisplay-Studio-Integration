@@ -17,5 +17,13 @@
   "options.alertBelow": "Alert below",
   "options.alertAbove": "Alert above",
   "options.alertColor": "Alert color",
-  "runtime.choose_entities": "Choose entities"
+  "runtime.choose_entities": "Choose entities",
+  "options.layout.single": "Single tile",
+  "options.layout.list": "List",
+  "options.layout.grid": "Grid",
+  "options.decimals.auto": "As reported",
+  "options.valueSize.auto": "Automatic",
+  "options.valueSize.small": "Small",
+  "options.valueSize.medium": "Medium",
+  "options.valueSize.large": "Large"
 }

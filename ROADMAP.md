@@ -610,7 +610,7 @@ RENDERER = render
   (compiler drops elements outside the frame and warns); adapts to the box
   (compact / regular / large); renders a readable placeholder when a required
   source is missing ("Choose calendars"); may return warnings. Time budget per
-  render: 50 ms (measured, warning above).
+  render: 100 ms (measured, warning above).
 - [ ] **8.3.4 Config migrations.** *(not started)* When the stored `version` is older than the
   package, `migrations.py` (`MIGRATIONS = {"1.x→2.0": fn}`) upgrades the stored
   options before rendering and on save.

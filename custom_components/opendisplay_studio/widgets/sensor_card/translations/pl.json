@@ -17,5 +17,13 @@
   "options.alertBelow": "Alarm poniżej",
   "options.alertAbove": "Alarm powyżej",
   "options.alertColor": "Kolor alarmu",
-  "runtime.choose_entities": "Wybierz encje"
+  "runtime.choose_entities": "Wybierz encje",
+  "options.layout.single": "Pojedynczy kafel",
+  "options.layout.list": "Lista",
+  "options.layout.grid": "Siatka",
+  "options.decimals.auto": "Jak zgłasza encja",
+  "options.valueSize.auto": "Automatyczny",
+  "options.valueSize.small": "Mały",
+  "options.valueSize.medium": "Średni",
+  "options.valueSize.large": "Duży"
 }

@@ -56,6 +56,7 @@ def _ink_right(line: str, font: ImageFont.FreeTypeFont, height: int) -> int:
     return ink[2] if ink else 0
 
 
+@lru_cache(maxsize=8192)
 def text_size(value: str, size: int) -> tuple[int, int]:
     """
     Return the width and height in pixels of the text block the renderer draws.

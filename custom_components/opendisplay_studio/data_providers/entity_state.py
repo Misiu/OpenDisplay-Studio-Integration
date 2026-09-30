@@ -26,6 +26,18 @@ _STATE_WORDS = {
         "home": "Home",
         "not_home": "Away",
     },
+    "de": {
+        STATE_UNAVAILABLE: "Nicht verfügbar",
+        STATE_UNKNOWN: "Unbekannt",
+        "on": "An",
+        "off": "Aus",
+        "open": "Offen",
+        "closed": "Geschlossen",
+        "locked": "Verriegelt",
+        "unlocked": "Entriegelt",
+        "home": "Zuhause",
+        "not_home": "Unterwegs",
+    },
     "pl": {
         STATE_UNAVAILABLE: "Niedostępny",
         STATE_UNKNOWN: "Nieznany",

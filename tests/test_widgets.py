@@ -123,16 +123,25 @@ class TestBuiltInCatalog:
         assert polish["sensor-card"]["name"] == "Karta czujnika"
         assert polish["weather"]["sources"][0]["label"] == "Encja pogody"
 
+    def test_german_labels_are_available(self) -> None:
+        german = {w["id"]: w["name"] for w in DEFAULT_REGISTRY.definitions("de-AT")}
+
+        assert german["sensor-card"] == "Sensorkarte"
+        assert german["weather"] == "Wetter"
+
     def test_an_unknown_language_falls_back_to_english(self) -> None:
         names = {w["id"]: w["name"] for w in DEFAULT_REGISTRY.definitions("xx")}
 
         assert names["sensor-card"] == "Sensor card"
 
+    @pytest.mark.parametrize("language", ["pl", "de"])
     @pytest.mark.parametrize("widget_id", ["sensor-card", "agenda", "weather"])
-    def test_polish_translates_everything_english_does(self, widget_id: str) -> None:
+    def test_every_language_translates_everything_english_does(
+        self, widget_id: str, language: str
+    ) -> None:
         translations = DEFAULT_REGISTRY.package(widget_id).translations
 
-        assert set(translations["en"]) <= set(translations["pl"])
+        assert set(translations["en"]) <= set(translations[language])
 
     @pytest.mark.parametrize("widget_id", ["sensor-card", "agenda", "weather"])
     def test_every_label_the_panel_shows_is_translated(self, widget_id: str) -> None:

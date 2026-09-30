@@ -29,5 +29,7 @@
   "runtime.condition.snowy-rainy": "Deszcz ze śniegiem",
   "runtime.condition.sunny": "Słonecznie",
   "runtime.condition.windy": "Wietrznie",
-  "runtime.condition.windy-variant": "Wietrznie"
+  "runtime.condition.windy-variant": "Wietrznie",
+  "options.forecastType.daily": "Dzienna",
+  "options.forecastType.hourly": "Godzinowa"
 }

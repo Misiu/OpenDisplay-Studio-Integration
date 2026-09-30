@@ -1,0 +1,23 @@
+{
+  "name": "Agenda",
+  "description": "Anstehende Termine aus einem oder mehreren Kalendern in einer Liste.",
+  "categories.Calendar": "Kalender",
+  "sources.calendars": "Kalender",
+  "sources.calendars.label": "Bezeichnung",
+  "sources.calendars.color": "Farbe",
+  "sections.content": "Inhalt",
+  "sections.presentation": "Darstellung",
+  "options.maxEvents": "Anzahl der Termine",
+  "options.days": "Vorschau (Tage)",
+  "options.emptyText": "Text, wenn keine Termine anstehen",
+  "options.groupByDay": "Nach Tagen gruppieren",
+  "options.showTime": "Uhrzeit anzeigen",
+  "options.showLocation": "Ort anzeigen",
+  "options.showCalendarLabel": "Kalenderbezeichnung anzeigen",
+  "options.use24h": "24-Stunden-Uhr",
+  "runtime.choose_calendars": "Kalender wählen",
+  "runtime.no_events": "Keine anstehenden Termine",
+  "runtime.today": "Heute",
+  "runtime.tomorrow": "Morgen",
+  "runtime.all_day": "Ganztägig"
+}
