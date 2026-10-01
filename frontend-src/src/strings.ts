@@ -7,6 +7,8 @@ const size = (width: number, height: number): string => `${width} × ${height}`;
 
 export const strings = {
   common: {
+    increase: "Increase",
+    decrease: "Decrease",
     cancel: "Cancel",
     close: "Close",
     size,
@@ -218,14 +220,12 @@ export const strings = {
   },
 
   inspector: {
+    alignInParent: "Align in Parent",
     expand: "Expand inspector",
     rail: "Layers",
     resize: "Resize inspector",
     dashboard: "Dashboard",
-    dashboardHint: "Display and canvas settings",
-    display: "Display",
-    rotationHelp:
-      "The picture is turned clockwise by this angle before it is sent, so the canvas has the size you see.",
+    dashboardHint: "Working area settings",
     workingArea: "Working area",
     workingAreaHelp:
       "Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.",
@@ -251,7 +251,6 @@ export const strings = {
       "It keeps its settings and draws again once the package returns.",
     appearance: "Appearance",
     diagnostics: "Render diagnostics",
-    deleteDashboard: "Delete dashboard",
     removeElement: "Remove element",
     locked: "Position is locked",
     unlock: "Unlock",
@@ -334,6 +333,7 @@ export const strings = {
    * every place that shows it.
    */
   fields: {
+    anchor: "Anchor",
     name: "Dashboard name",
     rotation: "Rotation",
     resolution: "Resolution",
@@ -354,11 +354,43 @@ export const strings = {
 
   rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
+  anchors: {
+    lt: "Top left",
+    mt: "Top center",
+    rt: "Top right",
+    lm: "Middle left",
+    mm: "Center",
+    rm: "Middle right",
+    lb: "Bottom left",
+    mb: "Bottom center",
+    rb: "Bottom right",
+  },
+
+  colors: {
+    clear: "Clear color",
+    none: "None",
+    accent: "Accent",
+    gray: (level: number): string => `Gray ${level}`,
+    names: {
+      black: "Black",
+      white: "White",
+      red: "Red",
+      yellow: "Yellow",
+      blue: "Blue",
+      green: "Green",
+      orange: "Orange",
+    },
+  },
+
   palettes: {
     bw: "Black / white",
     bwr: "Black / white / red",
     bwy: "Black / white / yellow",
     bwry: "Black / white / red / yellow",
     spectra6: "Spectra 6 · black / white / red / yellow / blue / green",
+    seven_color: "Seven colors · Spectra 6 and orange",
+    grayscale4: "Grayscale · 4 levels",
+    grayscale8: "Grayscale · 8 levels",
+    grayscale16: "Grayscale · 16 levels",
   },
 } as const;

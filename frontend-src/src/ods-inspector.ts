@@ -7,26 +7,18 @@ import {
   type TemplateResult,
 } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
-import {
-  isPaletteId,
-  PALETTE_COLORS,
-  PALETTE_LABELS,
-  profileById,
-} from "./display-profiles";
-import { inputValue } from "./dom";
 import { emit, type OdsEvent } from "./events";
 import { strings } from "./strings";
 import {
-  appearanceFormData,
   hasCornerFields,
   layoutFields,
-  primitiveAppearanceSchema,
+  primitiveFields,
   type LayoutField,
 } from "./item-fields";
 import { VISIBLE_KEY } from "./expressions";
 import { itemIcon } from "./item-labels";
+import { itemLocks } from "./locks";
 import { backgroundFormData, backgroundSchema } from "./container-fields";
-import { isRotation, ROTATIONS } from "./dashboards";
 import { selectionBox } from "./selection-gesture";
 import { findItem } from "./tree";
 import { clamp } from "./math";
@@ -38,8 +30,8 @@ import type {
   HaFormSchema,
   HomeAssistant,
   ContainerItem,
-  PaletteId,
   PrimitiveDefinition,
+  PrimitiveField,
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
@@ -56,12 +48,14 @@ import {
   withPickFields,
 } from "./widget-fields";
 import "./ods-expression-field";
+import "./ods-anchor-picker";
 import "./ods-property-field";
+import "./ods-value-field";
 import "./ods-structure";
 
-const MIN_WIDTH = 286;
+const MIN_WIDTH = 340;
 const MAX_WIDTH = 560;
-const DISPLAY_KEYS = ["width", "height", "padding", "snapSize"] as const;
+const DISPLAY_KEYS = ["padding", "snapSize"] as const;
 type DisplayKey = (typeof DISPLAY_KEYS)[number];
 
 const isDisplayKey = (key: string): key is DisplayKey =>
@@ -132,12 +126,12 @@ export class OdsInspector extends LitElement {
         overscroll-behavior: contain;
       }
       .inspector-title {
-        min-height: 58px;
+        min-height: 46px;
         display: grid;
         grid-template-columns: 30px minmax(0, 1fr);
         align-items: center;
         gap: 7px;
-        padding: 8px 12px;
+        padding: 6px 12px;
         border-bottom: 1px solid var(--studio-border);
       }
       .inspector-title > ha-icon {
@@ -156,21 +150,85 @@ export class OdsInspector extends LitElement {
         border-bottom: 1px solid var(--studio-border);
       }
       .inspector-section > summary {
-        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        height: 38px;
+        padding: 0 14px;
         cursor: pointer;
-        list-style-position: inside;
+        gap: 7px;
+        list-style: none;
         color: var(--studio-muted);
-        font: 700 10px var(--code-font-family, monospace);
-        letter-spacing: 0.09em;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.045em;
         text-transform: uppercase;
       }
+      .inspector-section > summary::-webkit-details-marker {
+        display: none;
+      }
+      /* The arrow that says a section opens and closes: right when closed, down when open. */
+      .inspector-section > summary::before {
+        content: "";
+        flex: none;
+        border: 4px solid transparent;
+        border-left: 5px solid currentColor;
+        border-right: 0;
+        transition: transform 0.12s;
+      }
+      .inspector-section[open] > summary::before {
+        transform: rotate(90deg);
+      }
       .section-body {
-        padding: 2px 14px 14px;
+        padding: 0 14px 12px;
       }
       .field-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        gap: 6px;
+      }
+      .disclosure {
+        margin-top: 10px;
+      }
+      .disclosure > summary {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        list-style: none;
+        color: var(--studio-muted);
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .disclosure > summary::-webkit-details-marker {
+        display: none;
+      }
+      .disclosure > summary::before {
+        content: "";
+        flex: none;
+        border: 4px solid transparent;
+        border-left: 5px solid currentColor;
+        border-right: 0;
+        transition: transform 0.12s;
+      }
+      .disclosure[open] > summary::before {
+        transform: rotate(90deg);
+      }
+      .disclosure > ods-anchor-picker {
+        margin-top: 6px;
+      }
+      .value-fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 8px;
+        margin-top: 10px;
+      }
+      .value-fields:first-child {
+        margin-top: 0;
+      }
+      .value-field {
+        min-width: 0;
+      }
+      .value-field.wide {
+        grid-column: span 2;
       }
       .stack-field {
         display: grid;
@@ -356,17 +414,6 @@ export class OdsInspector extends LitElement {
     }
   }
 
-  private onPaletteChange(event: Event): void {
-    const palette = inputValue(event);
-    if (isPaletteId(palette)) {
-      emit(this, "palette-change", { palette });
-    }
-  }
-
-  private onBackgroundChange(event: Event): void {
-    emit(this, "background-change", { color: inputValue(event) });
-  }
-
   private onWidgetOptionsChange(
     event: OdsEvent<"widget-options-change">
   ): void {
@@ -401,14 +448,6 @@ export class OdsInspector extends LitElement {
 
   private reloadWidgets(): void {
     emit(this, "widgets-reload");
-  }
-
-  private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
-    emit(this, "primitive-change", { value: event.detail.value });
-  }
-
-  private requestDashboardDelete(): void {
-    emit(this, "dashboard-delete-request");
   }
 
   private unlock(item: StudioItem): void {
@@ -503,71 +542,6 @@ export class OdsInspector extends LitElement {
     `;
   }
 
-  private onRotationChange(event: Event): void {
-    const rotation = Number(inputValue(event));
-    if (isRotation(rotation)) emit(this, "rotation-change", { rotation });
-  }
-
-  private renderRotationSelect(): TemplateResult {
-    const selected = this.dashboard.display.rotation;
-    return html`
-      <label class="stack-field">
-        ${strings.fields.rotation}
-        <select @change=${this.onRotationChange}>
-          ${ROTATIONS.map(
-            (rotation) => html`
-              <option value=${rotation} ?selected=${rotation === selected}>
-                ${strings.rotations[rotation]}
-              </option>
-            `
-          )}
-        </select>
-      </label>
-      <p class="field-help">${strings.inspector.rotationHelp}</p>
-    `;
-  }
-
-  private renderPaletteSelect(): TemplateResult {
-    const { profileId, palette: selected } = this.dashboard.display;
-    const profile = profileById(profileId);
-    const palettes: PaletteId[] =
-      profile.id === "custom"
-        ? Object.keys(PALETTE_LABELS).filter(isPaletteId)
-        : profile.palettes;
-    return html`
-      <label class="stack-field">
-        ${strings.fields.palette}
-        <select @change=${this.onPaletteChange}>
-          ${palettes.map(
-            (palette) => html`
-              <option value=${palette} ?selected=${palette === selected}>
-                ${PALETTE_LABELS[palette]}
-              </option>
-            `
-          )}
-        </select>
-      </label>
-    `;
-  }
-
-  private renderBackgroundSelect(): TemplateResult {
-    const { palette, background } = this.dashboard.display;
-    return html`
-      <label class="stack-field">
-        ${strings.fields.background}
-        <select @change=${this.onBackgroundChange}>
-          ${PALETTE_COLORS[palette].map(
-            (color) => html`
-              <option value=${color} ?selected=${color === background}>
-                ${color[0].toUpperCase()}${color.slice(1)}
-              </option>
-            `
-          )}
-        </select>
-      </label>
-    `;
-  }
-
   private renderDashboardInspector(): TemplateResult {
     return html`
       ${this.renderHeader(
@@ -575,19 +549,6 @@ export class OdsInspector extends LitElement {
         strings.inspector.dashboardHint,
         "mdi:monitor"
       )}
-      <details class="inspector-section" open>
-        <summary>${strings.inspector.display}</summary>
-        <div class="section-body">
-          <div class="field-grid">
-            ${this.renderDisplayField(strings.fields.width, "width", 64, 4096)}
-            ${this.renderDisplayField(strings.fields.height, "height", 64, 4096)}
-          </div>
-          <div class="field-grid">
-            ${this.renderPaletteSelect()} ${this.renderBackgroundSelect()}
-          </div>
-          ${this.renderRotationSelect()}
-        </div>
-      </details>
       <details class="inspector-section" open>
         <summary>${strings.inspector.workingArea}</summary>
         <div class="section-body">
@@ -598,10 +559,6 @@ export class OdsInspector extends LitElement {
           <p class="field-help">${strings.inspector.workingAreaHelp}</p>
         </div>
       </details>
-      ${this.renderDangerZone(
-        strings.inspector.deleteDashboard,
-        this.requestDashboardDelete
-      )}
       ${this.renderMetrics()}
     `;
   }
@@ -616,6 +573,7 @@ export class OdsInspector extends LitElement {
       <ods-property-field
         .label=${field.label}
         .fieldKey=${field.key}
+        unit="px"
         .value=${field.value}
         .min=${field.min}
         .max=${field.max}
@@ -701,6 +659,26 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  private onAlignChoice(event: OdsEvent<"anchor-change">): void {
+    event.stopPropagation();
+    emit(this, "align-in-parent", { place: event.detail.anchor });
+  }
+
+  /** The 3 x 3 grid that puts the element at a place of its parent, closed until asked for. */
+  private renderAlignInParent(item: StudioItem): TemplateResult {
+    const locks = itemLocks(item, this.primitives);
+    const blocked = item.locked || locks.position.length > 0;
+    return html`
+      <details class="disclosure">
+        <summary>${strings.inspector.alignInParent}</summary>
+        <ods-anchor-picker
+          .disabled=${blocked}
+          @anchor-change=${this.onAlignChoice}
+        ></ods-anchor-picker>
+      </details>
+    `;
+  }
+
   private renderLayoutSection(item: StudioItem): TemplateResult {
     const { grid, extra } = layoutFields(
       item,
@@ -716,7 +694,9 @@ export class OdsInspector extends LitElement {
             ${grid.map((field) => this.renderLayoutField(field, item))}
           </div>
           ${extra.map((field) => this.renderLayoutField(field, item))}
-          ${this.renderCornerToggle(item)} ${this.renderVisibility(item)}
+          ${item.kind === "primitive" ? this.renderValueFields(item, "layout") : nothing}
+          ${this.renderCornerToggle(item)} ${this.renderAlignInParent(item)}
+          ${this.renderVisibility(item)}
         </div>
       </details>
     `;
@@ -849,39 +829,52 @@ export class OdsInspector extends LitElement {
     `;
   }
 
-  private renderAppearanceField(
+  /** Half a row for a short value, a whole row for anything longer. */
+  private fieldSpan(field: PrimitiveField): string {
+    return field.shape === "number" ? "" : "wide";
+  }
+
+  private renderValueField(
     item: PrimitiveItem,
-    entry: HaFormSchema,
-    data: Record<string, unknown>
+    field: PrimitiveField
   ): TemplateResult {
-    return this.renderExpressible(
-      item,
-      entry.name,
-      entry.label,
-      html`
-        <ha-form
-          .hass=${this.hass}
-          .data=${data}
-          .schema=${[entry]}
-          .computeLabel=${formFieldLabel}
-          @value-changed=${this.onPrimitiveChange}
-        ></ha-form>
-      `
-    );
+    const values: Record<string, unknown> = { ...item.primitive };
+    const control = html`
+      <ods-value-field
+        .hass=${this.hass}
+        .field=${field}
+        .value=${values[field.key]}
+        .palette=${this.dashboard.display.palette}
+        .display=${this.dashboard.display}
+        .disabled=${item.locked}
+      ></ods-value-field>
+    `;
+    return html`
+      <div class=${`value-field ${this.fieldSpan(field)}`}>
+        ${this.renderExpressible(item, field.key, field.label, control)}
+      </div>
+    `;
+  }
+
+  private renderValueFields(
+    item: PrimitiveItem,
+    section: PrimitiveField["section"]
+  ): TemplateResult {
+    return html`
+      <div class="value-fields">
+        ${primitiveFields(item, this.primitives, section).map((field) =>
+          this.renderValueField(item, field)
+        )}
+      </div>
+    `;
   }
 
   private renderAppearance(item: PrimitiveItem): TemplateResult {
-    const data = appearanceFormData(item, this.primitives);
-    const schema = primitiveAppearanceSchema(
-      item,
-      this.dashboard.display.palette,
-      this.primitives
-    );
     return html`
       <details class="inspector-section" open>
         <summary>${strings.inspector.appearance}</summary>
         <div class="section-body">
-          ${schema.map((entry) => this.renderAppearanceField(item, entry, data))}
+          ${this.renderValueFields(item, "appearance")}
         </div>
       </details>
     `;

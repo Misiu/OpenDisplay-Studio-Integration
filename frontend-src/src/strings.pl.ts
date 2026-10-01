@@ -21,6 +21,8 @@ const plural = (
  */
 export const polish: StringsOverride = {
   common: {
+    increase: "Zwiększ",
+    decrease: "Zmniejsz",
     cancel: "Anuluj",
     close: "Zamknij",
   },
@@ -166,14 +168,12 @@ export const polish: StringsOverride = {
   },
 
   inspector: {
+    alignInParent: "Wyrównaj w rodzicu",
     expand: "Rozwiń inspektor",
     rail: "Warstwy",
     resize: "Zmień szerokość inspektora",
     dashboard: "Dashboard",
-    dashboardHint: "Ustawienia wyświetlacza i płótna",
-    display: "Wyświetlacz",
-    rotationHelp:
-      "Obraz jest obracany w prawo o ten kąt przed wysłaniem, więc płótno ma widoczny rozmiar.",
+    dashboardHint: "Ustawienia obszaru roboczego",
     workingArea: "Obszar roboczy",
     workingAreaHelp:
       "Margines wyznacza bezpieczny obszar edycji. Przyciąganie wyrównuje ruch i zmianę rozmiaru do pełnych pikseli.",
@@ -185,7 +185,6 @@ export const polish: StringsOverride = {
       "Zachowuje ustawienia i zostanie narysowany, gdy pakiet wróci.",
     appearance: "Wygląd",
     diagnostics: "Diagnostyka renderowania",
-    deleteDashboard: "Usuń dashboard",
     removeElement: "Usuń element",
     locked: "Pozycja jest zablokowana",
     unlock: "Odblokuj",
@@ -262,6 +261,7 @@ export const polish: StringsOverride = {
   },
 
   fields: {
+    anchor: "Kotwica",
     name: "Nazwa dashboardu",
     rotation: "Obrót",
     resolution: "Rozdzielczość",
@@ -279,6 +279,34 @@ export const polish: StringsOverride = {
 
   rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
+  anchors: {
+    lt: "Lewy górny",
+    mt: "Górny środek",
+    rt: "Prawy górny",
+    lm: "Lewy środek",
+    mm: "Środek",
+    rm: "Prawy środek",
+    lb: "Lewy dolny",
+    mb: "Dolny środek",
+    rb: "Prawy dolny",
+  },
+
+  colors: {
+    clear: "Wyczyść kolor",
+    none: "Brak",
+    accent: "Akcent",
+    gray: (level: number): string => `Szary ${level}`,
+    names: {
+      black: "Czarny",
+      white: "Biały",
+      red: "Czerwony",
+      yellow: "Żółty",
+      blue: "Niebieski",
+      green: "Zielony",
+      orange: "Pomarańczowy",
+    },
+  },
+
   palettes: {
     bw: "Czarny / biały",
     bwr: "Czarny / biały / czerwony",
@@ -286,5 +314,9 @@ export const polish: StringsOverride = {
     bwry: "Czarny / biały / czerwony / żółty",
     spectra6:
       "Spectra 6 · czarny / biały / czerwony / żółty / niebieski / zielony",
+    seven_color: "Siedem kolorów · Spectra 6 i pomarańczowy",
+    grayscale4: "Skala szarości · 4 poziomy",
+    grayscale8: "Skala szarości · 8 poziomów",
+    grayscale16: "Skala szarości · 16 poziomów",
   },
 };

@@ -53,3 +53,25 @@ export const libraryItem = (page: Page, name: string) =>
   page.locator("ods-library .catalog-item").filter({
     has: page.locator("strong", { hasText: new RegExp(`^${name}$`) }),
   });
+
+/** The names of the nine anchors as the anchor picker titles them. */
+const ANCHOR_NAMES: Record<string, string> = {
+  lt: "Top left",
+  mt: "Top center",
+  rt: "Top right",
+  lm: "Middle left",
+  mm: "Center",
+  rm: "Middle right",
+  lb: "Bottom left",
+  mb: "Bottom center",
+  rb: "Bottom right",
+};
+
+/** Opens the anchor picker of the selected element and picks one of the nine places. */
+export const chooseAnchor = async (page: Page, anchor: string) => {
+  await page.getByRole("button", { name: "Anchor", exact: true }).click();
+  await page
+    .locator("ods-popover ods-anchor-picker")
+    .getByRole("button", { name: ANCHOR_NAMES[anchor], exact: true })
+    .click();
+};

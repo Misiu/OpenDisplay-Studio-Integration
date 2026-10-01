@@ -104,3 +104,104 @@ export const tileStyles = css`
     transform: translateY(-1px);
   }
 `;
+
+/**
+ * The compact controls of the properties panel, measured on lvgl.espboards.dev: a 28 px
+ * box with its label inside at the left and its unit inside at the right, a 7 px radius
+ * and a 1 px border. Longer values put an 11 px label above a 28-30 px control.
+ */
+export const fieldStyles = css`
+  .box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--studio-border);
+    border-radius: 7px;
+    background: var(--secondary-background-color, #f3f5f6);
+    color: var(--studio-text);
+  }
+  .box:hover {
+    border-color: color-mix(
+      in srgb,
+      var(--studio-text) 25%,
+      var(--studio-border)
+    );
+  }
+  .box:focus-within {
+    border-color: var(--primary-color);
+  }
+  .box.disabled {
+    opacity: 0.55;
+  }
+  .box .inner-label,
+  .box .unit {
+    flex: none;
+    color: var(--studio-muted);
+    font-size: 10px;
+  }
+  .box input,
+  .box select {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-size: 12px;
+  }
+  .box input.mono {
+    font-family: var(--code-font-family, monospace);
+  }
+  .field-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--studio-muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  textarea.compact {
+    display: block;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px;
+    border: 1px solid var(--studio-border);
+    border-radius: 7px;
+    background: var(--secondary-background-color, #f3f5f6);
+    color: var(--studio-text);
+    font-size: 12px;
+    resize: vertical;
+  }
+  textarea.compact.mono {
+    font-family: var(--code-font-family, monospace);
+  }
+  textarea.compact:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+  }
+  .segmented {
+    display: flex;
+    height: 28px;
+    padding: 2px;
+    border: 1px solid var(--studio-border);
+    border-radius: 7px;
+    background: var(--secondary-background-color, #f3f5f6);
+  }
+  .segmented button {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--studio-muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .segmented button[aria-pressed="true"] {
+    background: var(--primary-color);
+    color: var(--text-primary-color, #fff);
+  }
+`;

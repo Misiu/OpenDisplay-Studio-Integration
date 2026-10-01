@@ -54,8 +54,8 @@ fields:
   - key: anchor
     label: Anchor
     shape: enum
-    options: [la, ma, ra, lt, mt, rt, lm, mm, rm, ls, ms, rs, lb, mb, rb, ld, md, rd]
-    default: la
+    options: [lt, mt, rt, lm, mm, rm, lb, mb, rb]
+    default: lt
     section: layout
   - key: stroke_width
     label: "Stroke width"

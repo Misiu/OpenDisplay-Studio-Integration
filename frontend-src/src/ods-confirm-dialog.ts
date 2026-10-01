@@ -56,9 +56,6 @@ export class OdsConfirmDialog extends LitElement {
         padding: 14px 20px;
         border-top: 1px solid var(--studio-border);
       }
-      .confirm {
-        color: var(--error-color, #db4437);
-      }
     `,
   ];
 
@@ -110,7 +107,7 @@ export class OdsConfirmDialog extends LitElement {
               ${strings.common.cancel}
             </ha-button>
             <ha-button
-              class="confirm"
+              variant="danger"
               appearance="filled"
               @click=${this.accept}
             >

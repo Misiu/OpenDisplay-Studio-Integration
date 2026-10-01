@@ -141,27 +141,30 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
   toggles (25 px buttons, 10 px/500). Zoom % chip top-right. Bottom-centered zoom
   bar 31 px: `−`, `0.5×`, `1×`, `2×`, `3×`, `+`, `Reset`, `Fit`. Help button
   bottom-left. Canvas padding 16 px.
-- [ ] **2.4 Right panel** 320 px (resizable 286–560, collapsible). Top:
+- [ ] **2.4 Right panel** 320 px (resizable 340–560, collapsible). Top:
   **Elements** header (uppercase 11 px, info tooltip, total count badge,
   collapse chevron), search 27 px (6 px radius). Rows 30 px, 6 px radius,
   11 px name + 9 px secondary caption, selected row in primary color. Bottom:
   **Properties** (independently scrollable).
-- [ ] **2.5 Properties shell.** Header: type icon tile, element name (13 px/600)
+- [ ] **2.5 Properties shell.** (Done: 38 px section headers with an arrow, 340 px minimum
+  width, `Align in Parent` in `Layout`. Open: `reset` links, non-default dots, `Hidden` switch.) Header: type icon tile, element name (13 px/600)
   + type caption, `Hidden` switch right; padding 10 × 14 px. Sections are
   accordions: header 38 px, uppercase 11 px/600, letter-spacing ≈ .045em, icon,
   right-aligned `reset` link (section defaults, one undo step), dot marker when
   non-default. Body padding 0 14 px. Order: `Layout` first, type sections from
   the definition, `Visibility` last. With nothing selected: `Canvas` (display,
   palette, background, padding, snap).
-- [ ] **2.6 Field element `ods-property-field`.** Short values: 28 px box,
-  label inside at left (10 px, secondary), value 12 px monospace, unit suffix
-  inside at right, 7 px radius, 1 px border; paired fields in a 2-column grid
-  with 6 px gap (X/Y, W/H, start/end). Long values: label above (11 px/500),
-  control below — textarea for text, color dropdown with swatch + name limited to
-  the dashboard palette plus valid aliases, font dropdown, icon picker with
-  search, 3×3 anchor picker, segmented control for short enums, switch for
-  booleans. Inline disclosure rows (`> Advanced`) 22 px. The trailing `{}`
-  button is added in phase 3.
+- [ ] **2.6 Field element `ods-property-field`.** Measurements:
+  `docs/design/LVGL_INSPECTOR_FIELDS.md`. Done: short numbers are 28 px boxes with the
+  label and the `px` unit inside (`ods-property-field`, `ods-value-field`); 10 px / 8 px grid
+  gaps; 38 px section headers; text in a textarea; fonts and long enums in a compact select;
+  short enums (up to four short options) as a segmented control; booleans as a switch row;
+  flags as chips; the color as a swatch row with a clear button that opens a popover with
+  the colors of the display (`ods-color-picker`, `ods-popover`); the anchor as a field that
+  opens a popover with the 3 x 3 grid (`ods-anchor-picker`); nested plot settings keep
+  `ha-form`. Changing the anchor keeps the element where it is drawn. Open: the icon
+  picker with search, the `Align in Parent` position editor built on the anchor grid, the
+  `reset` link and non-default dot on each section, disclosure rows (`Advanced`).
 - [ ] **2.7 Selection overlay.** Drawn in display pixels on a layer above the
   canvas, with every measure divided by the zoom so it keeps its screen size:
   1 px `#2196f3` outline, 8 px white square handles (1 px blue border) at four
@@ -174,7 +177,11 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
 > tested. They only plug into seams the split creates (`snapping.ts`,
 > `viewport.ts`, the canvas element).
 
-- [ ] **2.8 Snapping and guides** (`snapping.ts`, pure, Vitest). While moving,
+- [ ] **2.8 Snapping and guides** (`snapping.ts`, pure, Vitest). Done for moving: edges and
+  centres are pulled to those of siblings (5 px) and of the parent (8 px, preferred on a tie),
+  magenta dashed guides for every shared line, `Ctrl`/`⌘` or the `Snap` toggle turn it off.
+  Open: sticky release, equal spacing and its badges, snapping while resizing, and the edge
+  magnet to the container. Spec: While moving,
   in this order: grid rounding to the dashboard snap size; edge magnet 8 px with
   sticky release after 12 px; per-axis candidates — siblings 5 px (edges and
   centres), canvas centre lines 8 px (wins ties by 2 px), equal spacing 8 px —

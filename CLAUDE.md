@@ -277,10 +277,16 @@ Hard-coded colors are allowed only for display-palette swatches. Concrete
 measurements are in `ROADMAP.md` phase 2; `docs/design/DESIGN_SPECS.md` keeps
 the information architecture.
 
-- Primitive properties use our compact field element (label inside a 28 px box,
-  unit suffix, `{}` toggle). Use `ha-form` only for widget configuration from
-  `widget.yml` selectors; use `ha-icon`, `ha-dialog`, `ha-button`, `ha-alert`,
-  `ha-switch` where they fit.
+- Primitive properties use our compact field elements (`ods-property-field` for numbers,
+  `ods-value-field` for every other shape; label inside a 28 px box, unit suffix, `{}`
+  toggle). A color is picked from the colors of the display in `ods-color-picker`, an anchor
+  in `ods-anchor-picker`, both in an `ods-popover`. Use `ha-form` only for widget
+  configuration from `widget.yml` selectors and for nested plot settings; use `ha-icon`,
+  `ha-dialog`, `ha-button`, `ha-alert` where they fit.
+- **Palettes** are the color schemes of OpenDisplay and live in
+  `custom_components/opendisplay_studio/palettes.json`, the one file both the backend and
+  the panel read. A stored color is a name the renderer resolves, or a hex where it knows no
+  name (grays, orange). Never list colors anywhere else.
 - Every icon-only control has `aria-label` and a tooltip; focus stays visible;
   the tree uses `role="tree"` / `treeitem`.
 - Never let a panel cause horizontal page scroll. Floating UI (context menus,

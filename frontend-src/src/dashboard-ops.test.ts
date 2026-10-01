@@ -5,13 +5,11 @@ import {
   createWidgetItem,
   moveLayer,
   removeItem,
-  setBackground,
   setDisplayNumber,
   setItemExpression,
   setItemNumber,
-  setPalette,
-  setRotation,
   toggleItemState,
+  setPrimitiveField,
   updatePrimitiveFields,
 } from "./dashboard-ops";
 import { itemBounds } from "./geometry";
@@ -59,60 +57,10 @@ describe("setItemNumber", () => {
 });
 
 describe("display settings", () => {
-  it("re-constrains every item when the display shrinks", () => {
-    const dashboard = dashboardWith([
-      rectangleItem("r", { x_start: 300, x_end: 399 }),
-    ]);
-    setDisplayNumber(dashboard, "width", 200);
-    expect(itemBounds(dashboard.items[0]).x).toBe(100);
-  });
-
   it("clamps padding to half of the smaller side", () => {
     const dashboard = dashboardWith();
     setDisplayNumber(dashboard, "padding", 9999);
     expect(dashboard.display.padding).toBe(149);
-  });
-
-  it("swaps the sides of the canvas for a quarter turn and keeps them for a half turn", () => {
-    const dashboard = dashboardWith([], { width: 800, height: 480 });
-
-    setRotation(dashboard, 90);
-    expect(dashboard.display).toMatchObject({
-      rotation: 90,
-      width: 480,
-      height: 800,
-    });
-    setRotation(dashboard, 270);
-    expect(dashboard.display).toMatchObject({ width: 480, height: 800 });
-    setRotation(dashboard, 180);
-    expect(dashboard.display).toMatchObject({
-      rotation: 180,
-      width: 800,
-      height: 480,
-    });
-  });
-
-  it("keeps every item on the canvas when it is turned", () => {
-    const dashboard = dashboardWith(
-      [rectangleItem("r", { x_start: 300, x_end: 399 })],
-      { width: 400, height: 300 }
-    );
-
-    setRotation(dashboard, 90);
-
-    const bounds = itemBounds(dashboard.items[0]);
-    expect(bounds.x + bounds.width).toBeLessThanOrEqual(300);
-  });
-
-  it("forgets the device and the display type when the size is typed by hand", () => {
-    const dashboard = dashboardWith([], { deviceId: "d1", profileId: "p" });
-
-    setDisplayNumber(dashboard, "width", 640);
-
-    expect(dashboard.display).toMatchObject({
-      deviceId: null,
-      profileId: "custom",
-    });
   });
 
   it("keeps the device when only the padding changes", () => {
@@ -121,14 +69,6 @@ describe("display settings", () => {
     setDisplayNumber(dashboard, "padding", 10);
 
     expect(dashboard.display.deviceId).toBe("d1");
-  });
-
-  it("resets the background when the new palette does not contain it", () => {
-    const dashboard = dashboardWith([], { palette: "bwr", background: "red" });
-    setPalette(dashboard, "bw");
-    expect(dashboard.display.background).toBe("white");
-    setBackground(dashboard, "black");
-    expect(dashboard.display.background).toBe("black");
   });
 });
 
@@ -324,5 +264,46 @@ describe("setItemExpression", () => {
     setItemExpression(dashboard, "t", "size", undefined);
 
     expect(dashboard.items[0]).not.toHaveProperty("expressions");
+  });
+});
+
+describe("setPrimitiveField", () => {
+  it("sets a stored value, which the definitions have already allowed", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+
+    setPrimitiveField(dashboard, "t", "color", "red");
+
+    expect(dashboard.items[0]).toMatchObject({ primitive: { color: "red" } });
+  });
+
+  it("keeps a text where it is drawn when its anchor changes", () => {
+    const dashboard = dashboardWith([textItem("t")]);
+    const measured = { x: 0, y: 0, width: 100, height: 40 };
+    const before = itemBounds(dashboard.items[0], measured);
+
+    setPrimitiveField(dashboard, "t", "anchor", "mm", measured);
+
+    expect(itemBounds(dashboard.items[0], measured)).toEqual(before);
+    expect(dashboard.items[0]).toMatchObject({ primitive: { anchor: "mm" } });
+  });
+
+  it("changes only the anchor when the position is driven by an expression", () => {
+    const item = { ...textItem("t"), expressions: { x: "{{ 5 }}" } };
+    const dashboard = dashboardWith([item]);
+    const measured = { x: 0, y: 0, width: 100, height: 40 };
+
+    setPrimitiveField(dashboard, "t", "anchor", "mm", measured);
+
+    expect(dashboard.items[0]).toMatchObject({
+      primitive: { anchor: "mm", x: 10, y: 10 },
+    });
+  });
+
+  it("does nothing to a locked element", () => {
+    const dashboard = dashboardWith([{ ...textItem("t"), locked: true }]);
+
+    setPrimitiveField(dashboard, "t", "color", "red");
+
+    expect(dashboard.items[0]).toMatchObject({ primitive: { color: "black" } });
   });
 });

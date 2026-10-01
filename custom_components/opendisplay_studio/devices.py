@@ -7,24 +7,12 @@ from typing import TYPE_CHECKING, Any, Final
 from homeassistant.helpers import device_registry as dr
 
 from .const import DOMAIN, SENT_PREFIX
-from .palette import PALETTE_COLORS
+from .palette import PALETTE_BY_COLOR_SCHEME, PALETTE_COLORS
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
 OPENDISPLAY_DOMAIN: Final = "opendisplay"
-
-# The colour schemes of the `opendisplay` integration, by the name of its enum.
-# Four-level grayscale has no palette of its own; the dashboard draws in black and
-# white and the integration dithers it when it uploads the picture.
-PALETTE_BY_COLOR_SCHEME: Final[dict[str, str]] = {
-    "MONO": "bw",
-    "BWR": "bwr",
-    "BWY": "bwy",
-    "BWRY": "bwry",
-    "BWGBRY": "spectra6",
-    "GRAYSCALE_4": "bw",
-}
 
 
 def _palette(color_scheme: Any) -> str:

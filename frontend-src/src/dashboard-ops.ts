@@ -17,18 +17,18 @@ import {
   translateItem,
   workingArea,
 } from "./geometry";
-import { turnedCanvas } from "./dashboards";
 import { createId } from "./ids";
 import { clamp } from "./math";
 import { definitionFor, primitiveValuesFromForm } from "./item-fields";
-import { isBoxPrimitive, type CornerPrimitive } from "./primitive-shape";
+import {
+  isBoxPrimitive,
+  reanchored,
+  type CornerPrimitive,
+} from "./primitive-shape";
 import { createPrimitive, resolveLimit } from "./primitives";
-import { PALETTE_COLORS } from "./display-profiles";
 import type {
   Dashboard,
   ItemBounds,
-  PaletteId,
-  Rotation,
   Primitive,
   PrimitiveDefinition,
   PrimitiveItem,
@@ -214,15 +214,9 @@ const constrainAll = (dashboard: Dashboard): void =>
 
 export const setDisplayNumber = (
   dashboard: Dashboard,
-  key: "width" | "height" | "padding" | "snapSize",
+  key: "padding" | "snapSize",
   value: number
 ): void => {
-  if (key === "width" || key === "height") {
-    dashboard.display[key] = clamp(value, 64, 4096);
-    // A size typed by hand is no longer the size of a known display or device.
-    dashboard.display.profileId = "custom";
-    dashboard.display.deviceId = null;
-  }
   if (key === "padding") {
     dashboard.display.padding = clamp(
       value,
@@ -234,26 +228,6 @@ export const setDisplayNumber = (
   }
   if (key === "snapSize") dashboard.display.snapSize = clamp(value, 1, 256);
   constrainAll(dashboard);
-};
-
-/** Turn the picture: the canvas keeps the display and swaps its sides for a quarter turn. */
-export const setRotation = (dashboard: Dashboard, rotation: Rotation): void => {
-  const { display } = dashboard;
-  Object.assign(display, turnedCanvas(display, display.rotation, rotation), {
-    rotation,
-  });
-  constrainAll(dashboard);
-};
-
-export const setPalette = (dashboard: Dashboard, palette: PaletteId): void => {
-  dashboard.display.palette = palette;
-  if (!PALETTE_COLORS[palette].includes(dashboard.display.background)) {
-    dashboard.display.background = "white";
-  }
-};
-
-export const setBackground = (dashboard: Dashboard, color: string): void => {
-  dashboard.display.background = color;
 };
 
 export const toggleItemState = (
@@ -319,6 +293,29 @@ export const setWidgetPicks = (
   if (item?.kind === "widget") {
     item.widget.sources = { ...item.widget.sources, [sourceKey]: picks };
   }
+};
+
+/**
+ * Set one field of a primitive to a stored value. A new anchor keeps the element where it
+ * is drawn, unless its position is an expression, which would put it back.
+ */
+export const setPrimitiveField = (
+  dashboard: Dashboard,
+  itemId: string,
+  key: string,
+  value: unknown,
+  measured?: ItemBounds
+): void => {
+  const found = locate(dashboard.items, itemId);
+  if (found?.item.kind !== "primitive" || found.item.locked) return;
+  const item = found.item;
+  const positionDriven = ["x", "y"].some((name) => item.expressions?.[name]);
+  if (key === "anchor" && typeof value === "string" && !positionDriven) {
+    reanchored(item.primitive, value, measured);
+    return;
+  }
+  // The definitions decide what a field may hold; the panel only sends what they allow.
+  item.primitive = { ...item.primitive, [key]: value } as Primitive;
 };
 
 export const updatePrimitiveFields = (

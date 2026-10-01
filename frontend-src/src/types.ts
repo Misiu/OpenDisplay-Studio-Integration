@@ -1,4 +1,13 @@
-export type PaletteId = "bw" | "bwr" | "bwy" | "bwry" | "spectra6";
+export type PaletteId =
+  | "bw"
+  | "bwr"
+  | "bwy"
+  | "bwry"
+  | "spectra6"
+  | "seven_color"
+  | "grayscale4"
+  | "grayscale8"
+  | "grayscale16";
 export type DashboardStatus = "draft" | "ready";
 
 export type WidgetValue = string | number | boolean | string[];
@@ -441,6 +450,11 @@ export interface ItemBounds {
   width: number;
   height: number;
 }
+/** A preview and the dashboard it was rendered from, which has since been edited. */
+export interface PreviewState extends ComposePreviewResponse {
+  composedFrom: Dashboard;
+}
+
 export interface ComposePreviewResponse {
   imageUrl: string;
   yaml: string;

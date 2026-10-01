@@ -59,6 +59,7 @@ export interface DashboardFormData {
   width: number;
   height: number;
   palette: PaletteId;
+  background: string;
   rotation: string;
   padding: number;
   snapSize: number;
@@ -97,6 +98,7 @@ export const dashboardFormData = (dashboard: Dashboard): DashboardFormData => ({
   width: dashboard.display.width,
   height: dashboard.display.height,
   palette: dashboard.display.palette,
+  background: dashboard.display.background,
   rotation: String(dashboard.display.rotation),
   padding: dashboard.display.padding,
   snapSize: dashboard.display.snapSize,
@@ -180,9 +182,10 @@ export const dashboardFromForm = (
   next.display.palette = value.palette in PALETTE_LABELS ? value.palette : "bw";
   next.display.padding = Math.round(Number(value.padding) || 0);
   next.display.snapSize = Math.round(Number(value.snapSize) || 0);
-  if (!PALETTE_COLORS[next.display.palette].includes(next.display.background)) {
-    next.display.background = "white";
-  }
+  const colors = PALETTE_COLORS[next.display.palette];
+  next.display.background = colors.includes(value.background)
+    ? value.background
+    : "white";
   return next;
 };
 
@@ -241,9 +244,11 @@ export const copyName = (
 };
 
 /** Which display fields a form offers: the size, and the palettes to pick from. */
-interface DisplayFields {
+export interface DisplayFields {
   size: boolean;
   palettes: PaletteId[];
+  /** The colors the background can be; none leaves the background out of the form. */
+  backgrounds: string[];
 }
 
 export const ALL_PALETTES: PaletteId[] =
@@ -257,7 +262,14 @@ export const PRESET_PROFILES: DisplayProfile[] = DISPLAY_PROFILES.filter(
 const ALL_DISPLAY_FIELDS: DisplayFields = {
   size: true,
   palettes: ALL_PALETTES,
+  backgrounds: [],
 };
+
+/** The fields the display-settings dialog offers for a saved dashboard. */
+export const settingsFormFields = (dashboard: Dashboard): DisplayFields => ({
+  ...ALL_DISPLAY_FIELDS,
+  backgrounds: PALETTE_COLORS[dashboard.display.palette],
+});
 
 const pixelField = (name: string, label: string): StudioFormSchema => ({
   name,
@@ -291,6 +303,23 @@ const paletteFields = (palettes: PaletteId[]): StudioFormSchema[] => [
         options: palettes.map((value) => ({
           value,
           label: PALETTE_LABELS[value],
+        })),
+      },
+    },
+  },
+];
+
+const backgroundFields = (colors: string[]): StudioFormSchema[] => [
+  {
+    name: "background",
+    label: strings.fields.background,
+    required: true,
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: colors.map((color) => ({
+          value: color,
+          label: `${color[0].toUpperCase()}${color.slice(1)}`,
         })),
       },
     },
@@ -352,6 +381,9 @@ export const dashboardFormSchema = (
   },
   ...(display.size ? sizeFields() : []),
   ...(display.palettes.length > 1 ? paletteFields(display.palettes) : []),
+  ...(display.backgrounds.length > 0
+    ? backgroundFields(display.backgrounds)
+    : []),
   ...rotationFields(),
   ...advancedFields(),
 ];
@@ -364,6 +396,7 @@ const ACCENTS: Partial<Record<PaletteId, string>> = {
   bwry: "#d32f2f",
   bwy: "#d6a800",
   spectra6: "#246bfd",
+  seven_color: "#ff8000",
 };
 
 /** The colour a gallery miniature uses for its accent mark. */

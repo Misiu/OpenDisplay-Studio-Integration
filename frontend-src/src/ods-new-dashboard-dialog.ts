@@ -3,6 +3,7 @@ import { customElement, property } from "lit/decorators.js";
 import {
   ALL_PALETTES,
   PRESET_PROFILES,
+  type DisplayFields,
   dashboardFormData,
   dashboardFormLabel,
   dashboardFormSchema,
@@ -18,12 +19,7 @@ import {
 import { emit } from "./events";
 import { strings } from "./strings";
 import { baseStyles, chromeStyles } from "./studio-styles";
-import type {
-  Dashboard,
-  DisplayDevice,
-  HomeAssistant,
-  PaletteId,
-} from "./types";
+import type { Dashboard, DisplayDevice, HomeAssistant } from "./types";
 
 type PickerChange = CustomEvent<{ value: Record<string, string> }>;
 
@@ -321,17 +317,18 @@ export class OdsNewDashboardDialog extends LitElement {
   }
 
   /** The fields below the picker: a custom display sets its size, a preset only its colors. */
-  private displayFields(): { size: boolean; palettes: PaletteId[] } {
+  private displayFields(): DisplayFields {
     if (this.source === "custom") {
-      return { size: true, palettes: ALL_PALETTES };
+      return { size: true, palettes: ALL_PALETTES, backgrounds: [] };
     }
     if (this.source === "preset") {
       return {
         size: false,
         palettes: profileById(this.dashboard.display.profileId).palettes,
+        backgrounds: [],
       };
     }
-    return { size: false, palettes: [] };
+    return { size: false, palettes: [], backgrounds: [] };
   }
 
   protected render(): TemplateResult {

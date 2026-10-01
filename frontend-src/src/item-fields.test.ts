@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  appearanceFormData,
-  definitionFor,
   hasCornerFields,
   layoutFields,
-  primitiveAppearanceSchema,
-  primitiveValuesFromForm,
+  fieldFormSchema,
+  primitiveFields,
 } from "./item-fields";
 import {
   circleItem,
@@ -116,17 +114,17 @@ describe("layoutFields", () => {
   });
 });
 
-describe("primitiveAppearanceSchema", () => {
-  const names = (item: PrimitiveItem, palette = "bw" as const) =>
-    primitiveAppearanceSchema(item, palette, primitiveDefinitions).map(
-      (entry) => entry.name
-    );
+describe("primitiveFields", () => {
+  const names = (
+    item: PrimitiveItem,
+    section: "layout" | "appearance",
+    definitions = primitiveDefinitions
+  ) => primitiveFields(item, definitions, section).map((field) => field.key);
 
-  it("offers the fields of each primitive type", () => {
-    expect(names(textItem())).toEqual([
+  it("lists the appearance of each primitive type, in the order of its definition", () => {
+    expect(names(textItem(), "appearance")).toEqual([
       "value",
       "color",
-      "anchor",
       "max_width",
       "truncate",
       "font",
@@ -136,80 +134,30 @@ describe("primitiveAppearanceSchema", () => {
       "stroke_fill",
       "parse_colors",
     ]);
-    expect(names(rectangleItem())).toEqual([
+    expect(names(rectangleItem(), "appearance")).toEqual([
       "fill",
       "outline",
       "width",
       "radius",
       "corners",
     ]);
-    expect(names(circleItem())).toEqual(["fill", "outline", "width"]);
-    expect(
-      names(
-        rectangleItem("l", {
-          type: "line",
-          fill: "black",
-          dashed: false,
-        } as never)
-      )
-    ).toEqual(["fill", "width", "dashed", "dash_length", "space_length"]);
+    expect(names(circleItem(), "appearance")).toEqual([
+      "fill",
+      "outline",
+      "width",
+    ]);
   });
 
-  it("limits colours to the palette plus accent, and lets fills be transparent", () => {
-    const schema = primitiveAppearanceSchema(
-      rectangleItem(),
-      "bwr",
-      primitiveDefinitions
-    );
-    const fill = schema.find((entry) => entry.name === "fill");
-    expect(fill?.selector).toEqual({
-      select: { options: ["transparent", "black", "white", "red", "accent"] },
-    });
-    const outline = schema.find((entry) => entry.name === "outline");
-    expect(outline?.selector).toEqual({
-      select: { options: ["black", "white", "red", "accent"] },
-    });
-  });
-});
-
-describe("definition-driven fields", () => {
-  const qr = (): PrimitiveItem => ({
-    id: "qr",
-    kind: "primitive",
-    locked: false,
-    hidden: false,
-    primitive: {
-      type: "qrcode",
-      data: "ODX",
-      x: 1,
-      y: 2,
-      boxsize: 3,
-      border: 1,
-      color: "black",
-      bgcolor: "white",
-    },
+  it("lists what is not a number in the layout section with the layout, the anchor first", () => {
+    expect(names(textItem(), "layout")).toEqual(["anchor"]);
+    expect(names(circleItem(), "layout")).toEqual([]);
+    expect(names(primitiveItem("icon_sequence", "s"), "layout")).toEqual([
+      "direction",
+      "anchor",
+    ]);
   });
 
-  it("limits the module size of a QR code to what its definition says", () => {
-    const moduleSize = layoutFields(qr(), dashboard, primitiveDefinitions)
-      .grid[2];
-    expect(moduleSize).toMatchObject({ label: "Module size", min: 1, max: 16 });
-  });
-
-  it("limits a radius by the shorter side of the display", () => {
-    const radius = layoutFields(circleItem(), dashboard, primitiveDefinitions)
-      .grid[2];
-    expect(radius.max).toBe(300);
-  });
-
-  it("shows no layout fields for a primitive the backend does not offer", () => {
-    expect(layoutFields(circleItem(), dashboard, [])).toEqual({
-      grid: [],
-      extra: [],
-    });
-  });
-
-  it("does not show fields the backend fixes", () => {
+  it("does not list fields the backend fixes", () => {
     const [definition] = primitiveDefinitions;
     const hidden: PrimitiveDefinition = {
       ...definition,
@@ -218,67 +166,58 @@ describe("definition-driven fields", () => {
       ),
     };
 
-    const names = primitiveAppearanceSchema(textItem(), "bw", [hidden]).map(
-      (entry) => entry.name
+    const listed = names(textItem(), "appearance", [hidden]);
+
+    expect(listed).not.toContain("color");
+    expect(listed).toContain("value");
+  });
+
+  it("lists nothing for a type the backend does not offer", () => {
+    expect(names(textItem(), "appearance", [])).toEqual([]);
+  });
+});
+
+describe("fieldFormSchema", () => {
+  const schemaOf = (type: Parameters<typeof primitiveItem>[0], key: string) => {
+    const definition = primitiveDefinitions.find(
+      (entry) => entry.type === type
     );
+    const field = definition?.fields.find((entry) => entry.key === key);
+    if (!field) throw new Error(`No field ${type}.${key}`);
+    return fieldFormSchema(field, "bwr");
+  };
 
-    expect(names).not.toContain("color");
-    expect(names).toContain("value");
-  });
-
-  it("offers enums as their options and booleans as switches", () => {
-    const bar: PrimitiveItem = {
-      id: "b",
-      kind: "primitive",
-      locked: false,
-      hidden: false,
-      primitive: {
-        type: "progress_bar",
-        x_start: 0,
-        y_start: 0,
-        x_end: 9,
-        y_end: 9,
-        progress: 50,
-        direction: "right",
-        background: "white",
-        fill: "accent",
-        outline: "black",
-        width: 1,
-        show_percentage: true,
-      },
+  it("edits plot series as a list of objects and each axis as one object", () => {
+    const series = schemaOf("plot", "data").selector as {
+      object: { multiple: boolean; label_field: string; fields: object };
     };
-    const schema = primitiveAppearanceSchema(bar, "bw", primitiveDefinitions);
-    expect(
-      schema.find((entry) => entry.name === "direction")?.selector
-    ).toEqual({
-      select: { options: ["right", "left", "up", "down"] },
-    });
-    expect(
-      schema.find((entry) => entry.name === "show_percentage")?.selector
-    ).toEqual({ boolean: {} });
+    const axis = schemaOf("plot", "yaxis").selector as {
+      object: { fields: object };
+    };
+
+    expect(series.object.multiple).toBe(true);
+    expect(series.object.label_field).toBe("entity");
+    expect(Object.keys(series.object.fields)).toContain("smooth");
+    expect(Object.keys(axis.object.fields)).toContain("grid_style");
   });
 
-  it("shows an empty optional colour as transparent and stores it back as none", () => {
-    const rectangle = rectangleItem();
-    const data = appearanceFormData(rectangle, primitiveDefinitions);
-    expect(data.fill).toBe("transparent");
+  it("limits the colors inside nested settings to the palette plus accent", () => {
+    const series = schemaOf("plot", "data").selector as {
+      object: {
+        fields: { color: { selector: { select: { options: string[] } } } };
+      };
+    };
 
-    const definition = definitionFor(rectangle, primitiveDefinitions);
-    expect(
-      primitiveValuesFromForm({ fill: "transparent", width: 3 }, definition)
-    ).toEqual({ fill: null, width: 3 });
-    expect(primitiveValuesFromForm({ fill: "red" }, definition)).toEqual({
-      fill: "red",
-    });
+    expect(series.object.fields.color.selector.select.options).toEqual([
+      "black",
+      "white",
+      "red",
+      "accent",
+    ]);
   });
 });
 
 describe("the shapes with several points or nested settings", () => {
-  const forDefinitions = (item: PrimitiveItem) =>
-    primitiveAppearanceSchema(item, "bwr", primitiveDefinitions);
-  const selectorOf = (item: PrimitiveItem, name: string) =>
-    forDefinitions(item).find((entry) => entry.name === name)?.selector;
-
   it("lays out a pattern by its origin, cell size, gaps and counts", () => {
     const { grid } = layoutFields(
       primitiveItem("rectangle_pattern", "p"),
@@ -313,80 +252,5 @@ describe("the shapes with several points or nested settings", () => {
     expect(
       hasCornerFields(primitiveItem("plot", "p"), primitiveDefinitions)
     ).toBe(true);
-  });
-
-  it("shows the anchor, which is not a number, with the appearance", () => {
-    const names = forDefinitions(textItem()).map((entry) => entry.name);
-
-    expect(names).toContain("anchor");
-  });
-
-  it("picks corners from a multiple select and fonts from a list that takes other names", () => {
-    const rectangle = rectangleItem();
-    const text = textItem();
-
-    expect(selectorOf(rectangle, "corners")).toEqual({
-      select: {
-        options: ["top_left", "top_right", "bottom_right", "bottom_left"],
-        multiple: true,
-      },
-    });
-    expect(selectorOf(text, "font")).toEqual({
-      select: { options: ["ppb.ttf", "rbm.ttf"], custom_value: true },
-    });
-  });
-
-  it("types points and icons as lines of text", () => {
-    expect(selectorOf(primitiveItem("polygon", "p"), "points")).toEqual({
-      text: { multiline: true },
-    });
-    expect(selectorOf(primitiveItem("icon_sequence", "s"), "icons")).toEqual({
-      text: { multiline: true },
-    });
-  });
-
-  it("edits plot series as a list of objects and each axis as one object", () => {
-    const plot = primitiveItem("plot", "p");
-    const series = selectorOf(plot, "data") as {
-      object: { multiple: boolean; label_field: string; fields: object };
-    };
-    const axis = selectorOf(plot, "yaxis") as { object: { fields: object } };
-
-    expect(series.object.multiple).toBe(true);
-    expect(series.object.label_field).toBe("entity");
-    expect(Object.keys(series.object.fields)).toContain("smooth");
-    expect(Object.keys(axis.object.fields)).toContain("grid_style");
-  });
-
-  it("shows values the way their controls take them, and reads them back", () => {
-    const polygon = primitiveItem("polygon", "p", {
-      points: [
-        [1, 2],
-        [3, 4],
-        [5, 6],
-      ],
-    });
-
-    const data = appearanceFormData(polygon, primitiveDefinitions);
-    const back = primitiveValuesFromForm(
-      { points: data.points },
-      primitiveDefinitions.find((definition) => definition.type === "polygon")
-    );
-
-    expect(data.points).toBe("1, 2\n3, 4\n5, 6");
-    expect(back.points).toEqual([
-      [1, 2],
-      [3, 4],
-      [5, 6],
-    ]);
-  });
-
-  it("keeps the points while the text typed is not yet a list of pairs", () => {
-    const back = primitiveValuesFromForm(
-      { points: "1, 2\nx", fill: "red" },
-      primitiveDefinitions.find((definition) => definition.type === "polygon")
-    );
-
-    expect(back).toEqual({ fill: "red" });
   });
 });

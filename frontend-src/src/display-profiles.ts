@@ -1,15 +1,9 @@
-import { strings } from "./strings";
 import type { DisplayProfile, PaletteId } from "./types";
 
-export const PALETTE_LABELS: Record<PaletteId, string> = strings.palettes;
+import { PALETTE_IDS, PALETTE_LABELS } from "./palettes";
+import { strings } from "./strings";
 
-export const PALETTE_COLORS: Record<PaletteId, string[]> = {
-  bw: ["black", "white"],
-  bwr: ["black", "white", "red"],
-  bwy: ["black", "white", "yellow"],
-  bwry: ["black", "white", "red", "yellow"],
-  spectra6: ["black", "white", "red", "yellow", "blue", "green"],
-};
+export { PALETTE_COLORS, PALETTE_LABELS } from "./palettes";
 
 const solum = (
   id: string,
@@ -107,7 +101,7 @@ export const DISPLAY_PROFILES: DisplayProfile[] = [
     ...strings.customDisplay,
     width: 800,
     height: 480,
-    palettes: ["bw", "bwr", "bwy", "bwry", "spectra6"],
+    palettes: PALETTE_IDS,
     defaultPalette: "bw",
   },
 ];

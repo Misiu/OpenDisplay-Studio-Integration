@@ -5,21 +5,19 @@ import { styleMap } from "lit/directives/style-map.js";
 import { commandById, commandView, type CommandId } from "./commands";
 import { isMacPlatform } from "./dom";
 import { emit, type OdsEvent } from "./events";
-import {
-  itemBounds,
-  transformItem,
-  workingArea,
-  type ItemGesture,
-} from "./geometry";
+import { transformItem, workingArea, type ItemGesture } from "./geometry";
 import {
   boxBetween,
   marqueeSelection,
   moveSelection,
+  displayBoxOf,
+  movedGuides,
   moveTargets,
+  snapTargetsFor,
+  type MeasuredBox,
   selectionBox,
 } from "./selection-gesture";
 import {
-  absoluteBox,
   containerAt,
   countItems,
   findItem,
@@ -30,13 +28,15 @@ import {
   type Placed,
 } from "./tree";
 import { trackPointerGesture } from "./pointer-gesture";
+import { remeasured } from "./primitive-shape";
+import type { Guide } from "./snapping";
 import { itemLocks } from "./locks";
 import { isResizable } from "./primitive-resize";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
 import { baseStyles } from "./studio-styles";
 import { strings } from "./strings";
 import type {
-  ComposePreviewResponse,
+  PreviewState,
   Dashboard,
   ItemBounds,
   PrimitiveDefinition,
@@ -279,6 +279,20 @@ export class OdsCanvas extends LitElement {
         border: 2px dashed #00aef0;
         pointer-events: none;
       }
+      .guide {
+        position: absolute;
+        z-index: 7;
+        border: 0 dashed #e91e8c;
+        pointer-events: none;
+      }
+      .guide.vertical {
+        width: 0;
+        border-left-width: 1px;
+      }
+      .guide.horizontal {
+        height: 0;
+        border-top-width: 1px;
+      }
       .marquee {
         position: absolute;
         z-index: 6;
@@ -405,7 +419,7 @@ export class OdsCanvas extends LitElement {
   ];
 
   @property({ attribute: false }) public dashboard!: Dashboard;
-  @property({ attribute: false }) public preview?: ComposePreviewResponse;
+  @property({ attribute: false }) public preview?: PreviewState;
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
   @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property() public selectedItemId = "";
@@ -427,6 +441,8 @@ export class OdsCanvas extends LitElement {
   @state() private dropContainerId = "";
   /** The box being dragged out on empty canvas, on the display. */
   @state() private marquee?: ItemBounds;
+  /** The lines the moved items share with their siblings and parent. */
+  @state() private guides: Guide[] = [];
   private stopGesture?: () => void;
 
   disconnectedCallback(): void {
@@ -483,8 +499,48 @@ export class OdsCanvas extends LitElement {
     this.setViewport(wheelViewport(this.viewport, event));
   }
 
-  private measure = (item: StudioItem): ItemBounds | undefined =>
-    this.preview?.itemBounds[item.id];
+  /**
+   * The item being resized and what was measured for it when the drag began. A preview
+   * that arrives mid-drag must not change the size the drag is working from.
+   */
+  private resizing?: { original: StudioItem; measured?: ItemBounds };
+
+  /** What the backend measured for the item, brought up to date for edits it has not rendered. */
+  private measure = (item: StudioItem): MeasuredBox | undefined => {
+    const measured = this.measureSize(item);
+    if (measured && this.isPlacedByExpression(item)) {
+      return { ...measured, absolute: true };
+    }
+    return measured;
+  };
+
+  /** An element whose position or size an expression drives is drawn where the backend put it. */
+  private isPlacedByExpression(item: StudioItem): boolean {
+    const locks = itemLocks(item, this.primitives);
+    return locks.position.length > 0 || locks.handles.length > 0;
+  }
+
+  private measureSize = (item: StudioItem): ItemBounds | undefined => {
+    const base = this.resizing;
+    if (base?.original.id === item.id) {
+      return this.remeasure(base.original, item, base.measured);
+    }
+    const measured = this.preview?.itemBounds[item.id];
+    if (!measured || item.kind !== "primitive") return measured;
+    const composed = findItem(this.preview?.composedFrom.items ?? [], item.id);
+    return this.remeasure(composed, item, measured);
+  };
+
+  private remeasure(
+    from: StudioItem | undefined,
+    to: StudioItem,
+    measured: ItemBounds | undefined
+  ): ItemBounds | undefined {
+    if (!measured || from?.kind !== "primitive" || to.kind !== "primitive") {
+      return measured;
+    }
+    return remeasured(from.primitive, to.primitive, measured);
+  }
 
   /** The display pixel under a screen point; points outside the canvas are clamped to it. */
   private clampedPointAt(
@@ -553,6 +609,12 @@ export class OdsCanvas extends LitElement {
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
     const targets = moveTargets(this.dashboard, moving, this.measure);
+    const snap = snapTargetsFor(
+      this.dashboard,
+      moving,
+      target.id,
+      this.measure
+    );
     let last = { clientX: event.clientX, clientY: event.clientY };
     this.stopGesture = trackPointerGesture({
       origin: event,
@@ -560,20 +622,24 @@ export class OdsCanvas extends LitElement {
       onMove: (move) => {
         last = { clientX: move.clientX, clientY: move.clientY };
         const { dx, dy } = this.displayDelta(event, move);
-        emit(this, "items-transform", {
-          items: moveSelection(
-            targets,
-            target.id,
-            dx,
-            dy,
-            this.dashboard,
-            this.snapEnabled
-          ),
-        });
+        // Ctrl or Cmd held turns off every kind of snapping, as the Snap toggle does.
+        const snapping = this.snapEnabled && !move.ctrlKey && !move.metaKey;
+        const items = moveSelection(
+          targets,
+          target.id,
+          dx,
+          dy,
+          this.dashboard,
+          snapping,
+          snap
+        );
+        this.guides = snapping && snap ? movedGuides(targets, items, snap) : [];
+        emit(this, "items-transform", { items });
         this.updateDropContainer(last, moving);
       },
       onEnd: (_end, activated) => {
         this.dropContainerId = "";
+        this.guides = [];
         if (!activated) return;
         const point = this.clampedPointAt(last.clientX, last.clientY);
         const drop =
@@ -584,6 +650,7 @@ export class OdsCanvas extends LitElement {
       },
       onCancel: () => {
         this.dropContainerId = "";
+        this.guides = [];
       },
     });
   }
@@ -598,6 +665,7 @@ export class OdsCanvas extends LitElement {
     const original = structuredClone(item);
     const found = locate(this.dashboard.items, item.id);
     const measured = this.measure(item);
+    this.resizing = { original, measured };
     const minSize =
       item.kind === "widget"
         ? this.widgets.find((widget) => widget.id === item.widget.type)?.layout
@@ -626,7 +694,11 @@ export class OdsCanvas extends LitElement {
         });
       },
       onEnd: (_end, activated) => {
+        this.resizing = undefined;
         if (activated) emit(this, "item-transform-end", { before });
+      },
+      onCancel: () => {
+        this.resizing = undefined;
       },
     });
   }
@@ -897,10 +969,7 @@ export class OdsCanvas extends LitElement {
 
   private renderPlaced(placed: Placed): TemplateResult {
     const { item } = placed;
-    const box = absoluteBox(
-      itemBounds(item, this.measure(item)),
-      placed.offset
-    );
+    const box = displayBoxOf(item, placed.offset, this.measure(item));
     const selected = this.selectedItemIds.includes(item.id);
     const single = this.selectedItemIds.length === 1;
     return html`
@@ -938,6 +1007,28 @@ export class OdsCanvas extends LitElement {
       >
         ${this.renderSelectionSize(box)}
       </div>
+    `;
+  }
+
+  private renderGuide(guide: Guide): TemplateResult {
+    const { width, height } = this.dashboard.display;
+    const vertical = guide.axis === "x";
+    const style = vertical
+      ? {
+          left: `${(guide.position / width) * 100}%`,
+          top: `${(guide.from / height) * 100}%`,
+          height: `${((guide.to - guide.from) / height) * 100}%`,
+        }
+      : {
+          top: `${(guide.position / height) * 100}%`,
+          left: `${(guide.from / width) * 100}%`,
+          width: `${((guide.to - guide.from) / width) * 100}%`,
+        };
+    return html`
+      <div
+        class="guide ${vertical ? "vertical" : "horizontal"}"
+        style=${styleMap(style)}
+      ></div>
     `;
   }
 
@@ -1060,6 +1151,7 @@ export class OdsCanvas extends LitElement {
               this.renderPlaced(placed)
             )}
             ${this.renderSelectionBox()} ${this.renderMarquee()}
+            ${this.guides.map((guide) => this.renderGuide(guide))}
           </div>
         </div>
         <ods-zoom-bar

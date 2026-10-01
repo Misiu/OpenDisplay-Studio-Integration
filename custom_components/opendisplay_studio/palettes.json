@@ -1,0 +1,340 @@
+{
+  "bw": {
+    "schemes": [
+      "MONO"
+    ],
+    "accent": "red",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      }
+    ]
+  },
+  "bwr": {
+    "schemes": [
+      "BWR"
+    ],
+    "accent": "red",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      },
+      {
+        "id": "red",
+        "value": "red",
+        "hex": "#ff0000"
+      }
+    ]
+  },
+  "bwy": {
+    "schemes": [
+      "BWY"
+    ],
+    "accent": "yellow",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      },
+      {
+        "id": "yellow",
+        "value": "yellow",
+        "hex": "#ffff00"
+      }
+    ]
+  },
+  "bwry": {
+    "schemes": [
+      "BWRY"
+    ],
+    "accent": "yellow",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      },
+      {
+        "id": "red",
+        "value": "red",
+        "hex": "#ff0000"
+      },
+      {
+        "id": "yellow",
+        "value": "yellow",
+        "hex": "#ffff00"
+      }
+    ]
+  },
+  "spectra6": {
+    "schemes": [
+      "BWGBRY",
+      "BWGBRY_SPLIT"
+    ],
+    "accent": "red",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      },
+      {
+        "id": "red",
+        "value": "red",
+        "hex": "#ff0000"
+      },
+      {
+        "id": "yellow",
+        "value": "yellow",
+        "hex": "#ffff00"
+      },
+      {
+        "id": "blue",
+        "value": "blue",
+        "hex": "#0000ff"
+      },
+      {
+        "id": "green",
+        "value": "green",
+        "hex": "#00ff00"
+      }
+    ]
+  },
+  "seven_color": {
+    "schemes": [
+      "SEVEN_COLOR"
+    ],
+    "accent": "red",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      },
+      {
+        "id": "red",
+        "value": "red",
+        "hex": "#ff0000"
+      },
+      {
+        "id": "yellow",
+        "value": "yellow",
+        "hex": "#ffff00"
+      },
+      {
+        "id": "blue",
+        "value": "blue",
+        "hex": "#0000ff"
+      },
+      {
+        "id": "green",
+        "value": "green",
+        "hex": "#00ff00"
+      },
+      {
+        "id": "orange",
+        "value": "#ff8000",
+        "hex": "#ff8000"
+      }
+    ]
+  },
+  "grayscale4": {
+    "schemes": [
+      "GRAYSCALE_4"
+    ],
+    "accent": "black",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "gray1",
+        "value": "#555555",
+        "hex": "#555555"
+      },
+      {
+        "id": "gray2",
+        "value": "#aaaaaa",
+        "hex": "#aaaaaa"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      }
+    ]
+  },
+  "grayscale8": {
+    "schemes": [
+      "GRAYSCALE_8"
+    ],
+    "accent": "black",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "gray1",
+        "value": "#242424",
+        "hex": "#242424"
+      },
+      {
+        "id": "gray2",
+        "value": "#494949",
+        "hex": "#494949"
+      },
+      {
+        "id": "gray3",
+        "value": "#6d6d6d",
+        "hex": "#6d6d6d"
+      },
+      {
+        "id": "gray4",
+        "value": "#929292",
+        "hex": "#929292"
+      },
+      {
+        "id": "gray5",
+        "value": "#b6b6b6",
+        "hex": "#b6b6b6"
+      },
+      {
+        "id": "gray6",
+        "value": "#dbdbdb",
+        "hex": "#dbdbdb"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      }
+    ]
+  },
+  "grayscale16": {
+    "schemes": [
+      "GRAYSCALE_16"
+    ],
+    "accent": "black",
+    "colors": [
+      {
+        "id": "black",
+        "value": "black",
+        "hex": "#000000"
+      },
+      {
+        "id": "gray1",
+        "value": "#111111",
+        "hex": "#111111"
+      },
+      {
+        "id": "gray2",
+        "value": "#222222",
+        "hex": "#222222"
+      },
+      {
+        "id": "gray3",
+        "value": "#333333",
+        "hex": "#333333"
+      },
+      {
+        "id": "gray4",
+        "value": "#444444",
+        "hex": "#444444"
+      },
+      {
+        "id": "gray5",
+        "value": "#555555",
+        "hex": "#555555"
+      },
+      {
+        "id": "gray6",
+        "value": "#666666",
+        "hex": "#666666"
+      },
+      {
+        "id": "gray7",
+        "value": "#777777",
+        "hex": "#777777"
+      },
+      {
+        "id": "gray8",
+        "value": "#888888",
+        "hex": "#888888"
+      },
+      {
+        "id": "gray9",
+        "value": "#999999",
+        "hex": "#999999"
+      },
+      {
+        "id": "gray10",
+        "value": "#aaaaaa",
+        "hex": "#aaaaaa"
+      },
+      {
+        "id": "gray11",
+        "value": "#bbbbbb",
+        "hex": "#bbbbbb"
+      },
+      {
+        "id": "gray12",
+        "value": "#cccccc",
+        "hex": "#cccccc"
+      },
+      {
+        "id": "gray13",
+        "value": "#dddddd",
+        "hex": "#dddddd"
+      },
+      {
+        "id": "gray14",
+        "value": "#eeeeee",
+        "hex": "#eeeeee"
+      },
+      {
+        "id": "white",
+        "value": "white",
+        "hex": "#ffffff"
+      }
+    ]
+  }
+}

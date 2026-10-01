@@ -18,6 +18,7 @@ import type {
   DisplayDevice,
   LeafItem,
   Primitive,
+  PrimitiveItem,
   StudioItem,
 } from "./types";
 
@@ -703,7 +704,25 @@ const measuredBox = (primitive: Primitive): Box | undefined => {
 /** The size the harness reports for a leaf, in the coordinates the item stores. */
 const leafBounds = (item: LeafItem): Box => {
   if (item.kind === "widget") return { ...item.frame };
-  return primitiveBounds(item.primitive, measuredBox(item.primitive));
+  const primitive = withNumberTemplates(item);
+  return primitiveBounds(primitive, measuredBox(primitive));
+};
+
+/**
+ * The backend evaluates expressions; the harness only reads the simplest, `{{ 123 }}`,
+ * so a test can see a position that differs from the stored literal.
+ */
+const NUMBER_TEMPLATE = /^\{\{\s*(-?\d+)\s*\}\}$/;
+
+const withNumberTemplates = (item: PrimitiveItem): Primitive => {
+  const resolved = { ...item.primitive };
+  for (const [key, template] of Object.entries(item.expressions ?? {})) {
+    const match = NUMBER_TEMPLATE.exec(template);
+    if (match && key in resolved) {
+      Object.assign(resolved, { [key]: Number(match[1]) });
+    }
+  }
+  return resolved;
 };
 
 /**

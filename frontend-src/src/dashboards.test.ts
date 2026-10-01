@@ -11,6 +11,7 @@ import {
   dashboardFromProfile,
   PRESET_PROFILES,
   dashboardIsValid,
+  settingsFormFields,
   freshDashboard,
   listDashboards,
 } from "./dashboards";
@@ -154,7 +155,7 @@ describe("dashboardFormSchema", () => {
       entries.forEach((entry) =>
         "schema" in entry ? collect(entry.schema) : names.push(entry.name)
       );
-    collect(dashboardFormSchema());
+    collect(dashboardFormSchema(settingsFormFields(dashboardWith())));
     expect(names.sort()).toEqual(
       Object.keys(dashboardFormData(dashboardWith())).sort()
     );
@@ -253,18 +254,17 @@ describe("starting from a display", () => {
         "name" in entry ? [entry.name] : []
       );
 
-    expect(names({ size: false, palettes: [] })).toEqual([
+    expect(names({ size: false, palettes: [], backgrounds: [] })).toEqual([
       "name",
       "rotation",
       "advanced",
     ]);
-    expect(names({ size: false, palettes: ["bw", "bwr"] })).toEqual([
-      "name",
-      "palette",
-      "rotation",
-      "advanced",
-    ]);
-    expect(names({ size: false, palettes: ["bw"] })).not.toContain("palette");
+    expect(
+      names({ size: false, palettes: ["bw", "bwr"], backgrounds: [] })
+    ).toEqual(["name", "palette", "rotation", "advanced"]);
+    expect(
+      names({ size: false, palettes: ["bw"], backgrounds: [] })
+    ).not.toContain("palette");
     expect(names(undefined)).toEqual([
       "name",
       "dimensions",

@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { lastCall, openDashboard } from "./helpers";
 
 const openGallery = async (page: Page) => {
   await page.clock.setFixedTime(new Date("2026-09-28T12:00:00Z"));
@@ -181,12 +182,6 @@ test("creates a custom dashboard and opens it in the editor", async ({
     page.getByRole("textbox", { name: "Dashboard name" })
   ).toHaveValue("Studio board");
   await expect(page.locator(".workspace-meta")).toContainText("640 × 384 px");
-  await expect(
-    page.getByRole("combobox", { name: "Display type" })
-  ).toHaveCount(0);
-  await expect(page.getByRole("combobox", { name: "Palette" })).toHaveValue(
-    "spectra6"
-  );
   const createCall = await page.evaluate(() =>
     window.__ODS_E2E__
       .calls()
@@ -567,5 +562,83 @@ test.describe("starting a dashboard from a display", () => {
     await expect(
       dialog.getByRole("combobox", { name: "Palette" })
     ).toBeVisible();
+  });
+});
+
+test.describe("the display settings of a dashboard", () => {
+  const openSettings = async (page: Page, name: string) => {
+    const menu = await openDashboardMenu(page, name);
+    await menu
+      .getByRole("menuitem", { name: "Display Settings", exact: true })
+      .click();
+    return page.getByRole("dialog", { name: "Display settings", exact: true });
+  };
+
+  const save = async (dialog: Locator) => {
+    await dialog
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+    await expect(dialog).toHaveCount(0);
+  };
+
+  test("turn the canvas and change the background", async ({ page }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+
+    await dialog.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+    await dialog
+      .getByRole("combobox", { name: "Background" })
+      .selectOption("black");
+    await save(dialog);
+
+    await expect(dashboardCard(page, "Kitchen display")).toContainText(
+      "480 × 800"
+    );
+    expect(
+      await lastCall(page, "opendisplay_studio/update_dashboard")
+    ).toMatchObject({
+      dashboard: {
+        display: { rotation: 90, width: 480, height: 800, background: "black" },
+      },
+    });
+  });
+
+  test("keep the device through a rotation, so the design can still be sent", async ({
+    page,
+  }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+    await dialog.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+    await save(dialog);
+
+    await openDashboard(page, "Kitchen display");
+    await page.getByRole("button", { name: "Send to device" }).click();
+
+    await expect(page.getByText("Sent to the device")).toBeVisible();
+    expect(
+      await lastCall(page, "opendisplay_studio/send_to_device")
+    ).toMatchObject({
+      dashboard: { display: { rotation: 90, deviceId: "hallway" } },
+    });
+  });
+
+  test("forget the device when the size is typed by hand", async ({ page }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+    await dialog.getByRole("spinbutton", { name: "Width" }).fill("640");
+    await save(dialog);
+
+    await openDashboard(page, "Kitchen display");
+
+    await expect(
+      page.getByRole("button", { name: "Send to device" })
+    ).toHaveCount(0);
+  });
+
+  test("the editor panel no longer lists the delete action of the dashboard", async ({
+    page,
+  }) => {
+    await openDashboard(page, "Kitchen display");
+
+    await expect(
+      page.getByRole("button", { name: "Delete dashboard", exact: true })
+    ).toHaveCount(0);
   });
 });

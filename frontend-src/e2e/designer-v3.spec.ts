@@ -223,17 +223,11 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
     page.getByRole("button", { name: /^Progress bar$/ })
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
-  await expect(page.getByRole("spinbutton", { name: "Width" })).toHaveValue(
-    "800"
-  );
   await expect(
     page.getByRole("spinbutton", { name: "Outer padding" })
   ).toHaveValue("20");
   await expect(page.getByRole("spinbutton", { name: "Snap size" })).toHaveValue(
     "5"
-  );
-  await expect(page.getByRole("combobox", { name: "Background" })).toHaveValue(
-    "white"
   );
   await expect(page.getByRole("button", { name: /^grid$/i })).toHaveCount(0);
 

@@ -109,6 +109,19 @@ export const constrainItem = (
   }
 };
 
+/**
+ * Where an item may be dragged: the working area, widened to hold an item that already
+ * hangs out of it. Text hangs out when its anchor is changed, and resizing or moving it
+ * must not snap it back in at the first touch.
+ */
+const reachableArea = (area: ItemBounds, bounds: ItemBounds): ItemBounds => {
+  const left = Math.min(area.x, bounds.x);
+  const top = Math.min(area.y, bounds.y);
+  const right = Math.max(area.x + area.width, bounds.x + bounds.width);
+  const bottom = Math.max(area.y + area.height, bounds.y + bounds.height);
+  return { x: left, y: top, width: right - left, height: bottom - top };
+};
+
 interface ResizeItemOptions {
   /**
    * Where the origin of the container the item is in lies on the display. The item's
@@ -180,7 +193,7 @@ export const resizeItem = (
     deltaY: dy,
     minimumWidth,
     minimumHeight,
-    area: workingArea(dashboard),
+    area: reachableArea(workingArea(dashboard), before),
     preserveAspect: shiftKey || intrinsicAspect,
     snapSize: dashboard.display.snapSize,
     snapEnabled: options.snapEnabled,
@@ -266,8 +279,8 @@ const applyGesture = (
     );
     return;
   }
-  const area = workingArea(dashboard);
   const before = itemBounds(item, options.measured);
+  const area = reachableArea(workingArea(dashboard), before);
   const nextX = clamp(
     snapToGrid(before.x + dx, dashboard, options.snapEnabled),
     area.x,

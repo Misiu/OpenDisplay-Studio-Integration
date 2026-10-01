@@ -6,6 +6,8 @@ import type { StringsOverride } from "./i18n";
  */
 export const german: StringsOverride = {
   common: {
+    increase: "Erhöhen",
+    decrease: "Verringern",
     cancel: "Abbrechen",
     close: "Schließen",
   },
@@ -152,14 +154,12 @@ export const german: StringsOverride = {
   },
 
   inspector: {
+    alignInParent: "Im Elternelement ausrichten",
     expand: "Inspektor ausklappen",
     rail: "Ebenen",
     resize: "Breite des Inspektors ändern",
     dashboard: "Dashboard",
-    dashboardHint: "Display- und Flächeneinstellungen",
-    display: "Display",
-    rotationHelp:
-      "Das Bild wird vor dem Senden um diesen Winkel im Uhrzeigersinn gedreht, die Fläche hat also die sichtbare Größe.",
+    dashboardHint: "Einstellungen des Arbeitsbereichs",
     workingArea: "Arbeitsbereich",
     workingAreaHelp:
       "Der Rand legt den sicheren Bearbeitungsbereich fest. Das Einrasten richtet Bewegen und Skalieren an ganzen Pixeln aus.",
@@ -171,7 +171,6 @@ export const german: StringsOverride = {
       "Es behält seine Einstellungen und wird wieder gezeichnet, sobald das Paket zurückkehrt.",
     appearance: "Darstellung",
     diagnostics: "Render-Diagnose",
-    deleteDashboard: "Dashboard löschen",
     removeElement: "Element entfernen",
     locked: "Position ist gesperrt",
     unlock: "Entsperren",
@@ -249,6 +248,7 @@ export const german: StringsOverride = {
   },
 
   fields: {
+    anchor: "Anker",
     name: "Dashboard-Name",
     rotation: "Drehung",
     resolution: "Auflösung",
@@ -266,11 +266,43 @@ export const german: StringsOverride = {
 
   rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
+  anchors: {
+    lt: "Oben links",
+    mt: "Oben Mitte",
+    rt: "Oben rechts",
+    lm: "Mitte links",
+    mm: "Mitte",
+    rm: "Mitte rechts",
+    lb: "Unten links",
+    mb: "Unten Mitte",
+    rb: "Unten rechts",
+  },
+
+  colors: {
+    clear: "Farbe entfernen",
+    none: "Keine",
+    accent: "Akzent",
+    gray: (level: number): string => `Grau ${level}`,
+    names: {
+      black: "Schwarz",
+      white: "Weiß",
+      red: "Rot",
+      yellow: "Gelb",
+      blue: "Blau",
+      green: "Grün",
+      orange: "Orange",
+    },
+  },
+
   palettes: {
     bw: "Schwarz / Weiß",
     bwr: "Schwarz / Weiß / Rot",
     bwy: "Schwarz / Weiß / Gelb",
     bwry: "Schwarz / Weiß / Rot / Gelb",
     spectra6: "Spectra 6 · Schwarz / Weiß / Rot / Gelb / Blau / Grün",
+    seven_color: "Sieben Farben · Spectra 6 und Orange",
+    grayscale4: "Graustufen · 4 Stufen",
+    grayscale8: "Graustufen · 8 Stufen",
+    grayscale16: "Graustufen · 16 Stufen",
   },
 };

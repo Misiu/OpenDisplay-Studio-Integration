@@ -54,15 +54,13 @@ import {
   createWidgetItem,
   moveLayer,
   removeItem,
-  setBackground,
   setDisplayNumber,
   setItemExpression,
   setItemNumber,
-  setPalette,
-  setRotation,
   setWidgetOptions,
   setWidgetPicks,
   toggleItemState,
+  setPrimitiveField,
   updatePrimitiveFields,
 } from "./dashboard-ops";
 import {
@@ -94,12 +92,13 @@ import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
 import { strings } from "./strings";
+import { alignInParent } from "./align";
 import * as api from "./studio-api";
 import { clamp } from "./math";
 import { baseStyles, chromeStyles } from "./studio-styles";
 import { DEFAULT_VIEWPORT, type Viewport } from "./viewport";
 import type {
-  ComposePreviewResponse,
+  PreviewState,
   Dashboard,
   DisplayDevice,
   HomeAssistant,
@@ -294,7 +293,7 @@ export class OdsApp extends LitElement {
   @state() private renameRequestId = "";
   /** What Copy and Cut took; it also survives in local storage for other dashboards. */
   private clipboard = readClipboard();
-  @state() private preview?: ComposePreviewResponse;
+  @state() private preview?: PreviewState;
   @state() private loading = true;
   @state() private saving = false;
   @state() private dirty = false;
@@ -486,24 +485,6 @@ export class OdsApp extends LitElement {
       this.error = messageFrom(error, strings.app.sendFailed);
     } finally {
       this.sending = false;
-    }
-  }
-  private async deleteDashboard(): Promise<void> {
-    if (!this.hass || !this.current) return;
-    const id = this.current.id;
-    try {
-      await api.deleteDashboard(this.hass, id);
-      this.dashboards = this.dashboards.filter(
-        (dashboard) => dashboard.id !== id
-      );
-      this.current = undefined;
-      this.clearSelection();
-      this.preview = undefined;
-      this.dirty = false;
-      this.view = "dashboards";
-      this.clearHistory();
-    } catch (error) {
-      this.error = messageFrom(error, strings.app.deleteFailed);
     }
   }
   private openDashboard(dashboard: Dashboard): void {
@@ -1056,10 +1037,11 @@ export class OdsApp extends LitElement {
     if (!this.hass || !this.current) return;
     this.error = "";
     const request = ++this.previewRequest;
+    const composedFrom = structuredClone(this.current);
     try {
-      const result = await api.composePreview(this.hass, this.current);
+      const result = await api.composePreview(this.hass, composedFrom);
       if (request === this.previewRequest) {
-        this.preview = result;
+        this.preview = { ...result, composedFrom };
         this.scheduleClockRefresh();
       }
     } catch (error) {
@@ -1143,6 +1125,9 @@ export class OdsApp extends LitElement {
     if (!added) return;
     this.mutate((next) => insertOnDisplay(next, added, parentId));
     this.selectItem(added.id);
+    // The new element has no measured size yet; ask for it now, not after the usual delay,
+    // so resizing it right away works from the real size.
+    void this.composePreview();
   }
   private addFromCatalog(value: string): void {
     if (!this.current) return;
@@ -1424,19 +1409,6 @@ export class OdsApp extends LitElement {
     this.mutate((next) => setDisplayNumber(next, key, value));
   }
 
-  private onRotationChange(event: OdsEvent<"rotation-change">): void {
-    this.mutate((next) => setRotation(next, event.detail.rotation));
-    requestAnimationFrame(() => this.canvas?.fitView());
-  }
-
-  private onPaletteChange(event: OdsEvent<"palette-change">): void {
-    this.mutate((next) => setPalette(next, event.detail.palette));
-  }
-
-  private onBackgroundChange(event: OdsEvent<"background-change">): void {
-    this.mutate((next) => setBackground(next, event.detail.color));
-  }
-
   private onWidgetOptionsChange(
     event: OdsEvent<"widget-options-change">
   ): void {
@@ -1490,6 +1462,23 @@ export class OdsApp extends LitElement {
     this.mutate((next) =>
       setContainerBackground(next, this.selectedItemId, background)
     );
+  }
+
+  private onAlignInParent(event: OdsEvent<"align-in-parent">): void {
+    const id = this.selectedItemId;
+    const measured = this.preview?.itemBounds[id];
+    this.mutate((next) =>
+      alignInParent(next, id, event.detail.place, measured)
+    );
+  }
+
+  private onPrimitiveFieldChange(
+    event: OdsEvent<"primitive-field-change">
+  ): void {
+    const { key, value } = event.detail;
+    const id = this.selectedItemId;
+    const measured = this.preview?.itemBounds[id];
+    this.mutate((next) => setPrimitiveField(next, id, key, value, measured));
   }
 
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
@@ -1645,16 +1634,14 @@ export class OdsApp extends LitElement {
           @layers-reorder=${this.onLayersReorder}
           @item-number-change=${this.onItemNumberChange}
           @display-number-change=${this.onDisplayNumberChange}
-          @rotation-change=${this.onRotationChange}
-          @palette-change=${this.onPaletteChange}
-          @background-change=${this.onBackgroundChange}
           @widget-options-change=${this.onWidgetOptionsChange}
           @widget-picks-change=${this.onWidgetPicksChange}
           @widgets-reload=${this.reloadWidgets}
           @primitive-change=${this.onPrimitiveChange}
+          @primitive-field-change=${this.onPrimitiveFieldChange}
+          @align-in-parent=${this.onAlignInParent}
           @container-background-change=${this.onContainerBackgroundChange}
           @expression-change=${this.onExpressionChange}
-          @dashboard-delete-request=${this.deleteDashboard}
         ></ods-inspector>
       </div>
       ${this.renderDeleteDialog()} ${this.renderMenu()}

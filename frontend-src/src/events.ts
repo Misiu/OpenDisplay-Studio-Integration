@@ -1,12 +1,6 @@
 import type { CommandId } from "./commands";
 import type { DashboardFormData, DashboardSource } from "./dashboards";
-import type {
-  Dashboard,
-  PaletteId,
-  Rotation,
-  StudioItem,
-  WidgetPick,
-} from "./types";
+import type { Dashboard, StudioItem, WidgetPick } from "./types";
 import type { Viewport } from "./viewport";
 
 export type EditorView = "dashboards" | "design" | "code";
@@ -42,8 +36,12 @@ export interface OdsEventMap {
   "view-change": { view: "design" | "code" };
   "toggle-ready": undefined;
   "dashboard-save": undefined;
+  "popover-close": undefined;
+  "align-in-parent": { place: string };
+  "anchor-change": { anchor: string };
+  "color-change": { color: string | null };
+  "primitive-field-change": { key: string; value: unknown };
   "send-to-device": undefined;
-  "rotation-change": { rotation: Rotation };
   // library
   "library-collapse": { collapsed: boolean };
   "catalog-add": { value: string };
@@ -91,11 +89,9 @@ export interface OdsEventMap {
   "inspector-resize": { width: number };
   "item-number-change": { key: string; value: number };
   "display-number-change": {
-    key: "width" | "height" | "padding" | "snapSize";
+    key: "padding" | "snapSize";
     value: number;
   };
-  "palette-change": { palette: PaletteId };
-  "background-change": { color: string };
   "widget-options-change": { value: Record<string, unknown> };
   "widget-picks-change": { sourceKey: string; picks: WidgetPick[] };
   "widgets-reload": undefined;
@@ -103,7 +99,6 @@ export interface OdsEventMap {
   "container-background-change": { value: Record<string, unknown> };
   /** `template` is the new expression, `null` for back to the literal, `undefined` to start one. */
   "expression-change": { key: string; template: string | null | undefined };
-  "dashboard-delete-request": undefined;
   // confirm dialog
   "confirm-accept": undefined;
   "confirm-cancel": undefined;

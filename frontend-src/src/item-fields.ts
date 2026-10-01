@@ -1,5 +1,5 @@
 import { PALETTE_COLORS } from "./display-profiles";
-import { UNCHANGED, valueForForm, valueFromForm } from "./field-codecs";
+import { UNCHANGED, valueFromForm } from "./field-codecs";
 import { isBoxPrimitive, primitiveBounds } from "./primitive-shape";
 import { resolveLimit } from "./primitives";
 import { strings } from "./strings";
@@ -241,40 +241,32 @@ const formSelector = (
   }
 };
 
-/** Numbers in the layout section have inputs of their own; everything else is a form field. */
-const isShownInForm = (field: PrimitiveField): boolean =>
-  field.visible !== false &&
-  (field.section === "appearance" || !isNumeric(field));
+/** The `ha-form` entry for a nested field, whose structure Home Assistant edits. */
+export const fieldFormSchema = (
+  field: PrimitiveField,
+  palette: PaletteId
+): HaFormSchema => ({
+  name: field.key,
+  label: field.label,
+  selector: formSelector(field, [...PALETTE_COLORS[palette], "accent"]),
+});
 
-/** The `ha-form` schema for a primitive's appearance, with colours limited to the palette. */
-export const primitiveAppearanceSchema = (
+/**
+ * The fields of a primitive the panel shows as controls of their own, from its definition.
+ * Numbers in the layout section have inputs in the layout grid; anything else in that
+ * section, such as the anchor, is listed with `layout`. Fields the backend fixes are left out.
+ */
+export const primitiveFields = (
   item: PrimitiveItem,
-  palette: PaletteId,
-  definitions: PrimitiveDefinition[]
-): HaFormSchema[] => {
-  const definition = definitionFor(item, definitions);
-  if (!definition) {
-    return [];
-  }
-  const colors = [...PALETTE_COLORS[palette], "accent"];
-  return definition.fields.filter(isShownInForm).map((field) => ({
-    name: field.key,
-    label: field.label,
-    selector: formSelector(field, colors),
-  }));
-};
-
-/** The values the appearance form shows, each turned into what its control takes. */
-export const appearanceFormData = (
-  item: PrimitiveItem,
-  definitions: PrimitiveDefinition[]
-): Record<string, unknown> => {
-  const data: Record<string, unknown> = { ...item.primitive };
-  for (const field of definitionFor(item, definitions)?.fields ?? []) {
-    data[field.key] = valueForForm(field, data[field.key]);
-  }
-  return data;
-};
+  definitions: PrimitiveDefinition[],
+  section: PrimitiveField["section"]
+): PrimitiveField[] =>
+  (definitionFor(item, definitions)?.fields ?? []).filter(
+    (field) =>
+      field.visible !== false &&
+      field.section === section &&
+      (section === "appearance" || !isNumeric(field))
+  );
 
 /** Turn what the appearance form reports back into primitive values. */
 export const primitiveValuesFromForm = (

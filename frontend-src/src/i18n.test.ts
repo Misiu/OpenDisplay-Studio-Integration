@@ -9,7 +9,7 @@ describe("applyLanguage", () => {
     applyLanguage("pl");
 
     expect(strings.header.save).toBe("Zapisz");
-    expect(strings.inspector.deleteDashboard).toBe("Usuń dashboard");
+    expect(strings.inspector.removeElement).toBe("Usuń element");
   });
 
   it("speaks German when Home Assistant does", () => {

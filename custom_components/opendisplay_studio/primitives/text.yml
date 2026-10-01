@@ -40,7 +40,7 @@ fields:
   - key: anchor
     label: Anchor
     shape: enum
-    options: [la, ma, ra, lt, mt, rt, lm, mm, rm, ls, ms, rs, lb, mb, rb, ld, md, rd]
+    options: [lt, mt, rt, lm, mm, rm, lb, mb, rb]
     optional: true
     section: layout
   - key: max_width

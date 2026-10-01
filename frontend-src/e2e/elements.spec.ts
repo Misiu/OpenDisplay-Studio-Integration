@@ -285,21 +285,21 @@ test.describe("ods-inspector", () => {
     await page.mouse.up();
   };
 
-  test("resizes within 286–560 px and remembers the width across collapse", async ({
+  test("resizes within 340–560 px and remembers the width across collapse", async ({
     page,
   }) => {
     await openKitchen(page);
     await dragResizer(page, 0);
     await expect.poll(() => inspectorWidth(page)).toBeCloseTo(560, 0);
     await dragResizer(page, 1400);
-    await expect.poll(() => inspectorWidth(page)).toBeCloseTo(286, 0);
+    await expect.poll(() => inspectorWidth(page)).toBeCloseTo(340, 0);
 
     await page.getByRole("button", { name: "Collapse inspector" }).click();
     await expect(
       page.getByRole("button", { name: "Expand inspector" })
     ).toBeVisible();
     await page.getByRole("button", { name: "Expand inspector" }).click();
-    await expect.poll(() => inspectorWidth(page)).toBeCloseTo(286, 0);
+    await expect.poll(() => inspectorWidth(page)).toBeCloseTo(340, 0);
   });
 
   test("shows dashboard settings when nothing is selected and item settings when something is", async ({
@@ -341,39 +341,29 @@ test.describe("ods-inspector", () => {
     }
   });
 
-  test("has no display type list; the size, palette and background are edited", async ({
+  test("offers only the working area; the display is edited in the gallery", async ({
     page,
   }) => {
     await openKitchen(page);
-    await expect(
-      page.getByRole("combobox", { name: "Display type" })
-    ).toHaveCount(0);
-    await page.getByRole("spinbutton", { name: "Width" }).fill("640");
-    await page.getByRole("spinbutton", { name: "Width" }).press("Tab");
-    await expect(page.locator(".workspace-meta")).toContainText("640 × 480 px");
-    await page
-      .getByRole("combobox", { name: "Background" })
-      .selectOption("black");
-    await expect(
-      page.getByRole("combobox", { name: "Background" })
-    ).toHaveValue("black");
-    await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
-  });
 
-  test("deletes the dashboard from the danger zone", async ({ page }) => {
-    await openKitchen(page);
-    await page
-      .getByRole("button", { name: "Delete dashboard", exact: true })
-      .click();
     await expect(
-      page.getByRole("heading", { name: "Dashboards", exact: true })
+      page.getByRole("spinbutton", { name: "Padding" })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Open dashboard Kitchen display" })
+      page.getByRole("spinbutton", { name: "Snap size" })
+    ).toBeVisible();
+    for (const name of [
+      "Width",
+      "Height",
+      "Palette",
+      "Background",
+      "Rotation",
+    ]) {
+      await expect(page.getByLabel(name, { exact: true })).toHaveCount(0);
+    }
+    await expect(
+      page.getByRole("button", { name: "Delete dashboard", exact: true })
     ).toHaveCount(0);
-    expect(
-      await lastCall(page, "opendisplay_studio/delete_dashboard")
-    ).toMatchObject({ dashboard_id: "demo" });
   });
 });
 
@@ -677,38 +667,6 @@ test.describe("ods-code-view", () => {
 });
 
 test.describe("rotation and sending to a device", () => {
-  test("turning the dashboard swaps the sides of the canvas", async ({
-    page,
-  }) => {
-    await openKitchen(page);
-    await expect(page.locator(".workspace-meta")).toContainText("800 × 480 px");
-
-    await page.getByRole("combobox", { name: "Rotation" }).selectOption("90");
-
-    await expect(page.locator(".workspace-meta")).toContainText("480 × 800 px");
-    await expect(page.getByRole("spinbutton", { name: "Width" })).toHaveValue(
-      "480"
-    );
-    await page.getByRole("combobox", { name: "Rotation" }).selectOption("180");
-    await expect(page.locator(".workspace-meta")).toContainText("800 × 480 px");
-    await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
-  });
-
-  test("sends the design as it is to the device the dashboard is made for", async ({
-    page,
-  }) => {
-    await openKitchen(page);
-    await page.getByRole("combobox", { name: "Rotation" }).selectOption("90");
-
-    await page.getByRole("button", { name: "Send to device" }).click();
-
-    await expect(page.getByText("Sent to the device")).toBeVisible();
-    const sent = await lastCall(page, "opendisplay_studio/send_to_device");
-    expect(sent).toMatchObject({
-      dashboard: { display: { rotation: 90, deviceId: "hallway" } },
-    });
-  });
-
   test("offers no sending for a dashboard that is not made for a device", async ({
     page,
   }) => {
@@ -718,19 +676,6 @@ test.describe("rotation and sending to a device", () => {
     await expect(
       page.getByRole("button", { name: "Save", exact: true })
     ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Send to device" })
-    ).toHaveCount(0);
-  });
-
-  test("forgets the device when the size is typed by hand", async ({
-    page,
-  }) => {
-    await openKitchen(page);
-
-    await page.getByRole("spinbutton", { name: "Width" }).fill("640");
-    await page.getByRole("spinbutton", { name: "Width" }).press("Tab");
-
     await expect(
       page.getByRole("button", { name: "Send to device" })
     ).toHaveCount(0);

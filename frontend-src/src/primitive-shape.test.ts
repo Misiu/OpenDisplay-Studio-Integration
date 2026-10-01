@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { itemBounds, resizeItem, translateItem } from "./geometry";
+import {
+  itemBounds,
+  resizeItem,
+  transformItem,
+  translateItem,
+} from "./geometry";
+import { reanchored, remeasured } from "./primitive-shape";
 import { dashboardWith, primitiveItem } from "./test-support";
 
 const dashboard = dashboardWith([], { width: 800, height: 480 });
@@ -254,5 +260,157 @@ describe("resizing a primitive", () => {
     expect(text.primitive).toMatchObject({ size: 40 });
     expect(after.width).toBeGreaterThan(before.width);
     expect(after.x).toBe(before.x);
+  });
+});
+
+describe("the measurement of a primitive that was edited since it was rendered", () => {
+  const measuredAt20 = { x: 0, y: 0, width: 100, height: 25 };
+
+  it("grows text with its font size", () => {
+    const composed = primitiveItem("text", "t", { size: 20 }).primitive;
+    const edited = primitiveItem("text", "t", { size: 40 }).primitive;
+
+    expect(remeasured(composed, edited, measuredAt20)).toMatchObject({
+      width: 200,
+      height: 50,
+    });
+  });
+
+  it("shows a text that is being resized at its new size, around its anchor", () => {
+    const original = primitiveItem("text", "t", {
+      x: 300,
+      y: 200,
+      size: 20,
+      value: "Centred",
+      anchor: "mm",
+    });
+    const board = dashboardWith([], { width: 800, height: 480 });
+    const resized = structuredClone(original);
+    resizeItem(resized, "se", 100, 0, false, board, {
+      snapEnabled: false,
+      measured: measuredAt20,
+    });
+
+    const size = resized.primitive.type === "text" ? resized.primitive.size : 0;
+    const shown = itemBounds(
+      resized,
+      remeasured(original.primitive, resized.primitive, measuredAt20)
+    );
+
+    expect(size).toBe(40);
+    expect(shown.width).toBe(200);
+    expect(shown.x + shown.width / 2).toBeCloseTo(
+      resized.primitive.type === "text" ? resized.primitive.x : 0,
+      0
+    );
+  });
+
+  it("resizes a QR code by its module size and quiet zone", () => {
+    const composed = primitiveItem("qrcode", "q", {
+      boxsize: 3,
+      border: 1,
+    }).primitive;
+    const edited = primitiveItem("qrcode", "q", {
+      boxsize: 5,
+      border: 4,
+    }).primitive;
+
+    // 21 modules and a quiet zone of one: 69 px. With a zone of four and 5 px modules: 145.
+    expect(
+      remeasured(composed, edited, { x: 0, y: 0, width: 69, height: 69 })
+    ).toMatchObject({ width: 145, height: 145 });
+  });
+
+  it("leaves what does not depend on the edit alone", () => {
+    const rectangle = primitiveItem("rectangle", "r").primitive;
+
+    expect(remeasured(rectangle, rectangle, measuredAt20)).toBe(measuredAt20);
+  });
+});
+
+describe("an item that hangs out of the canvas", () => {
+  const options = { snapEnabled: false };
+  const measured = { x: 0, y: 0, width: 70, height: 45 };
+
+  it("keeps its far corner where it is when resized from the near one", () => {
+    const board = dashboardWith([], { width: 800, height: 480 });
+    const text = primitiveItem("text", "t", {
+      x: 21,
+      y: 40,
+      anchor: "mm",
+      value: "Text",
+    });
+    const before = itemBounds(text, measured);
+
+    resizeItem(text, "se", 57, 38, false, board, { ...options, measured });
+
+    const after = itemBounds(text, { ...measured, width: 131, height: 84 });
+    expect(before.x).toBeLessThan(0);
+    expect(Math.abs(after.x - before.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(1);
+  });
+
+  it("is not pulled back into the canvas by its first move", () => {
+    const board = dashboardWith([], { width: 800, height: 480 });
+    const text = primitiveItem("text", "t", {
+      x: 21,
+      y: 40,
+      anchor: "mm",
+      value: "Text",
+    });
+    const before = itemBounds(text, measured);
+
+    const moved = transformItem(text, { mode: "move" }, 3, 0, board, {
+      ...options,
+      measured,
+    });
+
+    expect(itemBounds(moved, measured).x).toBe(before.x + 3);
+  });
+});
+
+describe("changing the anchor of an element", () => {
+  const measured = { x: 0, y: 0, width: 100, height: 40 };
+
+  it("keeps the box where it is drawn, moving the point its coordinates name", () => {
+    const text = primitiveItem("text", "t", {
+      x: 300,
+      y: 200,
+      anchor: "lt",
+      value: "Label",
+    });
+    const before = itemBounds(text, measured);
+
+    reanchored(text.primitive, "mm", measured);
+
+    expect(itemBounds(text, measured)).toEqual(before);
+    expect(text.primitive).toMatchObject({ anchor: "mm", x: 350, y: 220 });
+  });
+
+  it("works for every pair of the nine anchors", () => {
+    const anchors = ["lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb"];
+    for (const from of anchors) {
+      for (const to of anchors) {
+        const icon = primitiveItem("icon", "i", {
+          x: 300,
+          y: 200,
+          size: 48,
+          anchor: from,
+        });
+        const before = itemBounds(icon);
+
+        reanchored(icon.primitive, to);
+
+        expect(itemBounds(icon), `${from} to ${to}`).toEqual(before);
+      }
+    }
+  });
+
+  it("leaves a primitive without an anchor alone", () => {
+    const circle = primitiveItem("circle", "c", { x: 100, y: 100 });
+
+    reanchored(circle.primitive, "mm");
+
+    expect(circle.primitive).toMatchObject({ x: 100, y: 100 });
   });
 });

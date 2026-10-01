@@ -54,7 +54,7 @@ fields:
   - key: anchor
     label: Anchor
     shape: enum
-    options: [la, ma, ra, lt, mt, rt, lm, mm, rm, ls, ms, rs, lb, mb, rb, ld, md, rd]
+    options: [lt, mt, rt, lm, mm, rm, lb, mb, rb]
     default: lm
     section: layout
   - key: font

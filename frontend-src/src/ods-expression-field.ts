@@ -24,7 +24,7 @@ export class OdsExpressionField extends LitElement {
       .row {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 24px;
-        gap: 6px;
+        gap: 4px;
         align-items: end;
       }
       .expression {
@@ -36,8 +36,8 @@ export class OdsExpressionField extends LitElement {
       }
       textarea {
         width: 100%;
-        min-height: 36px;
-        padding: 8px 9px;
+        min-height: 28px;
+        padding: 6px 8px;
         border: 1px solid var(--primary-color);
         border-radius: 7px;
         background: var(--secondary-background-color, #f3f5f6);
@@ -54,7 +54,7 @@ export class OdsExpressionField extends LitElement {
       .toggle {
         width: 24px;
         height: 24px;
-        margin-bottom: 6px;
+        margin-bottom: 2px;
         padding: 0;
         border: 1px solid var(--studio-border);
         border-radius: 6px;

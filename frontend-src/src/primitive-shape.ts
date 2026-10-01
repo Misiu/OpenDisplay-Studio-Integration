@@ -191,6 +191,37 @@ const qrBounds = (
   return { x: primitive.x, y: primitive.y, width: side, height: side };
 };
 
+const scaledBounds = (measured: ItemBounds, factor: number): ItemBounds => ({
+  ...measured,
+  width: Math.max(1, Math.round(measured.width * factor)),
+  height: Math.max(1, Math.round(measured.height * factor)),
+});
+
+/**
+ * What the backend measured for `composed`, brought up to date for `current`, the same
+ * primitive after edits the backend has not rendered yet (a resize in progress, a new
+ * font size). Text grows with its size and a QR code with its module size and quiet
+ * zone; anything else keeps its measurement.
+ */
+export const remeasured = (
+  composed: Primitive,
+  current: Primitive,
+  measured: ItemBounds
+): ItemBounds => {
+  if (
+    (composed.type === "text" || composed.type === "multiline") &&
+    current.type === composed.type
+  ) {
+    return scaledBounds(measured, current.size / composed.size);
+  }
+  if (composed.type === "qrcode" && current.type === "qrcode") {
+    const modules = measured.width / composed.boxsize - 2 * composed.border;
+    const side = (modules + 2 * current.border) * current.boxsize;
+    return { ...measured, width: side, height: side };
+  }
+  return measured;
+};
+
 /**
  * The pixels a primitive occupies, from its fields. Text and QR codes take their size
  * from `measured`, what the backend reports for the last render, when there is one.
@@ -238,6 +269,22 @@ export const primitiveBounds = (
         height: measured?.height ?? 1,
       };
   }
+};
+
+/**
+ * Give a primitive another anchor without moving what is drawn: its coordinates are those
+ * of the anchor point, so they move by how far the anchor point moved within the box.
+ */
+export const reanchored = (
+  primitive: Primitive,
+  anchor: string,
+  measured?: ItemBounds
+): void => {
+  if (!("anchor" in primitive) || !("x" in primitive)) return;
+  const before = primitiveBounds(primitive, measured);
+  primitive.anchor = anchor;
+  const after = primitiveBounds(primitive, measured);
+  translatePrimitive(primitive, before.x - after.x, before.y - after.y);
 };
 
 /** Move a primitive by (dx, dy). A debug grid covers the display and has no position. */

@@ -4,6 +4,7 @@ import {
   dashboardFormData,
   dashboardFormLabel,
   dashboardFormSchema,
+  settingsFormFields,
   dashboardIsValid,
   listDashboards,
   type DashboardFormData,
@@ -340,7 +341,7 @@ export class OdsGallery extends LitElement {
             autofocus
             .hass=${this.hass}
             .data=${dashboardFormData(dashboard)}
-            .schema=${dashboardFormSchema()}
+            .schema=${dashboardFormSchema(settingsFormFields(dashboard))}
             .computeLabel=${dashboardFormLabel}
             @value-changed=${this.settingsChanged}
           ></ha-form>

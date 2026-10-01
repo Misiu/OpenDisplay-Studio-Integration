@@ -1,5 +1,10 @@
 import { boundingBox } from "./container-ops";
-import { itemBounds, transformItem, translateItem } from "./geometry";
+import {
+  itemBounds,
+  transformItem,
+  translateItem,
+  workingArea,
+} from "./geometry";
 import {
   absoluteBox,
   containerBox,
@@ -9,10 +14,42 @@ import {
   withOffsets,
   type Offset,
 } from "./tree";
+import {
+  alignmentGuides,
+  snapAdjustment,
+  type Guide,
+  type SnapTargets,
+} from "./snapping";
 import type { Dashboard, ItemBounds, StudioItem } from "./types";
 
+/**
+ * What the backend measured for an item. `absolute` marks a box whose place, not only
+ * whose size, is the backend's: an element positioned by an expression is where the
+ * expression put it, which the panel cannot work out from the stored literal.
+ */
+export interface MeasuredBox extends ItemBounds {
+  absolute?: boolean;
+}
+
 /** What the backend measured for an item, if it has rendered it. */
-export type MeasuredBounds = (item: StudioItem) => ItemBounds | undefined;
+export type MeasuredBounds = (item: StudioItem) => MeasuredBox | undefined;
+
+/** The box of an item on the display, from its fields or, where it is driven, the backend's. */
+export const displayBoxOf = (
+  item: StudioItem,
+  offset: Offset,
+  measured?: MeasuredBox
+): ItemBounds => {
+  if (measured?.absolute) {
+    return {
+      x: measured.x,
+      y: measured.y,
+      width: measured.width,
+      height: measured.height,
+    };
+  }
+  return absoluteBox(itemBounds(item, measured), offset);
+};
 
 /** One item taking part in a drag, as it was when the drag began. */
 export interface MoveTarget {
@@ -40,10 +77,61 @@ export const moveTargets = (
     ];
   });
 
+/** The box around the targets as they were when the drag began, on the display. */
+const targetsBox = (targets: MoveTarget[]): ItemBounds =>
+  boundingBox(
+    targets.map((target) =>
+      absoluteBox(itemBounds(target.original, target.measured), target.offset)
+    )
+  );
+
+/**
+ * What the moved items snap to: the visible siblings of the main item and the box they
+ * live in, a container or the working area, all on the display.
+ */
+export const snapTargetsFor = (
+  dashboard: Dashboard,
+  movingIds: string[],
+  primaryId: string,
+  measure: MeasuredBounds
+): SnapTargets | undefined => {
+  const primary = locate(dashboard.items, primaryId);
+  if (!primary) return undefined;
+  const parentId = primary.parent?.id;
+  const siblings = withOffsets(dashboard.items)
+    .filter((placed) => placed.parent?.id === parentId)
+    .filter((placed) => !placed.item.hidden)
+    .filter((placed) => !movingIds.includes(placed.item.id))
+    .flatMap((placed) => {
+      const box = isContainer(placed.item)
+        ? containerBox(placed)
+        : absoluteBox(
+            itemBounds(placed.item, measure(placed.item)),
+            placed.offset
+          );
+      return box ? [box] : [];
+    });
+  const parent = primary.parent
+    ? parentBox(dashboard, primary.parent.id)
+    : workingArea(dashboard);
+  return parent ? { siblings, parent } : undefined;
+};
+
+const parentBox = (
+  dashboard: Dashboard,
+  id: string
+): ItemBounds | undefined => {
+  const found = locate(dashboard.items, id);
+  return found && isContainer(found.item)
+    ? absoluteBox(itemBounds(found.item), found.offset)
+    : undefined;
+};
+
 /**
  * The selection `dx`/`dy` display pixels into a drag. The main item snaps to the grid
  * and stays in the working area; every other item moves by exactly as much as it did,
- * so a selection keeps its shape.
+ * so a selection keeps its shape. With `snap`, the selection is pulled to the lines of its
+ * siblings and parent that come within reach, which takes the place of the grid there.
  */
 export const moveSelection = (
   targets: MoveTarget[],
@@ -51,7 +139,8 @@ export const moveSelection = (
   dx: number,
   dy: number,
   dashboard: Dashboard,
-  snapEnabled: boolean
+  snapEnabled: boolean,
+  snap?: SnapTargets
 ): StudioItem[] => {
   const primary = targets.find((target) => target.original.id === primaryId);
   if (!primary) return [];
@@ -65,14 +154,41 @@ export const moveSelection = (
   );
   const before = itemBounds(primary.original, primary.measured);
   const after = itemBounds(moved, primary.measured);
-  const actualX = after.x - before.x;
-  const actualY = after.y - before.y;
+  let actualX = after.x - before.x;
+  let actualY = after.y - before.y;
+  if (snap && snapEnabled && !primary.original.locked) {
+    const box = targetsBox(targets);
+    const pull = snapAdjustment({ ...box, x: box.x + dx, y: box.y + dy }, snap);
+    if (pull.dx !== 0) actualX = dx + pull.dx;
+    if (pull.dy !== 0) actualY = dy + pull.dy;
+  }
   return targets.map((target) => {
-    if (target.original.id === primaryId) return moved;
+    if (
+      target.original.id === primaryId &&
+      actualX === after.x - before.x &&
+      actualY === after.y - before.y
+    ) {
+      return moved;
+    }
     const copy = structuredClone(target.original);
     if (!copy.locked) translateItem(copy, actualX, actualY);
     return copy;
   });
+};
+
+/** The guides for the lines the moved items share with their siblings and parent. */
+export const movedGuides = (
+  targets: MoveTarget[],
+  moved: StudioItem[],
+  snap: SnapTargets
+): Guide[] => {
+  const boxes = targets.flatMap((target) => {
+    const item = moved.find((entry) => entry.id === target.original.id);
+    return item
+      ? [absoluteBox(itemBounds(item, target.measured), target.offset)]
+      : [];
+  });
+  return boxes.length > 0 ? alignmentGuides(boundingBox(boxes), snap) : [];
 };
 
 /** The box of an item on the display. */
@@ -83,7 +199,7 @@ export const displayBox = (
 ): ItemBounds | undefined => {
   const found = locate(dashboard.items, id);
   if (!found) return undefined;
-  return absoluteBox(itemBounds(found.item, measure(found.item)), found.offset);
+  return displayBoxOf(found.item, found.offset, measure(found.item));
 };
 
 /** One box around all the items, on the display. */
@@ -116,10 +232,7 @@ export const marqueeSelection = (
     .filter((placed) => {
       const box = isContainer(placed.item)
         ? containerBox(placed)
-        : absoluteBox(
-            itemBounds(placed.item, measure(placed.item)),
-            placed.offset
-          );
+        : displayBoxOf(placed.item, placed.offset, measure(placed.item));
       return box !== undefined && intersects(box, marquee);
     })
     .map((placed) => placed.item.id);

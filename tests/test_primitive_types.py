@@ -119,7 +119,10 @@ async def test_the_polygon_is_shifted_point_by_point() -> None:
     assert shifted["points"] == [[110, 45], [230, 65], [160, 155]]
 
 
-@pytest.mark.parametrize("anchor", ["lt", "mm", "rb", "ms", "ra"])
+NINE_ANCHORS = ["lt", "mt", "rt", "lm", "mm", "rm", "lb", "mb", "rb"]
+
+
+@pytest.mark.parametrize("anchor", NINE_ANCHORS)
 async def test_the_box_of_anchored_text_contains_its_ink(anchor: str) -> None:
     primitive = DEFAULT_PRIMITIVES.normalize(
         {
@@ -290,3 +293,13 @@ class TestPointsInContainers:
 
         with pytest.raises(DashboardValidationError, match="inside a container"):
             self.compile_items([container(children=[item])])
+
+
+@pytest.mark.parametrize("anchor", ["la", "ms", "rd", "xx", "l", ""])
+def test_only_the_nine_anchors_of_the_renderer_are_offered(anchor: str) -> None:
+    for primitive in (
+        {"type": "text", "value": "a", "x": 1, "y": 1},
+        {"type": "icon", "value": "home", "x": 1, "y": 1},
+    ):
+        with pytest.raises(DashboardValidationError, match=r"primitive\.anchor"):
+            DEFAULT_PRIMITIVES.normalize({**primitive, "anchor": anchor}, WIDTH, HEIGHT)

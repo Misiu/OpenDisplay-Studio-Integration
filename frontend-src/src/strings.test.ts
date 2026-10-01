@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PALETTE_IDS } from "./palettes";
 import { strings } from "./strings";
 
 describe("strings with values", () => {
@@ -52,13 +53,9 @@ describe("strings with values", () => {
 
 describe("strings coverage", () => {
   it("has a label for every palette", () => {
-    expect(Object.keys(strings.palettes).sort()).toEqual([
-      "bw",
-      "bwr",
-      "bwry",
-      "bwy",
-      "spectra6",
-    ]);
+    expect(Object.keys(strings.palettes).sort()).toEqual(
+      [...PALETTE_IDS].sort()
+    );
   });
 
   it("has a name for all eight resize handles", () => {
