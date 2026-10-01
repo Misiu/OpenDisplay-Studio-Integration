@@ -1,4 +1,36 @@
 import { applyLanguage } from "./i18n";
+import { backgroundFromForm } from "./container-fields";
+import {
+  copyItems,
+  duplicateItems,
+  pasteItems,
+  pasteTarget,
+  COPY_OFFSET,
+  type ClipboardData,
+} from "./clipboard";
+import { nudgeItems } from "./nudge";
+import { itemLocks } from "./locks";
+import { bringToFront, sendToBack, stepItems } from "./tree";
+import { withZoom } from "./viewport";
+import {
+  canGroup,
+  canUngroup,
+  createContainerItem,
+  groupItems,
+  insertOnDisplay,
+  reparentByDrop,
+  setContainerBackground,
+  ungroupItem,
+} from "./container-ops";
+import {
+  ancestors,
+  replaceItem,
+  containerAt,
+  findItem,
+  isContainer,
+  isGroup,
+  locate,
+} from "./tree";
 import { optionsFromForm } from "./widget-fields";
 import {
   CLOCK_REFRESH_MS,
@@ -17,8 +49,8 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import {
   catalogCascadePosition,
-  applyProfile,
   createPrimitiveItem,
+  renameItem,
   createWidgetItem,
   moveLayer,
   removeItem,
@@ -27,6 +59,7 @@ import {
   setItemExpression,
   setItemNumber,
   setPalette,
+  setRotation,
   setWidgetOptions,
   setWidgetPicks,
   toggleItemState,
@@ -34,19 +67,29 @@ import {
 } from "./dashboard-ops";
 import {
   commandById,
+  CANVAS_MENU,
+  EMPTY_CANVAS_MENU,
+  TREE_MENU,
   commandForKey,
+  isCommandId,
+  menuEntries,
   type CommandActions,
   type CommandContext,
   type CommandId,
+  type MenuEntry,
+  type MenuLayout,
 } from "./commands";
 import {
   copyName,
+  PRESET_PROFILES,
+  dashboardFromDevice,
   dashboardFromForm,
+  dashboardFromProfile,
   dashboardIsValid,
   freshDashboard,
+  type DashboardSource,
 } from "./dashboards";
-import { profileById } from "./display-profiles";
-import { isTypingTarget } from "./dom";
+import { isMacPlatform, isTypingTarget } from "./dom";
 import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
@@ -58,6 +101,7 @@ import { DEFAULT_VIEWPORT, type Viewport } from "./viewport";
 import type {
   ComposePreviewResponse,
   Dashboard,
+  DisplayDevice,
   HomeAssistant,
   PrimitiveDefinition,
   StudioItem,
@@ -68,11 +112,70 @@ import type { OdsCanvas } from "./ods-canvas";
 import "./ods-canvas";
 import "./ods-code-view";
 import "./ods-confirm-dialog";
+import "./ods-context-menu";
+import "./ods-shortcuts-dialog";
 import "./ods-gallery";
 import "./ods-header";
 import "./ods-inspector";
 import "./ods-library";
 import "./ods-new-dashboard-dialog";
+
+const ancestorIds = (dashboard: Dashboard, id: string): string[] =>
+  ancestors(dashboard.items, id).map((container) => container.id);
+
+const CLIPBOARD_KEY = "opendisplay_studio.clipboard";
+const ZOOM_STEP = 1.25;
+const MENU_WIDTH = 228;
+const MENU_ROW = 36;
+const MENU_SEPARATOR = 9;
+const MENU_MARGIN = 8;
+
+/** A menu opened by a right click, where it is on the panel and what it offers. */
+interface OpenMenu {
+  x: number;
+  y: number;
+  label: string;
+  entries: MenuEntry[];
+  /** The element the menu is about, if it was opened on one. */
+  itemId?: string;
+  /** The display pixel under the pointer, for Paste Here. */
+  point?: { x: number; y: number };
+}
+
+const readClipboard = (): ClipboardData | undefined => {
+  try {
+    const text = window.localStorage.getItem(CLIPBOARD_KEY);
+    const parsed: unknown = text ? JSON.parse(text) : undefined;
+    return isClipboard(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const isClipboard = (value: unknown): value is ClipboardData =>
+  typeof value === "object" &&
+  value !== null &&
+  "items" in value &&
+  Array.isArray(value.items);
+
+const writeClipboard = (data: ClipboardData): void => {
+  try {
+    window.localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(data));
+  } catch {
+    // The clipboard still works in memory when storage is not available.
+  }
+};
+
+/** The move a nudge makes: `step` pixels in a direction. */
+const nudgeVector = (
+  direction: "left" | "right" | "up" | "down",
+  step: number
+): { dx: number; dy: number } => {
+  if (direction === "left") return { dx: -step, dy: 0 };
+  if (direction === "right") return { dx: step, dy: 0 };
+  if (direction === "up") return { dx: 0, dy: -step };
+  return { dx: 0, dy: step };
+};
 
 const PREVIEW_DELAY_MS = 220;
 const NOTICE_MS = 5000;
@@ -121,6 +224,15 @@ export class OdsApp extends LitElement {
         overflow-anchor: none;
         contain: size layout paint;
       }
+      .menu-scrim {
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+      }
+      .menu-layer {
+        position: absolute;
+        z-index: 41;
+      }
       .shell {
         height: 100%;
         max-height: 100%;
@@ -168,10 +280,20 @@ export class OdsApp extends LitElement {
   @state() private widgets: WidgetDefinition[] = [];
   @state() private widgetErrors: WidgetLoadError[] = [];
   @state() private notice = "";
+  @state() private sending = false;
   private noticeTimer?: number;
   @state() private primitives: PrimitiveDefinition[] = [];
   @state() private current?: Dashboard;
-  @state() private selectedItemId = "";
+  /** The selected items, in the order they were selected; the last one is the main one. */
+  @state() private selection: string[] = [];
+  /** The group whose children can be selected one by one, if one was entered. */
+  @state() private enteredGroupId = "";
+  @state() private menu?: OpenMenu;
+  @state() private shortcutsOpen = false;
+  /** The element whose name the tree should start editing. */
+  @state() private renameRequestId = "";
+  /** What Copy and Cut took; it also survives in local storage for other dashboards. */
+  private clipboard = readClipboard();
   @state() private preview?: ComposePreviewResponse;
   @state() private loading = true;
   @state() private saving = false;
@@ -180,7 +302,7 @@ export class OdsApp extends LitElement {
   @state() private draggingCatalog = false;
   @state() private undoCount = 0;
   @state() private redoCount = 0;
-  @state() private pendingDeleteItemId = "";
+  @state() private pendingDeleteIds: string[] = [];
   @state() private leftCollapsed = false;
   @state() private rightCollapsed = false;
   @state() private inspectorWidth = 350;
@@ -188,6 +310,9 @@ export class OdsApp extends LitElement {
   @state() private viewport: Viewport = DEFAULT_VIEWPORT;
   @state() private newDashboardOpen = false;
   @state() private newDashboard = freshDashboard("en");
+  @state() private newDashboardSource: DashboardSource = "custom";
+  @state() private newDashboardDeviceId = "";
+  @state() private displayDevices: DisplayDevice[] = [];
   @state() private dashboardDialog?: DashboardDialog;
   @state() private dashboardDraft?: Dashboard;
 
@@ -199,6 +324,10 @@ export class OdsApp extends LitElement {
   private previewRequest = 0;
   private bootstrapStarted = false;
   private readonly history = new History<Dashboard>();
+
+  private get selectedItemId(): string {
+    return this.selection.at(-1) ?? "";
+  }
 
   private get language(): string {
     return this.hass?.language || "en";
@@ -261,9 +390,50 @@ export class OdsApp extends LitElement {
 
   // --- dashboards (gallery) --------------------------------------------------------------------
 
-  private openNewDashboard(): void {
+  /** The devices come first, so the dialog opens on the source that fits what there is. */
+  private async openNewDashboard(): Promise<void> {
+    this.displayDevices = await this.loadDisplayDevices();
     this.newDashboard = freshDashboard(this.language);
+    this.newDashboardDeviceId = "";
     this.newDashboardOpen = true;
+    this.chooseNewDashboardSource(
+      this.displayDevices.length ? "device" : "preset"
+    );
+  }
+
+  private async loadDisplayDevices(): Promise<DisplayDevice[]> {
+    if (!this.hass) return [];
+    try {
+      return await api.listDevices(this.hass);
+    } catch {
+      // Without the OpenDisplay integration the dialog offers the other sources.
+      return [];
+    }
+  }
+
+  /** Switching source gives the dashboard the display that source starts with. */
+  private chooseNewDashboardSource(source: DashboardSource): void {
+    this.newDashboardSource = source;
+    if (source === "device") {
+      this.useDevice(this.newDashboardDeviceId || this.displayDevices[0]?.id);
+    }
+    if (source === "preset") {
+      this.useProfile(this.newDashboard.display.profileId ?? "");
+    }
+  }
+
+  private useDevice(deviceId?: string): void {
+    const device = this.displayDevices.find((entry) => entry.id === deviceId);
+    if (!device) return;
+    this.newDashboardDeviceId = device.id;
+    this.newDashboard = dashboardFromDevice(this.newDashboard, device);
+  }
+
+  private useProfile(profileId: string): void {
+    const profile =
+      PRESET_PROFILES.find((entry) => entry.id === profileId) ??
+      PRESET_PROFILES[0];
+    this.newDashboard = dashboardFromProfile(this.newDashboard, profile);
   }
   private async createDashboard(): Promise<void> {
     if (!this.hass) return;
@@ -273,7 +443,7 @@ export class OdsApp extends LitElement {
       const created = await api.createDashboard(this.hass, this.newDashboard);
       this.dashboards = [...this.dashboards, created];
       this.current = structuredClone(created);
-      this.selectedItemId = "";
+      this.clearSelection();
       this.dirty = false;
       this.newDashboardOpen = false;
       this.view = "design";
@@ -304,6 +474,20 @@ export class OdsApp extends LitElement {
       this.saving = false;
     }
   }
+  /** Tries the design as it is, saved or not, on the device the dashboard is made for. */
+  private async sendToDevice(): Promise<void> {
+    if (!this.hass || !this.current) return;
+    this.sending = true;
+    this.error = "";
+    try {
+      await api.sendToDevice(this.hass, this.current);
+      this.showNotice(strings.app.sentToDevice);
+    } catch (error) {
+      this.error = messageFrom(error, strings.app.sendFailed);
+    } finally {
+      this.sending = false;
+    }
+  }
   private async deleteDashboard(): Promise<void> {
     if (!this.hass || !this.current) return;
     const id = this.current.id;
@@ -313,7 +497,7 @@ export class OdsApp extends LitElement {
         (dashboard) => dashboard.id !== id
       );
       this.current = undefined;
-      this.selectedItemId = "";
+      this.clearSelection();
       this.preview = undefined;
       this.dirty = false;
       this.view = "dashboards";
@@ -330,7 +514,7 @@ export class OdsApp extends LitElement {
     }
     if (this.dirty && !window.confirm(strings.app.discardChanges)) return;
     this.current = structuredClone(dashboard);
-    this.selectedItemId = "";
+    this.clearSelection();
     this.dirty = false;
     this.clearHistory();
     this.view = "design";
@@ -446,7 +630,7 @@ export class OdsApp extends LitElement {
       );
       if (this.current?.id === id) {
         this.current = undefined;
-        this.selectedItemId = "";
+        this.clearSelection();
         this.preview = undefined;
         this.dirty = false;
         this.clearHistory();
@@ -492,12 +676,7 @@ export class OdsApp extends LitElement {
     if (!snapshot) return;
     this.current = snapshot;
     this.dirty = true;
-    if (
-      this.selectedItemId &&
-      !snapshot.items.some((item) => item.id === this.selectedItemId)
-    ) {
-      this.selectedItemId = "";
-    }
+    this.keepExistingSelection(snapshot);
     this.syncHistory();
     this.schedulePreview();
   }
@@ -512,28 +691,71 @@ export class OdsApp extends LitElement {
   private readonly commandActions: CommandActions = {
     undo: () => this.undo(),
     redo: () => this.redo(),
-    requestDelete: (itemId) => {
-      this.pendingDeleteItemId = itemId;
+    requestDelete: (itemIds) => {
+      this.pendingDeleteIds = itemIds;
     },
-    toggleFlag: (itemId, flag) =>
-      this.mutate((next) => toggleItemState(next, itemId, flag)),
+    toggleFlag: (itemIds, flag) =>
+      this.mutate((next) => {
+        for (const itemId of itemIds) toggleItemState(next, itemId, flag);
+      }),
+    group: (itemIds) => this.groupSelection(itemIds),
+    ungroup: (itemId) => this.ungroup(itemId),
+    enterGroup: (itemId) => this.enterGroup(itemId),
+    exitGroup: () => this.exitGroup(),
+    deselect: () => this.clearSelection(),
+    copy: (itemIds) => this.copy(itemIds),
+    cut: (itemIds) => this.cut(itemIds),
+    paste: () => this.paste(),
+    pasteHere: () => this.pasteHere(),
+    duplicate: (itemIds) => this.duplicate(itemIds),
+    arrange: (itemIds, how) => this.arrange(itemIds, how),
+    rename: (itemId) => {
+      this.renameRequestId = itemId;
+    },
+    save: () => void this.saveDashboard(),
+    toggleCode: () =>
+      this.setEditorView(this.view === "code" ? "design" : "code"),
+    zoom: (how) => this.zoom(how),
+    nudge: (itemIds, direction, snapped) =>
+      this.nudge(itemIds, direction, snapped),
+    showShortcuts: () => {
+      this.shortcutsOpen = true;
+    },
   };
 
-  private commandContext(item?: StudioItem): CommandContext {
+  private commandContext(
+    item?: StudioItem,
+    targets?: StudioItem[]
+  ): CommandContext {
+    const dashboard = this.current;
+    const chosen = targets ?? (item ? [item] : this.selectedItems);
+    const ids = chosen.map((target) => target.id);
+    const primary = item ?? chosen.at(-1);
     return {
       canUndo: this.undoCount > 0,
       canRedo: this.redoCount > 0,
-      item,
+      item: primary,
+      targets: chosen,
+      canGroup: dashboard ? canGroup(dashboard, ids) : false,
+      canUngroup:
+        dashboard && primary ? canUngroup(dashboard, primary.id) : false,
+      canEnter: primary ? isGroup(primary) : false,
+      entered: this.enteredGroupId !== "",
+      canPaste: (this.clipboard?.items.length ?? 0) > 0,
+      dirty: this.dirty,
     };
   }
 
-  private get selectedItem(): StudioItem | undefined {
-    return this.current?.items.find(
-      (candidate) => candidate.id === this.selectedItemId
-    );
+  private get selectedItems(): StudioItem[] {
+    const items = this.current?.items ?? [];
+    return this.selection.flatMap((id) => findItem(items, id) ?? []);
   }
 
-  private runCommand(id: CommandId, item = this.selectedItem): void {
+  private get selectedItem(): StudioItem | undefined {
+    return this.selectedItems.at(-1);
+  }
+
+  private runCommand(id: CommandId, item?: StudioItem): void {
     const command = commandById(id);
     const context = this.commandContext(item);
     if (command.isEnabled(context)) {
@@ -544,21 +766,257 @@ export class OdsApp extends LitElement {
   private onCommand(event: OdsEvent<"command">): void {
     const { id, itemId } = event.detail;
     const item = itemId
-      ? this.current?.items.find((candidate) => candidate.id === itemId)
+      ? findItem(this.current?.items ?? [], itemId)
       : undefined;
-    this.runCommand(id, item ?? this.selectedItem);
+    this.runCommand(id, item);
   }
 
   private onKeyDown = (event: KeyboardEvent): void => {
-    if (this.view !== "design" || isTypingTarget(event)) {
+    if (event.defaultPrevented) return;
+    if (this.menu && event.key === "Escape") {
+      event.preventDefault();
+      this.closeMenu();
       return;
     }
-    const command = commandForKey(event);
-    if (command?.isEnabled(this.commandContext(this.selectedItem))) {
-      event.preventDefault();
-      this.runCommand(command.id);
+    if (this.shortcutsOpen && event.key === "Escape") {
+      this.shortcutsOpen = false;
+      return;
     }
+    if (isTypingTarget(event) || this.view === "dashboards") return;
+    const command = commandForKey(event, this.commandContext());
+    if (!command || (this.view === "code" && !command.anywhere)) return;
+    event.preventDefault();
+    this.runCommand(command.id);
   };
+
+  // --- clipboard, order, nudging, zoom ------------------------------------------
+
+  private copy(itemIds: string[]): void {
+    const dashboard = this.current;
+    if (!dashboard) return;
+    this.clipboard = copyItems(dashboard, itemIds);
+    writeClipboard(this.clipboard);
+  }
+
+  /** Cut is a copy and a delete, and one undo step. */
+  private cut(itemIds: string[]): void {
+    this.copy(itemIds);
+    this.mutate((next) => {
+      for (const itemId of itemIds) removeItem(next, itemId);
+    });
+    this.setSelection(this.selection.filter((id) => !itemIds.includes(id)));
+  }
+
+  private paste(): void {
+    this.pasteWith(() => ({ delta: { x: COPY_OFFSET, y: COPY_OFFSET } }));
+  }
+
+  /** Paste Here puts the copies at the pointer, in the container under it. */
+  private pasteHere(): void {
+    const point = this.menu?.point;
+    const dashboard = this.current;
+    if (!point || !dashboard) return;
+    const container = containerAt(
+      dashboard.items,
+      point.x,
+      point.y,
+      [],
+      this.enteredGroupId || undefined
+    );
+    this.pasteWith(
+      () => ({ anchor: point }),
+      container ? { parentId: container.id } : {}
+    );
+  }
+
+  private pasteWith(
+    placement: () =>
+      | { delta: { x: number; y: number } }
+      | { anchor: { x: number; y: number } },
+    forcedTarget?: { parentId?: string }
+  ): void {
+    const dashboard = this.current;
+    const data = this.clipboard ?? readClipboard();
+    if (!dashboard || !data) return;
+    let created: string[] = [];
+    this.mutate((next) => {
+      const target = forcedTarget ?? pasteTarget(next, this.selection);
+      created = pasteItems(next, data, target, placement());
+    });
+    if (created.length > 0) this.setSelection(created);
+  }
+
+  private duplicate(itemIds: string[]): void {
+    let created: string[] = [];
+    this.mutate((next) => {
+      created = duplicateItems(next, itemIds);
+    });
+    if (created.length > 0) this.setSelection(created);
+  }
+
+  private arrange(
+    itemIds: string[],
+    how: "front" | "back" | "up" | "down"
+  ): void {
+    this.mutate((next) => {
+      if (how === "front") bringToFront(next, itemIds);
+      if (how === "back") sendToBack(next, itemIds);
+      if (how === "up" || how === "down") stepItems(next, itemIds, how);
+    });
+  }
+
+  private nudge(
+    itemIds: string[],
+    direction: "left" | "right" | "up" | "down",
+    snapped: boolean
+  ): void {
+    const dashboard = this.current;
+    if (!dashboard) return;
+    const step = snapped ? dashboard.display.snapSize : 1;
+    const { dx, dy } = nudgeVector(direction, step);
+    this.mutate((next) => {
+      nudgeItems(
+        next,
+        itemIds,
+        dx,
+        dy,
+        workingArea(next),
+        (item) => itemLocks(item, this.primitives).position.length === 0
+      );
+    });
+  }
+
+  private zoom(how: "in" | "out" | "reset"): void {
+    if (how === "reset") {
+      this.canvas?.resetView();
+      return;
+    }
+    const factor = how === "in" ? ZOOM_STEP : 1 / ZOOM_STEP;
+    this.viewport = withZoom(this.viewport, this.viewport.zoom * factor);
+  }
+
+  // --- context menus -------------------------------------------------------------
+
+  private closeMenu(): void {
+    this.menu = undefined;
+  }
+
+  private menuLayout(source: "canvas" | "tree" | "empty"): MenuLayout {
+    if (source === "empty") return EMPTY_CANVAS_MENU;
+    return source === "tree" ? TREE_MENU : CANVAS_MENU;
+  }
+
+  private onContextMenu(event: OdsEvent<"context-menu">): void {
+    const { source, itemId, clientX, clientY, point } = event.detail;
+    const dashboard = this.current;
+    if (!dashboard) return;
+    if (itemId && !this.selection.includes(itemId)) this.selectItem(itemId);
+    if (!itemId && source === "empty") this.clearSelection();
+    const item = itemId ? findItem(dashboard.items, itemId) : undefined;
+    const targets = item ? this.targetsForMenu(item) : [];
+    const context = this.commandContext(item, targets);
+    const entries = menuEntries(
+      this.menuLayout(source),
+      context,
+      isMacPlatform()
+    );
+    if (entries.length === 0) return;
+    this.menu = {
+      ...this.menuPosition(clientX, clientY, entries),
+      label: item?.name ?? strings.canvas.menuLabel,
+      entries,
+      itemId,
+      point,
+    };
+  }
+
+  /** A menu opened on a selected element acts on the whole selection. */
+  private targetsForMenu(item: StudioItem): StudioItem[] {
+    return this.selection.includes(item.id) ? this.selectedItems : [item];
+  }
+
+  /** Puts a menu at the pointer, moved back inside the panel when it would overflow. */
+  private menuPosition(
+    clientX: number,
+    clientY: number,
+    entries: MenuEntry[]
+  ): { x: number; y: number } {
+    const host = this.getBoundingClientRect();
+    const height =
+      entries.length * MENU_ROW +
+      entries.filter((entry) => entry.separatorBefore).length * MENU_SEPARATOR +
+      MENU_MARGIN * 2;
+    const x = clientX - host.left;
+    const y = clientY - host.top;
+    return {
+      x:
+        x + MENU_WIDTH + MENU_MARGIN > host.width
+          ? Math.max(MENU_MARGIN, x - MENU_WIDTH)
+          : x,
+      y:
+        y + height + MENU_MARGIN > host.height
+          ? Math.max(MENU_MARGIN, host.height - height - MENU_MARGIN)
+          : y,
+    };
+  }
+
+  private onMenuSelect(event: OdsEvent<"menu-select">): void {
+    const menu = this.menu;
+    this.closeMenu();
+    if (!menu || !this.current) return;
+    const item = menu.itemId
+      ? findItem(this.current.items, menu.itemId)
+      : undefined;
+    if (!isCommandId(event.detail.id)) return;
+    const command = commandById(event.detail.id);
+    const context = this.commandContext(
+      item,
+      item ? this.targetsForMenu(item) : []
+    );
+    if (!command.isEnabled(context)) return;
+    // Paste Here reads the pointer position the menu was opened at.
+    this.menu = menu;
+    command.run(context, this.commandActions);
+    this.menu = undefined;
+  }
+
+  private renderMenu(): TemplateResult | typeof nothing {
+    const menu = this.menu;
+    if (!menu) return nothing;
+    return html`
+      <div
+        class="menu-scrim"
+        @pointerdown=${this.closeMenu}
+        @contextmenu=${this.dismissMenu}
+      ></div>
+      <div
+        class="menu-layer"
+        style=${styleMap({ left: `${menu.x}px`, top: `${menu.y}px` })}
+      >
+        <ods-context-menu
+          .entries=${menu.entries}
+          .label=${menu.label}
+          @menu-select=${this.onMenuSelect}
+        ></ods-context-menu>
+      </div>
+    `;
+  }
+
+  private dismissMenu(event: Event): void {
+    event.preventDefault();
+    this.closeMenu();
+  }
+
+  private renderShortcutsDialog(): TemplateResult | typeof nothing {
+    if (!this.shortcutsOpen) return nothing;
+    return html`
+      <ods-shortcuts-dialog
+        @shortcuts-close=${() => {
+          this.shortcutsOpen = false;
+        }}
+      ></ods-shortcuts-dialog>
+    `;
+  }
 
   private schedulePreview(): void {
     if (this.previewTimer) window.clearTimeout(this.previewTimer);
@@ -613,7 +1071,42 @@ export class OdsApp extends LitElement {
     if (view === "code" && !this.preview) void this.composePreview();
   }
   private selectItem(itemId: string): void {
-    if (this.selectedItemId !== itemId) this.selectedItemId = itemId;
+    this.setSelection(itemId ? [itemId] : []);
+  }
+  private clearSelection(): void {
+    this.setSelection([]);
+  }
+  private setSelection(ids: string[]): void {
+    const same =
+      ids.length === this.selection.length &&
+      ids.every((id, index) => id === this.selection[index]);
+    if (!same) this.selection = ids;
+    const main = ids.at(-1);
+    const dashboard = this.current;
+    if (this.enteredGroupId && main && dashboard) {
+      const stillInside =
+        locate(dashboard.items, main) && this.isInsideEntered(dashboard, main);
+      if (!stillInside) this.enteredGroupId = "";
+    }
+  }
+  private keepExistingSelection(dashboard: Dashboard): void {
+    const kept = this.selection.filter((id) => findItem(dashboard.items, id));
+    if (kept.length !== this.selection.length) this.selection = kept;
+    if (
+      this.enteredGroupId &&
+      !findItem(dashboard.items, this.enteredGroupId)
+    ) {
+      this.enteredGroupId = "";
+    }
+  }
+  /** Whether an item is the entered group or lies in it (or is that group's ancestor). */
+  private isInsideEntered(dashboard: Dashboard, id: string): boolean {
+    const entered = this.enteredGroupId;
+    if (!entered) return true;
+    const chain = [id, ...ancestorIds(dashboard, id)];
+    return (
+      chain.includes(entered) || ancestorIds(dashboard, entered).includes(id)
+    );
   }
   private showWholeCanvas(): void {
     this.canvas?.resetView();
@@ -622,27 +1115,33 @@ export class OdsApp extends LitElement {
 
   // --- adding elements -------------------------------------------------------
 
-  private addAt(value: string, x: number, y: number): void {
-    const dashboard = this.current;
-    if (!dashboard) return;
+  private createFromCatalog(
+    value: string,
+    x: number,
+    y: number,
+    dashboard: Dashboard
+  ): StudioItem | undefined {
     const [kind, type] = value.split(":");
-    if (!type) return;
-    let item: StudioItem | undefined;
+    if (!type) return undefined;
+    if (kind === "container") return createContainerItem(dashboard, x, y);
     if (kind === "widget") {
       const definition = this.widgets.find((widget) => widget.id === type);
-      if (definition) item = createWidgetItem(definition, x, y, dashboard);
-    } else if (kind === "primitive") {
-      item = createPrimitiveItem(this.primitives, type, x, y, dashboard);
-      if (!item) {
-        this.error = strings.app.unsupportedPrimitive(type);
-        return;
-      }
+      return definition
+        ? createWidgetItem(definition, x, y, dashboard)
+        : undefined;
     }
-    if (!item) return;
-    const added = item;
-    this.mutate((next) => {
-      next.items.push(added);
-    });
+    const item = createPrimitiveItem(this.primitives, type, x, y, dashboard);
+    if (!item) this.error = strings.app.unsupportedPrimitive(type);
+    return item;
+  }
+
+  /** Adds a catalog item centred on a display point, inside `parentId` when given. */
+  private addAt(value: string, x: number, y: number, parentId?: string): void {
+    const dashboard = this.current;
+    if (!dashboard) return;
+    const added = this.createFromCatalog(value, x, y, dashboard);
+    if (!added) return;
+    this.mutate((next) => insertOnDisplay(next, added, parentId));
     this.selectItem(added.id);
   }
   private addFromCatalog(value: string): void {
@@ -659,26 +1158,68 @@ export class OdsApp extends LitElement {
     const point = this.canvas?.displayPointAt(clientX, clientY);
     if (!dashboard || !point) return;
     const area = workingArea(dashboard);
-    this.addAt(
-      value,
-      clamp(
-        snapToGrid(point.x, dashboard, this.snapEnabled),
-        area.x,
-        area.x + area.width - 1
-      ),
-      clamp(
-        snapToGrid(point.y, dashboard, this.snapEnabled),
-        area.y,
-        area.y + area.height - 1
-      )
+    const x = clamp(
+      snapToGrid(point.x, dashboard, this.snapEnabled),
+      area.x,
+      area.x + area.width - 1
     );
+    const y = clamp(
+      snapToGrid(point.y, dashboard, this.snapEnabled),
+      area.y,
+      area.y + area.height - 1
+    );
+    const target = containerAt(
+      dashboard.items,
+      x,
+      y,
+      [],
+      this.enteredGroupId || undefined
+    );
+    this.addAt(value, x, y, target?.id);
   }
+
+  // --- groups ----------------------------------------------------------------
+
+  private groupSelection(itemIds: string[]): void {
+    let groupId: string | undefined;
+    this.mutate((next) => {
+      groupId = groupItems(
+        next,
+        itemIds,
+        (item) => this.preview?.itemBounds[item.id]
+      );
+    });
+    if (groupId) this.selectItem(groupId);
+  }
+
+  private ungroup(itemId: string): void {
+    let freed: string[] = [];
+    this.mutate((next) => {
+      freed = ungroupItem(next, itemId);
+    });
+    if (this.enteredGroupId === itemId) this.enteredGroupId = "";
+    this.setSelection(freed);
+  }
+
+  private enterGroup(itemId: string): void {
+    this.enteredGroupId = itemId;
+    this.setSelection([itemId]);
+  }
+
+  private exitGroup(): void {
+    const groupId = this.enteredGroupId;
+    this.enteredGroupId = "";
+    if (groupId) this.selectItem(groupId);
+  }
+
   private confirmDeleteItem(): void {
-    const itemId = this.pendingDeleteItemId;
-    if (!itemId) return;
-    this.pendingDeleteItemId = "";
-    this.mutate((next) => removeItem(next, itemId));
-    if (this.selectedItemId === itemId) this.selectItem("");
+    const itemIds = this.pendingDeleteIds;
+    if (itemIds.length === 0) return;
+    this.pendingDeleteIds = [];
+    this.mutate((next) => {
+      for (const itemId of itemIds) removeItem(next, itemId);
+    });
+    this.setSelection(this.selection.filter((id) => !itemIds.includes(id)));
   }
 
   // --- events from the elements ---------------------------------------------
@@ -720,6 +1261,20 @@ export class OdsApp extends LitElement {
     );
   }
 
+  private onNewDashboardSource(event: OdsEvent<"new-dashboard-source">): void {
+    this.chooseNewDashboardSource(event.detail.source);
+  }
+
+  private onNewDashboardDevice(event: OdsEvent<"new-dashboard-device">): void {
+    this.useDevice(event.detail.deviceId);
+  }
+
+  private onNewDashboardProfile(
+    event: OdsEvent<"new-dashboard-profile">
+  ): void {
+    this.useProfile(event.detail.profileId);
+  }
+
   private closeNewDashboard(): void {
     this.newDashboardOpen = false;
   }
@@ -745,11 +1300,31 @@ export class OdsApp extends LitElement {
   }
 
   private onItemSelect(event: OdsEvent<"item-select">): void {
-    this.selectItem(event.detail.itemId);
+    const { itemId, additive } = event.detail;
+    if (!additive || !itemId) {
+      this.selectItem(itemId);
+      return;
+    }
+    const without = this.selection.filter((id) => id !== itemId);
+    const toggledOff = without.length !== this.selection.length;
+    this.setSelection(toggledOff ? without : [...this.selection, itemId]);
+  }
+
+  private onSelectionChange(event: OdsEvent<"selection-change">): void {
+    this.setSelection(event.detail.itemIds);
+  }
+
+  private onGroupEnter(event: OdsEvent<"group-enter">): void {
+    this.enterGroup(event.detail.groupId);
+  }
+
+  private onItemRename(event: OdsEvent<"item-rename">): void {
+    const { itemId, name } = event.detail;
+    this.mutate((next) => renameItem(next, itemId, name));
   }
 
   private cancelDeleteItem(): void {
-    this.pendingDeleteItemId = "";
+    this.pendingDeleteIds = [];
   }
 
   private onLibraryCollapse(event: OdsEvent<"library-collapse">): void {
@@ -773,17 +1348,12 @@ export class OdsApp extends LitElement {
     this.viewport = event.detail;
   }
 
-  /** A live move or resize: replaces the item without a history step or preview. */
-  private onItemTransform(event: OdsEvent<"item-transform">): void {
-    const { item } = event.detail;
+  /** A live move or resize: replaces the items without a history step or preview. */
+  private onItemsTransform(event: OdsEvent<"items-transform">): void {
+    const { items } = event.detail;
     this.mutate(
       (next) => {
-        const index = next.items.findIndex(
-          (candidate) => candidate.id === item.id
-        );
-        if (index >= 0) {
-          next.items[index] = item;
-        }
+        for (const item of items) replaceItem(next, item);
       },
       false,
       false
@@ -791,8 +1361,29 @@ export class OdsApp extends LitElement {
   }
 
   private onItemTransformEnd(event: OdsEvent<"item-transform-end">): void {
-    this.recordHistory(event.detail.before);
+    const { before, drop } = event.detail;
+    if (drop) this.dropOnContainer(drop.itemId, drop.x, drop.y);
+    this.recordHistory(before);
     this.schedulePreview();
+  }
+
+  /** An element dropped after a drag goes into the container under the pointer. */
+  private dropOnContainer(itemId: string, x: number, y: number): void {
+    const dashboard = this.current;
+    if (!dashboard) return;
+    const target = containerAt(
+      dashboard.items,
+      x,
+      y,
+      [itemId],
+      this.enteredGroupId || undefined
+    );
+    if (target?.id === locate(dashboard.items, itemId)?.parent?.id) return;
+    this.mutate(
+      (next) => reparentByDrop(next, itemId, target?.id),
+      false,
+      false
+    );
   }
 
   private toggleSnap(): void {
@@ -833,9 +1424,8 @@ export class OdsApp extends LitElement {
     this.mutate((next) => setDisplayNumber(next, key, value));
   }
 
-  private onProfileChange(event: OdsEvent<"profile-change">): void {
-    const profile = profileById(event.detail.profileId);
-    this.mutate((next) => applyProfile(next, profile));
+  private onRotationChange(event: OdsEvent<"rotation-change">): void {
+    this.mutate((next) => setRotation(next, event.detail.rotation));
     requestAnimationFrame(() => this.canvas?.fitView());
   }
 
@@ -893,6 +1483,15 @@ export class OdsApp extends LitElement {
     }, NOTICE_MS);
   }
 
+  private onContainerBackgroundChange(
+    event: OdsEvent<"container-background-change">
+  ): void {
+    const background = backgroundFromForm(event.detail.value);
+    this.mutate((next) =>
+      setContainerBackground(next, this.selectedItemId, background)
+    );
+  }
+
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
     const { value } = event.detail;
     this.mutate((next) =>
@@ -903,17 +1502,29 @@ export class OdsApp extends LitElement {
   // --- templates -------------------------------------------------------------
 
   private renderDeleteDialog(): TemplateResult | typeof nothing {
-    const item = this.current?.items.find(
-      (candidate) => candidate.id === this.pendingDeleteItemId
+    const items = this.pendingDeleteIds.flatMap(
+      (id) => findItem(this.current?.items ?? [], id) ?? []
     );
-    if (!item) {
+    const [first] = items;
+    if (!first) {
       return nothing;
     }
+    const holdsItems = items.some(
+      (item) => isContainer(item) && item.children.length > 0
+    );
+    const heading =
+      items.length === 1
+        ? strings.app.deleteElementTitle(first.name)
+        : strings.app.deleteElementsTitle(items.length);
     return html`
       <ods-confirm-dialog
         eyebrow=${strings.app.confirmRemoval}
-        heading=${strings.app.deleteElementTitle(item.name)}
-        body=${strings.app.deleteElementBody}
+        heading=${heading}
+        body=${
+          holdsItems
+            ? strings.app.deleteContainerBody
+            : strings.app.deleteElementBody
+        }
         confirmLabel=${strings.app.deleteElement}
         @confirm-accept=${this.confirmDeleteItem}
         @confirm-cancel=${this.cancelDeleteItem}
@@ -929,8 +1540,14 @@ export class OdsApp extends LitElement {
       <ods-new-dashboard-dialog
         .hass=${this.hass}
         .dashboard=${this.newDashboard}
+        .devices=${this.displayDevices}
+        .source=${this.newDashboardSource}
+        .deviceId=${this.newDashboardDeviceId}
         .saving=${this.saving}
         @new-dashboard-change=${this.onNewDashboardChange}
+        @new-dashboard-source=${this.onNewDashboardSource}
+        @new-dashboard-device=${this.onNewDashboardDevice}
+        @new-dashboard-profile=${this.onNewDashboardProfile}
         @new-dashboard-close=${this.closeNewDashboard}
         @dashboard-create=${this.createDashboard}
       ></ods-new-dashboard-dialog>
@@ -973,6 +1590,13 @@ export class OdsApp extends LitElement {
         class="layout"
         style=${layoutStyle}
         @item-select=${this.onItemSelect}
+        @selection-change=${this.onSelectionChange}
+        @group-enter=${this.onGroupEnter}
+        @item-rename=${this.onItemRename}
+        @context-menu=${this.onContextMenu}
+        @rename-handled=${() => {
+          this.renameRequestId = "";
+        }}
         @command=${this.onCommand}
       >
         <ods-library
@@ -992,13 +1616,15 @@ export class OdsApp extends LitElement {
           .widgets=${this.widgets}
           .primitives=${this.primitives}
           .selectedItemId=${this.selectedItemId}
+          .selectedItemIds=${this.selection}
+          .enteredGroupId=${this.enteredGroupId}
           .snapEnabled=${this.snapEnabled}
           .acceptingDrop=${this.draggingCatalog}
           .canUndo=${this.undoCount > 0}
           .canRedo=${this.redoCount > 0}
           .viewport=${this.viewport}
           @viewport-change=${this.onViewportChange}
-          @item-transform=${this.onItemTransform}
+          @items-transform=${this.onItemsTransform}
           @item-transform-end=${this.onItemTransformEnd}
           @snap-toggle=${this.toggleSnap}
         ></ods-canvas>
@@ -1009,6 +1635,9 @@ export class OdsApp extends LitElement {
           .primitives=${this.primitives}
           .preview=${this.preview}
           .selectedItemId=${this.selectedItemId}
+          .selectedItemIds=${this.selection}
+          .enteredGroupId=${this.enteredGroupId}
+          .renameRequestId=${this.renameRequestId}
           .collapsed=${this.rightCollapsed}
           .width=${this.inspectorWidth}
           @inspector-collapse=${this.onInspectorCollapse}
@@ -1016,18 +1645,20 @@ export class OdsApp extends LitElement {
           @layers-reorder=${this.onLayersReorder}
           @item-number-change=${this.onItemNumberChange}
           @display-number-change=${this.onDisplayNumberChange}
-          @profile-change=${this.onProfileChange}
+          @rotation-change=${this.onRotationChange}
           @palette-change=${this.onPaletteChange}
           @background-change=${this.onBackgroundChange}
           @widget-options-change=${this.onWidgetOptionsChange}
           @widget-picks-change=${this.onWidgetPicksChange}
           @widgets-reload=${this.reloadWidgets}
           @primitive-change=${this.onPrimitiveChange}
+          @container-background-change=${this.onContainerBackgroundChange}
           @expression-change=${this.onExpressionChange}
           @dashboard-delete-request=${this.deleteDashboard}
         ></ods-inspector>
       </div>
-      ${this.renderDeleteDialog()}
+      ${this.renderDeleteDialog()} ${this.renderMenu()}
+      ${this.renderShortcutsDialog()}
     `;
   }
 
@@ -1057,11 +1688,16 @@ export class OdsApp extends LitElement {
           .view=${this.view}
           .dirty=${this.dirty}
           .saving=${this.saving}
+          .sending=${this.sending}
           @show-dashboards=${this.showGallery}
           @dashboard-name-change=${this.onNameChange}
           @view-change=${this.onViewChange}
           @toggle-ready=${this.toggleReady}
           @dashboard-save=${this.saveDashboard}
+          @send-to-device=${this.sendToDevice}
+          @help-open=${() => {
+            this.shortcutsOpen = true;
+          }}
         ></ods-header>
         ${this.renderError()} ${this.renderNotice()}
         ${

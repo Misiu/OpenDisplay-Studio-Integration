@@ -6,12 +6,16 @@ import {
   dashboardFormData,
   dashboardFormLabel,
   dashboardFormSchema,
+  dashboardFromDevice,
   dashboardFromForm,
+  dashboardFromProfile,
+  PRESET_PROFILES,
   dashboardIsValid,
   freshDashboard,
   listDashboards,
 } from "./dashboards";
 import { dashboardWith } from "./test-support";
+import type { DisplayDevice } from "./types";
 
 describe("freshDashboard", () => {
   it("is an empty draft sized from the chosen display profile", () => {
@@ -162,5 +166,193 @@ describe("dashboardFormSchema", () => {
     expect(dashboardFormLabel({ ...dimensions, title: "Section" })).toBe(
       "Section"
     );
+  });
+});
+
+describe("starting from a display", () => {
+  const device: DisplayDevice = {
+    id: "d1",
+    name: "Hall",
+    manufacturer: "Seeed",
+    model: '7.5" BWR',
+    width: 296,
+    height: 128,
+    palette: "bwr",
+    colors: ["black", "white", "red"],
+  };
+
+  it("takes the size and the colors of an OpenDisplay device", () => {
+    const dashboard = dashboardWith([], { background: "white" });
+    dashboard.name = "Mine";
+
+    const next = dashboardFromDevice(dashboard, device);
+
+    expect(next.display).toMatchObject({
+      width: 296,
+      height: 128,
+      palette: "bwr",
+    });
+    expect(next.name).toBe("Mine");
+    expect(dashboard.display.width).toBe(400);
+  });
+
+  it("falls back to a white background the new colors do not have", () => {
+    const dashboard = dashboardWith([], { palette: "bwr", background: "red" });
+
+    const next = dashboardFromDevice(dashboard, { ...device, palette: "bw" });
+
+    expect(next.display.background).toBe("white");
+  });
+
+  it("takes the size of a predefined display and its default colors", () => {
+    const profile = PRESET_PROFILES.find((entry) => entry.palettes.length > 1);
+    if (!profile) throw new Error("No profile offers a choice of colors");
+
+    const next = dashboardFromProfile(dashboardWith(), profile);
+
+    expect(next.display).toMatchObject({
+      profileId: profile.id,
+      width: profile.width,
+      height: profile.height,
+      palette: profile.defaultPalette,
+    });
+  });
+
+  it("only offers a predefined display the colors it can show", () => {
+    const profile = PRESET_PROFILES.find(
+      (entry) => entry.palettes.length === 1
+    );
+    if (!profile) throw new Error("No monochrome profile");
+
+    const next = dashboardFromProfile(dashboardWith(), profile, "spectra6");
+
+    expect(next.display.palette).toBe(profile.palettes[0]);
+  });
+
+  it("lists the predefined displays without the custom one", () => {
+    expect(PRESET_PROFILES.length).toBeGreaterThan(10);
+    expect(PRESET_PROFILES.some((profile) => profile.id === "custom")).toBe(
+      false
+    );
+  });
+
+  it("keeps the chosen display while only its colors or the name change", () => {
+    const dashboard = dashboardWith([], { profileId: "solum-7-5" });
+
+    const next = dashboardFromForm(dashboard, {
+      name: "Renamed",
+      palette: "bw",
+    });
+
+    expect(next.display.profileId).toBe("solum-7-5");
+  });
+
+  it("offers a size and colors only where the source leaves them open", () => {
+    const names = (fields: Parameters<typeof dashboardFormSchema>[0]) =>
+      dashboardFormSchema(fields).flatMap((entry) =>
+        "name" in entry ? [entry.name] : []
+      );
+
+    expect(names({ size: false, palettes: [] })).toEqual([
+      "name",
+      "rotation",
+      "advanced",
+    ]);
+    expect(names({ size: false, palettes: ["bw", "bwr"] })).toEqual([
+      "name",
+      "palette",
+      "rotation",
+      "advanced",
+    ]);
+    expect(names({ size: false, palettes: ["bw"] })).not.toContain("palette");
+    expect(names(undefined)).toEqual([
+      "name",
+      "dimensions",
+      "palette",
+      "rotation",
+      "advanced",
+    ]);
+  });
+});
+
+describe("rotation", () => {
+  const device: DisplayDevice = {
+    id: "d1",
+    name: "Hall",
+    manufacturer: null,
+    model: null,
+    width: 800,
+    height: 480,
+    palette: "bw",
+    colors: ["black", "white"],
+  };
+
+  it("sizes the canvas of a device for the way it is turned", () => {
+    const upright = dashboardFromDevice(dashboardWith(), device);
+    const turned = dashboardFromDevice(
+      dashboardWith([], { rotation: 90 }),
+      device
+    );
+
+    expect(upright.display).toMatchObject({ width: 800, height: 480 });
+    expect(turned.display).toMatchObject({ width: 480, height: 800 });
+  });
+
+  it("links the dashboard to the device it was made from", () => {
+    expect(dashboardFromDevice(dashboardWith(), device).display.deviceId).toBe(
+      "d1"
+    );
+    const profile = PRESET_PROFILES[0];
+    const linked = dashboardWith([], { deviceId: "d1" });
+    expect(dashboardFromProfile(linked, profile).display.deviceId).toBeNull();
+  });
+
+  it("turns the canvas when the form changes the rotation, and not when it also changes the size", () => {
+    const dashboard = dashboardWith([], { width: 800, height: 480 });
+
+    const turned = dashboardFromForm(dashboard, { rotation: "90" });
+    const sized = dashboardFromForm(dashboard, {
+      rotation: "90",
+      width: 500,
+      height: 300,
+    });
+
+    expect(turned.display).toMatchObject({
+      rotation: 90,
+      width: 480,
+      height: 800,
+    });
+    expect(sized.display).toMatchObject({
+      rotation: 90,
+      width: 500,
+      height: 300,
+    });
+  });
+
+  it("keeps the device when the rotation changes and drops it when the size does", () => {
+    const dashboard = dashboardWith([], { deviceId: "d1" });
+
+    expect(
+      dashboardFromForm(dashboard, { rotation: "180" }).display.deviceId
+    ).toBe("d1");
+    expect(
+      dashboardFromForm(dashboard, { width: 500 }).display.deviceId
+    ).toBeNull();
+  });
+
+  it("ignores a rotation that is not a quarter turn", () => {
+    const dashboard = dashboardWith([], { rotation: 90 });
+
+    expect(
+      dashboardFromForm(dashboard, { rotation: "45" }).display.rotation
+    ).toBe(90);
+  });
+
+  it("offers the four rotations in the settings form", () => {
+    const rotation = dashboardFormSchema().find(
+      (entry) => "name" in entry && entry.name === "rotation"
+    );
+
+    expect(JSON.stringify(rotation)).toContain('"value":"270"');
   });
 });

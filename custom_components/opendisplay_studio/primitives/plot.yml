@@ -1,0 +1,281 @@
+type: plot
+order: 85
+name: History plot
+description: A chart of the history of one or more entities
+icon: mdi:chart-line
+category: data
+geometry: box
+extent:
+  x: 320
+  y: 160
+fields:
+  - key: x_start
+    label: Left
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_start
+    label: Top
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: x_end
+    label: Right
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_end
+    label: Bottom
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: data
+    label: Series
+    shape: objects
+    required: true
+    min: 1
+    max: 4
+    default: [{"entity": "sensor.example", "color": "black", "width": 2, "smooth": false, "show_points": false}]
+    nested:
+      - key: entity
+        label: Entity
+        shape: string
+        required: true
+        maxLength: 255
+      - key: color
+        label: Color
+        shape: color
+        default: black
+      - key: width
+        label: "Line width"
+        shape: number
+        min: 1
+        max: 16
+        default: 2
+      - key: smooth
+        label: Smooth
+        shape: boolean
+        default: false
+      - key: line_style
+        label: "Line style"
+        shape: enum
+        options: [linear, step]
+        default: linear
+      - key: show_points
+        label: "Show points"
+        shape: boolean
+        default: false
+      - key: point_size
+        label: "Point size"
+        shape: number
+        min: 1
+        max: 16
+        default: 3
+      - key: point_color
+        label: "Point color"
+        shape: color
+        default: black
+      - key: span_gaps
+        label: "Join across gaps"
+        shape: boolean
+        default: false
+    section: appearance
+  - key: duration
+    label: "Time span"
+    shape: number
+    min: 60
+    max: 2592000
+    default: 86400
+    unit: s
+    section: appearance
+  - key: low
+    label: "Lowest value"
+    shape: number
+    min: -100000
+    max: 100000
+    optional: true
+    section: appearance
+  - key: high
+    label: "Highest value"
+    shape: number
+    min: -100000
+    max: 100000
+    optional: true
+    section: appearance
+  - key: round_values
+    label: "Round the range to whole numbers"
+    shape: boolean
+    default: false
+    section: appearance
+  - key: font
+    label: Font
+    shape: font
+    default: ppb.ttf
+    options: [ppb.ttf, rbm.ttf]
+    section: appearance
+  - key: debug
+    label: "Show the layout borders"
+    shape: boolean
+    default: false
+    section: appearance
+  - key: ylegend
+    label: "Value labels"
+    shape: object
+    optional: true
+    nested:
+      - key: position
+        label: Position
+        shape: enum
+        options: [left, right]
+        default: left
+      - key: size
+        label: Size
+        shape: number
+        min: 6
+        max: 64
+        default: 10
+      - key: width
+        label: Width
+        shape: number
+        min: -1
+        max: 512
+        default: -1
+      - key: color
+        label: Color
+        shape: color
+        default: black
+    section: appearance
+  - key: yaxis
+    label: "Value axis"
+    shape: object
+    optional: true
+    nested:
+      - key: tick_every
+        label: "Tick every"
+        shape: number
+        min: 1
+        max: 100000
+        default: 1
+      - key: width
+        label: "Line width"
+        shape: number
+        min: 1
+        max: 16
+        default: 1
+      - key: color
+        label: Color
+        shape: color
+        default: black
+      - key: tick_length
+        label: "Tick length"
+        shape: number
+        min: 0
+        max: 32
+        default: 4
+      - key: tick_width
+        label: "Tick width"
+        shape: number
+        min: 1
+        max: 16
+        default: 2
+      - key: grid
+        label: Grid
+        shape: boolean
+        default: true
+      - key: grid_color
+        label: "Grid color"
+        shape: color
+        default: black
+      - key: grid_style
+        label: "Grid style"
+        shape: enum
+        options: [dotted, dashed, solid]
+        default: dotted
+    section: appearance
+  - key: xlegend
+    label: "Time labels"
+    shape: object
+    optional: true
+    nested:
+      - key: position
+        label: Position
+        shape: enum
+        options: [bottom, top]
+        default: bottom
+      - key: format
+        label: "Time format"
+        shape: string
+        maxLength: 32
+        default: "%H:%M"
+      - key: size
+        label: Size
+        shape: number
+        min: 6
+        max: 64
+        default: 10
+      - key: interval
+        label: "Label every"
+        shape: number
+        optional: true
+        min: 1
+        max: 2592000
+      - key: height
+        label: Height
+        shape: number
+        min: -1
+        max: 512
+        default: -1
+      - key: color
+        label: Color
+        shape: color
+        default: black
+      - key: snap_to_hours
+        label: "Snap to whole hours"
+        shape: boolean
+        default: true
+    section: appearance
+  - key: xaxis
+    label: "Time axis"
+    shape: object
+    optional: true
+    nested:
+      - key: width
+        label: "Line width"
+        shape: number
+        min: 1
+        max: 16
+        default: 1
+      - key: color
+        label: Color
+        shape: color
+        default: black
+      - key: tick_length
+        label: "Tick length"
+        shape: number
+        min: 0
+        max: 32
+        default: 4
+      - key: tick_width
+        label: "Tick width"
+        shape: number
+        min: 1
+        max: 16
+        default: 2
+      - key: grid
+        label: Grid
+        shape: boolean
+        default: true
+      - key: grid_color
+        label: "Grid color"
+        shape: color
+        default: black
+      - key: grid_style
+        label: "Grid style"
+        shape: enum
+        options: [dotted, dashed, solid]
+        default: dotted
+    section: appearance

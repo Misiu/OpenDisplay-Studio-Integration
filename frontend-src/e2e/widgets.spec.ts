@@ -51,7 +51,7 @@ test.describe("the library", () => {
   });
 
   test("finds a widget by what it does", async ({ page }) => {
-    await page.getByRole("searchbox").fill("forecast");
+    await page.locator("ods-library").getByRole("searchbox").fill("forecast");
 
     await expect(libraryItem(page, "Weather")).toBeVisible();
     await expect(libraryItem(page, "Agenda")).toHaveCount(0);

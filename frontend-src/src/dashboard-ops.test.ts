@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  applyProfile,
   catalogCascadePosition,
   createPrimitiveItem,
   createWidgetItem,
@@ -11,6 +10,7 @@ import {
   setItemExpression,
   setItemNumber,
   setPalette,
+  setRotation,
   toggleItemState,
   updatePrimitiveFields,
 } from "./dashboard-ops";
@@ -73,24 +73,54 @@ describe("display settings", () => {
     expect(dashboard.display.padding).toBe(149);
   });
 
-  it("applies a display profile: size, palette and profile id", () => {
-    const dashboard = dashboardWith([widgetItem("w")]);
-    applyProfile(dashboard, {
-      id: "p",
-      manufacturer: "M",
-      name: "N",
-      width: 296,
-      height: 128,
-      palettes: ["bwr"],
-      defaultPalette: "bwr",
-    });
+  it("swaps the sides of the canvas for a quarter turn and keeps them for a half turn", () => {
+    const dashboard = dashboardWith([], { width: 800, height: 480 });
+
+    setRotation(dashboard, 90);
     expect(dashboard.display).toMatchObject({
-      profileId: "p",
-      width: 296,
-      height: 128,
-      palette: "bwr",
+      rotation: 90,
+      width: 480,
+      height: 800,
     });
-    expect(itemBounds(dashboard.items[0]).height).toBeLessThanOrEqual(128);
+    setRotation(dashboard, 270);
+    expect(dashboard.display).toMatchObject({ width: 480, height: 800 });
+    setRotation(dashboard, 180);
+    expect(dashboard.display).toMatchObject({
+      rotation: 180,
+      width: 800,
+      height: 480,
+    });
+  });
+
+  it("keeps every item on the canvas when it is turned", () => {
+    const dashboard = dashboardWith(
+      [rectangleItem("r", { x_start: 300, x_end: 399 })],
+      { width: 400, height: 300 }
+    );
+
+    setRotation(dashboard, 90);
+
+    const bounds = itemBounds(dashboard.items[0]);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(300);
+  });
+
+  it("forgets the device and the display type when the size is typed by hand", () => {
+    const dashboard = dashboardWith([], { deviceId: "d1", profileId: "p" });
+
+    setDisplayNumber(dashboard, "width", 640);
+
+    expect(dashboard.display).toMatchObject({
+      deviceId: null,
+      profileId: "custom",
+    });
+  });
+
+  it("keeps the device when only the padding changes", () => {
+    const dashboard = dashboardWith([], { deviceId: "d1" });
+
+    setDisplayNumber(dashboard, "padding", 10);
+
+    expect(dashboard.display.deviceId).toBe("d1");
   });
 
   it("resets the background when the new palette does not contain it", () => {

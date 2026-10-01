@@ -17,13 +17,21 @@ describe("the shipped definitions", () => {
   it("offer every ODL primitive of the editor, in library order", () => {
     expect(definitions.map((definition) => definition.type)).toEqual([
       "text",
+      "multiline",
       "rectangle",
+      "rectangle_pattern",
       "line",
+      "polygon",
       "circle",
+      "arc",
       "ellipse",
       "icon",
+      "icon_sequence",
       "qrcode",
+      "dlimg",
       "progress_bar",
+      "plot",
+      "debug_grid",
     ]);
   });
 
@@ -140,5 +148,70 @@ describe("resolveLimit", () => {
 
   it("uses the fallback when a limit is missing", () => {
     expect(resolveLimit(undefined, display, 99)).toBe(99);
+  });
+});
+
+describe("createPrimitive for the shapes with several points or nested settings", () => {
+  it("puts the first point of a polygon where it is dropped and keeps its shape", () => {
+    const polygon = createPrimitive(definitionOf("polygon"), {
+      ...context,
+      x: 300,
+      y: 200,
+    });
+
+    expect(polygon).toMatchObject({
+      points: [
+        [300, 200],
+        [380, 200],
+        [340, 270],
+      ],
+    });
+  });
+
+  it("puts a pattern's origin, an image and an arc at the drop point", () => {
+    expect(
+      createPrimitive(definitionOf("rectangle_pattern"), context)
+    ).toMatchObject({ x_start: 100, y_start: 100 });
+    expect(createPrimitive(definitionOf("dlimg"), context)).toMatchObject({
+      x: 100,
+      y: 100,
+    });
+    expect(createPrimitive(definitionOf("arc"), context)).toMatchObject({
+      x: 100,
+      y: 100,
+    });
+  });
+
+  it("gives a plot a series to draw and leaves the axes unset", () => {
+    expect(createPrimitive(definitionOf("plot"), context)).toMatchObject({
+      x_start: 100,
+      x_end: 420,
+      data: [{ entity: "sensor.example" }],
+      ylegend: null,
+      xaxis: null,
+      low: null,
+    });
+  });
+
+  it("copies the defaults, so editing one primitive never edits the next", () => {
+    const first = createPrimitive(definitionOf("polygon"), context);
+    const second = createPrimitive(definitionOf("polygon"), context);
+
+    if (first?.type === "polygon") first.points[0][0] = 999;
+
+    expect(second).toMatchObject({
+      points: [
+        [100, 100],
+        [180, 100],
+        [140, 170],
+      ],
+    });
+  });
+
+  it("does not place a debug grid: it covers the display", () => {
+    const grid = createPrimitive(definitionOf("debug_grid"), context);
+
+    expect(grid).not.toHaveProperty("x");
+    expect(grid).toMatchObject({ spacing: 20, dashed: true });
   });
 });

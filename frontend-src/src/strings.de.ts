@@ -24,6 +24,8 @@ export const german: StringsOverride = {
     loading: "OpenDisplay Studio wird geladen…",
     loadFailed: "OpenDisplay Studio konnte nicht geladen werden",
     createFailed: "Das Dashboard konnte nicht erstellt werden",
+    sentToDevice: "An das Gerät gesendet",
+    sendFailed: "Das Dashboard konnte nicht an das Gerät gesendet werden",
     saveFailed: "Das Dashboard konnte nicht gespeichert werden",
     deleteFailed: "Das Dashboard konnte nicht gelöscht werden",
     renameFailed: "Das Dashboard konnte nicht umbenannt werden",
@@ -84,10 +86,19 @@ export const german: StringsOverride = {
     subtitle: "Eine eigene OpenDisplay-Fläche erstellen",
     startFrom: "Beginnen mit",
     sources: "Dashboard-Quelle",
+    fromDevice: "Von Gerät",
+    fromDeviceHint: "Größe und Farben",
+    preset: "Vordefiniertes Display",
+    presetHint: "Ein bekanntes Display wählen",
     customSize: "Eigene Größe",
-    customSizeHint: "Auflösung und Farben festlegen",
-    fromDevice: "Von OpenDisplay-Gerät",
-    fromDeviceHint: "Kommt später",
+    customSizeHint: "Größe und Farben festlegen",
+    device: "Gerät",
+    display: "Display",
+    loadingDevices: "OpenDisplay-Geräte werden gesucht…",
+    noDevices:
+      "Keine OpenDisplay-Geräte gefunden. Richte die OpenDisplay-Integration ein oder beginne mit einem vordefinierten Display.",
+    deviceDetails: "Größe und Farben des Dashboards",
+    colors: "Farben",
     create: "Dashboard erstellen",
     creating: "Wird erstellt…",
   },
@@ -100,6 +111,8 @@ export const german: StringsOverride = {
     code: "Code",
     setDraft: "Als Entwurf markieren",
     setReady: "Als fertig markieren",
+    sendToDevice: "An Gerät senden",
+    sendingToDevice: "Wird gesendet…",
     save: "Speichern",
     saving: "Wird gespeichert…",
   },
@@ -145,7 +158,8 @@ export const german: StringsOverride = {
     dashboard: "Dashboard",
     dashboardHint: "Display- und Flächeneinstellungen",
     display: "Display",
-    displayType: "Display-Typ",
+    rotationHelp:
+      "Das Bild wird vor dem Senden um diesen Winkel im Uhrzeigersinn gedreht, die Fläche hat also die sichtbare Größe.",
     workingArea: "Arbeitsbereich",
     workingAreaHelp:
       "Der Rand legt den sicheren Bearbeitungsbereich fest. Das Einrasten richtet Bewegen und Skalieren an ganzen Pixeln aus.",
@@ -236,6 +250,8 @@ export const german: StringsOverride = {
 
   fields: {
     name: "Dashboard-Name",
+    rotation: "Drehung",
+    resolution: "Auflösung",
     width: "Breite",
     height: "Höhe",
     palette: "Palette",
@@ -247,6 +263,8 @@ export const german: StringsOverride = {
   },
 
   customDisplay: { manufacturer: "Eigenes", name: "Eigenes Display" },
+
+  rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
   palettes: {
     bw: "Schwarz / Weiß",

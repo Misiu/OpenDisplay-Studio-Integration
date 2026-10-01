@@ -1,5 +1,5 @@
 import { css, html, LitElement, nothing, type TemplateResult } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import { customElement, property, query, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { commandById, commandView, type CommandId } from "./commands";
@@ -11,8 +11,27 @@ import {
   workingArea,
   type ItemGesture,
 } from "./geometry";
+import {
+  boxBetween,
+  marqueeSelection,
+  moveSelection,
+  moveTargets,
+  selectionBox,
+} from "./selection-gesture";
+import {
+  absoluteBox,
+  containerAt,
+  countItems,
+  findItem,
+  isContainer,
+  locate,
+  selectionTarget,
+  withOffsets,
+  type Placed,
+} from "./tree";
 import { trackPointerGesture } from "./pointer-gesture";
 import { itemLocks } from "./locks";
+import { isResizable } from "./primitive-resize";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
 import { baseStyles } from "./studio-styles";
 import { strings } from "./strings";
@@ -221,6 +240,52 @@ export class OdsCanvas extends LitElement {
         border: 2px solid #00aef0;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
       }
+      .selection.container {
+        z-index: 2;
+        border-color: transparent;
+      }
+      .selection.container:hover {
+        border-color: rgba(3, 169, 244, 0.5);
+      }
+      .selection.holds-selection {
+        border: 1px solid rgba(3, 169, 244, 0.7);
+      }
+      .selection.group {
+        border-style: dashed;
+      }
+      .selection.entered {
+        border: 2px dashed #00aef0;
+        background: rgba(3, 169, 244, 0.05);
+      }
+      .selection.drop-target {
+        border: 2px solid #00aef0;
+        background: rgba(3, 169, 244, 0.14);
+      }
+      .group-hint {
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 6px);
+        min-width: max-content;
+        padding: 2px 7px;
+        border-radius: 4px;
+        color: #fff;
+        background: #283746;
+        font-size: 10px;
+        pointer-events: none;
+      }
+      .multi-selection {
+        position: absolute;
+        z-index: 5;
+        border: 2px dashed #00aef0;
+        pointer-events: none;
+      }
+      .marquee {
+        position: absolute;
+        z-index: 6;
+        border: 1px solid #00aef0;
+        background: rgba(0, 174, 240, 0.12);
+        pointer-events: none;
+      }
       .selection.locked {
         cursor: default;
         border-style: dashed;
@@ -344,6 +409,10 @@ export class OdsCanvas extends LitElement {
   @property({ attribute: false }) public widgets: WidgetDefinition[] = [];
   @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property() public selectedItemId = "";
+  /** Every selected item; `selectedItemId` is the main one. */
+  @property({ attribute: false }) public selectedItemIds: string[] = [];
+  /** The group whose children can be selected one by one. */
+  @property() public enteredGroupId = "";
   @property({ type: Boolean }) public snapEnabled = true;
   /** True while a catalog drag is in progress, so the stage shows it accepts a drop. */
   @property({ type: Boolean }) public acceptingDrop = false;
@@ -354,6 +423,10 @@ export class OdsCanvas extends LitElement {
   @property({ attribute: false }) public viewport: Viewport = DEFAULT_VIEWPORT;
   @query(".canvas") private canvas?: HTMLElement;
   @query(".canvas-stage") private stage?: HTMLElement;
+  /** The container a dragged element would drop into. */
+  @state() private dropContainerId = "";
+  /** The box being dragged out on empty canvas, on the display. */
+  @state() private marquee?: ItemBounds;
   private stopGesture?: () => void;
 
   disconnectedCallback(): void {
@@ -410,24 +483,121 @@ export class OdsCanvas extends LitElement {
     this.setViewport(wheelViewport(this.viewport, event));
   }
 
-  private beginGesture(
+  private measure = (item: StudioItem): ItemBounds | undefined =>
+    this.preview?.itemBounds[item.id];
+
+  /** The display pixel under a screen point; points outside the canvas are clamped to it. */
+  private clampedPointAt(
+    clientX: number,
+    clientY: number
+  ): { x: number; y: number } | undefined {
+    const canvas = this.canvas;
+    if (!canvas) return undefined;
+    const rect = canvas.getBoundingClientRect();
+    const { width, height } = this.dashboard.display;
+    const x = ((clientX - rect.left) / rect.width) * width;
+    const y = ((clientY - rect.top) / rect.height) * height;
+    return {
+      x: Math.min(width, Math.max(0, x)),
+      y: Math.min(height, Math.max(0, y)),
+    };
+  }
+
+  /** What a pointer press on an item selects: its outermost group, unless entered. */
+  private targetOf(item: StudioItem): StudioItem {
+    const id = selectionTarget(
+      this.dashboard.items,
+      item.id,
+      this.enteredGroupId || undefined
+    );
+    return findItem(this.dashboard.items, id) ?? item;
+  }
+
+  private onItemPointerDown(event: PointerEvent, pressed: StudioItem): void {
+    event.stopPropagation();
+    event.preventDefault();
+    const target = this.targetOf(pressed);
+    if (event.shiftKey) {
+      emit(this, "item-select", { itemId: target.id, additive: true });
+      return;
+    }
+    const alreadySelected = this.selectedItemIds.includes(target.id);
+    if (!alreadySelected) emit(this, "item-select", { itemId: target.id });
+    const moving =
+      alreadySelected && this.selectedItemIds.length > 1
+        ? this.selectedItemIds
+        : [target.id];
+    this.beginMove(event, target, moving);
+  }
+
+  private onHandlePointerDown(
     event: PointerEvent,
     item: StudioItem,
-    handle?: ResizeHandle
+    handle: ResizeHandle
   ): void {
     event.stopPropagation();
     event.preventDefault();
     emit(this, "item-select", { itemId: item.id });
-    if (item.locked) return;
     const locks = itemLocks(item, this.primitives);
-    const blocked = handle
-      ? locks.handles.includes(handle)
-      : locks.position.length > 0;
-    if (blocked) return;
+    if (item.locked || locks.handles.includes(handle)) return;
+    this.beginResize(event, item, handle);
+  }
+
+  private beginMove(
+    event: PointerEvent,
+    target: StudioItem,
+    moving: string[]
+  ): void {
+    const locks = itemLocks(target, this.primitives);
+    if (target.locked || locks.position.length > 0) return;
+    this.stopGesture?.();
+    const before = structuredClone(this.dashboard);
+    const targets = moveTargets(this.dashboard, moving, this.measure);
+    let last = { clientX: event.clientX, clientY: event.clientY };
+    this.stopGesture = trackPointerGesture({
+      origin: event,
+      threshold: GESTURE_THRESHOLD,
+      onMove: (move) => {
+        last = { clientX: move.clientX, clientY: move.clientY };
+        const { dx, dy } = this.displayDelta(event, move);
+        emit(this, "items-transform", {
+          items: moveSelection(
+            targets,
+            target.id,
+            dx,
+            dy,
+            this.dashboard,
+            this.snapEnabled
+          ),
+        });
+        this.updateDropContainer(last, moving);
+      },
+      onEnd: (_end, activated) => {
+        this.dropContainerId = "";
+        if (!activated) return;
+        const point = this.clampedPointAt(last.clientX, last.clientY);
+        const drop =
+          moving.length === 1 && point
+            ? { itemId: target.id, x: point.x, y: point.y }
+            : undefined;
+        emit(this, "item-transform-end", { before, drop });
+      },
+      onCancel: () => {
+        this.dropContainerId = "";
+      },
+    });
+  }
+
+  private beginResize(
+    event: PointerEvent,
+    item: StudioItem,
+    handle: ResizeHandle
+  ): void {
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
     const original = structuredClone(item);
-    const measured = this.measuredBounds(item);
+    const found = locate(this.dashboard.items, item.id);
+    const measured = this.measure(item);
     const minSize =
       item.kind === "widget"
         ? this.widgets.find((widget) => widget.id === item.widget.type)?.layout
@@ -437,31 +607,129 @@ export class OdsCanvas extends LitElement {
       origin: event,
       threshold: GESTURE_THRESHOLD,
       onMove: (move) => {
-        const canvas = this.canvas;
-        if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const { width, height } = this.dashboard.display;
-        const dx = Math.round(
-          ((move.clientX - event.clientX) / rect.width) * width
-        );
-        const dy = Math.round(
-          ((move.clientY - event.clientY) / rect.height) * height
-        );
-        const gesture: ItemGesture = handle
-          ? { mode: "resize", handle, shiftKey: move.shiftKey }
-          : { mode: "move" };
-        emit(this, "item-transform", {
-          item: transformItem(original, gesture, dx, dy, this.dashboard, {
-            snapEnabled: this.snapEnabled,
-            minSize,
-            measured,
-          }),
+        const { dx, dy } = this.displayDelta(event, move);
+        const gesture: ItemGesture = {
+          mode: "resize",
+          handle,
+          shiftKey: move.shiftKey,
+        };
+        emit(this, "items-transform", {
+          items: [
+            transformItem(original, gesture, dx, dy, this.dashboard, {
+              snapEnabled: this.snapEnabled,
+              minSize,
+              measured,
+              definitions: this.primitives,
+              offset: found?.offset,
+            }),
+          ],
         });
       },
       onEnd: (_end, activated) => {
         if (activated) emit(this, "item-transform-end", { before });
       },
     });
+  }
+
+  /** How far the pointer moved since the gesture began, in display pixels. */
+  private displayDelta(
+    origin: PointerEvent,
+    move: PointerEvent
+  ): { dx: number; dy: number } {
+    const canvas = this.canvas;
+    if (!canvas) return { dx: 0, dy: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const { width, height } = this.dashboard.display;
+    return {
+      dx: Math.round(((move.clientX - origin.clientX) / rect.width) * width),
+      dy: Math.round(((move.clientY - origin.clientY) / rect.height) * height),
+    };
+  }
+
+  /** Highlights the container the dragged element would land in. */
+  private updateDropContainer(
+    pointer: { clientX: number; clientY: number },
+    moving: string[]
+  ): void {
+    const point = this.clampedPointAt(pointer.clientX, pointer.clientY);
+    if (!point || moving.length !== 1) {
+      this.dropContainerId = "";
+      return;
+    }
+    const container = containerAt(
+      this.dashboard.items,
+      point.x,
+      point.y,
+      moving,
+      this.enteredGroupId || undefined
+    );
+    const parent = locate(this.dashboard.items, moving[0] ?? "")?.parent;
+    this.dropContainerId =
+      container && container.id !== parent?.id ? container.id : "";
+  }
+
+  /** Drag out a box on empty canvas to select what it touches; a plain click deselects. */
+  private onCanvasPointerDown(event: PointerEvent): void {
+    const start = this.clampedPointAt(event.clientX, event.clientY);
+    if (!start) return;
+    const additive = event.shiftKey;
+    const base = additive ? this.selectedItemIds : [];
+    this.stopGesture?.();
+    this.stopGesture = trackPointerGesture({
+      origin: event,
+      threshold: GESTURE_THRESHOLD,
+      onMove: (move) => {
+        const end = this.clampedPointAt(move.clientX, move.clientY);
+        if (!end) return;
+        const box = boxBetween(start, end);
+        this.marquee = box;
+        const touched = marqueeSelection(
+          this.dashboard,
+          box,
+          this.enteredGroupId || undefined,
+          this.measure
+        );
+        emit(this, "selection-change", {
+          itemIds: [...new Set([...base, ...touched])],
+        });
+      },
+      onEnd: (_end, activated) => {
+        this.marquee = undefined;
+        if (!activated && !additive) this.deselect();
+      },
+      onCancel: () => {
+        this.marquee = undefined;
+      },
+    });
+  }
+
+  private onItemContextMenu(event: MouseEvent, pressed: StudioItem): void {
+    event.preventDefault();
+    event.stopPropagation();
+    emit(this, "context-menu", {
+      source: "canvas",
+      itemId: this.targetOf(pressed).id,
+      clientX: event.clientX,
+      clientY: event.clientY,
+    });
+  }
+
+  private onCanvasContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+    emit(this, "context-menu", {
+      source: "empty",
+      clientX: event.clientX,
+      clientY: event.clientY,
+      point: this.clampedPointAt(event.clientX, event.clientY),
+    });
+  }
+
+  private onItemDoubleClick(event: MouseEvent, pressed: StudioItem): void {
+    event.stopPropagation();
+    const target = this.targetOf(pressed);
+    if (isContainer(target) && target.grouped) {
+      emit(this, "group-enter", { groupId: target.id });
+    }
   }
 
   // --- events from the toolbar and the stage -------------------------------
@@ -505,11 +773,6 @@ export class OdsCanvas extends LitElement {
 
   // --- items -----------------------------------------------------------------
 
-  /** What the backend measured for an item in the last preview, if anything. */
-  private measuredBounds(item: StudioItem): ItemBounds | undefined {
-    return this.preview?.itemBounds[item.id];
-  }
-
   private resizeHandleLabel(item: StudioItem, handle: ResizeHandle): string {
     return strings.canvas.resizeHandle(item.name, strings.canvas.sides[handle]);
   }
@@ -537,9 +800,9 @@ export class OdsCanvas extends LitElement {
   private renderExpressionLock(
     item: StudioItem
   ): TemplateResult | typeof nothing {
-    const { position } = itemLocks(item, this.primitives);
-    if (position.length === 0) return nothing;
-    const reason = strings.expression.positionLocked(position.join(", "));
+    const { position, scalingBlockedBy } = itemLocks(item, this.primitives);
+    const reason = this.lockReason(position, scalingBlockedBy);
+    if (!reason) return nothing;
     return html`
       <ha-icon
         class="lock-badge expression-lock"
@@ -548,6 +811,16 @@ export class OdsCanvas extends LitElement {
         aria-label=${reason}
       ></ha-icon>
     `;
+  }
+
+  private lockReason(position: string[], blockedBy: string[]): string {
+    if (position.length > 0) {
+      return strings.expression.positionLocked(position.join(", "));
+    }
+    if (blockedBy.length > 0) {
+      return strings.expression.scalingLocked(blockedBy.join(", "));
+    }
+    return "";
   }
 
   private renderSelectionSize(box: ItemBounds): TemplateResult {
@@ -561,6 +834,7 @@ export class OdsCanvas extends LitElement {
   }
 
   private renderHandles(item: StudioItem): TemplateResult[] {
+    if (item.kind === "primitive" && !isResizable(item.primitive)) return [];
     const disabled = itemLocks(item, this.primitives).handles;
     return RESIZE_HANDLES.filter((handle) => !disabled.includes(handle)).map(
       (handle) => html`
@@ -570,32 +844,110 @@ export class OdsCanvas extends LitElement {
           tabindex="-1"
           aria-label=${this.resizeHandleLabel(item, handle)}
           @pointerdown=${(event: PointerEvent) =>
-            this.beginGesture(event, item, handle)}
+            this.onHandlePointerDown(event, item, handle)}
         ></button>
       `
     );
   }
 
-  private renderItem(item: StudioItem): TemplateResult {
-    const box = itemBounds(item, this.measuredBounds(item));
-    const selected = item.id === this.selectedItemId;
-    const classes = classMap({
+  /** Several items have no shared handles; a group scales what is in it. */
+  private showsHandles(item: StudioItem, selected: boolean): boolean {
+    if (!selected || item.locked || this.selectedItemIds.length !== 1) {
+      return false;
+    }
+    return true;
+  }
+
+  private showsGroupHint(item: StudioItem, selected: boolean): boolean {
+    return (
+      selected &&
+      this.selectedItemIds.length === 1 &&
+      isContainer(item) &&
+      item.grouped &&
+      this.enteredGroupId !== item.id
+    );
+  }
+
+  private renderGroupHint(): TemplateResult {
+    return html`
+      <span class="group-hint">${strings.canvas.enterGroupHint}</span>
+    `;
+  }
+
+  private itemClasses(placed: Placed): Record<string, boolean> {
+    const { item } = placed;
+    const selected = this.selectedItemIds.includes(item.id);
+    const holdsSelection =
+      isContainer(item) &&
+      this.selectedItemIds.some(
+        (id) => id !== item.id && locate(item.children, id) !== undefined
+      );
+    return {
       selection: true,
       selected,
+      container: isContainer(item),
+      group: isContainer(item) && item.grouped,
+      entered: item.id === this.enteredGroupId,
+      "holds-selection": holdsSelection,
+      "drop-target": item.id === this.dropContainerId,
       locked: item.locked,
       hidden: item.hidden,
-    });
+    };
+  }
+
+  private renderPlaced(placed: Placed): TemplateResult {
+    const { item } = placed;
+    const box = absoluteBox(
+      itemBounds(item, this.measure(item)),
+      placed.offset
+    );
+    const selected = this.selectedItemIds.includes(item.id);
+    const single = this.selectedItemIds.length === 1;
     return html`
       <div
         data-item-id=${item.id}
-        class=${classes}
+        class=${classMap(this.itemClasses(placed))}
         style=${styleMap(percentBox(box, this.dashboard.display))}
-        @pointerdown=${(event: PointerEvent) => this.beginGesture(event, item)}
+        @pointerdown=${(event: PointerEvent) =>
+          this.onItemPointerDown(event, item)}
+        @dblclick=${(event: MouseEvent) => this.onItemDoubleClick(event, item)}
+        @contextmenu=${(event: MouseEvent) =>
+          this.onItemContextMenu(event, item)}
       >
         ${this.renderBadges(item)}
-        ${selected ? this.renderSelectionSize(box) : nothing}
-        ${selected && !item.locked ? this.renderHandles(item) : nothing}
+        ${selected && single ? this.renderSelectionSize(box) : nothing}
+        ${this.showsGroupHint(item, selected) ? this.renderGroupHint() : nothing}
+        ${this.showsHandles(item, selected) ? this.renderHandles(item) : nothing}
       </div>
+    `;
+  }
+
+  /** One box around a selection of several items, with the size of all of them. */
+  private renderSelectionBox(): TemplateResult | typeof nothing {
+    if (this.selectedItemIds.length < 2) return nothing;
+    const box = selectionBox(
+      this.dashboard,
+      this.selectedItemIds,
+      this.measure
+    );
+    if (!box) return nothing;
+    return html`
+      <div
+        class="multi-selection"
+        style=${styleMap(percentBox(box, this.dashboard.display))}
+      >
+        ${this.renderSelectionSize(box)}
+      </div>
+    `;
+  }
+
+  private renderMarquee(): TemplateResult | typeof nothing {
+    if (!this.marquee) return nothing;
+    return html`
+      <div
+        class="marquee"
+        style=${styleMap(percentBox(this.marquee, this.dashboard.display))}
+      ></div>
     `;
   }
 
@@ -629,7 +981,7 @@ export class OdsCanvas extends LitElement {
     return html`
       <div class="workspace-meta">
         <span>${strings.common.sizeInPixels(width, height)}</span>
-        <span>${strings.canvas.layers(dashboard.items.length)}</span>
+        <span>${strings.canvas.layers(countItems(dashboard.items))}</span>
         <span>${strings.canvas.padding(padding)}</span>
         <div class="history-controls">
           ${this.renderHistoryButton("undo")}
@@ -695,7 +1047,8 @@ export class OdsCanvas extends LitElement {
           <div
             class="canvas"
             style=${canvasStyle}
-            @pointerdown=${this.deselect}
+            @pointerdown=${this.onCanvasPointerDown}
+            @contextmenu=${this.onCanvasContextMenu}
           >
             ${this.renderPreview()}
             <div
@@ -703,7 +1056,10 @@ export class OdsCanvas extends LitElement {
               aria-hidden="true"
               style=${workingAreaStyle}
             ></div>
-            ${dashboard.items.map((item) => this.renderItem(item))}
+            ${withOffsets(dashboard.items).map((placed) =>
+              this.renderPlaced(placed)
+            )}
+            ${this.renderSelectionBox()} ${this.renderMarquee()}
           </div>
         </div>
         <ods-zoom-bar

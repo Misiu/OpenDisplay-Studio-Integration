@@ -1,67 +1,28 @@
 import { clamp, snap } from "./math";
+import { resizeBounds, type ResizeHandle } from "./resize";
 import {
-  alignIntrinsicBounds,
-  resizeBounds,
-  type ResizeHandle,
-} from "./resize";
-import type { Dashboard, ItemBounds, Primitive, StudioItem } from "./types";
-
-type BoxPrimitive = Extract<
-  Primitive,
-  { x_start: number; y_start: number; x_end: number; y_end: number }
->;
-export const isBoxPrimitive = (
-  primitive: Primitive
-): primitive is BoxPrimitive => "x_start" in primitive;
-
-export const primitiveBounds = (primitive: Primitive): ItemBounds => {
-  if (isBoxPrimitive(primitive)) {
-    return {
-      x: Math.min(primitive.x_start, primitive.x_end),
-      y: Math.min(primitive.y_start, primitive.y_end),
-      width: Math.abs(primitive.x_end - primitive.x_start) + 1,
-      height: Math.abs(primitive.y_end - primitive.y_start) + 1,
-    };
-  }
-  if (primitive.type === "circle") {
-    return {
-      x: primitive.x - primitive.radius,
-      y: primitive.y - primitive.radius,
-      width: primitive.radius * 2 + 1,
-      height: primitive.radius * 2 + 1,
-    };
-  }
-  if (primitive.type === "qrcode") {
-    const size = (21 + primitive.border * 2) * primitive.boxsize;
-    return { x: primitive.x, y: primitive.y, width: size, height: size };
-  }
-  if (primitive.type === "icon") {
-    return {
-      x: primitive.x,
-      y: primitive.y,
-      width: primitive.size,
-      height: primitive.size,
-    };
-  }
-  return {
-    x: primitive.x,
-    y: primitive.y,
-    width: Math.max(
-      primitive.size,
-      Math.round(primitive.value.length * primitive.size * 0.62)
-    ),
-    height: Math.max(1, Math.round(primitive.size * 1.25)),
-  };
-};
-
-/** Primitives whose size the backend measures: it depends on data and fonts. */
-const isMeasured = (primitive: Primitive): boolean =>
-  primitive.type === "text" || primitive.type === "qrcode";
+  isResizable,
+  primitiveConstraints,
+  resizePrimitive,
+  type ResizeConstraints,
+} from "./primitive-resize";
+import {
+  isMeasured,
+  primitiveBounds,
+  translatePrimitive,
+} from "./primitive-shape";
+import { scaleChildren } from "./scale";
+import type {
+  Dashboard,
+  ItemBounds,
+  PrimitiveDefinition,
+  StudioItem,
+} from "./types";
 
 /**
- * Where an item is drawn. Text and QR codes take their size from `measured`, what
- * the backend reports for the last render; until there is one, or for shapes whose
- * size follows from their fields, the panel works it out itself.
+ * Where an item is drawn. Text and QR codes take their size from `measured`, what the
+ * backend reports for the last render; until there is one, or for shapes whose size
+ * follows from their fields, the panel works it out itself.
  */
 export const itemBounds = (
   item: StudioItem,
@@ -70,21 +31,14 @@ export const itemBounds = (
   if (item.kind === "widget") {
     return item.frame;
   }
-  const local = primitiveBounds(item.primitive);
-  if (measured && isMeasured(item.primitive)) {
-    return { ...local, width: measured.width, height: measured.height };
+  if (item.kind === "container") {
+    return { x: item.x, y: item.y, width: item.width, height: item.height };
   }
-  return local;
+  return primitiveBounds(
+    item.primitive,
+    isMeasured(item.primitive) ? measured : undefined
+  );
 };
-
-/** Modules along one side of a QR code including its quiet zone. */
-const qrModuleCount = (
-  primitive: Extract<Primitive, { type: "qrcode" }>,
-  measured?: ItemBounds
-): number =>
-  measured
-    ? Math.max(1, Math.round(measured.width / primitive.boxsize))
-    : 21 + primitive.border * 2;
 
 /** The editable area: the display minus its padding on every side. */
 export const workingArea = (dashboard: Dashboard): ItemBounds => {
@@ -116,16 +70,12 @@ export const translateItem = (
     item.frame.y += dy;
     return;
   }
-  const primitive = item.primitive;
-  if (isBoxPrimitive(primitive)) {
-    primitive.x_start += dx;
-    primitive.x_end += dx;
-    primitive.y_start += dy;
-    primitive.y_end += dy;
-  } else {
-    primitive.x += dx;
-    primitive.y += dy;
+  if (item.kind === "container") {
+    item.x += dx;
+    item.y += dy;
+    return;
   }
+  translatePrimitive(item.primitive, dx, dy);
 };
 
 /** Move an item back inside the working area; widgets larger than it are shrunk. */
@@ -153,23 +103,28 @@ export const constrainItem = (
     item.frame.width = Math.min(item.frame.width, area.width);
     item.frame.height = Math.min(item.frame.height, area.height);
   }
+  if (item.kind === "container") {
+    item.width = Math.min(item.width, area.width);
+    item.height = Math.min(item.height, area.height);
+  }
 };
 
 interface ResizeItemOptions {
+  /**
+   * Where the origin of the container the item is in lies on the display. The item's
+   * coordinates are relative to it, while snapping and limits work on the display.
+   */
+  offset?: { x: number; y: number };
   snapEnabled: boolean;
   /** What the backend measured for this item, if it has rendered it. */
   measured?: ItemBounds;
+  /** The primitive definitions, which say how each field scales inside a group. */
+  definitions?: PrimitiveDefinition[];
   /** Smallest size a widget may take; comes from its definition. */
   minSize?: { width: number; height: number };
 }
 
 const DEFAULT_WIDGET_MIN_SIZE = { width: 60, height: 48 };
-
-interface ResizeConstraints {
-  minimumWidth: number;
-  minimumHeight: number;
-  intrinsicAspect: boolean;
-}
 
 const resizeConstraints = (
   item: StudioItem,
@@ -183,51 +138,10 @@ const resizeConstraints = (
       intrinsicAspect: false,
     };
   }
-  const primitive = item.primitive;
-  if (primitive.type === "circle") {
-    return { minimumWidth: 3, minimumHeight: 3, intrinsicAspect: true };
+  if (item.kind === "container") {
+    return { minimumWidth: 8, minimumHeight: 8, intrinsicAspect: false };
   }
-  if (primitive.type === "qrcode") {
-    const modules = qrModuleCount(primitive, measured);
-    return {
-      minimumWidth: modules,
-      minimumHeight: modules,
-      intrinsicAspect: true,
-    };
-  }
-  if (primitive.type === "icon") {
-    return { minimumWidth: 8, minimumHeight: 8, intrinsicAspect: true };
-  }
-  if (primitive.type === "text") {
-    const minimum = textBoxAtSize(primitive, 6, measured);
-    return {
-      minimumWidth: minimum.width,
-      minimumHeight: minimum.height,
-      intrinsicAspect: true,
-    };
-  }
-  if (primitive.type === "line") {
-    return { minimumWidth: 1, minimumHeight: 1, intrinsicAspect: false };
-  }
-  return { minimumWidth: 2, minimumHeight: 2, intrinsicAspect: false };
-};
-
-/** The text block at another font size: scaled from the measurement when there is one. */
-const textBoxAtSize = (
-  primitive: Extract<Primitive, { type: "text" }>,
-  size: number,
-  measured?: ItemBounds
-): ItemBounds => {
-  if (!measured) {
-    return primitiveBounds({ ...primitive, size });
-  }
-  const scale = size / primitive.size;
-  return {
-    x: primitive.x,
-    y: primitive.y,
-    width: Math.max(1, Math.round(measured.width * scale)),
-    height: Math.max(1, Math.round(measured.height * scale)),
-  };
+  return primitiveConstraints(item.primitive, measured);
 };
 
 const INTRINSIC_HANDLE: Partial<Record<ResizeHandle, ResizeHandle>> = {
@@ -276,106 +190,34 @@ export const resizeItem = (
     item.frame = requested;
     return;
   }
-
-  const primitive = item.primitive;
-  if (isBoxPrimitive(primitive)) {
-    const right = requested.x + requested.width - 1;
-    const bottom = requested.y + requested.height - 1;
-    if (primitive.type === "line") {
-      const leftToRight = primitive.x_start <= primitive.x_end;
-      const topToBottom = primitive.y_start <= primitive.y_end;
-      primitive.x_start = leftToRight ? requested.x : right;
-      primitive.x_end = leftToRight ? right : requested.x;
-      primitive.y_start = topToBottom ? requested.y : bottom;
-      primitive.y_end = topToBottom ? bottom : requested.y;
-      if (
-        primitive.x_start === primitive.x_end &&
-        primitive.y_start === primitive.y_end
-      ) {
-        primitive.x_end = Math.min(
-          dashboard.display.width - 1,
-          primitive.x_start + 1
-        );
-      }
-    } else {
-      primitive.x_start = requested.x;
-      primitive.y_start = requested.y;
-      primitive.x_end = right;
-      primitive.y_end = bottom;
+  if (item.kind === "container") {
+    Object.assign(item, {
+      x: requested.x,
+      y: requested.y,
+      width: requested.width,
+      height: requested.height,
+    });
+    if (item.grouped) {
+      scaleChildren(
+        item,
+        requested.width / Math.max(1, before.width),
+        requested.height / Math.max(1, before.height),
+        options.definitions ?? [],
+        dashboard.display
+      );
     }
     return;
   }
 
-  if (primitive.type === "circle") {
-    const radius = Math.max(
-      1,
-      Math.floor((Math.min(requested.width, requested.height) - 1) / 2)
-    );
-    const diameter = radius * 2 + 1;
-    const aligned = alignIntrinsicBounds(
-      requested,
-      diameter,
-      diameter,
-      geometryHandle
-    );
-    primitive.x = aligned.x + radius;
-    primitive.y = aligned.y + radius;
-    primitive.radius = radius;
-    return;
-  }
-
-  if (primitive.type === "qrcode") {
-    const modules = qrModuleCount(primitive, options.measured);
-    primitive.boxsize = clamp(
-      Math.floor(Math.min(requested.width, requested.height) / modules),
-      1,
-      16
-    );
-    const size = modules * primitive.boxsize;
-    const aligned = alignIntrinsicBounds(requested, size, size, geometryHandle);
-    primitive.x = aligned.x;
-    primitive.y = aligned.y;
-    return;
-  }
-
-  if (primitive.type === "icon") {
-    primitive.size = clamp(
-      Math.floor(Math.min(requested.width, requested.height)),
-      8,
-      256
-    );
-    const aligned = alignIntrinsicBounds(
-      requested,
-      primitive.size,
-      primitive.size,
-      geometryHandle
-    );
-    primitive.x = aligned.x;
-    primitive.y = aligned.y;
-    return;
-  }
-
-  const previousSize = primitive.size;
-  primitive.size = clamp(
-    Math.round((previousSize * requested.width) / Math.max(1, before.width)),
-    6,
-    256
-  );
-  const actual = options.measured
-    ? textBoxAtSize(
-        { ...primitive, size: previousSize },
-        primitive.size,
-        options.measured
-      )
-    : primitiveBounds(primitive);
-  const aligned = alignIntrinsicBounds(
+  if (!isResizable(item.primitive)) return;
+  resizePrimitive(item.primitive, {
     requested,
-    actual.width,
-    actual.height,
-    geometryHandle
-  );
-  primitive.x = aligned.x;
-  primitive.y = aligned.y;
+    before,
+    handle: geometryHandle,
+    measured: options.measured,
+    displayWidth: dashboard.display.width,
+    displayHeight: dashboard.display.height,
+  });
 };
 
 /** What a pointer gesture does to the item under it. */
@@ -397,6 +239,21 @@ export const transformItem = (
 ): StudioItem => {
   const item = structuredClone(original);
   if (item.locked) return item;
+  const offset = options.offset ?? { x: 0, y: 0 };
+  translateItem(item, offset.x, offset.y);
+  applyGesture(item, gesture, dx, dy, dashboard, options);
+  translateItem(item, -offset.x, -offset.y);
+  return item;
+};
+
+const applyGesture = (
+  item: StudioItem,
+  gesture: ItemGesture,
+  dx: number,
+  dy: number,
+  dashboard: Dashboard,
+  options: ResizeItemOptions
+): void => {
   if (gesture.mode === "resize") {
     resizeItem(
       item,
@@ -407,7 +264,7 @@ export const transformItem = (
       dashboard,
       options
     );
-    return item;
+    return;
   }
   const area = workingArea(dashboard);
   const before = itemBounds(item, options.measured);
@@ -422,5 +279,4 @@ export const transformItem = (
     Math.max(area.y, area.y + area.height - before.height)
   );
   translateItem(item, nextX - before.x, nextY - before.y);
-  return item;
 };

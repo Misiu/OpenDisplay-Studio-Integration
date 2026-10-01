@@ -39,6 +39,8 @@ export const polish: StringsOverride = {
     loading: "Ładowanie OpenDisplay Studio…",
     loadFailed: "Nie udało się załadować OpenDisplay Studio",
     createFailed: "Nie udało się utworzyć dashboardu",
+    sentToDevice: "Wysłano na urządzenie",
+    sendFailed: "Nie udało się wysłać dashboardu na urządzenie",
     saveFailed: "Nie udało się zapisać dashboardu",
     deleteFailed: "Nie udało się usunąć dashboardu",
     renameFailed: "Nie udało się zmienić nazwy dashboardu",
@@ -98,10 +100,19 @@ export const polish: StringsOverride = {
     subtitle: "Utwórz własne płótno OpenDisplay",
     startFrom: "Zacznij od",
     sources: "Źródło dashboardu",
+    fromDevice: "Z urządzenia",
+    fromDeviceHint: "Rozmiar i kolory",
+    preset: "Gotowy wyświetlacz",
+    presetHint: "Wybierz znany wyświetlacz",
     customSize: "Własny rozmiar",
-    customSizeHint: "Ustaw rozdzielczość i kolory",
-    fromDevice: "Z urządzenia OpenDisplay",
-    fromDeviceHint: "Wkrótce",
+    customSizeHint: "Ustaw rozmiar i kolory",
+    device: "Urządzenie",
+    display: "Wyświetlacz",
+    loadingDevices: "Szukanie urządzeń OpenDisplay…",
+    noDevices:
+      "Nie znaleziono urządzeń OpenDisplay. Skonfiguruj integrację OpenDisplay albo zacznij od gotowego wyświetlacza.",
+    deviceDetails: "Rozmiar i kolory dashboardu",
+    colors: "Kolory",
     create: "Utwórz dashboard",
     creating: "Tworzenie…",
   },
@@ -114,6 +125,8 @@ export const polish: StringsOverride = {
     code: "Kod",
     setDraft: "Ustaw jako szkic",
     setReady: "Ustaw jako gotowy",
+    sendToDevice: "Wyślij na urządzenie",
+    sendingToDevice: "Wysyłanie…",
     save: "Zapisz",
     saving: "Zapisywanie…",
   },
@@ -159,7 +172,8 @@ export const polish: StringsOverride = {
     dashboard: "Dashboard",
     dashboardHint: "Ustawienia wyświetlacza i płótna",
     display: "Wyświetlacz",
-    displayType: "Typ wyświetlacza",
+    rotationHelp:
+      "Obraz jest obracany w prawo o ten kąt przed wysłaniem, więc płótno ma widoczny rozmiar.",
     workingArea: "Obszar roboczy",
     workingAreaHelp:
       "Margines wyznacza bezpieczny obszar edycji. Przyciąganie wyrównuje ruch i zmianę rozmiaru do pełnych pikseli.",
@@ -249,6 +263,8 @@ export const polish: StringsOverride = {
 
   fields: {
     name: "Nazwa dashboardu",
+    rotation: "Obrót",
+    resolution: "Rozdzielczość",
     width: "Szerokość",
     height: "Wysokość",
     palette: "Paleta",
@@ -260,6 +276,8 @@ export const polish: StringsOverride = {
   },
 
   customDisplay: { manufacturer: "Własny", name: "Własny wyświetlacz" },
+
+  rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
   palettes: {
     bw: "Czarny / biały",

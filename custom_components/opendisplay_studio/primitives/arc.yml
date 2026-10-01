@@ -1,0 +1,62 @@
+type: arc
+order: 41
+name: Arc
+description: An arc, or a pie slice when filled
+icon: mdi:circle-slice-3
+category: shapes
+geometry: radial
+fields:
+  - key: x
+    label: "Center X"
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y
+    label: "Center Y"
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: radius
+    label: Radius
+    shape: number
+    min: 1
+    max: display_shorter_side
+    default: 60
+    unit: px
+    section: layout
+  - key: start_angle
+    label: "Start angle"
+    shape: number
+    min: -360
+    max: 720
+    default: 0
+    unit: "°"
+    section: layout
+  - key: end_angle
+    label: "End angle"
+    shape: number
+    min: -360
+    max: 720
+    default: 270
+    unit: "°"
+    section: layout
+  - key: fill
+    label: Fill
+    shape: color
+    nullable: true
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: "Outline width"
+    shape: number
+    min: 0
+    max: 32
+    default: 3
+    unit: px
+    section: appearance

@@ -10,6 +10,8 @@ builds its controls and new-item defaults from these definitions, and
 from __future__ import annotations
 
 import json
+import re
+from collections.abc import Callable
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Final, NoReturn
@@ -28,10 +30,31 @@ from custom_components.opendisplay_studio.validation import (
 BUILTIN_PRIMITIVE_DIRECTORY: Final = Path(__file__).parent
 
 SHAPES: Final = frozenset(
-    {"number", "coordinate", "boolean", "enum", "color", "string", "text"}
+    {
+        "number",
+        "coordinate",
+        "boolean",
+        "enum",
+        "flags",
+        "color",
+        "string",
+        "text",
+        "font",
+        "points",
+        "icons",
+        "object",
+        "objects",
+    }
 )
 SECTIONS: Final = frozenset({"layout", "appearance"})
-GEOMETRIES: Final = frozenset({"point", "box", "line"})
+GEOMETRIES: Final = frozenset(
+    {"point", "box", "line", "radial", "points", "pattern", "image", "canvas"}
+)
+BOXED_GEOMETRIES: Final = frozenset({"box", "line"})
+FONT_PATTERN: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,127}$")
+MAX_POINTS: Final = 256
+MAX_ICONS: Final = 64
+MAX_SERIES: Final = 4
 DISPLAY_LIMITS: Final = frozenset(
     {"display_width", "display_height", "display_shorter_side"}
 )
@@ -54,7 +77,7 @@ def _require_text(raw: dict[str, Any], key: str, where: str) -> str:
     return value
 
 
-def _check_field(field: object, where: str) -> dict[str, Any]:
+def _check_field(field: object, where: str, *, nested: bool = False) -> dict[str, Any]:
     if not isinstance(field, dict):
         _malformed(f"{where}: every field must be an object")
     key = _require_text(field, "key", where)
@@ -63,22 +86,29 @@ def _check_field(field: object, where: str) -> dict[str, Any]:
     shape = field.get("shape")
     if shape not in SHAPES:
         _malformed(f"{where}: unknown shape {shape!r}")
-    if field.get("section") not in SECTIONS:
+    if not nested and field.get("section") not in SECTIONS:
         _malformed(f"{where}: section must be layout or appearance")
     if not (
         field.get("required") is True
         or "default" in field
         or field.get("nullable") is True
+        or field.get("optional") is True
     ):
-        _malformed(f"{where}: needs required, a default, or nullable")
+        _malformed(f"{where}: needs required, a default, nullable or optional")
     if shape == "coordinate" and field.get("axis") not in {"x", "y"}:
         _malformed(f"{where}: a coordinate needs axis x or y")
     if shape == "number":
         _check_number_limits(field, where)
-    if shape == "enum" and not (
+    if shape in {"enum", "flags"} and not (
         isinstance(field.get("options"), list) and field["options"]
     ):
-        _malformed(f"{where}: an enum needs options")
+        _malformed(f"{where}: {shape} needs options")
+    if shape in {"object", "objects"}:
+        children = field.get("nested")
+        if not isinstance(children, list) or not children:
+            _malformed(f"{where}: {shape} needs nested fields")
+        for child in children:
+            _check_field(child, where, nested=True)
     return field
 
 
@@ -108,7 +138,7 @@ def _check_definition(raw: object, path: Path) -> dict[str, Any]:
     keys = [_check_field(field, where)["key"] for field in fields]
     if len(keys) != len(set(keys)):
         _malformed(f"{where}: field keys must be unique")
-    if raw["geometry"] != "point" and not isinstance(raw.get("extent"), dict):
+    if raw["geometry"] in BOXED_GEOMETRIES and not isinstance(raw.get("extent"), dict):
         _malformed(f"{where}: box and line need an extent")
     return raw
 
@@ -169,16 +199,18 @@ class PrimitiveRegistry:
             return frozenset()
         return frozenset(field["key"] for field in definition["fields"])
 
-    def coordinate_keys(self, primitive_type: str) -> frozenset[str]:
-        """Return the keys of a type's position fields; none for an unknown type."""
+    def keys_of_shape(self, primitive_type: str, shape: str) -> frozenset[str]:
+        """Return the keys of a type's fields of one shape; none for an unknown type."""
         definition = self._definitions.get(primitive_type)
         if definition is None:
             return frozenset()
         return frozenset(
-            field["key"]
-            for field in definition["fields"]
-            if field["shape"] == "coordinate"
+            field["key"] for field in definition["fields"] if field["shape"] == shape
         )
+
+    def coordinate_keys(self, primitive_type: str) -> frozenset[str]:
+        """Return the keys of a type's position fields; none for an unknown type."""
+        return self.keys_of_shape(primitive_type, "coordinate")
 
     def normalize(
         self,
@@ -206,7 +238,7 @@ class PrimitiveRegistry:
         normalized: dict[str, Any] = {"type": primitive_type}
         for field in definition["fields"]:
             normalized[field["key"]] = self._normalize_field(
-                field, primitive, width, height, relative=relative
+                field, primitive, (width, height), relative=relative
             )
         if not expressed & self.coordinate_keys(primitive_type):
             self.check_geometry(normalized)
@@ -230,7 +262,7 @@ class PrimitiveRegistry:
         return self._normalize_field(
             self.field(primitive_type, key),
             {key: value},
-            *display,
+            display,
             relative=relative,
         )
 
@@ -245,39 +277,80 @@ class PrimitiveRegistry:
         self,
         field: dict[str, Any],
         primitive: dict[str, Any],
-        width: int,
-        height: int,
+        display: tuple[int, int],
         *,
         relative: bool,
+        prefix: str = "primitive",
     ) -> Any:
         key = field["key"]
-        name = f"primitive.{key}"
+        name = f"{prefix}.{key}"
         if key in primitive:
             value = primitive[key]
         elif field.get("required"):
             value = None
         else:
             value = field.get("default")
-        shape = field["shape"]
-        if shape == "number":
-            return integer(
-                value,
-                name,
-                _limit(field["min"], width, height),
-                _limit(field["max"], width, height),
-            )
-        if shape == "coordinate":
-            extent = width if field["axis"] == "x" else height
-            return _coordinate(value, name, extent, relative=relative)
-        if shape == "boolean":
-            return boolean(value, name)
-        if shape == "enum":
-            if value not in field["options"]:
-                fail(f"{name} is invalid")
-            return value
-        if shape == "color":
-            return color(value, name, allow_none=bool(field.get("nullable")))
+        if value is None and field.get("optional"):
+            return None
+        check = _CHECKS.get(field["shape"])
+        if check is not None:
+            return check(field, value, name, display, relative)
+        if field["shape"] in {"object", "objects"}:
+            return self._nested(field, value, name, display, relative=relative)
         return _normalize_text(field, value, name)
+
+    def _nested(
+        self,
+        field: dict[str, Any],
+        value: object,
+        name: str,
+        display: tuple[int, int],
+        *,
+        relative: bool,
+    ) -> Any:
+        """Validate an object, or a short list of objects, against nested fields."""
+        if field["shape"] == "object":
+            return self._nested_object(field, value, name, display, relative=relative)
+        maximum = field.get("max", MAX_SERIES)
+        minimum = field.get("min", 1)
+        if not isinstance(value, list) or len(value) > maximum:
+            fail(f"{name} must be a list of at most {maximum}")
+        if len(value) < minimum:
+            fail(f"{name} needs at least {minimum} entries")
+        return [
+            self._nested_object(
+                field, entry, f"{name}[{index}]", display, relative=relative
+            )
+            for index, entry in enumerate(value)
+        ]
+
+    def _nested_object(
+        self,
+        field: dict[str, Any],
+        value: object,
+        name: str,
+        display: tuple[int, int],
+        *,
+        relative: bool,
+    ) -> dict[str, Any]:
+        source = {} if value is None else value
+        if not isinstance(source, dict):
+            fail(f"{name} must be an object")
+        known = {child["key"] for child in field["nested"]}
+        for key in source:
+            if key not in known:
+                fail(f"{name}.{key} is not a field")
+        return {
+            child["key"]: self._normalize_field(
+                child, source, display, relative=relative, prefix=name
+            )
+            for child in field["nested"]
+        }
+
+    def element(self, primitive: dict[str, Any]) -> dict[str, Any]:
+        """Return the ODL element for a primitive: fields left unset are omitted."""
+        definition = self._definitions[primitive["type"]]
+        return _without_unset(definition["fields"], primitive)
 
     def check_geometry(self, value: dict[str, Any]) -> None:
         """Reject a box or line whose fields, taken together, draw nothing."""
@@ -293,6 +366,142 @@ class PrimitiveRegistry:
             and value["y_start"] == value["y_end"]
         ):
             fail("line must have two distinct points")
+
+
+type Check = Callable[
+    [dict[str, Any], object, str, tuple[int, int], bool],
+    Any,
+]
+
+
+def _check_number(
+    field: dict[str, Any],
+    value: object,
+    name: str,
+    display: tuple[int, int],
+    _relative: bool,  # noqa: FBT001
+) -> int:
+    return integer(
+        value,
+        name,
+        _limit(field["min"], *display),
+        _limit(field["max"], *display),
+    )
+
+
+def _check_coordinate(
+    field: dict[str, Any],
+    value: object,
+    name: str,
+    display: tuple[int, int],
+    relative: bool,  # noqa: FBT001
+) -> int:
+    extent = display[0] if field["axis"] == "x" else display[1]
+    return _coordinate(value, name, extent, relative=relative)
+
+
+def _check_enum(
+    field: dict[str, Any],
+    value: object,
+    name: str,
+    _display: tuple[int, int],
+    _relative: bool,  # noqa: FBT001
+) -> Any:
+    if value not in field["options"]:
+        fail(f"{name} is invalid")
+    return value
+
+
+def _check_color(
+    field: dict[str, Any],
+    value: object,
+    name: str,
+    _display: tuple[int, int],
+    _relative: bool,  # noqa: FBT001
+) -> str | None:
+    return color(value, name, allow_none=bool(field.get("nullable")))
+
+
+_CHECKS: dict[str, Check] = {
+    "number": _check_number,
+    "coordinate": _check_coordinate,
+    "boolean": lambda _f, value, name, _d, _r: boolean(value, name),
+    "enum": _check_enum,
+    "color": _check_color,
+    "flags": lambda field, value, name, _d, _r: _flags(value, field["options"], name),
+    "font": lambda _f, value, name, _d, _r: _font(value, name),
+    "points": lambda _f, value, name, display, relative: _points(
+        value, name, display, relative=relative
+    ),
+    "icons": lambda _f, value, name, _d, _r: _icons(value, name),
+}
+
+
+def _without_unset(
+    fields: list[dict[str, Any]], value: dict[str, Any]
+) -> dict[str, Any]:
+    """Copy `value` without the optional fields that were left unset, at any depth."""
+    by_key = {field["key"]: field for field in fields}
+    result: dict[str, Any] = {}
+    for key, item in value.items():
+        field = by_key.get(key)
+        if field is None:
+            result[key] = item
+        elif item is None and field.get("optional"):
+            continue
+        elif field["shape"] == "object" and isinstance(item, dict):
+            result[key] = _without_unset(field["nested"], item)
+        elif field["shape"] == "objects" and isinstance(item, list):
+            result[key] = [_without_unset(field["nested"], entry) for entry in item]
+        else:
+            result[key] = item
+    return result
+
+
+def _flags(value: object, options: list[str], name: str) -> str:
+    """Return a comma-separated subset of `options`, in the options' order."""
+    if not isinstance(value, str):
+        fail(f"{name} must be text")
+    chosen = {part.strip() for part in value.split(",") if part.strip()}
+    if not chosen or not chosen <= set(options):
+        fail(f"{name} must be a list of {', '.join(options)}")
+    return ",".join(option for option in options if option in chosen)
+
+
+def _font(value: object, name: str) -> str:
+    if not isinstance(value, str) or FONT_PATTERN.fullmatch(value) is None:
+        fail(f"{name} must be the name of a font file or family")
+    return value
+
+
+def _points(
+    value: object, name: str, display: tuple[int, int], *, relative: bool
+) -> list[list[int]]:
+    """Return a list of at least three [x, y] pairs."""
+    if not isinstance(value, list) or not 3 <= len(value) <= MAX_POINTS:
+        fail(f"{name} must have between 3 and {MAX_POINTS} points")
+    points: list[list[int]] = []
+    for index, pair in enumerate(value):
+        if not isinstance(pair, list | tuple) or len(pair) != 2:
+            fail(f"{name}[{index}] must be a pair [x, y]")
+        points.append(
+            [
+                _coordinate(
+                    pair[0], f"{name}[{index}].x", display[0], relative=relative
+                ),
+                _coordinate(
+                    pair[1], f"{name}[{index}].y", display[1], relative=relative
+                ),
+            ]
+        )
+    return points
+
+
+def _icons(value: object, name: str) -> list[str]:
+    """Return a list of one or more icon names."""
+    if not isinstance(value, list) or not 1 <= len(value) <= MAX_ICONS:
+        fail(f"{name} must have between 1 and {MAX_ICONS} icons")
+    return [string(entry, f"{name}[{index}]", 128) for index, entry in enumerate(value)]
 
 
 def _coordinate(value: object, name: str, extent: int, *, relative: bool) -> int:

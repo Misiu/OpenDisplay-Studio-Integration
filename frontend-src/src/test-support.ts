@@ -1,67 +1,58 @@
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
+import { createPrimitive } from "./primitives";
 import { loadWidgetDefinitions } from "./widget-definitions";
 import type {
+  ContainerItem,
   Dashboard,
+  Primitive,
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
   WidgetItem,
 } from "./types";
 
+const definitions = loadPrimitiveDefinitions();
+
+/** A primitive item as the panel creates it, with the given fields changed. */
+export const primitiveItem = (
+  type: Primitive["type"],
+  id: string,
+  values: Record<string, unknown> = {}
+): PrimitiveItem => {
+  const primitive = createPrimitive(
+    definitions.find((definition) => definition.type === type),
+    { x: 0, y: 0, displayWidth: 800, displayHeight: 480 }
+  );
+  if (!primitive) throw new Error(`No definition for ${type}`);
+  Object.assign(primitive, values);
+  return {
+    id,
+    name: id,
+    kind: "primitive",
+    locked: false,
+    hidden: false,
+    primitive,
+  };
+};
+
 export const rectangleItem = (
   id = "rect",
-  overrides: Partial<PrimitiveItem["primitive"]> = {}
-): PrimitiveItem => ({
-  id,
-  name: id,
-  kind: "primitive",
-  locked: false,
-  hidden: false,
-  primitive: {
-    type: "rectangle",
+  overrides: Record<string, unknown> = {}
+): PrimitiveItem =>
+  primitiveItem("rectangle", id, {
     x_start: 20,
     y_start: 30,
     x_end: 119,
     y_end: 79,
     fill: null,
-    outline: "black",
-    width: 2,
     ...overrides,
-  } as PrimitiveItem["primitive"],
-});
+  });
 
-export const circleItem = (id = "circle"): PrimitiveItem => ({
-  id,
-  name: id,
-  kind: "primitive",
-  locked: false,
-  hidden: false,
-  primitive: {
-    type: "circle",
-    x: 100,
-    y: 100,
-    radius: 20,
-    fill: null,
-    outline: "black",
-    width: 2,
-  },
-});
+export const circleItem = (id = "circle"): PrimitiveItem =>
+  primitiveItem("circle", id, { x: 100, y: 100, radius: 20, fill: null });
 
-export const textItem = (id = "text"): PrimitiveItem => ({
-  id,
-  name: id,
-  kind: "primitive",
-  locked: false,
-  hidden: false,
-  primitive: {
-    type: "text",
-    value: "Text",
-    x: 10,
-    y: 10,
-    size: 32,
-    color: "black",
-  },
-});
+export const textItem = (id = "text"): PrimitiveItem =>
+  primitiveItem("text", id, { value: "Text", x: 10, y: 10 });
 
 export const widgetItem = (id = "widget"): WidgetItem => ({
   id,
@@ -91,6 +82,8 @@ export const dashboardWith = (
     background: "white",
     padding: 0,
     snapSize: 5,
+    rotation: 0,
+    deviceId: null,
     ...display,
   },
   items,
@@ -99,7 +92,7 @@ export const dashboardWith = (
 });
 
 /** The definitions the backend ships, read from the repository. */
-export const primitiveDefinitions = loadPrimitiveDefinitions();
+export const primitiveDefinitions = definitions;
 export const widgetDefinitions = loadWidgetDefinitions();
 
 /** One built-in widget's definition, as the backend ships it. */
@@ -108,3 +101,24 @@ export const widgetDefinition = (id: string): WidgetDefinition => {
   if (!definition) throw new Error(`No built-in widget ${id}`);
   return definition;
 };
+
+/** A container at (100, 50) of size 200 × 120 holding `children`. */
+export const containerItem = (
+  id = "box",
+  children: StudioItem[] = [],
+  overrides: Partial<ContainerItem> = {}
+): ContainerItem => ({
+  id,
+  name: id,
+  kind: "container",
+  locked: false,
+  hidden: false,
+  x: 100,
+  y: 50,
+  width: 200,
+  height: 120,
+  grouped: false,
+  background: null,
+  children,
+  ...overrides,
+});

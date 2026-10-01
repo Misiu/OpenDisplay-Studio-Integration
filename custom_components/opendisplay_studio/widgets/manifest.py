@@ -147,9 +147,7 @@ def _check_references(manifest: dict[str, Any], folder: str) -> None:
     for label, keys in (("options", option_keys), ("sources", source_keys)):
         duplicated = {key for key in keys if keys.count(key) > 1}
         if duplicated:
-            message = (
-                f"{folder}/widget.yml: {label}: duplicate key {sorted(duplicated)[0]}"
-            )
+            message = f"{folder}/widget.yml: {label}: duplicate key {min(duplicated)}"
             raise ManifestError(message)
     for provider, params in manifest["data"].items():
         for name, value in params.items():

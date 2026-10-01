@@ -184,6 +184,8 @@ def _validate_primitive(
     if relative:
         single |= walk.primitives.coordinate_keys(primitive_type)
     expressions = _expressions(value, known | ITEM_EXPRESSIONS, single=single)
+    if relative:
+        _reject_relative_points(walk.primitives, primitive_type, expressions)
     item = {
         **state,
         "kind": "primitive",
@@ -198,6 +200,19 @@ def _validate_primitive(
     _with_expressions(item, expressions)
     item["_type"] = primitive_type
     return item
+
+
+def _reject_relative_points(
+    primitives: PrimitiveRegistry, primitive_type: str, expressions: dict[str, str]
+) -> None:
+    """
+    Refuse a template for the points of a shape inside a container.
+
+    The container's offset has to be added to every point, which the Code view can do
+    for a single coordinate but not for the points a template returns.
+    """
+    for key in primitives.keys_of_shape(primitive_type, "points") & expressions.keys():
+        fail(f"expressions.{key} cannot be an expression inside a container")
 
 
 def _validate_background(value: object) -> dict[str, Any] | None:

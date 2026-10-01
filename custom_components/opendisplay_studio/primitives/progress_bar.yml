@@ -44,11 +44,7 @@ fields:
   - key: direction
     label: Direction
     shape: enum
-    options:
-      - right
-      - left
-      - up
-      - down
+    options: [right, left, up, down]
     default: right
     section: appearance
   - key: background
@@ -67,7 +63,7 @@ fields:
     default: black
     section: appearance
   - key: width
-    label: Outline width
+    label: "Outline width"
     shape: number
     min: 0
     max: 32
@@ -75,7 +71,13 @@ fields:
     unit: px
     section: appearance
   - key: show_percentage
-    label: Show percentage
+    label: "Show percentage"
     shape: boolean
     default: true
+    section: appearance
+  - key: font_name
+    label: Font
+    shape: font
+    default: ppb.ttf
+    options: [ppb.ttf, rbm.ttf]
     section: appearance

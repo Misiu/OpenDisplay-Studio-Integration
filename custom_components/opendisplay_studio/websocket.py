@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from time import monotonic
 from typing import Any, cast
 
 import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError, ServiceNotFound
 
-from .compiler import DashboardCompileError, async_compile_dashboard
+from .compiler import DashboardCompileError
 from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
-from .palette import accent_color_for_palette
+from .delivery import async_render_dashboard
+from .devices import async_send_to_device, list_display_devices
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
 from .widget_reload import async_reload_widgets
@@ -144,19 +145,10 @@ async def websocket_compose_preview(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Compile and render the exact PNG used by Media Source."""
-    pipeline_started = monotonic()
+    """Compile and render the canvas, as designed, for the editor."""
     try:
         dashboard = validate_dashboard(msg["dashboard"], _widgets(hass))
-        compiled = await async_compile_dashboard(hass, dashboard, _widgets(hass))
-        display = dashboard["display"]
-        rendered = await _renderer(hass).async_render(
-            width=display["width"],
-            height=display["height"],
-            elements=compiled.elements,
-            background=display["background"],
-            accent_color=accent_color_for_palette(display["palette"]),
-        )
+        rendered = await async_render_dashboard(hass, dashboard, for_device=False)
     except DashboardValidationError as err:
         _error(connection, msg, err)
         return
@@ -168,22 +160,9 @@ async def websocket_compose_preview(
         LOGGER.exception("Unexpected live preview failure")
         connection.send_error(msg["id"], "preview_failed", str(err))
         return
-    pipeline_ms = round((monotonic() - pipeline_started) * 1000, 2)
-    token = hass.data[DOMAIN].cache.put(rendered.png)
-    LOGGER.info(
-        "Rendered preview dashboard=%s size=%dx%d queue=%.2f ms data=%.2f ms "
-        "compile=%.2f ms render=%.2f ms encode=%.2f ms pipeline=%.2f ms bytes=%d",
-        dashboard.get("id", "unsaved"),
-        display["width"],
-        display["height"],
-        rendered.timings["queue"],
-        compiled.data_ms,
-        compiled.compile_ms,
-        rendered.timings["render"],
-        rendered.timings["encode"],
-        pipeline_ms,
-        len(rendered.png),
-    )
+    compiled = rendered.compiled
+    picture = rendered.picture
+    token = hass.data[DOMAIN].cache.put(picture.png)
     connection.send_result(
         msg["id"],
         {
@@ -198,15 +177,52 @@ async def websocket_compose_preview(
                 "usesTime": compiled.dependencies.uses_time,
             },
             "timings": {
-                "queue": rendered.timings["queue"],
+                "queue": picture.timings["queue"],
                 "data": compiled.data_ms,
                 "compile": compiled.compile_ms,
-                "render": rendered.timings["render"],
-                "encode": rendered.timings["encode"],
-                "pipeline": pipeline_ms,
+                "render": picture.timings["render"],
+                "encode": picture.timings["encode"],
+                "pipeline": rendered.pipeline_ms,
             },
         },
     )
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/send_to_device",
+        vol.Required("dashboard"): dict,
+    }
+)
+@websocket_api.require_admin
+@websocket_api.async_response
+async def websocket_send_to_device(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Render the dashboard as the device shows it and upload it to the device."""
+    try:
+        dashboard = validate_dashboard(msg["dashboard"], _widgets(hass))
+        device_id = dashboard["display"]["deviceId"]
+        if device_id is None:
+            connection.send_error(
+                msg["id"], "no_device", "The dashboard is not made for a device"
+            )
+            return
+        rendered = await async_render_dashboard(hass, dashboard, for_device=True)
+        await async_send_to_device(hass, device_id, rendered.picture.png)
+    except DashboardValidationError as err:
+        _error(connection, msg, err)
+        return
+    except (DashboardCompileError, OdlRenderError) as err:
+        connection.send_error(msg["id"], "render_failed", str(err))
+        return
+    except (HomeAssistantError, ServiceNotFound) as err:
+        LOGGER.warning("Could not send the dashboard to the device: %s", err)
+        connection.send_error(msg["id"], "send_failed", str(err))
+        return
+    connection.send_result(msg["id"], {})
 
 
 @websocket_api.websocket_command(
@@ -233,7 +249,22 @@ async def websocket_reload_widgets(
     )
 
 
+@websocket_api.websocket_command(
+    {vol.Required("type"): "opendisplay_studio/list_devices"}
+)
+@websocket_api.require_admin
+def websocket_list_devices(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the OpenDisplay devices a new dashboard can be sized for."""
+    connection.send_result(msg["id"], {"devices": list_display_devices(hass)})
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, websocket_list_devices)
+    websocket_api.async_register_command(hass, websocket_send_to_device)
     websocket_api.async_register_command(hass, websocket_bootstrap)
     websocket_api.async_register_command(hass, websocket_reload_widgets)
     websocket_api.async_register_command(hass, websocket_create_dashboard)

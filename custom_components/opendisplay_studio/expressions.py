@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 VISIBLE = "visible"
 _NUMERIC_SHAPES = frozenset({"number", "coordinate"})
-_TEXT_SHAPES = frozenset({"string", "text"})
+_TEXT_SHAPES = frozenset({"string", "text", "font", "flags"})
 
 
 @dataclass(slots=True)

@@ -23,12 +23,41 @@ export const strings = {
     show: "Show",
     lock: "Lock",
     unlock: "Unlock",
+    group: "Make group",
+    ungroup: "Ungroup",
+    enterGroup: "Enter group",
+    exitGroup: "Exit group",
+    deselect: "Deselect",
+    copy: "Copy",
+    cut: "Cut",
+    paste: "Paste",
+    pasteHere: "Paste here",
+    duplicate: "Duplicate",
+    rename: "Rename",
+    bringToFront: "Bring to front",
+    sendToBack: "Send to back",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    save: "Save dashboard",
+    toggleCode: "Switch between design and code",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    zoomReset: "Reset zoom",
+    showShortcuts: "Keyboard shortcuts",
+    nudge: {
+      left: "Nudge left",
+      right: "Nudge right",
+      up: "Nudge up",
+      down: "Nudge down",
+    },
   },
 
   app: {
     loading: "Loading OpenDisplay Studio…",
     loadFailed: "Could not load OpenDisplay Studio",
     createFailed: "Could not create the dashboard",
+    sentToDevice: "Sent to the device",
+    sendFailed: "Could not send the dashboard to the device",
     saveFailed: "Could not save the dashboard",
     deleteFailed: "Could not delete the dashboard",
     renameFailed: "Could not rename the dashboard",
@@ -41,6 +70,9 @@ export const strings = {
       `Unsupported primitive type: ${type || "(empty)"}`,
     confirmRemoval: "Confirm removal",
     deleteElementTitle: (name: string): string => `Delete ${name}?`,
+    deleteElementsTitle: (count: number): string => `Delete ${count} elements?`,
+    deleteContainerBody:
+      "This removes the container and everything in it. You can restore it with Undo.",
     deleteElementBody:
       "This removes the element from the dashboard. You can restore it with Undo.",
     deleteElement: "Delete element",
@@ -88,10 +120,19 @@ export const strings = {
     subtitle: "Create a custom OpenDisplay canvas",
     startFrom: "Start from",
     sources: "Dashboard source",
+    fromDevice: "From device",
+    fromDeviceHint: "Size and colors",
+    preset: "Predefined display",
+    presetHint: "Pick a known display",
     customSize: "Custom size",
-    customSizeHint: "Set resolution and colors",
-    fromDevice: "From OpenDisplay device",
-    fromDeviceHint: "Coming later",
+    customSizeHint: "Set size and colors",
+    device: "Device",
+    display: "Display",
+    loadingDevices: "Looking for OpenDisplay devices…",
+    noDevices:
+      "No OpenDisplay devices found. Set up the OpenDisplay integration, or start from a predefined display.",
+    deviceDetails: "Dashboard size and colors",
+    colors: "Colors",
     create: "Create dashboard",
     creating: "Creating…",
   },
@@ -105,8 +146,11 @@ export const strings = {
     code: "Code",
     setDraft: "Set Draft",
     setReady: "Set Ready",
+    sendToDevice: "Send to device",
+    sendingToDevice: "Sending…",
     save: "Save",
     saving: "Saving…",
+    help: "Keyboard shortcuts",
   },
 
   library: {
@@ -118,6 +162,10 @@ export const strings = {
     searchPlaceholder: "Search elements…",
     widgets: "Widgets",
     primitives: "Primitives",
+    containers: "Containers",
+    container: "Container",
+    containerHint: "Holds other elements and moves them together.",
+    noContainers: "No matching containers",
     noWidgets: "No matching widgets",
     reloadWidgets: "Reload widgets",
     userWidget: "user",
@@ -133,6 +181,19 @@ export const strings = {
       `${description} Click or drag to add.`,
   },
 
+  shortcuts: {
+    eyebrow: "Help",
+    title: "Keyboard shortcuts",
+    open: "Keyboard shortcuts",
+    groups: {
+      edit: "Edit",
+      arrange: "Arrange",
+      group: "Groups",
+      view: "View",
+      history: "History",
+    },
+  },
+
   structure: {
     title: "Structure",
     heading: "Elements",
@@ -141,6 +202,19 @@ export const strings = {
     widget: "Widget",
     reorderTitle: "Reorder layer",
     reorder: (name: string): string => `Reorder ${name}`,
+    root: (count: number): string =>
+      `Root (${count} ${count === 1 ? "widget" : "widgets"})`,
+    rootName: "Root",
+    breadcrumb: "Group being edited",
+    exit: "Exit",
+    container: "Container",
+    group: "Group",
+    groupBadge: "Group",
+    search: "Search layers",
+    searchPlaceholder: "Search layers…",
+    rename: "Element name",
+    collapseRow: (name: string): string => `Collapse ${name}`,
+    expandRow: (name: string): string => `Expand ${name}`,
   },
 
   inspector: {
@@ -150,12 +224,27 @@ export const strings = {
     dashboard: "Dashboard",
     dashboardHint: "Display and canvas settings",
     display: "Display",
-    displayType: "Display type",
+    rotationHelp:
+      "The picture is turned clockwise by this angle before it is sent, so the canvas has the size you see.",
     workingArea: "Working area",
     workingAreaHelp:
       "Padding defines the editable safe area. Snap aligns movement and resizing to pixel increments.",
     layout: "Layout",
     widgetSettings: "Widget settings",
+    background: "Background",
+    backgroundEnabled: "Background",
+    backgroundFill: "Fill",
+    backgroundOutline: "Outline",
+    backgroundWidth: "Outline width",
+    backgroundRadius: "Corner radius",
+    kindContainer: "Container",
+    kindGroup: "Group",
+    groupedChip: "Grouped",
+    selectedElements: (count: number): string => `${count} elements`,
+    selectionHint:
+      "Move, hide, lock or delete them together. Group them to keep them as one.",
+    boundingBox: "Bounding box",
+    removeElements: "Remove elements",
     dataSources: "Data sources",
     widgetMissing: (type: string): string =>
       `The widget ${type} is not installed. ` +
@@ -189,12 +278,16 @@ export const strings = {
     alwaysVisible: "Always shown",
     positionLocked: (fields: string): string =>
       `Position is driven by an expression (${fields})`,
+    scalingLocked: (names: string): string =>
+      `The group cannot be resized: ${names} has a position or size driven by an expression`,
     cornerFields: "Edit corners",
     derivedFields: "Edit position and size",
   },
 
   canvas: {
     rendering: "Rendering…",
+    menuLabel: "Canvas actions",
+    enterGroupHint: "Enter / double-click to edit",
     previewAlt: "Authoritative rendered display preview",
     hidden: "Hidden",
     layers: (count: number): string => `${count} layers`,
@@ -242,6 +335,8 @@ export const strings = {
    */
   fields: {
     name: "Dashboard name",
+    rotation: "Rotation",
+    resolution: "Resolution",
     width: "Width",
     height: "Height",
     palette: "Palette",
@@ -256,6 +351,8 @@ export const strings = {
 
   /** The generic display offered when none of the catalogued panels fits. */
   customDisplay: { manufacturer: "Custom", name: "Custom display" },
+
+  rotations: { 0: "0°", 90: "90°", 180: "180°", 270: "270°" },
 
   palettes: {
     bw: "Black / white",

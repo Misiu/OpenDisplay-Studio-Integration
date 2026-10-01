@@ -13,7 +13,7 @@ import type {
   WidgetLoadError,
 } from "./types";
 
-type EntryKind = "widget" | "primitive";
+type EntryKind = "widget" | "primitive" | "container";
 
 interface CatalogEntry {
   id: string;
@@ -34,6 +34,14 @@ interface DragGhost {
 }
 
 const DRAG_THRESHOLD = 4;
+
+/** The one container the library offers; groups are made from a selection. */
+const containerEntry = (): CatalogEntry => ({
+  id: "container",
+  name: strings.library.container,
+  description: strings.library.containerHint,
+  icon: "mdi:select-all",
+});
 
 /** The element catalog: search, click to add, drag onto the canvas. Collapses to a rail. */
 @customElement("ods-library")
@@ -452,6 +460,7 @@ export class OdsLibrary extends LitElement {
       `;
     }
     const widgets = filterCatalog(this.widgets, this.searchText);
+    const containers = filterCatalog([containerEntry()], this.searchText);
     const primitives = filterCatalog(this.primitives, this.searchText).map(
       (definition): CatalogEntry => ({ ...definition, id: definition.type })
     );
@@ -505,6 +514,15 @@ export class OdsLibrary extends LitElement {
             </header>
             <div class="catalog-grid">
               ${this.renderEntries(primitives, "primitive", strings.library.noPrimitives)}
+            </div>
+          </section>
+          <section class="catalog-section">
+            <header>
+              <span>${strings.library.containers}</span>
+              <span class="count">${containers.length}</span>
+            </header>
+            <div class="catalog-grid">
+              ${this.renderEntries(containers, "container", strings.library.noContainers)}
             </div>
           </section>
         </div>

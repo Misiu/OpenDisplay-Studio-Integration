@@ -63,11 +63,20 @@ def shift_primitive(
     offset_y: int,
     registry: PrimitiveRegistry = DEFAULT_PRIMITIVES,
 ) -> dict[str, Any]:
-    """Return a copy of `primitive` with its coordinates moved by the offset."""
-    shifted = dict(primitive)
+    """
+    Return the ODL element of `primitive`, its coordinates moved by the offset.
+
+    Optional fields left unset are omitted, so the renderer applies its own default.
+    """
+    shifted = registry.element(primitive)
     for field in registry.definition(primitive["type"])["fields"]:
+        key = field["key"]
+        if key not in shifted:
+            continue
         if field["shape"] == "coordinate":
-            shifted[field["key"]] += offset_x if field["axis"] == "x" else offset_y
+            shifted[key] += offset_x if field["axis"] == "x" else offset_y
+        elif field["shape"] == "points":
+            shifted[key] = [[x + offset_x, y + offset_y] for x, y in shifted[key]]
     return shifted
 
 

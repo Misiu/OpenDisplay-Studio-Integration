@@ -1,0 +1,24 @@
+type: polygon
+order: 31
+name: Polygon
+description: Filled or outlined polygon
+icon: mdi:vector-polygon
+category: shapes
+geometry: points
+fields:
+  - key: points
+    label: Points
+    shape: points
+    required: true
+    default: [[0, 0], [80, 0], [40, 70]]
+    section: layout
+  - key: fill
+    label: Fill
+    shape: color
+    nullable: true
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance

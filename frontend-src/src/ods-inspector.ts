@@ -8,7 +8,6 @@ import {
 } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import {
-  DISPLAY_PROFILES,
   isPaletteId,
   PALETTE_COLORS,
   PALETTE_LABELS,
@@ -26,6 +25,10 @@ import {
 } from "./item-fields";
 import { VISIBLE_KEY } from "./expressions";
 import { itemIcon } from "./item-labels";
+import { backgroundFormData, backgroundSchema } from "./container-fields";
+import { isRotation, ROTATIONS } from "./dashboards";
+import { selectionBox } from "./selection-gesture";
+import { findItem } from "./tree";
 import { clamp } from "./math";
 import { trackPointerGesture } from "./pointer-gesture";
 import { baseStyles, chromeStyles } from "./studio-styles";
@@ -34,6 +37,7 @@ import type {
   Dashboard,
   HaFormSchema,
   HomeAssistant,
+  ContainerItem,
   PaletteId,
   PrimitiveDefinition,
   PrimitiveItem,
@@ -278,6 +282,9 @@ export class OdsInspector extends LitElement {
   @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property({ attribute: false }) public preview?: ComposePreviewResponse;
   @property() public selectedItemId = "";
+  @property({ attribute: false }) public selectedItemIds: string[] = [];
+  @property() public enteredGroupId = "";
+  @property() public renameRequestId = "";
   @property({ type: Boolean }) public collapsed = false;
   @property({ type: Number }) public width = 350;
 
@@ -347,10 +354,6 @@ export class OdsInspector extends LitElement {
     if (value !== undefined && isDisplayKey(key)) {
       emit(this, "display-number-change", { key, value });
     }
-  }
-
-  private onProfileChange(event: Event): void {
-    emit(this, "profile-change", { profileId: inputValue(event) });
   }
 
   private onPaletteChange(event: Event): void {
@@ -500,21 +503,27 @@ export class OdsInspector extends LitElement {
     `;
   }
 
-  private renderProfileSelect(): TemplateResult {
-    const selectedId = this.dashboard.display.profileId;
+  private onRotationChange(event: Event): void {
+    const rotation = Number(inputValue(event));
+    if (isRotation(rotation)) emit(this, "rotation-change", { rotation });
+  }
+
+  private renderRotationSelect(): TemplateResult {
+    const selected = this.dashboard.display.rotation;
     return html`
       <label class="stack-field">
-        ${strings.inspector.displayType}
-        <select @change=${this.onProfileChange}>
-          ${DISPLAY_PROFILES.map(
-            (entry) => html`
-              <option value=${entry.id} ?selected=${entry.id === selectedId}>
-                ${entry.manufacturer} · ${entry.name}
+        ${strings.fields.rotation}
+        <select @change=${this.onRotationChange}>
+          ${ROTATIONS.map(
+            (rotation) => html`
+              <option value=${rotation} ?selected=${rotation === selected}>
+                ${strings.rotations[rotation]}
               </option>
             `
           )}
         </select>
       </label>
+      <p class="field-help">${strings.inspector.rotationHelp}</p>
     `;
   }
 
@@ -569,7 +578,6 @@ export class OdsInspector extends LitElement {
       <details class="inspector-section" open>
         <summary>${strings.inspector.display}</summary>
         <div class="section-body">
-          ${this.renderProfileSelect()}
           <div class="field-grid">
             ${this.renderDisplayField(strings.fields.width, "width", 64, 4096)}
             ${this.renderDisplayField(strings.fields.height, "height", 64, 4096)}
@@ -577,6 +585,7 @@ export class OdsInspector extends LitElement {
           <div class="field-grid">
             ${this.renderPaletteSelect()} ${this.renderBackgroundSelect()}
           </div>
+          ${this.renderRotationSelect()}
         </div>
       </details>
       <details class="inspector-section" open>
@@ -878,6 +887,41 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  private onContainerBackgroundChange(
+    event: OdsEvent<"widget-options-change">
+  ): void {
+    emit(this, "container-background-change", { value: event.detail.value });
+  }
+
+  /** The background of a plain container; a group has none. */
+  private renderContainerBackground(
+    item: ContainerItem
+  ): TemplateResult | typeof nothing {
+    if (item.grouped) return nothing;
+    const labels = strings.inspector;
+    const schema = backgroundSchema(this.dashboard.display.palette, {
+      enabled: labels.backgroundEnabled,
+      fill: labels.backgroundFill,
+      outline: labels.backgroundOutline,
+      width: labels.backgroundWidth,
+      radius: labels.backgroundRadius,
+    });
+    return html`
+      <details class="inspector-section" open>
+        <summary>${labels.background}</summary>
+        <div class="section-body">
+          <ha-form
+            .hass=${this.hass}
+            .data=${backgroundFormData(item)}
+            .schema=${schema}
+            .computeLabel=${formFieldLabel}
+            @value-changed=${this.onContainerBackgroundChange}
+          ></ha-form>
+        </div>
+      </details>
+    `;
+  }
+
   /** A widget asks for its data first and its layout last; a primitive the other way. */
   private renderItemSections(item: StudioItem): TemplateResult {
     if (item.kind === "widget") {
@@ -885,27 +929,100 @@ export class OdsInspector extends LitElement {
         ${this.renderWidgetSettings(item)} ${this.renderLayoutSection(item)}
       `;
     }
+    if (item.kind === "container") {
+      return html`
+        ${this.renderLayoutSection(item)}
+        ${this.renderContainerBackground(item)}
+      `;
+    }
     return html`
       ${this.renderLayoutSection(item)} ${this.renderAppearance(item)}
     `;
   }
 
+  private kindOf(item: StudioItem): string {
+    if (item.kind === "widget") return strings.inspector.kindWidget;
+    if (item.kind === "container") {
+      return item.grouped
+        ? strings.inspector.kindGroup
+        : strings.inspector.kindContainer;
+    }
+    return strings.inspector.kindPrimitive;
+  }
+
+  private renderGroupedChip(item: StudioItem): TemplateResult | typeof nothing {
+    if (item.kind !== "container" || !item.grouped) return nothing;
+    return html`
+      <div class="locked-notice grouped-chip">
+        <span>
+          <ha-icon icon="mdi:group"></ha-icon>
+          ${strings.inspector.groupedChip}
+        </span>
+      </div>
+    `;
+  }
+
   private renderItemInspector(item: StudioItem): TemplateResult {
-    const kind =
-      item.kind === "widget"
-        ? strings.inspector.kindWidget
-        : strings.inspector.kindPrimitive;
     return html`
       ${this.renderHeader(
         item.name,
-        strings.inspector.subtitle(kind, item.locked),
+        strings.inspector.subtitle(this.kindOf(item), item.locked),
         itemIcon(item, this.widgets, this.primitives)
       )}
-      ${this.renderLockedNotice(item)} ${this.renderItemSections(item)}
+      ${this.renderGroupedChip(item)} ${this.renderLockedNotice(item)}
+      ${this.renderItemSections(item)}
       ${this.renderDangerZone(strings.inspector.removeElement, () =>
         this.requestItemDelete(item)
       )}
       ${this.renderMetrics()}
+    `;
+  }
+
+  /** Several elements selected: what they add up to, and what can be done to all of them. */
+  private renderMultiInspector(): TemplateResult {
+    const count = this.selectedItemIds.length;
+    const box = selectionBox(
+      this.dashboard,
+      this.selectedItemIds,
+      (item) => this.preview?.itemBounds[item.id]
+    );
+    return html`
+      ${this.renderHeader(
+        strings.inspector.selectedElements(count),
+        strings.inspector.selectionHint,
+        "mdi:select-multiple"
+      )}
+      ${
+        box
+          ? html`
+              <details class="inspector-section" open>
+                <summary>${strings.inspector.boundingBox}</summary>
+                <div class="section-body">
+                  <div class="field-grid">
+                    ${this.renderBoxValue(strings.fields.x, box.x)}
+                    ${this.renderBoxValue(strings.fields.y, box.y)}
+                    ${this.renderBoxValue(strings.fields.width, box.width)}
+                    ${this.renderBoxValue(strings.fields.height, box.height)}
+                  </div>
+                </div>
+              </details>
+            `
+          : nothing
+      }
+      ${this.renderDangerZone(strings.inspector.removeElements, () =>
+        emit(this, "command", { id: "delete-item" })
+      )}
+    `;
+  }
+
+  private renderBoxValue(label: string, value: number): TemplateResult {
+    return html`
+      <ods-property-field
+        .label=${label}
+        .fieldKey=${label}
+        .value=${Math.round(value)}
+        .disabled=${true}
+      ></ods-property-field>
     `;
   }
 
@@ -927,13 +1044,17 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  private renderProperties(item: StudioItem | undefined): TemplateResult {
+    if (this.selectedItemIds.length > 1) return this.renderMultiInspector();
+    if (item) return this.renderItemInspector(item);
+    return this.renderDashboardInspector();
+  }
+
   protected render(): TemplateResult {
     if (this.collapsed) {
       return this.renderRail();
     }
-    const item = this.dashboard.items.find(
-      (candidate) => candidate.id === this.selectedItemId
-    );
+    const item = findItem(this.dashboard.items, this.selectedItemId);
     return html`
       <aside class="panel inspector">
         <div
@@ -948,14 +1069,11 @@ export class OdsInspector extends LitElement {
           .widgets=${this.widgets}
           .primitives=${this.primitives}
           .selectedItemId=${this.selectedItemId}
+          .selectedItemIds=${this.selectedItemIds}
+          .enteredGroupId=${this.enteredGroupId}
+          .renameRequestId=${this.renameRequestId}
         ></ods-structure>
-        <section class="properties">
-          ${
-            item
-              ? this.renderItemInspector(item)
-              : this.renderDashboardInspector()
-          }
-        </section>
+        <section class="properties">${this.renderProperties(item)}</section>
       </aside>
     `;
   }

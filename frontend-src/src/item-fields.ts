@@ -1,8 +1,10 @@
 import { PALETTE_COLORS } from "./display-profiles";
-import { isBoxPrimitive, primitiveBounds } from "./geometry";
+import { UNCHANGED, valueForForm, valueFromForm } from "./field-codecs";
+import { isBoxPrimitive, primitiveBounds } from "./primitive-shape";
 import { resolveLimit } from "./primitives";
 import { strings } from "./strings";
 import type {
+  ContainerItem,
   Dashboard,
   HaFormSchema,
   PaletteId,
@@ -69,6 +71,23 @@ const widgetLayoutFields = (
   };
 };
 
+const containerLayoutFields = (
+  item: ContainerItem,
+  dashboard: Dashboard
+): LayoutFields => {
+  const { width, height } = dashboard.display;
+  const labels = strings.fields;
+  return {
+    grid: [
+      layoutField(labels.x, "x", item.x, -width, width),
+      layoutField(labels.y, "y", item.y, -height, height),
+      layoutField(labels.width, "width", item.width, 1, width),
+      layoutField(labels.height, "height", item.height, 1, height),
+    ],
+    extra: [],
+  };
+};
+
 /** A box or line is edited as left, top, width and height, whichever way it was drawn. */
 const cornerLayoutFields = (
   item: PrimitiveItem,
@@ -112,6 +131,9 @@ const storedLayoutField = (
   );
 };
 
+const isNumeric = (field: PrimitiveField): boolean =>
+  field.shape === "coordinate" || field.shape === "number";
+
 /** The layout fields a primitive stores itself, straight from its definition. */
 const storedLayoutFields = (
   item: PrimitiveItem,
@@ -120,18 +142,23 @@ const storedLayoutFields = (
 ): LayoutFields => {
   const values: Record<string, unknown> = { ...item.primitive };
   const grid = definition.fields
-    .filter((field) => field.section === "layout")
+    .filter((field) => field.section === "layout" && isNumeric(field))
     .map((field) => storedLayoutField(field, values, dashboard));
   return { grid, extra: [] };
 };
+
+const isCornerGeometry = (definition: PrimitiveDefinition): boolean =>
+  definition.geometry === "box" || definition.geometry === "line";
 
 /** Whether a box or line can also be edited by its corners, where each may be an expression. */
 export const hasCornerFields = (
   item: StudioItem,
   definitions: PrimitiveDefinition[]
-): boolean =>
-  item.kind === "primitive" &&
-  definitionFor(item, definitions)?.geometry !== "point";
+): boolean => {
+  if (item.kind !== "primitive") return false;
+  const definition = definitionFor(item, definitions);
+  return definition !== undefined && isCornerGeometry(definition);
+};
 
 /**
  * The numeric layout fields the inspector shows for an item, from its definition. A box
@@ -146,14 +173,29 @@ export const layoutFields = (
   if (item.kind === "widget") {
     return widgetLayoutFields(item, dashboard);
   }
+  if (item.kind === "container") {
+    return containerLayoutFields(item, dashboard);
+  }
   const definition = definitionFor(item, definitions);
   if (!definition) {
     return NO_FIELDS;
   }
-  return definition.geometry === "point" || corners
-    ? storedLayoutFields(item, definition, dashboard)
-    : cornerLayoutFields(item, dashboard);
+  return isCornerGeometry(definition) && !corners
+    ? cornerLayoutFields(item, dashboard)
+    : storedLayoutFields(item, definition, dashboard);
 };
+
+/** The `ha-form` selector of a nested field, which the object selector lists by key. */
+const nestedFields = (
+  field: PrimitiveField,
+  colors: string[]
+): Record<string, unknown> =>
+  Object.fromEntries(
+    (field.nested ?? []).map((child) => [
+      child.key,
+      { label: child.label, selector: formSelector(child, colors) },
+    ])
+  );
 
 const formSelector = (
   field: PrimitiveField,
@@ -164,6 +206,10 @@ const formSelector = (
       return { boolean: {} };
     case "enum":
       return { select: { options: field.options ?? [] } };
+    case "flags":
+      return { select: { options: field.options ?? [], multiple: true } };
+    case "font":
+      return { select: { options: field.options ?? [], custom_value: true } };
     case "color":
       return {
         select: {
@@ -177,13 +223,28 @@ const formSelector = (
           max: typeof field.max === "number" ? field.max : undefined,
         },
       };
+    case "points":
+    case "icons":
+      return { text: { multiline: true } };
+    case "object":
+      return { object: { fields: nestedFields(field, colors) } };
+    case "objects":
+      return {
+        object: {
+          multiple: true,
+          label_field: field.nested?.[0]?.key,
+          fields: nestedFields(field, colors),
+        },
+      };
     default:
       return { text: {} };
   }
 };
 
+/** Numbers in the layout section have inputs of their own; everything else is a form field. */
 const isShownInForm = (field: PrimitiveField): boolean =>
-  field.section === "appearance" && field.visible !== false;
+  field.visible !== false &&
+  (field.section === "appearance" || !isNumeric(field));
 
 /** The `ha-form` schema for a primitive's appearance, with colours limited to the palette. */
 export const primitiveAppearanceSchema = (
@@ -203,17 +264,14 @@ export const primitiveAppearanceSchema = (
   }));
 };
 
-/** The values the appearance form shows: an empty optional colour reads as transparent. */
+/** The values the appearance form shows, each turned into what its control takes. */
 export const appearanceFormData = (
   item: PrimitiveItem,
   definitions: PrimitiveDefinition[]
 ): Record<string, unknown> => {
   const data: Record<string, unknown> = { ...item.primitive };
-  const definition = definitionFor(item, definitions);
-  for (const field of definition?.fields ?? []) {
-    if (field.nullable && data[field.key] === null) {
-      data[field.key] = TRANSPARENT;
-    }
+  for (const field of definitionFor(item, definitions)?.fields ?? []) {
+    data[field.key] = valueForForm(field, data[field.key]);
   }
   return data;
 };
@@ -225,8 +283,12 @@ export const primitiveValuesFromForm = (
 ): Record<string, unknown> => {
   const result = { ...values };
   for (const field of definition?.fields ?? []) {
-    if (field.nullable && result[field.key] === TRANSPARENT) {
-      result[field.key] = null;
+    if (!(field.key in result)) continue;
+    const value = valueFromForm(field, result[field.key]);
+    if (value === UNCHANGED) {
+      delete result[field.key];
+    } else {
+      result[field.key] = value;
     }
   }
   return result;

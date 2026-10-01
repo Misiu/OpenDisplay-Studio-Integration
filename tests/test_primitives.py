@@ -22,13 +22,21 @@ WIDTH = 800
 HEIGHT = 480
 EXPECTED_TYPES = [
     "text",
+    "multiline",
     "rectangle",
+    "rectangle_pattern",
     "line",
+    "polygon",
     "circle",
+    "arc",
     "ellipse",
     "icon",
+    "icon_sequence",
     "qrcode",
+    "dlimg",
     "progress_bar",
+    "plot",
+    "debug_grid",
 ]
 
 
@@ -76,6 +84,13 @@ def test_defaults_alone_make_a_valid_primitive(primitive_type: str) -> None:
     }
     if definition["geometry"] in {"box", "line"}:
         required.update({"x_end": 100, "y_end": 60})
+    required.update(
+        {
+            field["key"]: field["default"]
+            for field in definition["fields"]
+            if field.get("required") and field["shape"] not in {"coordinate", "text"}
+        }
+    )
 
     normalized = normalize({"type": primitive_type, **required})
 
@@ -87,15 +102,11 @@ def test_defaults_alone_make_a_valid_primitive(primitive_type: str) -> None:
 def test_text_keeps_the_documented_field_order_and_fills_defaults() -> None:
     normalized = normalize({"type": "text", "value": " Hello ", "x": 5, "y": 6})
 
-    assert list(normalized) == ["type", "value", "x", "y", "size", "color"]
-    assert normalized == {
-        "type": "text",
-        "value": "Hello",
-        "x": 5,
-        "y": 6,
-        "size": 32,
-        "color": "black",
-    }
+    assert list(normalized)[:6] == ["type", "value", "x", "y", "size", "color"]
+    assert normalized["value"] == "Hello"
+    assert (normalized["x"], normalized["y"]) == (5, 6)
+    assert (normalized["size"], normalized["color"]) == (32, "black")
+    assert normalized["anchor"] is None
 
 
 def test_unknown_keys_are_dropped() -> None:
@@ -199,12 +210,12 @@ def test_qr_data_beyond_what_a_code_can_hold_is_rejected_by_bytes() -> None:
         normalize(overflows)
 
 
-def test_icon_anchor_can_only_be_left_top() -> None:
+def test_icon_anchor_must_be_a_known_anchor() -> None:
     icon = {"type": "icon", "value": "home", "x": 1, "y": 1}
 
-    assert normalize({**icon, "anchor": "lt"})["anchor"] == "lt"
+    assert normalize({**icon, "anchor": "mm"})["anchor"] == "mm"
     with pytest.raises(DashboardValidationError, match=r"primitive\.anchor"):
-        normalize({**icon, "anchor": "mm"})
+        normalize({**icon, "anchor": "zz"})
 
 
 def test_the_input_is_never_modified() -> None:

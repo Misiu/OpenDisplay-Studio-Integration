@@ -5,6 +5,9 @@ import "@fontsource/roboto/700.css";
 import "./ods-app";
 import { createId } from "./ids";
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
+import { primitiveBounds } from "./primitive-shape";
+import { createPrimitive } from "./primitives";
+import { allItems } from "./tree";
 import { optionDefaults } from "./widget-fields";
 import { loadWidgetDefinitions } from "./widget-definitions";
 import type {
@@ -12,7 +15,50 @@ import type {
   WidgetLoadError,
   HomeAssistant,
   Dashboard,
+  DisplayDevice,
+  LeafItem,
+  Primitive,
+  StudioItem,
 } from "./types";
+
+const primitiveDefinitions = loadPrimitiveDefinitions();
+
+/** The OpenDisplay devices the harness pretends Home Assistant has set up. */
+const DISPLAY_DEVICES: DisplayDevice[] = [
+  {
+    id: "hallway",
+    name: "Hallway display",
+    manufacturer: "Seeed Studio",
+    model: '7.5" BWR',
+    width: 800,
+    height: 480,
+    palette: "bwr",
+    colors: ["black", "white", "red"],
+  },
+  {
+    id: "kitchen",
+    name: "Kitchen e-paper",
+    manufacturer: "OpenDisplay",
+    model: '2.9" MONO',
+    width: 296,
+    height: 128,
+    palette: "bw",
+    colors: ["black", "white"],
+  },
+];
+
+/** A primitive as the panel creates it, with the given fields changed. */
+const primitiveOf = (
+  type: Primitive["type"],
+  values: Record<string, unknown>
+): Primitive => {
+  const primitive = createPrimitive(
+    primitiveDefinitions.find((definition) => definition.type === type),
+    { x: 0, y: 0, displayWidth: 1280, displayHeight: 800 }
+  );
+  if (!primitive) throw new Error(`No definition for ${type}`);
+  return Object.assign(primitive, values);
+};
 
 if (!customElements.get("ha-icon")) {
   customElements.define(
@@ -214,26 +260,18 @@ if (!customElements.get("ha-form")) {
           "display:grid;gap:5px;margin:0 0 12px;font:500 12px Roboto,sans-serif";
         label.append(fieldLabel);
         const selectConfig = selector.select as
-          | { options?: Array<string | { value: string; label?: string }> }
+          | {
+              options?: Array<string | { value: string; label?: string }>;
+              multiple?: boolean;
+            }
           | undefined;
         if (selectConfig) {
-          const select = document.createElement("select");
-          select.style.cssText =
-            "height:38px;padding:0 9px;border:1px solid #aab2b8;border-radius:8px";
-          select.setAttribute("aria-label", fieldLabel);
-          select.disabled = Boolean(field.disabled);
-          for (const entry of selectConfig.options ?? []) {
-            const option = document.createElement("option");
-            option.value = typeof entry === "string" ? entry : entry.value;
-            option.textContent =
-              typeof entry === "string" ? entry : (entry.label ?? entry.value);
-            select.append(option);
-          }
-          select.value = String(this.formData[name] ?? "");
-          select.addEventListener("change", () =>
-            this.updateValue(name, select.value)
-          );
-          label.append(select);
+          label.append(this.renderSelect(field, selectConfig, fieldLabel));
+          return label;
+        }
+        const textarea = this.renderTextArea(field, selector, fieldLabel);
+        if (textarea) {
+          label.append(textarea);
           return label;
         }
         const input = document.createElement("input");
@@ -276,6 +314,82 @@ if (!customElements.get("ha-form")) {
         );
         label.append(input);
         return label;
+      }
+      private renderSelect(
+        field: DemoFormSchema,
+        config: {
+          options?: Array<string | { value: string; label?: string }>;
+          multiple?: boolean;
+        },
+        fieldLabel: string
+      ): HTMLSelectElement {
+        const name = field.name!;
+        const select = document.createElement("select");
+        select.style.cssText = `${config.multiple ? "" : "height:38px;"}padding:0 9px;border:1px solid #aab2b8;border-radius:8px`;
+        select.setAttribute("aria-label", fieldLabel);
+        select.disabled = Boolean(field.disabled);
+        select.multiple = Boolean(config.multiple);
+        for (const entry of config.options ?? []) {
+          const option = document.createElement("option");
+          option.value = typeof entry === "string" ? entry : entry.value;
+          option.textContent =
+            typeof entry === "string" ? entry : (entry.label ?? entry.value);
+          select.append(option);
+        }
+        const current = this.formData[name];
+        if (config.multiple) {
+          for (const option of select.options) {
+            option.selected =
+              Array.isArray(current) && current.includes(option.value);
+          }
+        } else {
+          select.value = String(current ?? "");
+        }
+        select.addEventListener("change", () =>
+          this.updateValue(
+            name,
+            config.multiple
+              ? [...select.selectedOptions].map((option) => option.value)
+              : select.value
+          )
+        );
+        return select;
+      }
+      /**
+       * Home Assistant edits a multi-line text as it is and an object in its own
+       * editor; the harness shows both as text, an object as JSON.
+       */
+      private renderTextArea(
+        field: DemoFormSchema,
+        selector: Record<string, unknown>,
+        fieldLabel: string
+      ): HTMLTextAreaElement | undefined {
+        const name = field.name!;
+        const isObject = "object" in selector;
+        const text = selector.text as { multiline?: boolean } | undefined;
+        if (!isObject && !text?.multiline) return undefined;
+        const area = document.createElement("textarea");
+        area.rows = 4;
+        area.style.cssText =
+          "padding:6px 9px;border:1px solid #aab2b8;border-radius:8px;font:12px monospace";
+        area.setAttribute("aria-label", fieldLabel);
+        area.disabled = Boolean(field.disabled);
+        const current = this.formData[name];
+        area.value = isObject
+          ? JSON.stringify(current ?? {}, null, 2)
+          : String(current ?? "");
+        area.addEventListener("change", () => {
+          if (!isObject) {
+            this.updateValue(name, area.value);
+            return;
+          }
+          try {
+            this.updateValue(name, JSON.parse(area.value));
+          } catch {
+            // Not JSON yet: keep what was there, as the real editor does.
+          }
+        });
+        return area;
       }
       private updateValue(name: string, value: unknown): void {
         this.formData = { ...this.formData, [name]: value };
@@ -365,6 +479,8 @@ const demoDashboard: Dashboard = {
     background: "white",
     padding: 20,
     snapSize: 5,
+    rotation: 0,
+    deviceId: "hallway",
   },
   items: [
     {
@@ -401,6 +517,8 @@ const hallwayDashboard: Dashboard = {
     background: "white",
     padding: 0,
     snapSize: 5,
+    rotation: 0,
+    deviceId: null,
   },
   items: [
     {
@@ -409,15 +527,107 @@ const hallwayDashboard: Dashboard = {
       kind: "primitive",
       locked: false,
       hidden: false,
-      primitive: {
-        type: "text",
+      primitive: primitiveOf("text", {
         value: "21.4",
         x: 40,
         y: 40,
         size: 32,
         color: "black",
-      },
+      }),
       expressions: { value: "{{ states('sensor.kitchen_temperature') }}" },
+    },
+    {
+      id: "panel",
+      name: "Panel",
+      kind: "container",
+      locked: false,
+      hidden: false,
+      x: 700,
+      y: 100,
+      width: 400,
+      height: 300,
+      grouped: false,
+      background: { fill: "white", outline: "black", width: 2, radius: 0 },
+      children: [
+        {
+          id: "chip",
+          name: "Chip",
+          kind: "primitive",
+          locked: false,
+          hidden: false,
+          primitive: primitiveOf("rectangle", {
+            x_start: 40,
+            y_start: 40,
+            x_end: 159,
+            y_end: 99,
+            fill: null,
+            outline: "black",
+            width: 2,
+          }),
+        },
+        {
+          id: "dot",
+          name: "Dot",
+          kind: "primitive",
+          locked: false,
+          hidden: false,
+          primitive: primitiveOf("circle", {
+            x: 300,
+            y: 200,
+            radius: 30,
+            fill: null,
+            outline: "black",
+            width: 2,
+          }),
+        },
+      ],
+    },
+    {
+      id: "cluster",
+      name: "Cluster",
+      kind: "container",
+      locked: false,
+      hidden: false,
+      x: 100,
+      y: 500,
+      width: 400,
+      height: 150,
+      grouped: true,
+      background: null,
+      children: [
+        {
+          id: "left",
+          name: "Left",
+          kind: "primitive",
+          locked: false,
+          hidden: false,
+          primitive: primitiveOf("rectangle", {
+            x_start: 0,
+            y_start: 0,
+            x_end: 159,
+            y_end: 99,
+            fill: null,
+            outline: "black",
+            width: 2,
+          }),
+        },
+        {
+          id: "right",
+          name: "Right",
+          kind: "primitive",
+          locked: false,
+          hidden: false,
+          primitive: primitiveOf("rectangle", {
+            x_start: 200,
+            y_start: 0,
+            x_end: 359,
+            y_end: 99,
+            fill: null,
+            outline: "black",
+            width: 2,
+          }),
+        },
+      ],
     },
   ],
   createdAt: "2026-09-20T08:00:00+00:00",
@@ -438,6 +648,8 @@ const officeDashboard: Dashboard = {
     background: "white",
     padding: 0,
     snapSize: 5,
+    rotation: 0,
+    deviceId: null,
   },
   items: [],
   createdAt: "2026-09-18T10:00:00+00:00",
@@ -468,59 +680,65 @@ const qrModules = (data: string): number => {
  * computed from their fields, so the harness deliberately differs from the
  * panel's own first guess and tests can tell them apart.
  */
-const itemBounds = (
-  dashboard: Dashboard
-): Record<string, { x: number; y: number; width: number; height: number }> => {
-  const result: Record<
-    string,
-    { x: number; y: number; width: number; height: number }
-  > = {};
-  for (const item of dashboard.items) {
-    if (item.kind === "widget") {
-      result[item.id] = { ...item.frame };
+type Box = { x: number; y: number; width: number; height: number };
+
+/** What the harness "measures" for the primitives whose size the backend measures. */
+const measuredBox = (primitive: Primitive): Box | undefined => {
+  if (primitive.type === "text") {
+    return {
+      x: primitive.x,
+      y: primitive.y,
+      width: Math.round(primitive.value.length * primitive.size * 0.55),
+      height: Math.round(primitive.size * 1.4),
+    };
+  }
+  if (primitive.type === "qrcode") {
+    const side =
+      (qrModules(primitive.data) + primitive.border * 2) * primitive.boxsize;
+    return { x: primitive.x, y: primitive.y, width: side, height: side };
+  }
+  return undefined;
+};
+
+/** The size the harness reports for a leaf, in the coordinates the item stores. */
+const leafBounds = (item: LeafItem): Box => {
+  if (item.kind === "widget") return { ...item.frame };
+  return primitiveBounds(item.primitive, measuredBox(item.primitive));
+};
+
+/**
+ * What the backend reports as item bounds, on the display: a container's children
+ * store coordinates relative to it, so their offsets are added.
+ */
+const collectBounds = (
+  items: StudioItem[],
+  offset: { x: number; y: number },
+  result: Record<string, Box>
+): void => {
+  for (const item of items) {
+    if (item.kind === "container") {
+      const box = {
+        x: item.x,
+        y: item.y,
+        width: item.width,
+        height: item.height,
+      };
+      result[item.id] = { ...box, x: box.x + offset.x, y: box.y + offset.y };
+      collectBounds(
+        item.children,
+        { x: offset.x + item.x, y: offset.y + item.y },
+        result
+      );
     } else {
-      const primitive = item.primitive;
-      if ("x_start" in primitive) {
-        result[item.id] = {
-          x: Math.min(primitive.x_start, primitive.x_end),
-          y: Math.min(primitive.y_start, primitive.y_end),
-          width: Math.abs(primitive.x_end - primitive.x_start) + 1,
-          height: Math.abs(primitive.y_end - primitive.y_start) + 1,
-        };
-      } else if (primitive.type === "circle") {
-        result[item.id] = {
-          x: primitive.x - primitive.radius,
-          y: primitive.y - primitive.radius,
-          width: primitive.radius * 2 + 1,
-          height: primitive.radius * 2 + 1,
-        };
-      } else if (primitive.type === "qrcode") {
-        const size =
-          (qrModules(primitive.data) + primitive.border * 2) *
-          primitive.boxsize;
-        result[item.id] = {
-          x: primitive.x,
-          y: primitive.y,
-          width: size,
-          height: size,
-        };
-      } else if (primitive.type === "icon") {
-        result[item.id] = {
-          x: primitive.x,
-          y: primitive.y,
-          width: primitive.size,
-          height: primitive.size,
-        };
-      } else {
-        result[item.id] = {
-          x: primitive.x,
-          y: primitive.y,
-          width: Math.round(primitive.value.length * primitive.size * 0.55),
-          height: Math.round(primitive.size * 1.4),
-        };
-      }
+      const box = leafBounds(item);
+      result[item.id] = { ...box, x: box.x + offset.x, y: box.y + offset.y };
     }
   }
+};
+
+const itemBounds = (dashboard: Dashboard): Record<string, Box> => {
+  const result: Record<string, Box> = {};
+  collectBounds(dashboard.items, { x: 0, y: 0 }, result);
   return result;
 };
 
@@ -590,8 +808,14 @@ const hass: HomeAssistant = {
         dashboards,
         widgets: installedWidgets(hass.language),
         widgetErrors: widgetErrors(),
-        primitives: loadPrimitiveDefinitions(),
+        primitives: primitiveDefinitions,
       } as T;
+    }
+    if (message.type === "opendisplay_studio/send_to_device") {
+      return {} as T;
+    }
+    if (message.type === "opendisplay_studio/list_devices") {
+      return { devices: DISPLAY_DEVICES } as T;
     }
     if (message.type === "opendisplay_studio/reload_widgets") {
       loadedPackages = new Set(installedPackages);
@@ -602,7 +826,8 @@ const hass: HomeAssistant = {
     }
     if (message.type === "opendisplay_studio/compose_preview") {
       const dashboard = message.dashboard as Dashboard;
-      const yaml = dashboard.items
+      const yaml = allItems(dashboard.items)
+        .filter((item) => item.kind !== "container")
         .map((item) =>
           item.kind === "primitive"
             ? `- type: ${item.primitive.type}`

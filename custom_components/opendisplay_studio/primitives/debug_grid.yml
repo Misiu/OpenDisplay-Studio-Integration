@@ -1,0 +1,74 @@
+type: debug_grid
+order: 90
+name: Debug grid
+description: A labelled grid over the whole display, for checking positions
+icon: mdi:grid
+category: debug
+geometry: canvas
+fields:
+  - key: spacing
+    label: Spacing
+    shape: number
+    min: 2
+    max: 512
+    default: 20
+    unit: px
+    section: appearance
+  - key: line_color
+    label: "Line color"
+    shape: color
+    default: black
+    section: appearance
+  - key: dashed
+    label: Dashed
+    shape: boolean
+    default: true
+    section: appearance
+  - key: dash_length
+    label: "Dash length"
+    shape: number
+    min: 1
+    max: 64
+    default: 2
+    unit: px
+    section: appearance
+  - key: space_length
+    label: "Gap length"
+    shape: number
+    min: 1
+    max: 64
+    default: 4
+    unit: px
+    section: appearance
+  - key: show_labels
+    label: "Show labels"
+    shape: boolean
+    default: true
+    section: appearance
+  - key: label_step
+    label: "Label every"
+    shape: number
+    min: 2
+    max: 2048
+    optional: true
+    unit: px
+    section: appearance
+  - key: label_color
+    label: "Label color"
+    shape: color
+    default: black
+    section: appearance
+  - key: label_font_size
+    label: "Label size"
+    shape: number
+    min: 6
+    max: 48
+    default: 12
+    unit: px
+    section: appearance
+  - key: font
+    label: Font
+    shape: font
+    default: ppb.ttf
+    options: [ppb.ttf, rbm.ttf]
+    section: appearance

@@ -1,0 +1,98 @@
+type: rectangle_pattern
+order: 21
+name: Rectangle pattern
+description: A grid of repeated rectangles
+icon: mdi:view-grid-outline
+category: shapes
+geometry: pattern
+fields:
+  - key: x_start
+    label: Left
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y_start
+    label: Top
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: x_size
+    label: "Cell width"
+    shape: number
+    min: 1
+    max: display_width
+    default: 40
+    unit: px
+    section: layout
+  - key: y_size
+    label: "Cell height"
+    shape: number
+    min: 1
+    max: display_height
+    default: 30
+    unit: px
+    section: layout
+  - key: x_offset
+    label: "Horizontal gap"
+    shape: number
+    min: 0
+    max: display_width
+    default: 8
+    unit: px
+    section: layout
+  - key: y_offset
+    label: "Vertical gap"
+    shape: number
+    min: 0
+    max: display_height
+    default: 8
+    unit: px
+    section: layout
+  - key: x_repeat
+    label: Columns
+    shape: number
+    min: 1
+    max: 64
+    default: 3
+    section: layout
+  - key: y_repeat
+    label: Rows
+    shape: number
+    min: 1
+    max: 64
+    default: 2
+    section: layout
+  - key: fill
+    label: Fill
+    shape: color
+    nullable: true
+    section: appearance
+  - key: outline
+    label: Outline
+    shape: color
+    default: black
+    section: appearance
+  - key: width
+    label: "Outline width"
+    shape: number
+    min: 0
+    max: 32
+    default: 1
+    unit: px
+    section: appearance
+  - key: radius
+    label: "Corner radius"
+    shape: number
+    min: 0
+    max: 256
+    optional: true
+    unit: px
+    section: appearance
+  - key: corners
+    label: "Rounded corners"
+    shape: flags
+    options: [top_left, top_right, bottom_right, bottom_left]
+    optional: true
+    section: appearance

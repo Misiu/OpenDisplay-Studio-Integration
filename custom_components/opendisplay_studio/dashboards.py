@@ -20,7 +20,9 @@ from .primitives import DEFAULT_PRIMITIVES, PrimitiveRegistry
 from .validation import (
     DashboardValidationError,
     color,
+    device_id,
     integer,
+    rotation,
     string,
 )
 from .widgets import WidgetRegistry
@@ -79,6 +81,8 @@ def validate_dashboard(
             ),
             "padding": padding,
             "snapSize": snap_size,
+            "rotation": rotation(display.get("rotation", 0)),
+            "deviceId": device_id(display.get("deviceId")),
         },
         "items": items,
     }

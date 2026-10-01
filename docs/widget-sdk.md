@@ -38,8 +38,15 @@ def render(context: WidgetContext) -> list[dict]:
     box = context.box
     greeting = context.t("greeting", who=context.options["who"])
     size = fit_text(greeting, box.width - 16, maximum=box.height // 2)
-    return [text(greeting, x=box.x + box.width // 2, y=box.y + box.height // 2,
-                 size=size, anchor="mm")]
+    return [
+        text(
+            greeting,
+            x=box.x + box.width // 2,
+            y=box.y + box.height // 2,
+            size=size,
+            anchor="mm",
+        )
+    ]
 
 
 RENDERER = render
@@ -80,7 +87,9 @@ entry per pick in the same order.
 ## 3. Draw inside the box
 
 ```python
-for pick, data in zip(context.sources["calendars"], context.data["calendars"], strict=True):
+for pick, data in zip(
+    context.sources["calendars"], context.data["calendars"], strict=True
+):
     for event in data["events"]:
         ...
 ```

@@ -223,8 +223,11 @@ Each definition declares `type`, name, icon, description, library category,
 field has `key`, `label`, `shape`, `required`, `default`, `section`, and
 optional `unit`, `min`, `max`, `options`, `nested`.
 
-Shapes: `number`, `coordinate` (px or `%`), `boolean`, `enum`, `color`,
-`font`, `icon`, `string`, `text`, `json` (`points`, `icons`, `data`), `entity`.
+Shapes: `number`, `coordinate` (pixels; `%` is a documented gap), `boolean`,
+`enum`, `flags` (a comma-separated subset of `options`), `color`, `string`,
+`text`, `font`, `points`, `icons`, `object` and `objects` (fields listed in
+`nested`). A field may be `optional`: left unset it is omitted from the ODL element,
+so the renderer applies its own default.
 
 - `bootstrap` returns the definitions; the inspector renders **generic**
   controls from them. No per-type branches in inspector code, no per-type

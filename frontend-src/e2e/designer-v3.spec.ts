@@ -120,7 +120,7 @@ const startLayerReorder = async (
   target: Locator,
   edge: "before" | "after"
 ) => {
-  const handle = source.getByRole("button", { name: /Reorder/ });
+  const handle = source.locator("strong");
   const handleBox = await handle.boundingBox();
   const targetBox = await target.boundingBox();
   if (!handleBox || !targetBox) {
@@ -216,9 +216,11 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
     page.getByRole("textbox", { name: "Dashboard name" })
   ).toHaveValue("Kitchen display");
   await expect(page.getByRole("button", { name: /Sensor card/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Rectangle/ })).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /Progress bar/ })
+    page.getByRole("button", { name: "Rectangle", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^Progress bar$/ })
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
   await expect(page.getByRole("spinbutton", { name: "Width" })).toHaveValue(
@@ -233,17 +235,18 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
   await expect(page.getByRole("combobox", { name: "Background" })).toHaveValue(
     "white"
   );
-  await expect(page.getByRole("button", { name: /grid/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^grid$/i })).toHaveCount(0);
 
   const toolboxBox = await page.locator(".toolbox").boundingBox();
   const searchBox = await page.locator(".search").boundingBox();
   const textBox = await page
-    .getByRole("button", { name: /Text/ })
+    .getByRole("button", { name: /^Text$/ })
     .boundingBox();
-  const rectangleBox = await page
-    .getByRole("button", { name: /Rectangle/ })
+  // The tile beside Text in the two-column catalog.
+  const neighbourBox = await page
+    .getByRole("button", { name: "Multiline text", exact: true })
     .boundingBox();
-  if (!toolboxBox || !searchBox || !textBox || !rectangleBox) {
+  if (!toolboxBox || !searchBox || !textBox || !neighbourBox) {
     throw new Error("Catalog layout is not visible");
   }
   expect(toolboxBox.width).toBeCloseTo(255, 0);
@@ -251,15 +254,17 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
   expect(searchBox.height).toBeCloseTo(30, 0);
   expect(textBox.width).toBeCloseTo(115, 0);
   expect(textBox.height).toBeCloseTo(34, 0);
-  expect(rectangleBox.x - (textBox.x + textBox.width)).toBeCloseTo(6, 0);
+  expect(neighbourBox.x - (textBox.x + textBox.width)).toBeCloseTo(6, 0);
 
   const search = page.getByRole("searchbox", {
     name: "Search widgets and primitives",
   });
   await search.fill("rect");
   await expect(page.getByText("No matching widgets")).toBeVisible();
-  await expect(page.getByRole("button", { name: /Rectangle/ })).toBeVisible();
-  await expect(page.getByRole("button", { name: /Text/ })).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: "Rectangle", exact: true })
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Text$/ })).toBeHidden();
 });
 
 test("moves and resizes an absolute widget with pixel snapping", async ({
@@ -409,7 +414,7 @@ test("preserves the selected item aspect ratio only while Shift is held", async 
 test("anchors a circle at the opposite edge instead of expanding around its center", async ({
   page,
 }) => {
-  await page.getByRole("button", { name: /Circle/ }).click();
+  await page.getByRole("button", { name: /^Circle$/ }).click();
   const circle = page.locator(".selection.selected");
   const before = await circle.boundingBox();
   if (!before) throw new Error("Circle is not visible");
@@ -427,7 +432,7 @@ test("anchors a circle at the opposite edge instead of expanding around its cent
 test("resizes box and quantized intrinsic ODL primitives through directional handles", async ({
   page,
 }) => {
-  await page.getByRole("button", { name: /Rectangle/ }).click();
+  await page.getByRole("button", { name: "Rectangle", exact: true }).click();
   const rectangle = page.locator(".selection.selected");
   const rectangleBaseline = await selectedLayout(page);
   await dragResizeHandle(page, rectangle, "se", { x: 20, y: 15 });
@@ -437,7 +442,7 @@ test("resizes box and quantized intrinsic ODL primitives through directional han
   expect(resizedRectangle.right).toBeGreaterThan(rectangleBaseline.right);
   expect(resizedRectangle.bottom).toBeGreaterThan(rectangleBaseline.bottom);
 
-  await page.getByRole("button", { name: /QR code/ }).click();
+  await page.getByRole("button", { name: /^QR code$/ }).click();
   const qrCode = page.locator(".selection.selected");
   const qrBefore = await qrCode.boundingBox();
   if (!qrBefore) throw new Error("QR code is not visible");
@@ -532,7 +537,7 @@ test("adds new elements by click and drag without moving or reloading the editor
         .filter((call) => call.type === "opendisplay_studio/bootstrap").length
   );
 
-  await page.getByRole("button", { name: /Rectangle/ }).click();
+  await page.getByRole("button", { name: "Rectangle", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "rectangle_1", exact: true })
   ).toBeVisible();
@@ -540,7 +545,7 @@ test("adds new elements by click and drag without moving or reloading the editor
   await expect(page.locator("[data-item-id].selected")).toHaveCount(1);
   expectStableCanvas(before, await editorPosition(page));
 
-  await dragCatalogItemToCanvas(page, /Circle/);
+  await dragCatalogItemToCanvas(page, /^Circle$/);
   await expect(
     page.getByRole("heading", { name: "circle_1", exact: true })
   ).toBeVisible();
@@ -563,8 +568,8 @@ test("keeps catalog dragging relative to the canvas across different HA sidebar 
 }) => {
   const panel = page.locator("ods-app");
   const scenarios = [
-    { sidebarWidth: 176, name: /Ellipse/, value: "primitive:ellipse" },
-    { sidebarWidth: 324, name: /Line/, value: "primitive:line" },
+    { sidebarWidth: 176, name: /^Ellipse$/, value: "primitive:ellipse" },
+    { sidebarWidth: 324, name: /^Line$/, value: "primitive:line" },
   ];
 
   for (const scenario of scenarios) {
@@ -693,7 +698,7 @@ test("supports consecutive catalog drops, immediate movement and cancellation ou
 }) => {
   const initialCount = await page.locator(".layer-row").count();
 
-  await dragCatalogItemToCanvas(page, /Line/, { x: 0.38, y: 0.38 });
+  await dragCatalogItemToCanvas(page, /^Line$/, { x: 0.38, y: 0.38 });
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 1);
   await expect(
     page.getByRole("heading", { name: "line_1", exact: true })
@@ -703,7 +708,7 @@ test("supports consecutive catalog drops, immediate movement and cancellation ou
     /.+/
   );
 
-  await dragCatalogItemToCanvas(page, /QR code/, { x: 0.7, y: 0.64 });
+  await dragCatalogItemToCanvas(page, /^QR code$/, { x: 0.7, y: 0.64 });
   await expect(page.locator(".layer-row")).toHaveCount(initialCount + 2);
   await expect(
     page.getByRole("heading", { name: "qrcode_1", exact: true })
@@ -735,7 +740,7 @@ test("supports consecutive catalog drops, immediate movement and cancellation ou
     selectedId!
   );
 
-  const source = page.getByRole("button", { name: /Progress bar/ });
+  const source = page.getByRole("button", { name: /^Progress bar$/ });
   const sourceBox = await source.boundingBox();
   if (!sourceBox) throw new Error("Progress bar catalog item is not visible");
   await page.mouse.move(
@@ -790,7 +795,7 @@ test("adds overlapping primitives and preserves each exact ODL type", async ({
     ["Progress bar", "progress_bar"],
   ] as const;
   for (const [name, type] of types) {
-    await dragCatalogItemToCanvas(page, new RegExp(name));
+    await dragCatalogItemToCanvas(page, new RegExp(`^${name}$`));
     await expect(
       page.getByRole("heading", { name: `${type}_1`, exact: true })
     ).toBeVisible();
@@ -814,8 +819,8 @@ test("adds overlapping primitives and preserves each exact ODL type", async ({
 test("selects, hides, locks and reorders compact layers with an insertion marker", async ({
   page,
 }) => {
-  await dragCatalogItemToCanvas(page, /Rectangle/, { x: 0.62, y: 0.56 });
-  await dragCatalogItemToCanvas(page, /Text/, { x: 0.72, y: 0.66 });
+  await dragCatalogItemToCanvas(page, /^Rectangle$/, { x: 0.62, y: 0.56 });
+  await dragCatalogItemToCanvas(page, /^Text$/, { x: 0.72, y: 0.66 });
 
   const rectangleRow = page
     .locator(".layer-row")
@@ -864,8 +869,8 @@ test("selects, hides, locks and reorders compact layers with an insertion marker
 test("supports undo and redo for movement, visibility and layer order", async ({
   page,
 }) => {
-  await dragCatalogItemToCanvas(page, /Rectangle/, { x: 0.34, y: 0.34 });
-  await dragCatalogItemToCanvas(page, /Text/, { x: 0.78, y: 0.72 });
+  await dragCatalogItemToCanvas(page, /^Rectangle$/, { x: 0.34, y: 0.34 });
+  await dragCatalogItemToCanvas(page, /^Text$/, { x: 0.78, y: 0.72 });
   const rectangleRow = page
     .locator(".layer-row")
     .filter({ hasText: "rectangle_1" });
@@ -920,7 +925,7 @@ test("supports undo and redo for movement, visibility and layer order", async ({
 test("requires confirmation before deleting a layer and supports undo", async ({
   page,
 }) => {
-  await dragCatalogItemToCanvas(page, /Text/, { x: 0.72, y: 0.66 });
+  await dragCatalogItemToCanvas(page, /^Text$/, { x: 0.72, y: 0.66 });
   const textRow = page.locator(".layer-row").filter({ hasText: "text_1" });
   await textRow.getByRole("button", { name: "Delete text_1" }).click();
   const dialog = page.getByRole("dialog", { name: "Delete text_1?" });

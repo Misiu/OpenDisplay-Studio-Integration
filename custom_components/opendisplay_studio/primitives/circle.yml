@@ -7,13 +7,13 @@ category: shapes
 geometry: point
 fields:
   - key: x
-    label: Center X
+    label: "Center X"
     shape: coordinate
     axis: x
     required: true
     section: layout
   - key: y
-    label: Center Y
+    label: "Center Y"
     shape: coordinate
     axis: y
     required: true
@@ -37,7 +37,7 @@ fields:
     default: black
     section: appearance
   - key: width
-    label: Outline width
+    label: "Outline width"
     shape: number
     min: 0
     max: 32

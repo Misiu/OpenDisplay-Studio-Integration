@@ -62,8 +62,9 @@ preview refreshes when one changes.
 ```python
 from opendisplay_studio.sdk import WidgetContext, text
 
-def render(context: WidgetContext) -> list[dict]:
-    ...
+
+def render(context: WidgetContext) -> list[dict]: ...
+
 
 RENDERER = render
 ```

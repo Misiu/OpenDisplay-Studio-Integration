@@ -1,0 +1,57 @@
+type: dlimg
+order: 71
+name: Image
+description: An image from a URL, a media file or a camera or image entity
+icon: mdi:image-outline
+category: media
+geometry: image
+fields:
+  - key: url
+    label: Image
+    shape: string
+    required: true
+    maxLength: 2048
+    default: /media/local/image.png
+    section: appearance
+  - key: x
+    label: X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y
+    label: Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: xsize
+    label: Width
+    shape: number
+    min: 1
+    max: display_width
+    default: 160
+    unit: px
+    section: layout
+  - key: ysize
+    label: Height
+    shape: number
+    min: 1
+    max: display_height
+    default: 120
+    unit: px
+    section: layout
+  - key: resize_method
+    label: Resize
+    shape: enum
+    options: [stretch, cover, contain, crop]
+    default: stretch
+    section: appearance
+  - key: rotate
+    label: Rotate
+    shape: number
+    min: -360
+    max: 360
+    default: 0
+    unit: "°"
+    section: appearance

@@ -1,0 +1,72 @@
+type: icon_sequence
+order: 61
+name: Icon sequence
+description: A row or column of icons
+icon: mdi:dots-horizontal-circle-outline
+category: media
+geometry: point
+fields:
+  - key: icons
+    label: Icons
+    shape: icons
+    required: true
+    default: [home, thermometer, water]
+    section: appearance
+  - key: x
+    label: X
+    shape: coordinate
+    axis: x
+    required: true
+    section: layout
+  - key: y
+    label: Y
+    shape: coordinate
+    axis: y
+    required: true
+    section: layout
+  - key: size
+    label: Size
+    shape: number
+    min: 8
+    max: 256
+    default: 32
+    unit: px
+    section: layout
+  - key: direction
+    label: Direction
+    shape: enum
+    options: [right, left, up, down]
+    default: right
+    section: layout
+  - key: spacing
+    label: Spacing
+    shape: number
+    min: 0
+    max: 256
+    optional: true
+    unit: px
+    section: appearance
+  - key: fill
+    label: Color
+    shape: color
+    default: black
+    section: appearance
+  - key: anchor
+    label: Anchor
+    shape: enum
+    options: [la, ma, ra, lt, mt, rt, lm, mm, rm, ls, ms, rs, lb, mb, rb, ld, md, rd]
+    default: la
+    section: layout
+  - key: stroke_width
+    label: "Stroke width"
+    shape: number
+    min: 0
+    max: 16
+    default: 0
+    unit: px
+    section: appearance
+  - key: stroke_fill
+    label: "Stroke color"
+    shape: color
+    default: white
+    section: appearance

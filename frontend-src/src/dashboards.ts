@@ -1,10 +1,55 @@
 import {
+  DISPLAY_PROFILES,
+  isPaletteId,
   PALETTE_COLORS,
   PALETTE_LABELS,
   profileById,
 } from "./display-profiles";
 import { strings } from "./strings";
-import type { Dashboard, PaletteId, StudioFormSchema } from "./types";
+import type {
+  Dashboard,
+  DisplayDevice,
+  DisplayProfile,
+  PaletteId,
+  Rotation,
+  StudioFormSchema,
+} from "./types";
+
+/** Where a new dashboard takes its display from. */
+export type DashboardSource = "device" | "preset" | "custom";
+
+export const ROTATIONS: Rotation[] = [0, 90, 180, 270];
+
+export const isRotation = (value: number): value is Rotation =>
+  ROTATIONS.some((rotation) => rotation === value);
+
+/** A quarter turn swaps the width and the height of the picture. */
+export const isQuarterTurn = (rotation: Rotation): boolean =>
+  rotation === 90 || rotation === 270;
+
+/** The canvas of a display of the given own size, for the way the picture is turned. */
+export const canvasSize = (
+  size: { width: number; height: number },
+  rotation: Rotation
+): { width: number; height: number } =>
+  isQuarterTurn(rotation)
+    ? { width: size.height, height: size.width }
+    : { width: size.width, height: size.height };
+
+/** The canvas after the picture is turned from one rotation to another. */
+export const turnedCanvas = (
+  size: { width: number; height: number },
+  from: Rotation,
+  to: Rotation
+): { width: number; height: number } =>
+  isQuarterTurn(from) === isQuarterTurn(to)
+    ? size
+    : { width: size.height, height: size.width };
+
+const rotationFrom = (value: string, current: Rotation): Rotation => {
+  const rotation = Number(value);
+  return isRotation(rotation) ? rotation : current;
+};
 
 export type DashboardSort = "updated" | "name";
 
@@ -14,6 +59,7 @@ export interface DashboardFormData {
   width: number;
   height: number;
   palette: PaletteId;
+  rotation: string;
   padding: number;
   snapSize: number;
 }
@@ -37,6 +83,8 @@ export const freshDashboard = (
       background: "white",
       padding: 0,
       snapSize: 5,
+      rotation: 0,
+      deviceId: null,
     },
     items: [],
     createdAt: "",
@@ -49,11 +97,60 @@ export const dashboardFormData = (dashboard: Dashboard): DashboardFormData => ({
   width: dashboard.display.width,
   height: dashboard.display.height,
   palette: dashboard.display.palette,
+  rotation: String(dashboard.display.rotation),
   padding: dashboard.display.padding,
   snapSize: dashboard.display.snapSize,
 });
 
-/** Apply form edits to a copy of the dashboard; any edit makes the display "custom". */
+interface DisplaySettings {
+  profileId: string;
+  deviceId: string | null;
+  width: number;
+  height: number;
+  palette: PaletteId;
+}
+
+/** A copy of the dashboard on another display; a background the palette lacks becomes white. */
+const onDisplay = (
+  dashboard: Dashboard,
+  display: DisplaySettings
+): Dashboard => {
+  const next = structuredClone(dashboard);
+  Object.assign(next.display, display);
+  if (!PALETTE_COLORS[display.palette].includes(next.display.background)) {
+    next.display.background = "white";
+  }
+  return next;
+};
+
+/** The dashboard sized for an OpenDisplay device: its resolution and its colors. */
+export const dashboardFromDevice = (
+  dashboard: Dashboard,
+  device: DisplayDevice
+): Dashboard =>
+  onDisplay(dashboard, {
+    profileId: "custom",
+    deviceId: device.id,
+    ...canvasSize(device, dashboard.display.rotation),
+    palette: device.palette,
+  });
+
+/** The dashboard sized for a predefined display, in one of the colors it offers. */
+export const dashboardFromProfile = (
+  dashboard: Dashboard,
+  profile: DisplayProfile,
+  palette: PaletteId = profile.defaultPalette
+): Dashboard =>
+  onDisplay(dashboard, {
+    profileId: profile.id,
+    deviceId: null,
+    ...canvasSize(profile, dashboard.display.rotation),
+    palette: profile.palettes.includes(palette)
+      ? palette
+      : profile.defaultPalette,
+  });
+
+/** Apply form edits to a copy of the dashboard; a new size makes the display "custom". */
 export const dashboardFromForm = (
   dashboard: Dashboard,
   partial: Partial<DashboardFormData>
@@ -61,9 +158,25 @@ export const dashboardFromForm = (
   const value = { ...dashboardFormData(dashboard), ...partial };
   const next = structuredClone(dashboard);
   next.name = String(value.name);
-  next.display.profileId = "custom";
-  next.display.width = Math.round(Number(value.width) || 0);
-  next.display.height = Math.round(Number(value.height) || 0);
+  const typed = {
+    width: Math.round(Number(value.width) || 0),
+    height: Math.round(Number(value.height) || 0),
+  };
+  const sizeEdited =
+    typed.width !== dashboard.display.width ||
+    typed.height !== dashboard.display.height;
+  const rotation = rotationFrom(value.rotation, dashboard.display.rotation);
+  // A new size is the user's own; a new rotation keeps the display and turns its canvas.
+  const canvas = sizeEdited
+    ? typed
+    : turnedCanvas(typed, dashboard.display.rotation, rotation);
+  if (sizeEdited) {
+    next.display.profileId = "custom";
+    next.display.deviceId = null;
+  }
+  next.display.width = canvas.width;
+  next.display.height = canvas.height;
+  next.display.rotation = rotation;
   next.display.palette = value.palette in PALETTE_LABELS ? value.palette : "bw";
   next.display.padding = Math.round(Number(value.padding) || 0);
   next.display.snapSize = Math.round(Number(value.snapSize) || 0);
@@ -127,47 +240,47 @@ export const copyName = (
   return candidate;
 };
 
-/** The `ha-form` schema shared by the create and display-settings dialogs. */
-export const dashboardFormSchema = (): StudioFormSchema[] => [
-  {
-    name: "name",
-    label: strings.fields.name,
-    required: true,
-    selector: { text: {} },
+/** Which display fields a form offers: the size, and the palettes to pick from. */
+interface DisplayFields {
+  size: boolean;
+  palettes: PaletteId[];
+}
+
+export const ALL_PALETTES: PaletteId[] =
+  Object.keys(PALETTE_LABELS).filter(isPaletteId);
+
+/** The predefined displays; `custom` is the size the user types. */
+export const PRESET_PROFILES: DisplayProfile[] = DISPLAY_PROFILES.filter(
+  (profile) => profile.id !== "custom"
+);
+
+const ALL_DISPLAY_FIELDS: DisplayFields = {
+  size: true,
+  palettes: ALL_PALETTES,
+};
+
+const pixelField = (name: string, label: string): StudioFormSchema => ({
+  name,
+  label,
+  required: true,
+  selector: {
+    number: { mode: "box", min: 64, max: 4096, unit_of_measurement: "px" },
   },
+});
+
+const sizeFields = (): StudioFormSchema[] => [
   {
     name: "dimensions",
     type: "grid",
     flatten: true,
     schema: [
-      {
-        name: "width",
-        label: strings.fields.width,
-        required: true,
-        selector: {
-          number: {
-            mode: "box",
-            min: 64,
-            max: 4096,
-            unit_of_measurement: "px",
-          },
-        },
-      },
-      {
-        name: "height",
-        label: strings.fields.height,
-        required: true,
-        selector: {
-          number: {
-            mode: "box",
-            min: 64,
-            max: 4096,
-            unit_of_measurement: "px",
-          },
-        },
-      },
+      pixelField("width", strings.fields.width),
+      pixelField("height", strings.fields.height),
     ],
   },
+];
+
+const paletteFields = (palettes: PaletteId[]): StudioFormSchema[] => [
   {
     name: "palette",
     label: strings.fields.palette,
@@ -175,13 +288,33 @@ export const dashboardFormSchema = (): StudioFormSchema[] => [
     selector: {
       select: {
         mode: "dropdown",
-        options: Object.entries(PALETTE_LABELS).map(([value, label]) => ({
+        options: palettes.map((value) => ({
           value,
-          label,
+          label: PALETTE_LABELS[value],
         })),
       },
     },
   },
+];
+
+const rotationFields = (): StudioFormSchema[] => [
+  {
+    name: "rotation",
+    label: strings.fields.rotation,
+    required: true,
+    selector: {
+      select: {
+        mode: "dropdown",
+        options: ROTATIONS.map((rotation) => ({
+          value: String(rotation),
+          label: strings.rotations[rotation],
+        })),
+      },
+    },
+  },
+];
+
+const advancedFields = (): StudioFormSchema[] => [
   {
     name: "advanced",
     type: "expandable",
@@ -205,6 +338,22 @@ export const dashboardFormSchema = (): StudioFormSchema[] => [
       },
     ],
   },
+];
+
+/** The `ha-form` schema shared by the create and display-settings dialogs. */
+export const dashboardFormSchema = (
+  display: DisplayFields = ALL_DISPLAY_FIELDS
+): StudioFormSchema[] => [
+  {
+    name: "name",
+    label: strings.fields.name,
+    required: true,
+    selector: { text: {} },
+  },
+  ...(display.size ? sizeFields() : []),
+  ...(display.palettes.length > 1 ? paletteFields(display.palettes) : []),
+  ...rotationFields(),
+  ...advancedFields(),
 ];
 
 export const dashboardFormLabel = (entry: StudioFormSchema): string =>

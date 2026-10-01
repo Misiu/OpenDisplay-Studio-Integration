@@ -1,6 +1,12 @@
 import type { CommandId } from "./commands";
-import type { DashboardFormData } from "./dashboards";
-import type { Dashboard, PaletteId, StudioItem, WidgetPick } from "./types";
+import type { DashboardFormData, DashboardSource } from "./dashboards";
+import type {
+  Dashboard,
+  PaletteId,
+  Rotation,
+  StudioItem,
+  WidgetPick,
+} from "./types";
 import type { Viewport } from "./viewport";
 
 export type EditorView = "dashboards" | "design" | "code";
@@ -26,6 +32,9 @@ export interface OdsEventMap {
   "dashboard-dialog-close": undefined;
   "new-dashboard-change": { value: Partial<DashboardFormData> };
   "new-dashboard-close": undefined;
+  "new-dashboard-source": { source: DashboardSource };
+  "new-dashboard-device": { deviceId: string };
+  "new-dashboard-profile": { profileId: string };
   "dashboard-create": undefined;
   // header
   "show-dashboards": undefined;
@@ -33,15 +42,38 @@ export interface OdsEventMap {
   "view-change": { view: "design" | "code" };
   "toggle-ready": undefined;
   "dashboard-save": undefined;
+  "send-to-device": undefined;
+  "rotation-change": { rotation: Rotation };
   // library
   "library-collapse": { collapsed: boolean };
   "catalog-add": { value: string };
   "catalog-drag": { active: boolean };
   "catalog-drop": { value: string; clientX: number; clientY: number };
   // canvas
-  "item-select": { itemId: string };
-  "item-transform": { item: StudioItem };
-  "item-transform-end": { before: Dashboard };
+  /** `additive` (Shift) adds the item to the selection, or takes it out again. */
+  "item-select": { itemId: string; additive?: boolean };
+  /** A marquee or another gesture chose exactly these items. */
+  "selection-change": { itemIds: string[] };
+  "group-enter": { groupId: string };
+  "items-transform": { items: StudioItem[] };
+  /** `drop` is set when one element was moved: where the pointer ended, on the display. */
+  "item-transform-end": {
+    before: Dashboard;
+    drop?: { itemId: string; x: number; y: number };
+  };
+  "item-rename": { itemId: string; name: string };
+  /** A right click: on an element of the canvas, on a row of the tree, or on empty canvas. */
+  "context-menu": {
+    source: "canvas" | "tree" | "empty";
+    itemId?: string;
+    clientX: number;
+    clientY: number;
+    /** The display pixel under the pointer, for a menu on the canvas. */
+    point?: { x: number; y: number };
+  };
+  "rename-handled": undefined;
+  "help-open": undefined;
+  "shortcuts-close": undefined;
   "snap-toggle": undefined;
   /** Run a registered command; `itemId` when it is about a particular item. */
   command: { id: CommandId; itemId?: string };
@@ -53,7 +85,7 @@ export interface OdsEventMap {
   "layers-reorder": {
     itemId: string;
     targetId: string;
-    edge: "before" | "after";
+    edge: "before" | "after" | "inside";
   };
   "inspector-collapse": { collapsed: boolean };
   "inspector-resize": { width: number };
@@ -62,13 +94,13 @@ export interface OdsEventMap {
     key: "width" | "height" | "padding" | "snapSize";
     value: number;
   };
-  "profile-change": { profileId: string };
   "palette-change": { palette: PaletteId };
   "background-change": { color: string };
   "widget-options-change": { value: Record<string, unknown> };
   "widget-picks-change": { sourceKey: string; picks: WidgetPick[] };
   "widgets-reload": undefined;
   "primitive-change": { value: Record<string, unknown> };
+  "container-background-change": { value: Record<string, unknown> };
   /** `template` is the new expression, `null` for back to the literal, `undefined` to start one. */
   "expression-change": { key: string; template: string | null | undefined };
   "dashboard-delete-request": undefined;

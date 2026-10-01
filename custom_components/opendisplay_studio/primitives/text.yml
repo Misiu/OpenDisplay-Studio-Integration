@@ -37,3 +37,60 @@ fields:
     shape: color
     default: black
     section: appearance
+  - key: anchor
+    label: Anchor
+    shape: enum
+    options: [la, ma, ra, lt, mt, rt, lm, mm, rm, ls, ms, rs, lb, mb, rb, ld, md, rd]
+    optional: true
+    section: layout
+  - key: max_width
+    label: "Wrap width"
+    shape: number
+    min: 1
+    max: display_width
+    optional: true
+    unit: px
+    section: appearance
+  - key: truncate
+    label: "Cut with an ellipsis instead of wrapping"
+    shape: boolean
+    default: false
+    section: appearance
+  - key: font
+    label: Font
+    shape: font
+    default: ppb.ttf
+    options: [ppb.ttf, rbm.ttf]
+    section: appearance
+  - key: align
+    label: Alignment
+    shape: enum
+    options: [left, center, right]
+    default: left
+    section: appearance
+  - key: spacing
+    label: "Line spacing"
+    shape: number
+    min: 0
+    max: 100
+    default: 5
+    unit: px
+    section: appearance
+  - key: stroke_width
+    label: "Stroke width"
+    shape: number
+    min: 0
+    max: 16
+    default: 0
+    unit: px
+    section: appearance
+  - key: stroke_fill
+    label: "Stroke color"
+    shape: color
+    default: white
+    section: appearance
+  - key: parse_colors
+    label: "Color markup"
+    shape: boolean
+    default: false
+    section: appearance

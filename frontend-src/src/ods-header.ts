@@ -1,4 +1,4 @@
-import { css, html, LitElement, type TemplateResult } from "lit";
+import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { inputValue } from "./dom";
 import { emit } from "./events";
@@ -161,6 +161,7 @@ export class OdsHeader extends LitElement {
   @property() public view: "design" | "code" = "design";
   @property({ type: Boolean }) public dirty = false;
   @property({ type: Boolean }) public saving = false;
+  @property({ type: Boolean }) public sending = false;
 
   private onNameInput(event: Event): void {
     emit(this, "dashboard-name-change", { name: inputValue(event) });
@@ -170,6 +171,25 @@ export class OdsHeader extends LitElement {
     return this.dashboard.status === "ready"
       ? strings.header.setDraft
       : strings.header.setReady;
+  }
+
+  private sendToDevice(): void {
+    emit(this, "send-to-device");
+  }
+
+  /** The button that tries the design on the device the dashboard is made for. */
+  private renderSendButton(): TemplateResult | typeof nothing {
+    if (!this.dashboard.display.deviceId) return nothing;
+    return html`
+      <ha-button
+        appearance="plain"
+        .disabled=${this.sending}
+        @click=${this.sendToDevice}
+      >
+        <ha-icon slot="start" icon="mdi:send"></ha-icon>
+        ${this.sending ? strings.header.sendingToDevice : strings.header.sendToDevice}
+      </ha-button>
+    `;
   }
 
   protected render(): TemplateResult {
@@ -212,6 +232,7 @@ export class OdsHeader extends LitElement {
           </button>
         </nav>
         <div class="editor-actions">
+          ${this.renderSendButton()}
           <span class="status ${dashboard.status}">${dashboard.status}</span>
           <ha-button
             appearance="plain"
@@ -219,6 +240,14 @@ export class OdsHeader extends LitElement {
           >
             ${this.statusToggleLabel}
           </ha-button>
+          <button
+            class="icon-button"
+            title=${strings.header.help}
+            aria-label=${strings.header.help}
+            @click=${() => emit(this, "help-open")}
+          >
+            <ha-icon icon="mdi:keyboard-outline"></ha-icon>
+          </button>
           <ha-button
             appearance="filled"
             .disabled=${!this.dirty || this.saving}

@@ -10,6 +10,7 @@ from typing import Any
 
 from aiohttp import ClientSession
 from odl_renderer import generate_image  # type: ignore[import-untyped]
+from odl_renderer.types import DataProvider  # type: ignore[import-untyped]
 from PIL import Image
 
 
@@ -25,7 +26,10 @@ class OdlRenderResult:
     timings: dict[str, float]
 
 
-def _encode_png(image: Image.Image) -> bytes:
+def _encode_png(image: Image.Image, rotation: int) -> bytes:
+    if rotation:
+        # PIL turns counter-clockwise; the dashboard setting is clockwise.
+        image = image.rotate(-rotation, expand=True)
     output = BytesIO()
     image.convert("RGB").save(output, format="PNG", optimize=False)
     return output.getvalue()
@@ -38,7 +42,7 @@ class OdlRenderService:
         self._session = session
         self._semaphore = asyncio.Semaphore(concurrency)
 
-    async def async_render(
+    async def async_render(  # noqa: PLR0913
         self,
         *,
         width: int,
@@ -46,8 +50,10 @@ class OdlRenderService:
         elements: list[dict[str, Any]],
         background: str,
         accent_color: str,
+        history: DataProvider | None = None,
+        rotation: int = 0,
     ) -> OdlRenderResult:
-        """Render ODL and validate the exact requested output dimensions."""
+        """Render ODL, check the size, then turn the picture clockwise by `rotation`."""
         requested_at = monotonic()
         async with self._semaphore:
             started_at = monotonic()
@@ -59,6 +65,7 @@ class OdlRenderService:
                     background=background,
                     accent_color=accent_color,
                     session=self._session,
+                    data_provider=history,
                 )
             except (TypeError, ValueError, OSError) as err:
                 raise OdlRenderError(str(err)) from err
@@ -69,7 +76,7 @@ class OdlRenderService:
                     f"expected {width}x{height}"
                 )
                 raise OdlRenderError(message)
-            png = await asyncio.to_thread(_encode_png, image)
+            png = await asyncio.to_thread(_encode_png, image, rotation)
             completed_at = monotonic()
         return OdlRenderResult(
             png=png,

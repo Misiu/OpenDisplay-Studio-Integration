@@ -13,6 +13,7 @@ const definitionOf = (
   if (item.kind === "widget") {
     return widgets.find((widget) => widget.id === item.widget.type);
   }
+  if (item.kind === "container") return undefined;
   return primitives.find((primitive) => primitive.type === item.primitive.type);
 };
 
@@ -20,4 +21,9 @@ export const itemIcon = (
   item: StudioItem,
   widgets: WidgetDefinition[],
   primitives: PrimitiveDefinition[]
-): string => definitionOf(item, widgets, primitives)?.icon ?? "mdi:puzzle";
+): string => {
+  if (item.kind === "container") {
+    return item.grouped ? "mdi:group" : "mdi:select-all";
+  }
+  return definitionOf(item, widgets, primitives)?.icon ?? "mdi:puzzle";
+};

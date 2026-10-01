@@ -12,7 +12,11 @@ interface PrimitiveExpectation {
   name: string;
   /** Labels that must be editable once the primitive is selected. */
   fields: string[];
+  /** Resize handles on the selection; a debug grid covers the display and has none. */
+  handles?: number;
 }
+
+const SHAPE_FIELDS = ["Fill", "Outline", "Outline width"];
 
 const PRIMITIVES: PrimitiveExpectation[] = [
   {
@@ -82,6 +86,100 @@ const PRIMITIVES: PrimitiveExpectation[] = [
       "Show percentage",
     ],
   },
+  {
+    type: "multiline",
+    name: "Multiline text",
+    fields: [
+      "X",
+      "Y",
+      "Size",
+      "Line height",
+      "Text",
+      "Delimiter",
+      "Color",
+      "Anchor",
+      "Font",
+      "Alignment",
+    ],
+  },
+  {
+    type: "rectangle_pattern",
+    name: "Rectangle pattern",
+    fields: [
+      "Left",
+      "Top",
+      "Cell width",
+      "Cell height",
+      "Horizontal gap",
+      "Vertical gap",
+      "Columns",
+      "Rows",
+      ...SHAPE_FIELDS,
+      "Corner radius",
+      "Rounded corners",
+    ],
+  },
+  {
+    type: "polygon",
+    name: "Polygon",
+    fields: ["Points", "Fill", "Outline"],
+  },
+  {
+    type: "arc",
+    name: "Arc",
+    fields: [
+      "Center X",
+      "Center Y",
+      "Radius",
+      "Start angle",
+      "End angle",
+      ...SHAPE_FIELDS,
+    ],
+  },
+  {
+    type: "icon_sequence",
+    name: "Icon sequence",
+    fields: [
+      "X",
+      "Y",
+      "Size",
+      "Icons",
+      "Direction",
+      "Spacing",
+      "Color",
+      "Anchor",
+    ],
+  },
+  {
+    type: "dlimg",
+    name: "Image",
+    fields: ["X", "Y", "Width", "Height", "Image", "Resize", "Rotate"],
+  },
+  {
+    type: "plot",
+    name: "History plot",
+    fields: [
+      "X",
+      "Y",
+      "Width",
+      "Height",
+      "Series",
+      "Time span",
+      "Lowest value",
+      "Highest value",
+      "Font",
+      "Value labels",
+      "Value axis",
+      "Time labels",
+      "Time axis",
+    ],
+  },
+  {
+    type: "debug_grid",
+    name: "Debug grid",
+    fields: ["Spacing", "Line color", "Dashed", "Show labels", "Label size"],
+    handles: 0,
+  },
 ];
 
 const selectedChip = (page: Page) => page.locator(".selection-size");
@@ -98,7 +196,7 @@ test.beforeEach(async ({ page }) => {
   await openKitchen(page);
 });
 
-test("offers all eight primitives in the library, in the backend's order", async ({
+test("offers every primitive in the library, in the backend's order", async ({
   page,
 }) => {
   const primitives = page
@@ -108,17 +206,25 @@ test("offers all eight primitives in the library, in the backend's order", async
 
   await expect(primitives).toHaveText([
     "Text",
+    "Multiline text",
     "Rectangle",
+    "Rectangle pattern",
     "Line",
+    "Polygon",
     "Circle",
+    "Arc",
     "Ellipse",
     "Icon",
+    "Icon sequence",
     "QR code",
+    "Image",
     "Progress bar",
+    "History plot",
+    "Debug grid",
   ]);
   await expect(
     page.locator("ods-library .catalog-section").nth(1).locator(".count")
-  ).toHaveText("8");
+  ).toHaveText("16");
 });
 
 for (const primitive of PRIMITIVES) {
@@ -131,7 +237,7 @@ for (const primitive of PRIMITIVES) {
     await expect(page.locator(".selection.selected")).toHaveCount(1);
     await expect(
       page.locator(".selection.selected [data-resize-handle]")
-    ).toHaveCount(8);
+    ).toHaveCount(primitive.handles ?? 8);
     for (const label of primitive.fields) {
       await expect(
         fieldNamed(page, label),
@@ -269,5 +375,105 @@ test.describe("Text", () => {
     await page.getByLabel("Size", { exact: true }).press("Tab");
 
     await expect(selectedChip(page)).toHaveText("141 × 90");
+  });
+});
+
+test.describe("the shapes with their own geometry", () => {
+  test("a polygon is outlined by its points, and follows edits of them", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+    // The starting triangle is 81 wide and 71 tall, inclusive.
+    await expect(selectedChip(page)).toHaveText("81 × 71");
+
+    const points = page.getByRole("textbox", { name: "Points", exact: true });
+    await points.fill("10, 10\n110, 10\n110, 60\n10, 60");
+    await points.press("Tab");
+
+    await expect(selectedChip(page)).toHaveText("101 × 51");
+  });
+
+  test("keeps the points it has while what is typed is not yet a list of pairs", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+
+    const points = page.getByRole("textbox", { name: "Points", exact: true });
+    await points.fill("10, 10\nnot a point");
+    await points.press("Tab");
+
+    await expect(selectedChip(page)).toHaveText("81 × 71");
+  });
+
+  test("an arc is outlined as the circle it is cut from", async ({ page }) => {
+    await libraryItem(page, "Arc").click();
+
+    await expect(selectedChip(page)).toHaveText("121 × 121");
+    await page.getByLabel("Radius", { exact: true }).fill("30");
+    await page.getByLabel("Radius", { exact: true }).press("Tab");
+    await expect(selectedChip(page)).toHaveText("61 × 61");
+  });
+
+  test("a pattern is outlined round all of its cells", async ({ page }) => {
+    await libraryItem(page, "Rectangle pattern").click();
+
+    // Three columns and two rows of 40 × 30 cells, 8 px apart, each drawn a pixel larger.
+    await expect(selectedChip(page)).toHaveText("137 × 69");
+    await page.getByLabel("Columns", { exact: true }).fill("4");
+    await page.getByLabel("Columns", { exact: true }).press("Tab");
+    await expect(selectedChip(page)).toHaveText("185 × 69");
+  });
+
+  test("a row of icons is outlined by its icons, and grows with the list", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Icon sequence").click();
+
+    // Three icons of 32 px, a quarter of that apart.
+    await expect(selectedChip(page)).toHaveText("112 × 32");
+    const icons = page.getByRole("textbox", { name: "Icons", exact: true });
+    await icons.fill("home\nstar");
+    await icons.press("Tab");
+    await expect(selectedChip(page)).toHaveText("72 × 32");
+  });
+
+  test("an image is outlined at the size it is drawn", async ({ page }) => {
+    await libraryItem(page, "Image").click();
+
+    await expect(selectedChip(page)).toHaveText("160 × 120");
+  });
+
+  test("a debug grid can be selected but not resized", async ({ page }) => {
+    await libraryItem(page, "Debug grid").click();
+
+    await expect(page.locator(".selection.selected")).toHaveCount(1);
+    await expect(
+      page.locator(".selection.selected [data-resize-handle]")
+    ).toHaveCount(0);
+  });
+
+  test("a polygon is moved with all of its points by dragging it", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+    const before = await page.locator(".selection.selected").boundingBox();
+    if (!before) throw new Error("The polygon outline is not visible");
+
+    await page.mouse.move(
+      before.x + before.width / 2,
+      before.y + before.height / 2
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      before.x + before.width / 2 + 60,
+      before.y + before.height / 2 + 30,
+      { steps: 6 }
+    );
+    await page.mouse.up();
+
+    const after = await page.locator(".selection.selected").boundingBox();
+    expect(after?.x).toBeGreaterThan(before.x + 40);
+    expect(after?.width).toBeCloseTo(before.width, 0);
+    await expect(selectedChip(page)).toHaveText("81 × 71");
   });
 });

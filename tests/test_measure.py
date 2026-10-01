@@ -8,9 +8,11 @@ import pytest
 from odl_renderer import generate_image  # type: ignore[import-untyped]
 from PIL import Image, ImageChops
 
+from custom_components.opendisplay_studio import measure
 from custom_components.opendisplay_studio.compiler import async_compile_dashboard
 from custom_components.opendisplay_studio.dashboards import validate_dashboard
-from custom_components.opendisplay_studio.measure import primitive_box, qr_modules
+from custom_components.opendisplay_studio.measure import qr_modules
+from custom_components.opendisplay_studio.odl import Box
 from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
 
 if TYPE_CHECKING:
@@ -25,6 +27,10 @@ async def render(elements: list[dict[str, Any]]) -> Image.Image:
         WIDTH, HEIGHT, elements, background="white", accent_color="red"
     )
     return image.convert("RGB")
+
+
+def primitive_box(primitive: dict[str, Any]) -> Box:
+    return measure.primitive_box(primitive, (WIDTH, HEIGHT))
 
 
 def ink_box(image: Image.Image) -> tuple[int, int, int, int]:
@@ -79,7 +85,14 @@ async def test_text_box_grows_with_each_line() -> None:
 async def test_colour_markup_is_not_counted_as_text() -> None:
     plain = primitive_box({"type": "text", "value": "red", "x": 0, "y": 0, "size": 24})
     marked = primitive_box(
-        {"type": "text", "value": "[red]red[/red]", "x": 0, "y": 0, "size": 24}
+        {
+            "type": "text",
+            "value": "[red]red[/red]",
+            "x": 0,
+            "y": 0,
+            "size": 24,
+            "parse_colors": True,
+        }
     )
 
     assert marked.width == plain.width

@@ -1,7 +1,7 @@
 {
   "domain": "opendisplay_studio",
   "name": "OpenDisplay Studio",
-  "after_dependencies": [],
+  "after_dependencies": ["recorder"],
   "codeowners": ["@Misiu"],
   "config_flow": true,
   "dependencies": ["http", "media_source", "panel_custom", "websocket_api"],

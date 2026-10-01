@@ -10,9 +10,8 @@ fields:
     label: Content
     shape: text
     required: true
-    # The most a QR code can hold at the error correction the renderer uses.
-    maxBytes: 1273
     default: ODX
+    maxBytes: 1273
     section: appearance
   - key: x
     label: X
@@ -27,7 +26,7 @@ fields:
     required: true
     section: layout
   - key: boxsize
-    label: Module size
+    label: "Module size"
     shape: number
     min: 1
     max: 16
@@ -35,7 +34,7 @@ fields:
     unit: px
     section: layout
   - key: border
-    label: Quiet zone
+    label: "Quiet zone"
     shape: number
     min: 0
     max: 8

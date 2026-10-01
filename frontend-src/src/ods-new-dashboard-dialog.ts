@@ -1,16 +1,31 @@
-import { css, html, LitElement, type TemplateResult } from "lit";
+import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import {
+  ALL_PALETTES,
+  PRESET_PROFILES,
   dashboardFormData,
   dashboardFormLabel,
   dashboardFormSchema,
   dashboardIsValid,
   type DashboardFormData,
+  type DashboardSource,
 } from "./dashboards";
+import {
+  PALETTE_COLORS,
+  PALETTE_LABELS,
+  profileById,
+} from "./display-profiles";
 import { emit } from "./events";
 import { strings } from "./strings";
 import { baseStyles, chromeStyles } from "./studio-styles";
-import type { Dashboard, HomeAssistant } from "./types";
+import type {
+  Dashboard,
+  DisplayDevice,
+  HomeAssistant,
+  PaletteId,
+} from "./types";
+
+type PickerChange = CustomEvent<{ value: Record<string, string> }>;
 
 /** The "New dashboard" dialog: shows the draft, reports edits and the create/cancel intent. */
 @customElement("ods-new-dashboard-dialog")
@@ -34,17 +49,17 @@ export class OdsNewDashboardDialog extends LitElement {
       }
       .dashboard-source-options {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 9px;
       }
       .dashboard-source {
         min-width: 0;
-        min-height: 64px;
+        min-height: 52px;
         display: grid;
         grid-template-columns: 24px minmax(0, 1fr);
         align-items: center;
         gap: 9px;
-        padding: 9px 11px;
+        padding: 8px 10px;
         border: 1px solid var(--studio-border);
         border-radius: 9px;
         text-align: start;
@@ -77,6 +92,35 @@ export class OdsNewDashboardDialog extends LitElement {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+      .display-summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        margin: 0;
+      }
+      .display-summary div {
+        padding: 9px 11px;
+        border: 1px solid var(--studio-border);
+        border-radius: 9px;
+      }
+      .display-summary dt {
+        color: var(--studio-muted);
+        font-size: 10px;
+      }
+      .display-summary dd {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 3px 0 0;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border: 1px solid var(--studio-border);
+        border-radius: 50%;
+      }
       .new-dashboard-content ha-form {
         display: block;
       }
@@ -90,6 +134,9 @@ export class OdsNewDashboardDialog extends LitElement {
 
   @property({ attribute: false }) public hass?: HomeAssistant;
   @property({ attribute: false }) public dashboard!: Dashboard;
+  @property({ attribute: false }) public devices: DisplayDevice[] = [];
+  @property() public source: DashboardSource = "custom";
+  @property() public deviceId = "";
   @property({ type: Boolean }) public saving = false;
 
   private formChanged(
@@ -98,53 +145,213 @@ export class OdsNewDashboardDialog extends LitElement {
     emit(this, "new-dashboard-change", { value: event.detail.value });
   }
 
+  private deviceChanged(event: PickerChange): void {
+    emit(this, "new-dashboard-device", {
+      deviceId: event.detail.value.deviceId ?? "",
+    });
+  }
+
+  private profileChanged(event: PickerChange): void {
+    emit(this, "new-dashboard-profile", {
+      profileId: event.detail.value.profileId ?? "",
+    });
+  }
+
+  private close(): void {
+    emit(this, "new-dashboard-close");
+  }
+
+  private create(): void {
+    emit(this, "dashboard-create");
+  }
+
+  private renderSource(
+    source: DashboardSource,
+    icon: string,
+    title: string,
+    hint: string
+  ): TemplateResult {
+    const selected = this.source === source;
+    return html`
+      <button
+        class=${selected ? "dashboard-source selected" : "dashboard-source"}
+        type="button"
+        role="radio"
+        aria-checked=${selected ? "true" : "false"}
+        @click=${() => emit(this, "new-dashboard-source", { source })}
+      >
+        <ha-icon icon=${icon}></ha-icon>
+        <span>
+          <strong>${title}</strong>
+          <small>${hint}</small>
+        </span>
+      </button>
+    `;
+  }
+
+  private renderSources(): TemplateResult {
+    const text = strings.newDashboard;
+    return html`
+      <div
+        class="dashboard-source-options"
+        role="radiogroup"
+        aria-label=${text.sources}
+      >
+        ${this.renderSource(
+          "device",
+          "mdi:devices",
+          text.fromDevice,
+          text.fromDeviceHint
+        )}
+        ${this.renderSource(
+          "preset",
+          "mdi:format-list-bulleted",
+          text.preset,
+          text.presetHint
+        )}
+        ${this.renderSource(
+          "custom",
+          "mdi:monitor",
+          text.customSize,
+          text.customSizeHint
+        )}
+      </div>
+    `;
+  }
+
+  /** What the picked display gives the dashboard: its size and the colors it can show. */
+  private renderDisplaySummary(): TemplateResult {
+    const { width, height, palette } = this.dashboard.display;
+    return html`
+      <dl
+        class="display-summary"
+        role="group"
+        aria-label=${strings.newDashboard.deviceDetails}
+      >
+        <div>
+          <dt>${strings.fields.resolution}</dt>
+          <dd>${strings.common.sizeInPixels(width, height)}</dd>
+        </div>
+        <div>
+          <dt>${strings.newDashboard.colors}</dt>
+          <dd class="swatches">
+            ${PALETTE_COLORS[palette].map(
+              (color) => html`
+                <span
+                  class="swatch"
+                  title=${color}
+                  style=${`background:${color}`}
+                ></span>
+              `
+            )}
+            ${PALETTE_LABELS[palette]}
+          </dd>
+        </div>
+      </dl>
+    `;
+  }
+
+  private renderPicker(
+    name: string,
+    label: string,
+    options: { value: string; label: string }[],
+    value: string,
+    changed: (event: PickerChange) => void
+  ): TemplateResult {
+    return html`
+      <ha-form
+        .hass=${this.hass}
+        .data=${{ [name]: value }}
+        .schema=${[
+          {
+            name,
+            label,
+            selector: { select: { mode: "dropdown", options } },
+          },
+        ]}
+        .computeLabel=${dashboardFormLabel}
+        @value-changed=${changed}
+      ></ha-form>
+    `;
+  }
+
+  private renderDevicePicker(): TemplateResult {
+    if (this.devices.length === 0) {
+      return html`
+        <ha-alert alert-type="info">${strings.newDashboard.noDevices}</ha-alert>
+      `;
+    }
+    const options = this.devices.map((device) => ({
+      value: device.id,
+      label: `${device.name} · ${strings.common.size(device.width, device.height)}`,
+    }));
+    return html`
+      ${this.renderPicker(
+        "deviceId",
+        strings.newDashboard.device,
+        options,
+        this.deviceId,
+        this.deviceChanged
+      )}
+      ${this.renderDisplaySummary()}
+    `;
+  }
+
+  private renderProfilePicker(): TemplateResult {
+    const options = PRESET_PROFILES.map((profile) => ({
+      value: profile.id,
+      label: `${profile.manufacturer} · ${profile.name}`,
+    }));
+    return html`
+      ${this.renderPicker(
+        "profileId",
+        strings.newDashboard.display,
+        options,
+        this.dashboard.display.profileId ?? "",
+        this.profileChanged
+      )}
+      ${this.renderDisplaySummary()}
+    `;
+  }
+
+  private renderSourceBody(): TemplateResult | typeof nothing {
+    if (this.source === "device") return this.renderDevicePicker();
+    if (this.source === "preset") return this.renderProfilePicker();
+    return nothing;
+  }
+
+  /** The fields below the picker: a custom display sets its size, a preset only its colors. */
+  private displayFields(): { size: boolean; palettes: PaletteId[] } {
+    if (this.source === "custom") {
+      return { size: true, palettes: ALL_PALETTES };
+    }
+    if (this.source === "preset") {
+      return {
+        size: false,
+        palettes: profileById(this.dashboard.display.profileId).palettes,
+      };
+    }
+    return { size: false, palettes: [] };
+  }
+
   protected render(): TemplateResult {
     return html`
       <ha-dialog
         .open=${true}
         width="medium"
+        style="--ha-dialog-width-md: 720px"
         header-title=${strings.newDashboard.title}
         header-subtitle=${strings.newDashboard.subtitle}
-        @closed=${() => emit(this, "new-dashboard-close")}
+        @closed=${this.close}
       >
         <div class="new-dashboard-content">
           <span class="form-label">${strings.newDashboard.startFrom}</span>
-          <div
-            class="dashboard-source-options"
-            role="radiogroup"
-            aria-label=${strings.newDashboard.sources}
-          >
-            <button
-              class="dashboard-source selected"
-              type="button"
-              role="radio"
-              aria-checked="true"
-            >
-              <ha-icon icon="mdi:monitor"></ha-icon>
-              <span>
-                <strong>${strings.newDashboard.customSize}</strong>
-                <small>${strings.newDashboard.customSizeHint}</small>
-              </span>
-            </button>
-            <button
-              class="dashboard-source"
-              type="button"
-              role="radio"
-              aria-checked="false"
-              disabled
-            >
-              <ha-icon icon="mdi:devices"></ha-icon>
-              <span>
-                <strong>${strings.newDashboard.fromDevice}</strong>
-                <small>${strings.newDashboard.fromDeviceHint}</small>
-              </span>
-            </button>
-          </div>
+          ${this.renderSources()} ${this.renderSourceBody()}
           <ha-form
             autofocus
             .hass=${this.hass}
             .data=${dashboardFormData(this.dashboard)}
-            .schema=${dashboardFormSchema()}
+            .schema=${dashboardFormSchema(this.displayFields())}
             .computeLabel=${dashboardFormLabel}
             @value-changed=${this.formChanged}
           ></ha-form>
@@ -153,7 +360,7 @@ export class OdsNewDashboardDialog extends LitElement {
           <ha-button
             slot="secondaryAction"
             appearance="plain"
-            @click=${() => emit(this, "new-dashboard-close")}
+            @click=${this.close}
           >
             ${strings.common.cancel}
           </ha-button>
@@ -161,7 +368,7 @@ export class OdsNewDashboardDialog extends LitElement {
             slot="primaryAction"
             appearance="filled"
             .disabled=${this.saving || !dashboardIsValid(this.dashboard)}
-            @click=${() => emit(this, "dashboard-create")}
+            @click=${this.create}
           >
             ${this.saving ? strings.newDashboard.creating : strings.newDashboard.create}
           </ha-button>

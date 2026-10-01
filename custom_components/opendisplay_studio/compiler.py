@@ -23,6 +23,8 @@ from .flatten import (
     flatten_items,
     shift_primitive,
 )
+from .history import RecordedHistory, async_prefetch_history
+from .images import async_load_images
 from .measure import primitive_box
 from .odl import Box, DisplayContext, WidgetContext, rectangle, text
 from .palette import accent_color_for_palette
@@ -52,6 +54,7 @@ class CompiledDashboard:
     yaml: str
     data_ms: float
     compile_ms: float
+    history: RecordedHistory | None = None
 
 
 @dataclass(slots=True)
@@ -70,11 +73,11 @@ def _frame_box(frame: dict[str, int]) -> Box:
 
 
 def _measure_primitives(
-    primitives: dict[str, dict[str, Any]],
+    primitives: dict[str, dict[str, Any]], display: tuple[int, int]
 ) -> dict[str, dict[str, int]]:
     """Measure every primitive as the renderer draws it (loads fonts, so not async)."""
     return {
-        item_id: primitive_box(primitive).as_dict()
+        item_id: primitive_box(primitive, display).as_dict()
         for item_id, primitive in primitives.items()
     }
 
@@ -226,6 +229,7 @@ async def async_compile_dashboard(
             for placed in placed_items
             if placed.item["kind"] == "primitive"
         },
+        (display.width, display.height),
     )
     elements: list[dict[str, Any]] = []
     widget_elements: dict[str, list[dict[str, Any]]] = {}
@@ -270,6 +274,8 @@ async def async_compile_dashboard(
             elements.extend(rendered)
         except (KeyError, TypeError, ValueError) as err:
             raise DashboardCompileError(f"Item {item['id']}: {err}") from err
+    elements = await async_load_images(hass, elements, warnings)
+    elements, history = await async_prefetch_history(hass, elements, warnings)
     compiled_done = monotonic()
     return CompiledDashboard(
         elements=elements,
@@ -283,4 +289,5 @@ async def async_compile_dashboard(
         ),
         data_ms=round((data_done - started) * 1000, 2),
         compile_ms=round((compiled_done - data_done) * 1000, 2),
+        history=history,
     )

@@ -23,3 +23,6 @@ STORAGE_VERSION = 1
 SCHEMA_VERSION = 1
 
 LOGGER = logging.getLogger(__package__)
+
+# Media Source identifiers of the form `sent-<token>` name a picture the editor sent.
+SENT_PREFIX = "sent-"

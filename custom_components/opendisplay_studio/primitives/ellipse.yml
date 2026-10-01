@@ -44,7 +44,7 @@ fields:
     default: black
     section: appearance
   - key: width
-    label: Outline width
+    label: "Outline width"
     shape: number
     min: 0
     max: 32

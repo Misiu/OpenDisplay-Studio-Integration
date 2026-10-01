@@ -44,10 +44,24 @@ fields:
     default: black
     section: appearance
   - key: width
-    label: Outline width
+    label: "Outline width"
     shape: number
     min: 0
     max: 32
     default: 2
     unit: px
+    section: appearance
+  - key: radius
+    label: "Corner radius"
+    shape: number
+    min: 0
+    max: 256
+    optional: true
+    unit: px
+    section: appearance
+  - key: corners
+    label: "Rounded corners"
+    shape: flags
+    options: [top_left, top_right, bottom_right, bottom_left]
+    optional: true
     section: appearance

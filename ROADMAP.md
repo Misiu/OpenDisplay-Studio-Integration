@@ -244,37 +244,40 @@ Each step: definition YAML with every documented field + `visible`, validator
 coverage, library tile and icon, correct `itemBounds`, pytest render test with
 pixel sampling, e2e add-and-edit test, row in `docs/odl-coverage.md`.
 
-- [ ] **4.1 Complete the existing 8.** `text` (+`font`, `anchor`, `max_width`,
-  `spacing`, `stroke_width`, `stroke_fill`, `parse_colors`, `truncate`),
-  `line` (+`dash_length`, `space_length`), `rectangle` (+`radius`, `corners`),
-  `icon` (free `anchor`, `fill` canonical with `color` accepted),
-  `progress_bar` (+`font`), percentages on root-level coordinates, `visible`
-  on all.
-- [ ] **4.2 `multiline`** — `value`, `delimiter`, `x`, `y`, `offset_y`
-  (required; authoring default `round(1.3 × size)`), `size`, `font`, `color`,
+- [ ] **4.1 Complete the existing 8.** Done: `text` (+`font`, `anchor`,
+  `max_width`, `spacing`, `stroke_width`, `stroke_fill`, `parse_colors`,
+  `truncate`, `align`), `line` (+`dash_length`, `space_length`), `rectangle`
+  (+`radius`, `corners`), `icon` (free `anchor`, `fill`, stroke),
+  `progress_bar` (+`font_name`). Open: percentages on root-level coordinates
+  (see `docs/odl-coverage.md`).
+- [x] **4.2 `multiline`** - `value`, `delimiter`, `x`, `y`, `offset_y`
+  (required; authoring default `round(1.3 x size)`), `size`, `font`, `color`,
   `anchor`.
-- [ ] **4.3 `arc`** — centre, `radius`, `start_angle`, `end_angle`, `fill`
+- [x] **4.3 `arc`** - centre, `radius`, `start_angle`, `end_angle`, `fill`
   (pie) or `outline` + `width` (arc). Resize handles change the radius.
-- [ ] **4.4 `polygon`** — `points` editor: list of X/Y pairs with add/remove
-  rows; on canvas, move translates all points, point handles move one point.
-- [ ] **4.5 `rectangle_pattern`** — `x_start`, `y_start`, `x_size`,
+- [ ] **4.4 `polygon`** - Done: `points` edited as one `x, y` pair per line,
+  move translates every point, resize stretches them, group scaling scales them.
+  Open: rows with add/remove buttons, and point handles that move one point.
+- [x] **4.5 `rectangle_pattern`** - `x_start`, `y_start`, `x_size`,
   `y_size`, `x_offset`, `y_offset`, `x_repeat`, `y_repeat`, colors; resize
   changes the cell size.
-- [ ] **4.6 `icon_sequence`** — `icons` list editor (icon picker per row,
-  reorder), `size`, `direction`, `spacing` (default `size/4`), `fill`, `anchor`.
-- [ ] **4.7 `dlimg`** — `url`, `xsize`, `ysize`, `resize_method`, `rotate`.
-  Backend resolves `camera.*`/`image.*` entities and `/media/…` paths before
-  rendering and passes HA's shared aiohttp session. URL field offers an entity
-  picker shortcut.
-- [ ] **4.8 `plot`** — bounds, `duration`, `low`, `high`, `round_values`,
-  `font`, `size`, `debug`, nested `ylegend`, `yaxis`, `xlegend`, `xaxis`, and a
-  `data` series editor (entity picker + per-series color, width, span_gaps,
-  smooth, line_style, show_points, point_size, point_color, value_scale).
-  Backend implements odl-renderer's `DataProvider` on the HA recorder.
-- [ ] **4.9 `debug_grid`** — canvas-wide, no bounds, not draggable, at most one
-  per dashboard; listed in the tree, shown/hidden like any item.
-- [ ] **4.10 Fonts.** Backend passes `font_dirs` (HA config fonts) and lists
-  available fonts in `bootstrap` for the font dropdown.
+- [ ] **4.6 `icon_sequence`** - Done: `icons` (one per line), `size`,
+  `direction`, `spacing` (default `size/4`), `fill`, `anchor`. Open: an icon
+  picker per row and reordering.
+- [ ] **4.7 `dlimg`** - Done: `url`, `xsize`, `ysize`, `resize_method`,
+  `rotate`; the backend resolves `camera.*`/`image.*` entities and `/local`,
+  `/media` paths to bytes and passes HA's shared aiohttp session. Open: the
+  entity picker shortcut next to the URL field.
+- [ ] **4.8 `plot`** - Done: bounds, `duration`, `low`, `high`,
+  `round_values`, `font`, `debug`, nested `ylegend`, `yaxis`, `xlegend`,
+  `xaxis` and the `data` series (edited with HA's object selector), and a
+  `DataProvider` on the recorder. Open: `value_scale`, an entity picker per
+  series, and a test against a real recorder database.
+- [ ] **4.9 `debug_grid`** - Done: canvas-wide, no bounds, not draggable or
+  resizable, shown/hidden like any item. Open: at most one per dashboard.
+- [ ] **4.10 Fonts.** Done: the definitions list the two bundled fonts and
+  accept another name. Open: the backend passes `font_dirs` (HA config fonts) and
+  lists the available fonts in `bootstrap`.
 
 Out of scope (decided): `diagram`, `rotation`/`mirror`/`pivot`, the flow
 cursor (omitted `y`). Every created element has explicit coordinates.
@@ -289,23 +292,32 @@ identically.
 
 Reference behaviour observed on lvgl.espboards.dev (Sept 2026), adapted to ODL.
 
+**The concept.** A dashboard is a tree. An **object** (our *container*) holds other
+elements and any element can be nested in it to any depth; children are positioned
+relative to it, so moving the container moves everything in it. A container can be marked
+as a **group**: it then has no background, is selected as one element on the canvas, is
+opened with `Enter` / double-click to reach its children, and — the point of a group —
+**resizing it scales everything inside** (positions, sizes, fonts, outline widths). A
+group is therefore how a set of elements becomes one reusable, movable, duplicable,
+scalable block.
+
 ### 5.1 Tree panel
 
-- [ ] **5.1.1 Tree rendering.** First row `Root (N widgets)` (N = direct
+- [x] **5.1.1 Tree rendering.** First row `Root (N widgets)` (N = direct
   children) represents the canvas; selecting it shows Canvas properties.
   Container rows: collapse chevron, type icon, name, id-style caption, child
   count `(n)`, `Group` badge when grouped. Children are indented one level
   (≈ 16 px) with a vertical guide line. Leaf rows: type icon, name, caption.
   The header badge shows the total element count including nested ones.
-- [ ] **5.1.2 Row actions** (visible on hover and on the selected row):
+- [x] **5.1.2 Row actions** (visible on hover and on the selected row):
   containers — `Make group` (link icon), `Hide`, `Delete`; groups —
   `Enter group`, `Ungroup`, `Hide`, `Delete`; leaves — `Hide`, `Delete`.
   Delete asks for confirmation.
-- [ ] **5.1.3 Search** filters rows by name/type, keeping ancestors of matches
+- [x] **5.1.3 Search** filters rows by name/type, keeping ancestors of matches
   visible.
-- [ ] **5.1.4 Selection sync.** Tree ↔ canvas selection is bidirectional;
+- [x] **5.1.4 Selection sync.** Tree ↔ canvas selection is bidirectional;
   selecting a row scrolls it into view and expands its ancestors.
-- [ ] **5.1.5 Keyboard.** Arrow Up/Down move selection, Left/Right
+- [x] **5.1.5 Keyboard.** Arrow Up/Down move selection, Left/Right
   collapse/expand, Enter enters a group (see 5.2.12), F2 renames.
 
 ### 5.2 Containers and groups (one concept)
@@ -324,39 +336,40 @@ both.
 | Edit its children | directly | `Enter` / double-click first |
 | Created by | Library › `Container` | `Make group` on a selection, or on a container |
 
-- [ ] **5.2.1 Container item.** Added from the Library (`CONTAINERS ›
+- [x] **5.2.1 Container item.** Added from the Library (`CONTAINERS ›
   Container`), default 100 × 100 with white fill and black 1 px outline (the
   optional background compiles to one ODL `rectangle` drawn before its
   children; `fill`, `outline`, `width`, `radius` editable, `none` allowed).
   Properties: `Layout` (X, Y, W, H), `Background`, `Visibility`.
-- [ ] **5.2.2 Children are directly selectable** on the canvas; the parent
+- [x] **5.2.2 Children are directly selectable** on the canvas; the parent
   container gets a thin outline while a child is selected.
-- [ ] **5.2.3 Drop from Library onto a container** makes the new element its
+- [x] **5.2.3 Drop from Library onto a container** makes the new element its
   last child; the drop point becomes its relative position; the container stays
   highlighted as drop target while hovering.
-- [ ] **5.2.4 Drag an existing element onto a container** (canvas) re-parents it
+- [x] **5.2.4 Drag an existing element onto a container** (canvas) re-parents it
   into the deepest container under the pointer on drop; visual position is
   preserved (absolute → relative conversion).
-- [ ] **5.2.5 Drag a child outside its container** (canvas) re-parents it to the
+- [x] **5.2.5 Drag a child outside its container** (canvas) re-parents it to the
   nearest ancestor that contains the drop point (Root if none); visual position
   preserved; it is inserted directly after its former parent.
-- [ ] **5.2.6 Tree drag-and-drop.** Row drop zones: upper quarter = before,
+- [x] **5.2.6 Tree drag-and-drop.** Row drop zones: upper quarter = before,
   lower quarter = after, middle half of a container row = inside (appended as
   last child). Markers: line for before/after, outlined row for inside.
   Re-parenting via the tree preserves the visual position (LVGL resets to 0,0 —
   deliberate deviation).
-- [ ] **5.2.7 Moving a container** moves the whole subtree (only its own X/Y
+- [x] **5.2.7 Moving a container** moves the whole subtree (only its own X/Y
   change); resizing a plain container does not change children.
-- [ ] **5.2.8 Delete container** deletes the subtree after confirmation;
+- [x] **5.2.8 Delete container** deletes the subtree after confirmation;
   `Ungroup` (5.2.10) is the way to keep children.
-- [ ] **5.2.9 Multi-selection.** `Shift`+click adds or removes an element
+- [x] **5.2.9 Multi-selection.** `Shift`+click adds or removes an element
   (canvas and tree); dragging a marquee on empty canvas selects every element of
   the current level it touches. The selection is a set: dragging any selected
   element, the arrow keys, alignment, hide, lock, delete, copy and duplicate all
   act on every element of it at once, as one undo step. The overlay draws one
   bounding box; resize handles are hidden for a multi-selection. Properties show
-  `N elements` with the X/Y of the bounding box.
-- [ ] **5.2.10 Make group / Ungroup** (`Ctrl+G` / `Ctrl+Shift+G`). `Make group`
+  `N elements` with the X/Y of the bounding box. *(Arrow keys, alignment, copy and
+  duplicate on a selection arrive with the commands of phase 6.)*
+- [x] **5.2.10 Make group / Ungroup** (`Ctrl+G` / `Ctrl+Shift+G`). `Make group`
   on a multi-selection (elements of one parent) wraps them in a new container
   with `grouped: true`, no background, the size of their bounding box, placed
   where the topmost of them was; every child keeps its visual position. On a
@@ -365,15 +378,15 @@ both.
   visual positions preserved and removes the group. Groups show a `Group` badge
   in the tree and a `Grouped` chip in the Properties header. Each is one undo
   step.
-- [ ] **5.2.11 Group selection.** Clicking any child of a group on the canvas
+- [x] **5.2.11 Group selection.** Clicking any child of a group on the canvas
   selects the **group**; its box shows handles and the hint
   "Enter / double-click to edit".
-- [ ] **5.2.12 Enter / exit group.** Enter or double-click enters the selected
+- [x] **5.2.12 Enter / exit group.** Enter or double-click enters the selected
   group: the tree shows a breadcrumb bar `Root › <group>` with an `Exit` button,
   the group row is outlined, the group box is dashed, and its children become
   individually selectable. Escape (or `Exit`, or clicking outside the group)
   exits and re-selects the group.
-- [ ] **5.2.13 Group resize scales children** — phase 7.
+- [x] **5.2.13 Group resize scales children** — phase 7.
 
 **Accepted when:** e2e covers each 5.x behaviour with real pointer sequences;
 pytest proves container offsets and group flattening produce the same PNG as the
@@ -388,23 +401,23 @@ reference command ids. Menus: 8 px radius, 36 px rows, icon + label + shortcut
 hint right-aligned, separators between groups, disabled items dimmed. Opening a
 menu on an element first selects it.
 
-- [ ] **6.1 Canvas element menu:** Copy `Ctrl+C` · Cut `Ctrl+X` · Paste
+- [x] **6.1 Canvas element menu:** Copy `Ctrl+C` · Cut `Ctrl+X` · Paste
   `Ctrl+V` · Duplicate `Ctrl+D` | Delete `Del` | Bring to Front · Send to Back |
   Make group / Ungroup `Ctrl+G` / `Ctrl+Shift+G` (containers and groups only).
-- [ ] **6.2 Tree row menu:** Copy · Cut · Paste | Move Up · Move Down | Hide /
+- [x] **6.2 Tree row menu:** Copy · Cut · Paste | Move Up · Move Down | Hide /
   Show · Lock / Unlock | Delete | Make group / Ungroup | Rename `F2`.
-- [ ] **6.3 Empty canvas menu:** Paste · Paste Here (at pointer position).
-- [ ] **6.4 Clipboard semantics.** Copy/cut store a deep copy of the selected
+- [x] **6.3 Empty canvas menu:** Paste · Paste Here (at pointer position).
+- [x] **6.4 Clipboard semantics.** Copy/cut store a deep copy of the selected
   subtree in the panel (in memory, also `localStorage` for cross-dashboard
   paste). Paste inserts into the selected container (or the selected item's
   parent, or Root), after the selection, offset +8/+8 px, with new ids and names;
   the pasted item becomes selected. Paste Here places its top-left at the
   pointer. Cut = copy + delete as one undo step.
-- [ ] **6.5 Duplicate** inserts a copy right after the source in the same
+- [x] **6.5 Duplicate** inserts a copy right after the source in the same
   parent, offset +8/+8 px, and selects it.
-- [ ] **6.6 Order.** Bring to Front / Send to Back move to the last / first
+- [x] **6.6 Order.** Bring to Front / Send to Back move to the last / first
   position among siblings; Move Up / Down swap with the next / previous sibling.
-- [ ] **6.7 Keyboard shortcuts** (Ctrl = ⌘ on macOS; ignored while typing in a
+- [x] **6.7 Keyboard shortcuts** *(zoom toward the cursor and panning with Ctrl/Space belong to the canvas work of phase 2.8–2.10 and are not done yet)* (Ctrl = ⌘ on macOS; ignored while typing in a
   field, except Escape):
 
   | Action | Keys |
@@ -434,7 +447,7 @@ its shortcut and asserts the resulting document and PNG.
 
 ## Phase 7 — Group scaling and responsive layout
 
-- [ ] **7.1 Group resize scales children:** geometry fields (coordinates,
+- [x] **7.1 Group resize scales children:** geometry fields (coordinates,
   sizes, `radius`, `size`, stroke widths rounded to ≥ 1) scale proportionally
   about the group's fixed edge; `Shift` keeps aspect ratio. Blocked (with a lock
   reason) if any descendant has an expression-driven geometry field.
@@ -587,9 +600,13 @@ data:                               # provider parameters, may reference options
 ```python
 from opendisplay_studio.sdk import WidgetContext, odl
 
+
 def render(ctx: WidgetContext) -> list[dict]:
-    events = merge_sorted(ctx.data["calendars"], key="start")[: ctx.options["maxEvents"]]
+    events = merge_sorted(ctx.data["calendars"], key="start")[
+        : ctx.options["maxEvents"]
+    ]
     ...
+
 
 RENDERER = render
 ```

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from time import monotonic
 from typing import override
 
 from homeassistant.components.media_player import BrowseError, MediaClass, MediaType
@@ -15,9 +14,9 @@ from homeassistant.components.media_source import (
 )
 from homeassistant.core import HomeAssistant
 
-from .compiler import DashboardCompileError, async_compile_dashboard
-from .const import DOMAIN, LOGGER
-from .palette import accent_color_for_palette
+from .compiler import DashboardCompileError
+from .const import DOMAIN, LOGGER, RENDER_HTTP_PATH, SENT_PREFIX
+from .delivery import async_render_dashboard
 from .rendering import OdlRenderError
 
 
@@ -36,43 +35,29 @@ class OpenDisplayStudioMediaSource(MediaSource):
 
     @override
     async def async_resolve_media(self, item: MediaSourceItem) -> PlayMedia:
-        dashboard = self.hass.data[DOMAIN].dashboards.get(item.identifier)
+        data = self.hass.data[DOMAIN]
+        if item.identifier.startswith(SENT_PREFIX):
+            return self._resolve_sent(item.identifier.removeprefix(SENT_PREFIX))
+        dashboard = data.dashboards.get(item.identifier)
         if dashboard is None or dashboard["status"] != "ready":
             raise Unresolvable("Unknown or Draft OpenDisplay Studio dashboard")
-        started = monotonic()
         try:
-            compiled = await async_compile_dashboard(
-                self.hass, dashboard, self.hass.data[DOMAIN].widgets
-            )
-            display = dashboard["display"]
-            rendered = await self.hass.data[DOMAIN].renderer.async_render(
-                width=display["width"],
-                height=display["height"],
-                elements=compiled.elements,
-                background=display["background"],
-                accent_color=accent_color_for_palette(display["palette"]),
+            rendered = await async_render_dashboard(
+                self.hass, dashboard, for_device=True
             )
         except (DashboardCompileError, OdlRenderError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)
             raise Unresolvable(
                 translation_domain=DOMAIN, translation_key="render_failed"
             ) from err
-        pipeline_ms = round((monotonic() - started) * 1000, 2)
-        LOGGER.info(
-            "Rendered Media Source dashboard=%s size=%dx%d queue=%.2f ms data=%.2f ms "
-            "compile=%.2f ms render=%.2f ms encode=%.2f ms pipeline=%.2f ms",
-            item.identifier,
-            display["width"],
-            display["height"],
-            rendered.timings["queue"],
-            compiled.data_ms,
-            compiled.compile_ms,
-            rendered.timings["render"],
-            rendered.timings["encode"],
-            pipeline_ms,
-        )
-        token = self.hass.data[DOMAIN].cache.put(rendered.png)
-        return PlayMedia(f"/api/opendisplay_studio/render/{token}.png", "image/png")
+        token = data.cache.put(rendered.picture.png)
+        return PlayMedia(RENDER_HTTP_PATH.replace("{token}", token), "image/png")
+
+    def _resolve_sent(self, token: str) -> PlayMedia:
+        """Resolve a picture an administrator is sending to a device from the editor."""
+        if self.hass.data[DOMAIN].cache.get(token) is None:
+            raise Unresolvable("The picture is no longer available")
+        return PlayMedia(RENDER_HTTP_PATH.replace("{token}", token), "image/png")
 
     @override
     async def async_browse_media(self, item: MediaSourceItem) -> BrowseMediaSource:

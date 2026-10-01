@@ -41,54 +41,122 @@ export interface WidgetItem extends ItemState {
   layout: { padding: number };
 }
 
-export interface TextPrimitive {
+/** How a text-like element is drawn: font, alignment and outline of the glyphs. */
+interface TextStyle {
+  font: string;
+  align: "left" | "center" | "right";
+  spacing: number;
+  stroke_width: number;
+  stroke_fill: string;
+  parse_colors: boolean;
+}
+export interface TextPrimitive extends TextStyle {
   type: "text";
   value: string;
   x: number;
   y: number;
   size: number;
   color: string;
+  /** Pillow anchor; `null` lets the renderer choose. */
+  anchor: string | null;
+  max_width: number | null;
+  truncate: boolean;
 }
-export interface RectanglePrimitive {
-  type: "rectangle";
+export interface MultilinePrimitive extends TextStyle {
+  type: "multiline";
+  value: string;
+  delimiter: string;
+  x: number;
+  y: number;
+  offset_y: number;
+  size: number;
+  color: string;
+  anchor: string;
+}
+
+/** A primitive given by two opposite corners. */
+interface CornerBox {
   x_start: number;
   y_start: number;
   x_end: number;
   y_end: number;
+}
+/** Corner rounding shared by the rectangle and the rectangle pattern. */
+interface Rounding {
+  radius: number | null;
+  corners: string | null;
+}
+interface Outlined {
   fill: string | null;
   outline: string;
   width: number;
 }
-export interface LinePrimitive {
-  type: "line";
+export interface RectanglePrimitive extends CornerBox, Outlined, Rounding {
+  type: "rectangle";
+}
+export interface RectanglePatternPrimitive extends Outlined, Rounding {
+  type: "rectangle_pattern";
   x_start: number;
   y_start: number;
-  x_end: number;
-  y_end: number;
+  x_size: number;
+  y_size: number;
+  x_offset: number;
+  y_offset: number;
+  x_repeat: number;
+  y_repeat: number;
+}
+export interface LinePrimitive extends CornerBox {
+  type: "line";
   fill: string;
   width: number;
   dashed: boolean;
+  dash_length: number;
+  space_length: number;
 }
-export interface CirclePrimitive {
+export interface PolygonPrimitive {
+  type: "polygon";
+  points: [number, number][];
+  fill: string | null;
+  outline: string;
+}
+export interface CirclePrimitive extends Outlined {
   type: "circle";
   x: number;
   y: number;
   radius: number;
-  fill: string | null;
-  outline: string;
-  width: number;
 }
-export interface EllipsePrimitive extends Omit<RectanglePrimitive, "type"> {
+export interface ArcPrimitive extends Outlined {
+  type: "arc";
+  x: number;
+  y: number;
+  radius: number;
+  start_angle: number;
+  end_angle: number;
+}
+export interface EllipsePrimitive extends CornerBox, Outlined {
   type: "ellipse";
 }
-export interface IconPrimitive {
+interface IconStyle {
+  size: number;
+  fill: string;
+  anchor: string;
+  stroke_width: number;
+  stroke_fill: string;
+}
+export interface IconPrimitive extends IconStyle {
   type: "icon";
   value: string;
   x: number;
   y: number;
-  size: number;
-  color: string;
-  anchor: "lt";
+}
+export interface IconSequencePrimitive extends IconStyle {
+  type: "icon_sequence";
+  icons: string[];
+  x: number;
+  y: number;
+  direction: "right" | "left" | "up" | "down";
+  /** `null` leaves the gap to the renderer: a quarter of the icon size. */
+  spacing: number | null;
 }
 export interface QrCodePrimitive {
   type: "qrcode";
@@ -100,27 +168,74 @@ export interface QrCodePrimitive {
   color: string;
   bgcolor: string;
 }
-export interface ProgressBarPrimitive extends Omit<
-  RectanglePrimitive,
-  "type" | "fill"
-> {
+export interface DlimgPrimitive {
+  type: "dlimg";
+  url: string;
+  x: number;
+  y: number;
+  xsize: number;
+  ysize: number;
+  resize_method: "stretch" | "cover" | "contain" | "crop";
+  rotate: number;
+}
+export interface ProgressBarPrimitive extends CornerBox {
   type: "progress_bar";
   progress: number;
   direction: "right" | "left" | "up" | "down";
   background: string;
   fill: string;
+  outline: string;
+  width: number;
   show_percentage: boolean;
+  font_name: string;
+}
+/** A nested object of a plot (a series, an axis or a legend): plain values by key. */
+export type PlotObject = Record<string, string | number | boolean | null>;
+export interface PlotPrimitive extends CornerBox {
+  type: "plot";
+  data: PlotObject[];
+  duration: number;
+  low: number | null;
+  high: number | null;
+  round_values: boolean;
+  font: string;
+  debug: boolean;
+  ylegend: PlotObject | null;
+  yaxis: PlotObject | null;
+  xlegend: PlotObject | null;
+  xaxis: PlotObject | null;
+}
+export interface DebugGridPrimitive {
+  type: "debug_grid";
+  spacing: number;
+  line_color: string;
+  dashed: boolean;
+  dash_length: number;
+  space_length: number;
+  show_labels: boolean;
+  label_step: number | null;
+  label_color: string;
+  label_font_size: number;
+  font: string;
 }
 
 export type Primitive =
   | TextPrimitive
+  | MultilinePrimitive
   | RectanglePrimitive
+  | RectanglePatternPrimitive
   | LinePrimitive
+  | PolygonPrimitive
   | CirclePrimitive
+  | ArcPrimitive
   | EllipsePrimitive
   | IconPrimitive
+  | IconSequencePrimitive
   | QrCodePrimitive
-  | ProgressBarPrimitive;
+  | DlimgPrimitive
+  | ProgressBarPrimitive
+  | PlotPrimitive
+  | DebugGridPrimitive;
 
 export interface PrimitiveItem extends ItemState {
   kind: "primitive";
@@ -146,12 +261,15 @@ export interface ContainerItem extends ItemState {
   height: number;
   grouped: boolean;
   background: ContainerBackground | null;
-  children: TreeItem[];
+  children: StudioItem[];
 }
 
-/** What the panel draws and edits today: one flat list (containers arrive in phase 5). */
-export type StudioItem = WidgetItem | PrimitiveItem;
-export type TreeItem = StudioItem | ContainerItem;
+/** An item that draws something itself, as opposed to holding other items. */
+export type LeafItem = WidgetItem | PrimitiveItem;
+export type StudioItem = LeafItem | ContainerItem;
+
+/** How far, clockwise, the picture is turned before a display gets it. */
+export type Rotation = 0 | 90 | 180 | 270;
 
 export interface Dashboard {
   id: string;
@@ -167,6 +285,9 @@ export interface Dashboard {
     background: string;
     padding: number;
     snapSize: number;
+    rotation: Rotation;
+    /** The OpenDisplay device the dashboard is made for, which it can be sent to. */
+    deviceId: string | null;
   };
   items: StudioItem[];
   createdAt: string;
@@ -181,6 +302,18 @@ export interface DisplayProfile {
   height: number;
   palettes: PaletteId[];
   defaultPalette: PaletteId;
+}
+
+/** An OpenDisplay device the integration has set up, with the display it drives. */
+export interface DisplayDevice {
+  id: string;
+  name: string;
+  manufacturer: string | null;
+  model: string | null;
+  width: number;
+  height: number;
+  palette: PaletteId;
+  colors: string[];
 }
 
 export interface WidgetFieldDefinition {
@@ -223,11 +356,32 @@ export interface WidgetLoadError {
   message: string;
 }
 export type FieldShape =
-  "number" | "coordinate" | "boolean" | "enum" | "color" | "string" | "text";
+  | "number"
+  | "coordinate"
+  | "boolean"
+  | "enum"
+  | "flags"
+  | "color"
+  | "string"
+  | "text"
+  | "font"
+  | "points"
+  | "icons"
+  | "object"
+  | "objects";
 
 /** A number limit: a fixed value, or one taken from the display size. */
 export type FieldLimit =
   number | "display_width" | "display_height" | "display_shorter_side";
+
+/** Anything a primitive field can hold, as JSON. */
+export type PrimitiveValue =
+  | string
+  | number
+  | boolean
+  | null
+  | PrimitiveValue[]
+  | { [key: string]: PrimitiveValue };
 
 export interface PrimitiveField {
   key: string;
@@ -235,9 +389,13 @@ export interface PrimitiveField {
   shape: FieldShape;
   section: "layout" | "appearance";
   required?: boolean;
-  default?: string | number | boolean;
+  default?: PrimitiveValue;
   /** A colour that may be "no colour" (stored as null, shown as transparent). */
   nullable?: boolean;
+  /** Left unset (`null`) when the user has not chosen a value; the renderer decides. */
+  optional?: boolean;
+  /** The fields of an `object`, or of each entry of `objects`. */
+  nested?: PrimitiveField[];
   axis?: "x" | "y";
   min?: FieldLimit;
   max?: FieldLimit;
@@ -257,7 +415,15 @@ export interface PrimitiveDefinition {
   description: string;
   icon: string;
   category: string;
-  geometry: "point" | "box" | "line";
+  geometry:
+    | "point"
+    | "box"
+    | "line"
+    | "radial"
+    | "points"
+    | "pattern"
+    | "image"
+    | "canvas";
   /** How far a new box or line reaches from where it is dropped. */
   extent?: { x: number; y: number };
   fields: PrimitiveField[];

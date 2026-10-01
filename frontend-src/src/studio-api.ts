@@ -2,6 +2,7 @@ import type {
   BootstrapResponse,
   ComposePreviewResponse,
   Dashboard,
+  DisplayDevice,
   HomeAssistant,
   ReloadWidgetsResponse,
 } from "./types";
@@ -65,3 +66,24 @@ export const composePreview = (
     type: "opendisplay_studio/compose_preview",
     dashboard: structuredClone(dashboard),
   });
+
+/** The OpenDisplay devices a new dashboard can take its size and colors from. */
+export const listDevices = async (
+  hass: HomeAssistant
+): Promise<DisplayDevice[]> => {
+  const result = await hass.callWS<{ devices: DisplayDevice[] }>({
+    type: "opendisplay_studio/list_devices",
+  });
+  return result.devices;
+};
+
+/** Renders the dashboard as the device shows it and uploads it to the device. */
+export const sendToDevice = async (
+  hass: HomeAssistant,
+  dashboard: Dashboard
+): Promise<void> => {
+  await hass.callWS({
+    type: "opendisplay_studio/send_to_device",
+    dashboard: structuredClone(dashboard),
+  });
+};

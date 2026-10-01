@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   constrainItem,
   itemBounds,
-  primitiveBounds,
   resizeItem,
   snapToGrid,
   transformItem,
@@ -13,6 +12,7 @@ import { clamp } from "./math";
 import {
   circleItem,
   dashboardWith,
+  primitiveItem,
   rectangleItem,
   textItem,
   widgetItem,
@@ -67,27 +67,10 @@ describe("itemBounds", () => {
       height: 41,
     });
     expect(
-      primitiveBounds({
-        type: "icon",
-        value: "x",
-        x: 5,
-        y: 6,
-        size: 24,
-        color: "black",
-        anchor: "lt",
-      })
+      itemBounds(primitiveItem("icon", "i", { x: 5, y: 6, size: 24 }))
     ).toEqual({ x: 5, y: 6, width: 24, height: 24 });
     expect(
-      primitiveBounds({
-        type: "qrcode",
-        data: "x",
-        x: 0,
-        y: 0,
-        boxsize: 3,
-        border: 1,
-        color: "black",
-        bgcolor: "white",
-      })
+      itemBounds(primitiveItem("qrcode", "q", { x: 0, y: 0, boxsize: 3 }))
     ).toEqual({ x: 0, y: 0, width: 69, height: 69 });
   });
 });

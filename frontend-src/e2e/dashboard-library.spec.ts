@@ -123,7 +123,7 @@ test("filters dashboards and changes their sort order", async ({ page }) => {
     .toEqual(["Hallway overview", "Kitchen display", "Office status"]);
 });
 
-test("opens the same custom dashboard dialog from both add affordances", async ({
+test("opens the same dashboard dialog from both add affordances", async ({
   page,
 }) => {
   const addDashboard = [
@@ -136,11 +136,14 @@ test("opens the same custom dashboard dialog from both add affordances", async (
     const dialog = page.getByRole("dialog", { name: "New dashboard" });
     await expect(dialog).toBeVisible();
     await expect(
-      dialog.getByRole("radio", { name: /From OpenDisplay device/ })
-    ).toBeDisabled();
+      dialog.getByRole("radio", { name: /From device/ })
+    ).toBeChecked();
+    await expect(
+      dialog.getByRole("radio", { name: /Predefined display/ })
+    ).not.toBeChecked();
     await expect(
       dialog.getByRole("radio", { name: /Custom size/ })
-    ).toBeChecked();
+    ).not.toBeChecked();
     if (index === 0) {
       await expect(dialog).toHaveScreenshot("new-dashboard-dialog.png");
     }
@@ -157,6 +160,7 @@ test("creates a custom dashboard and opens it in the editor", async ({
     .click();
   const dialog = page.getByRole("dialog", { name: "New dashboard" });
   const create = dialog.getByRole("button", { name: "Create dashboard" });
+  await dialog.getByRole("radio", { name: /Custom size/ }).click();
   await expect(create).toBeDisabled();
 
   await dialog
@@ -179,7 +183,7 @@ test("creates a custom dashboard and opens it in the editor", async ({
   await expect(page.locator(".workspace-meta")).toContainText("640 × 384 px");
   await expect(
     page.getByRole("combobox", { name: "Display type" })
-  ).toHaveValue("custom");
+  ).toHaveCount(0);
   await expect(page.getByRole("combobox", { name: "Palette" })).toHaveValue(
     "spectra6"
   );
@@ -455,3 +459,113 @@ declare global {
     };
   }
 }
+
+test.describe("starting a dashboard from a display", () => {
+  const openDialog = async (page: Page) => {
+    await page
+      .getByRole("button", { name: "New dashboard", exact: true })
+      .click();
+    return page.getByRole("dialog", { name: "New dashboard" });
+  };
+
+  const createCall = (page: Page) =>
+    page.evaluate(
+      () =>
+        window.__ODS_E2E__
+          .calls()
+          .findLast(
+            (call) => call.type === "opendisplay_studio/create_dashboard"
+          )?.dashboard as { display: Record<string, unknown> } | undefined
+    );
+
+  test("lists the OpenDisplay devices and shows the size and colors of the chosen one", async ({
+    page,
+  }) => {
+    const dialog = await openDialog(page);
+
+    const devices = dialog.getByRole("combobox", { name: "Device" });
+    await expect(devices.locator("option")).toHaveText([
+      "Hallway display · 800 × 480",
+      "Kitchen e-paper · 296 × 128",
+    ]);
+    const summary = dialog.getByRole("group", {
+      name: "Dashboard size and colors",
+    });
+    await expect(summary).toContainText("800 × 480 px");
+    await expect(summary).toContainText("Black / white / red");
+
+    await devices.selectOption("kitchen");
+
+    await expect(summary).toContainText("296 × 128 px");
+    await expect(summary).toContainText("Black / white");
+    await expect(summary.locator(".swatch")).toHaveCount(2);
+  });
+
+  test("creates a dashboard with the resolution and colors of the device", async ({
+    page,
+  }) => {
+    const dialog = await openDialog(page);
+    await dialog
+      .getByRole("combobox", { name: "Device" })
+      .selectOption("kitchen");
+    await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Shelf");
+
+    await dialog.getByRole("button", { name: "Create dashboard" }).click();
+
+    await expect(page.locator(".workspace-meta")).toContainText("296 × 128 px");
+    expect(await createCall(page)).toMatchObject({
+      display: { width: 296, height: 128, palette: "bw" },
+    });
+  });
+
+  test("does not offer to type a size for a device: it is the device's", async ({
+    page,
+  }) => {
+    const dialog = await openDialog(page);
+
+    await expect(dialog.getByRole("spinbutton", { name: "Width" })).toHaveCount(
+      0
+    );
+    await expect(dialog.getByRole("combobox", { name: "Palette" })).toHaveCount(
+      0
+    );
+  });
+
+  test("lists the predefined displays, with the colors each can show", async ({
+    page,
+  }) => {
+    const dialog = await openDialog(page);
+    await dialog.getByRole("radio", { name: /Predefined display/ }).click();
+
+    const displays = dialog.getByRole("combobox", { name: "Display" });
+    await expect(displays.locator("option").first()).toContainText(
+      "Seeed Studio"
+    );
+    await displays.selectOption("eink-spectra6-13-3");
+
+    await expect(
+      dialog.getByRole("group", { name: "Dashboard size and colors" })
+    ).toContainText("1200 × 1600 px");
+    await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Big");
+    await dialog.getByRole("button", { name: "Create dashboard" }).click();
+    await expect(page.locator(".workspace-meta")).toContainText(
+      "1200 × 1600 px"
+    );
+    expect(await createCall(page)).toMatchObject({
+      display: { profileId: "eink-spectra6-13-3", palette: "spectra6" },
+    });
+  });
+
+  test("lets the size be typed only for a custom display", async ({ page }) => {
+    const dialog = await openDialog(page);
+
+    await dialog.getByRole("radio", { name: /Custom size/ }).click();
+
+    await expect(
+      dialog.getByRole("spinbutton", { name: "Width" })
+    ).toBeVisible();
+    await expect(
+      dialog.getByRole("combobox", { name: "Palette" })
+    ).toBeVisible();
+  });
+});

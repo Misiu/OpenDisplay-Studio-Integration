@@ -29,6 +29,24 @@ def integer(value: object, name: str, minimum: int, maximum: int) -> int:
     return value
 
 
+ROTATIONS = (0, 90, 180, 270)
+MAX_DEVICE_ID_LENGTH = 64
+
+
+def rotation(value: object) -> int:
+    """Return the clockwise turn, in degrees, a picture gets before it is sent."""
+    if isinstance(value, bool) or value not in ROTATIONS:
+        fail(f"display.rotation must be one of {', '.join(map(str, ROTATIONS))}")
+    return int(value)
+
+
+def device_id(value: object) -> str | None:
+    """Return the id of the device a dashboard is sent to, or `None` for no device."""
+    if value is None:
+        return None
+    return string(value, "display.deviceId", MAX_DEVICE_ID_LENGTH)
+
+
 def string(value: object, name: str, maximum: int = MAX_TEXT_LENGTH) -> str:
     """Return `value` stripped, when it is a non-empty string of allowed length."""
     if not isinstance(value, str):

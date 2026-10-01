@@ -199,7 +199,9 @@ test.describe("ods-library", () => {
     await expect(page.getByText("No matching widgets")).toBeVisible();
     await expect(page.getByText("No matching primitives")).toBeVisible();
     await search.fill("");
-    await expect(page.getByRole("button", { name: /Rectangle/ })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Rectangle", exact: true })
+    ).toBeVisible();
     await expect(
       page.getByRole("button", { name: /Sensor card/ })
     ).toBeVisible();
@@ -207,7 +209,7 @@ test.describe("ods-library", () => {
 
   test("adds an element with a click and selects it", async ({ page }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: /Circle/ }).click();
+    await page.getByRole("button", { name: /^Circle$/ }).click();
     await expect(
       page.getByRole("heading", { name: "circle_1", exact: true })
     ).toBeVisible();
@@ -227,7 +229,7 @@ test.describe("ods-structure", () => {
     await expect(
       page.locator('.layer-row[data-item-id="temperature"]')
     ).toHaveClass(/active/);
-    await page.getByRole("button", { name: /Rectangle/ }).click();
+    await page.getByRole("button", { name: "Rectangle", exact: true }).click();
     await expect(count).toHaveText("2");
 
     await page.getByRole("button", { name: "Dashboards", exact: true }).click();
@@ -241,7 +243,7 @@ test.describe("ods-structure", () => {
 
   test("lists the top layer first", async ({ page }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: /Circle/ }).click();
+    await page.getByRole("button", { name: /^Circle$/ }).click();
     const names = await page.locator(".layer-row strong").allTextContents();
     expect(names).toEqual(["circle_1", "Kitchen"]);
   });
@@ -325,13 +327,13 @@ test.describe("ods-inspector", () => {
     page,
   }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: /Circle/ }).click();
+    await page.getByRole("button", { name: /^Circle$/ }).click();
     for (const label of ["Center X", "Center Y", "Radius"]) {
       await expect(
         page.getByRole("spinbutton", { name: label, exact: true })
       ).toBeVisible();
     }
-    await page.getByRole("button", { name: /QR code/ }).click();
+    await page.getByRole("button", { name: /^QR code$/ }).click();
     for (const label of ["X", "Y", "Module size"]) {
       await expect(
         page.getByRole("spinbutton", { name: label, exact: true })
@@ -339,17 +341,16 @@ test.describe("ods-inspector", () => {
     }
   });
 
-  test("changes the display type, palette and background", async ({ page }) => {
+  test("has no display type list; the size, palette and background are edited", async ({
+    page,
+  }) => {
     await openKitchen(page);
-    await page
-      .getByRole("combobox", { name: "Display type" })
-      .selectOption("eink-spectra6-13-3");
-    await expect(page.locator(".workspace-meta")).toContainText(
-      "1200 × 1600 px"
-    );
-    await expect(page.getByRole("combobox", { name: "Palette" })).toHaveValue(
-      "spectra6"
-    );
+    await expect(
+      page.getByRole("combobox", { name: "Display type" })
+    ).toHaveCount(0);
+    await page.getByRole("spinbutton", { name: "Width" }).fill("640");
+    await page.getByRole("spinbutton", { name: "Width" }).press("Tab");
+    await expect(page.locator(".workspace-meta")).toContainText("640 × 480 px");
     await page
       .getByRole("combobox", { name: "Background" })
       .selectOption("black");
@@ -624,6 +625,7 @@ test.describe("ods-new-dashboard-dialog", () => {
       .getByRole("textbox", { name: "Dashboard name" })
       .fill("Draft board");
     await expect(create).toBeEnabled();
+    await dialog.getByRole("radio", { name: /Custom size/ }).click();
     await dialog.getByRole("spinbutton", { name: "Width" }).fill("10");
     await expect(create).toBeDisabled();
     await dialog.getByRole("button", { name: "Cancel" }).click();
@@ -671,5 +673,88 @@ test.describe("ods-code-view", () => {
     await expect(
       page.getByRole("button", { name: "Copy generated ODL YAML" })
     ).toContainText("Copy YAML", { timeout: 5000 });
+  });
+});
+
+test.describe("rotation and sending to a device", () => {
+  test("turning the dashboard swaps the sides of the canvas", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    await expect(page.locator(".workspace-meta")).toContainText("800 × 480 px");
+
+    await page.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+
+    await expect(page.locator(".workspace-meta")).toContainText("480 × 800 px");
+    await expect(page.getByRole("spinbutton", { name: "Width" })).toHaveValue(
+      "480"
+    );
+    await page.getByRole("combobox", { name: "Rotation" }).selectOption("180");
+    await expect(page.locator(".workspace-meta")).toContainText("800 × 480 px");
+    await expect(page.getByRole("button", { name: "Undo" })).toBeEnabled();
+  });
+
+  test("sends the design as it is to the device the dashboard is made for", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    await page.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+
+    await page.getByRole("button", { name: "Send to device" }).click();
+
+    await expect(page.getByText("Sent to the device")).toBeVisible();
+    const sent = await lastCall(page, "opendisplay_studio/send_to_device");
+    expect(sent).toMatchObject({
+      dashboard: { display: { rotation: 90, deviceId: "hallway" } },
+    });
+  });
+
+  test("offers no sending for a dashboard that is not made for a device", async ({
+    page,
+  }) => {
+    await openGallery(page);
+    await openDashboard(page, "Office status");
+
+    await expect(
+      page.getByRole("button", { name: "Save", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Send to device" })
+    ).toHaveCount(0);
+  });
+
+  test("forgets the device when the size is typed by hand", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+
+    await page.getByRole("spinbutton", { name: "Width" }).fill("640");
+    await page.getByRole("spinbutton", { name: "Width" }).press("Tab");
+
+    await expect(
+      page.getByRole("button", { name: "Send to device" })
+    ).toHaveCount(0);
+  });
+
+  test("a new dashboard for a device sized for its rotation", async ({
+    page,
+  }) => {
+    await openGallery(page);
+    await page
+      .getByRole("button", { name: "New dashboard", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog", { name: "New dashboard" });
+
+    await dialog.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+
+    await expect(
+      dialog.getByRole("group", { name: "Dashboard size and colors" })
+    ).toContainText("480 × 800 px");
+    await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Tall");
+    await dialog.getByRole("button", { name: "Create dashboard" }).click();
+    await expect(page.locator(".workspace-meta")).toContainText("480 × 800 px");
+    await expect(
+      page.getByRole("button", { name: "Send to device" })
+    ).toBeVisible();
   });
 });

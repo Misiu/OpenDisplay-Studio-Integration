@@ -4,6 +4,7 @@ import type {
   Primitive,
   PrimitiveDefinition,
   PrimitiveField,
+  PrimitiveValue,
 } from "./types";
 
 interface DisplaySize {
@@ -40,12 +41,12 @@ export const resolveLimit = (
 const startingValue = (
   field: PrimitiveField,
   display: DisplaySize
-): string | number | boolean | null => {
+): PrimitiveValue => {
   if (field.default === undefined) {
-    return field.nullable ? null : 0;
+    return field.nullable || field.optional ? null : 0;
   }
   if (field.shape !== "number" || typeof field.default !== "number") {
-    return field.default;
+    return structuredClone(field.default);
   }
   return clamp(
     field.default,
@@ -54,23 +55,47 @@ const startingValue = (
   );
 };
 
-/** Put a point, box or line where the item is dropped, inside the display. */
+/** Move the points of a polygon so its first point lies at (x, y). */
+const placePoints = (points: unknown, x: number, y: number): void => {
+  if (!Array.isArray(points)) return;
+  const [first] = points;
+  const [originX, originY] = Array.isArray(first) ? first : [0, 0];
+  points.forEach((point, index) => {
+    if (!Array.isArray(point)) return;
+    points[index] = [x + point[0] - originX, y + point[1] - originY];
+  });
+};
+
+/** Put a new primitive where the item is dropped, inside the display. */
 const place = (
   definition: PrimitiveDefinition,
   values: Record<string, unknown>,
   context: PrimitiveFactoryContext
 ): void => {
   const { x, y, displayWidth, displayHeight } = context;
-  if (definition.geometry === "point") {
-    values.x = x;
-    values.y = y;
-    return;
+  switch (definition.geometry) {
+    case "canvas":
+      return;
+    case "pattern":
+      values.x_start = x;
+      values.y_start = y;
+      return;
+    case "points":
+      placePoints(values.points, x, y);
+      return;
+    case "box":
+    case "line": {
+      const extent = definition.extent ?? { x: 0, y: 0 };
+      values.x_start = x;
+      values.y_start = y;
+      values.x_end = Math.min(displayWidth - 1, x + extent.x);
+      values.y_end = Math.min(displayHeight - 1, y + extent.y);
+      return;
+    }
+    default:
+      values.x = x;
+      values.y = y;
   }
-  const extent = definition.extent ?? { x: 0, y: 0 };
-  values.x_start = x;
-  values.y_start = y;
-  values.x_end = Math.min(displayWidth - 1, x + extent.x);
-  values.y_end = Math.min(displayHeight - 1, y + extent.y);
 };
 
 /**

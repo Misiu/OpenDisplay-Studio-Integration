@@ -1,24 +1,34 @@
 import { seedExpression, VISIBLE_KEY } from "./expressions";
 import { optionDefaults } from "./widget-fields";
+import { scaleChildren } from "./scale";
 import { defaultItemName } from "./item-names";
 import {
+  allItems,
+  findItem,
+  locate,
+  moveItem,
+  moveRelative,
+  removeFromTree,
+} from "./tree";
+import {
   constrainItem,
-  isBoxPrimitive,
   itemBounds,
   snapToGrid,
   translateItem,
   workingArea,
 } from "./geometry";
+import { turnedCanvas } from "./dashboards";
 import { createId } from "./ids";
 import { clamp } from "./math";
 import { definitionFor, primitiveValuesFromForm } from "./item-fields";
+import { isBoxPrimitive, type CornerPrimitive } from "./primitive-shape";
 import { createPrimitive, resolveLimit } from "./primitives";
 import { PALETTE_COLORS } from "./display-profiles";
 import type {
   Dashboard,
-  DisplayProfile,
   ItemBounds,
   PaletteId,
+  Rotation,
   Primitive,
   PrimitiveDefinition,
   PrimitiveItem,
@@ -30,10 +40,10 @@ import type {
 } from "./types";
 
 /**
- * Edit one numeric field of a point primitive: its position keeps the whole
+ * Edit one numeric field a primitive stores itself: a coordinate keeps the whole
  * element inside the working area, any other field stays within its definition's limits.
  */
-const setPointField = (
+const setStoredField = (
   item: PrimitiveItem,
   key: string,
   value: number,
@@ -42,42 +52,131 @@ const setPointField = (
   definition: PrimitiveDefinition | undefined
 ): void => {
   const primitive = item.primitive;
-  if (isBoxPrimitive(primitive)) {
-    return;
-  }
-  const bounds = itemBounds(item);
-  if (key === "x") {
-    const offset = bounds.x - primitive.x;
-    const lowest = area.x - offset;
-    const highest = area.x + area.width - bounds.width - offset;
+  const field = definition?.fields.find((candidate) => candidate.key === key);
+  if (field?.shape === "coordinate") {
+    const bounds = itemBounds(item);
+    const stored = { ...primitive };
+    const current = Number(Reflect.get(stored, key));
+    const horizontal = field.axis === "x";
+    const offset = (horizontal ? bounds.x : bounds.y) - current;
+    const start = horizontal ? area.x : area.y;
+    const extent = horizontal ? area.width : area.height;
+    const size = horizontal ? bounds.width : bounds.height;
+    const lowest = start - offset;
+    const highest = start + extent - size - offset;
     Object.assign(primitive, {
-      x: clamp(value, lowest, Math.max(lowest, highest)),
+      [key]: clamp(value, lowest, Math.max(lowest, highest)),
     });
     return;
   }
-  if (key === "y") {
-    const offset = bounds.y - primitive.y;
-    const lowest = area.y - offset;
-    const highest = area.y + area.height - bounds.height - offset;
-    Object.assign(primitive, {
-      y: clamp(value, lowest, Math.max(lowest, highest)),
-    });
-    return;
-  }
-  const field = definition?.fields.find(
-    (candidate) =>
-      candidate.key === key &&
-      candidate.shape === "number" &&
-      candidate.section === "layout"
-  );
-  if (field) {
+  if (field?.shape === "number" && field.section === "layout") {
     const minimum = resolveLimit(field.min, display, value);
     const maximum = resolveLimit(field.max, display, value);
     Object.assign(primitive, { [key]: clamp(value, minimum, maximum) });
   }
 };
 
-/** Edit one numeric layout field of an item, keeping it inside the working area. */
+/** Edit one numeric layout field of a widget's frame or a container's box. */
+const setBoxField = (
+  box: { x: number; y: number; width: number; height: number },
+  key: string,
+  value: number,
+  area: ItemBounds
+): void => {
+  if (key === "x") {
+    box.x = clamp(value, area.x, area.x + area.width - box.width);
+  }
+  if (key === "y") {
+    box.y = clamp(value, area.y, area.y + area.height - box.height);
+  }
+  if (key === "width") {
+    box.width = clamp(value, 1, area.x + area.width - box.x);
+  }
+  if (key === "height") {
+    box.height = clamp(value, 1, area.y + area.height - box.y);
+  }
+};
+
+const setBoxPrimitiveField = (
+  primitive: CornerPrimitive,
+  key: string,
+  value: number,
+  area: ItemBounds
+): void => {
+  if (key === "x") {
+    const width = primitive.x_end - primitive.x_start;
+    primitive.x_start = clamp(value, area.x, area.x + area.width - width - 1);
+    primitive.x_end = primitive.x_start + width;
+  }
+  if (key === "y") {
+    const height = primitive.y_end - primitive.y_start;
+    primitive.y_start = clamp(value, area.y, area.y + area.height - height - 1);
+    primitive.y_end = primitive.y_start + height;
+  }
+  if (key === "width") {
+    primitive.x_end = clamp(
+      primitive.x_start + Math.max(1, value) - 1,
+      primitive.x_start + 1,
+      area.x + area.width - 1
+    );
+  }
+  if (key === "height") {
+    primitive.y_end = clamp(
+      primitive.y_start + Math.max(1, value) - 1,
+      primitive.y_start + 1,
+      area.y + area.height - 1
+    );
+  }
+};
+
+/** The field edit itself, for an item whose coordinates are display coordinates. */
+const applyNumber = (
+  item: StudioItem,
+  key: string,
+  value: number,
+  dashboard: Dashboard,
+  definitions: PrimitiveDefinition[]
+): void => {
+  const area = workingArea(dashboard);
+  if (item.kind === "widget") {
+    if (key === "padding") item.layout.padding = clamp(value, 0, 128);
+    setBoxField(item.frame, key, value, area);
+    return;
+  }
+  if (item.kind === "container") {
+    const before = { width: item.width, height: item.height };
+    setBoxField(item, key, value, area);
+    if (item.grouped) {
+      scaleChildren(
+        item,
+        item.width / Math.max(1, before.width),
+        item.height / Math.max(1, before.height),
+        definitions,
+        dashboard.display
+      );
+    }
+    return;
+  }
+  const primitive = item.primitive;
+  if (isBoxPrimitive(primitive)) {
+    setBoxPrimitiveField(primitive, key, value, area);
+  } else {
+    setStoredField(
+      item,
+      key,
+      value,
+      area,
+      dashboard.display,
+      definitionFor(item, definitions)
+    );
+  }
+};
+
+/**
+ * Edit one numeric layout field of an item, keeping it inside the working area. Inside
+ * a container the item stores relative coordinates, so the edit is made where the item
+ * really is on the display and converted back.
+ */
 export const setItemNumber = (
   dashboard: Dashboard,
   itemId: string,
@@ -85,67 +184,29 @@ export const setItemNumber = (
   value: number,
   definitions: PrimitiveDefinition[]
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
-  if (!item || item.locked) return;
-  const area = workingArea(dashboard);
-  if (item.kind === "widget") {
-    if (key === "padding") item.layout.padding = clamp(value, 0, 128);
-    if (key === "x") {
-      item.frame.x = clamp(
-        value,
-        area.x,
-        area.x + area.width - item.frame.width
-      );
-    }
-    if (key === "y") {
-      item.frame.y = clamp(
-        value,
-        area.y,
-        area.y + area.height - item.frame.height
-      );
-    }
-    if (key === "width") {
-      item.frame.width = clamp(value, 1, area.x + area.width - item.frame.x);
-    }
-    if (key === "height") {
-      item.frame.height = clamp(value, 1, area.y + area.height - item.frame.y);
-    }
-    return;
-  }
-  const primitive = item.primitive;
-  const definition = definitionFor(item, definitions);
-  if (isBoxPrimitive(primitive)) {
-    if (key === "x") {
-      const width = primitive.x_end - primitive.x_start;
-      primitive.x_start = clamp(value, area.x, area.x + area.width - width - 1);
-      primitive.x_end = primitive.x_start + width;
-    }
-    if (key === "y") {
-      const height = primitive.y_end - primitive.y_start;
-      primitive.y_start = clamp(
-        value,
-        area.y,
-        area.y + area.height - height - 1
-      );
-      primitive.y_end = primitive.y_start + height;
-    }
-    if (key === "width") {
-      primitive.x_end = clamp(
-        primitive.x_start + Math.max(1, value) - 1,
-        primitive.x_start + 1,
-        area.x + area.width - 1
-      );
-    }
-    if (key === "height") {
-      primitive.y_end = clamp(
-        primitive.y_start + Math.max(1, value) - 1,
-        primitive.y_start + 1,
-        area.y + area.height - 1
-      );
-    }
-  } else {
-    setPointField(item, key, value, area, dashboard.display, definition);
-  }
+  const found = locate(dashboard.items, itemId);
+  if (!found || found.item.locked) return;
+  const { item, offset } = found;
+  translateItem(item, offset.x, offset.y);
+  applyNumber(
+    item,
+    key,
+    displayValue(key, value, offset),
+    dashboard,
+    definitions
+  );
+  translateItem(item, -offset.x, -offset.y);
+};
+
+/** A stored position is relative to the container; limits are checked on the display. */
+const displayValue = (
+  key: string,
+  value: number,
+  offset: { x: number; y: number }
+): number => {
+  if (key === "x") return value + offset.x;
+  if (key === "y") return value + offset.y;
+  return value;
 };
 
 const constrainAll = (dashboard: Dashboard): void =>
@@ -158,6 +219,9 @@ export const setDisplayNumber = (
 ): void => {
   if (key === "width" || key === "height") {
     dashboard.display[key] = clamp(value, 64, 4096);
+    // A size typed by hand is no longer the size of a known display or device.
+    dashboard.display.profileId = "custom";
+    dashboard.display.deviceId = null;
   }
   if (key === "padding") {
     dashboard.display.padding = clamp(
@@ -172,14 +236,12 @@ export const setDisplayNumber = (
   constrainAll(dashboard);
 };
 
-export const applyProfile = (
-  dashboard: Dashboard,
-  profile: DisplayProfile
-): void => {
-  dashboard.display.profileId = profile.id;
-  dashboard.display.width = profile.width;
-  dashboard.display.height = profile.height;
-  dashboard.display.palette = profile.defaultPalette;
+/** Turn the picture: the canvas keeps the display and swaps its sides for a quarter turn. */
+export const setRotation = (dashboard: Dashboard, rotation: Rotation): void => {
+  const { display } = dashboard;
+  Object.assign(display, turnedCanvas(display, display.rotation, rotation), {
+    rotation,
+  });
   constrainAll(dashboard);
 };
 
@@ -199,32 +261,41 @@ export const toggleItemState = (
   itemId: string,
   key: "locked" | "hidden"
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  const item = findItem(dashboard.items, itemId);
   if (item) item[key] = !item[key];
 };
 
 export const removeItem = (dashboard: Dashboard, itemId: string): void => {
-  dashboard.items = dashboard.items.filter((item) => item.id !== itemId);
+  removeFromTree(dashboard, itemId);
 };
 
 /**
- * Move a layer next to another. The layer list shows the top item first,
- * so `before` means above.
+ * Move a layer next to another, in the same container or in the target's. The layer
+ * list shows the top item first, so `before` means above. The layer keeps its place
+ * on the display.
  */
 export const moveLayer = (
   dashboard: Dashboard,
   itemId: string,
   targetId: string,
-  edge: "before" | "after"
+  edge: "before" | "after" | "inside"
 ): void => {
-  const topFirst = [...dashboard.items].reverse();
-  const from = topFirst.findIndex((item) => item.id === itemId);
-  if (from < 0) return;
-  const [moved] = topFirst.splice(from, 1);
-  const targetIndex = topFirst.findIndex((item) => item.id === targetId);
-  if (targetIndex < 0) return;
-  topFirst.splice(edge === "before" ? targetIndex : targetIndex + 1, 0, moved);
-  dashboard.items = topFirst.reverse();
+  if (edge === "inside") {
+    moveItem(dashboard, itemId, targetId || undefined, translateItem);
+    return;
+  }
+  moveRelative(dashboard, itemId, targetId, edge, translateItem);
+};
+
+/** Gives an item a new name; an empty one is ignored. */
+export const renameItem = (
+  dashboard: Dashboard,
+  itemId: string,
+  name: string
+): void => {
+  const item = findItem(dashboard.items, itemId);
+  const trimmed = name.trim();
+  if (item && trimmed) item.name = trimmed.slice(0, 100);
 };
 
 export const setWidgetOptions = (
@@ -232,7 +303,7 @@ export const setWidgetOptions = (
   itemId: string,
   options: WidgetOptions
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  const item = findItem(dashboard.items, itemId);
   if (item?.kind === "widget") {
     item.widget.options = { ...item.widget.options, ...options };
   }
@@ -244,7 +315,7 @@ export const setWidgetPicks = (
   sourceKey: string,
   picks: WidgetPick[]
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  const item = findItem(dashboard.items, itemId);
   if (item?.kind === "widget") {
     item.widget.sources = { ...item.widget.sources, [sourceKey]: picks };
   }
@@ -256,7 +327,7 @@ export const updatePrimitiveFields = (
   fields: Record<string, unknown>,
   definitions: PrimitiveDefinition[]
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  const item = findItem(dashboard.items, itemId);
   if (item?.kind !== "primitive") return;
   const values = primitiveValuesFromForm(
     fields,
@@ -284,7 +355,7 @@ export const createWidgetItem = (
   );
   return {
     id: createId(),
-    name: defaultItemName(dashboard.items, definition.id),
+    name: defaultItemName(allItems(dashboard.items), definition.id),
     kind: "widget",
     locked: false,
     hidden: false,
@@ -331,7 +402,7 @@ export const createPrimitiveItem = (
   if (!primitive) return undefined;
   const item: PrimitiveItem = {
     id: createId(),
-    name: defaultItemName(dashboard.items, primitive.type),
+    name: defaultItemName(allItems(dashboard.items), primitive.type),
     kind: "primitive",
     locked: false,
     hidden: false,
@@ -354,7 +425,9 @@ export const catalogCascadePosition = (
 ): { x: number; y: number } => {
   const area = workingArea(dashboard);
   const cascade =
-    (dashboard.items.length * Math.max(dashboard.display.snapSize, 5) * 3) %
+    (allItems(dashboard.items).length *
+      Math.max(dashboard.display.snapSize, 5) *
+      3) %
     Math.max(1, Math.min(area.width, area.height) / 3);
   return {
     x: snapToGrid(
@@ -388,7 +461,7 @@ export const setItemExpression = (
   key: string,
   template: string | null | undefined
 ): void => {
-  const item = dashboard.items.find((candidate) => candidate.id === itemId);
+  const item = findItem(dashboard.items, itemId);
   if (!item || item.locked) return;
   const expressions = { ...item.expressions };
   if (template === null) {
