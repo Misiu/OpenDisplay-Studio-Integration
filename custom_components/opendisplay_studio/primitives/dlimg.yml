@@ -8,7 +8,7 @@ geometry: image
 fields:
   - key: url
     label: Image
-    shape: string
+    shape: image
     required: true
     maxLength: 2048
     default: /media/local/image.png

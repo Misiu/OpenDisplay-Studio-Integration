@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
+from custom_components.opendisplay_studio.compiler import async_compile_dashboard
+from custom_components.opendisplay_studio.dashboards import validate_dashboard
 from custom_components.opendisplay_studio.flatten import shift_primitive
+from custom_components.opendisplay_studio.icons import SORTED_ICON_NAMES
 from custom_components.opendisplay_studio.measure import primitive_box
 from custom_components.opendisplay_studio.primitives import DEFAULT_PRIMITIVES
 from custom_components.opendisplay_studio.validation import DashboardValidationError
+from custom_components.opendisplay_studio.widgets import DEFAULT_REGISTRY
 from tests.test_items import container, validated
+from tests.test_items import dashboard as dashboard_with
 from tests.test_measure import HEIGHT, WIDTH, ink_box, render
+
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
 
 DRAWN_TYPES = {
     "text": {"value": "Kitchen", "x": 60, "y": 40, "size": 32},
@@ -169,9 +177,11 @@ class TestNestedAndListFields:
         with pytest.raises(DashboardValidationError, match=r"primitive\.points"):
             self.check({"type": "polygon", "points": points})
 
-    def test_points_outside_the_display_are_rejected(self) -> None:
+    def test_points_too_far_from_the_display_are_rejected(self) -> None:
         with pytest.raises(DashboardValidationError, match=r"points\[1\]"):
-            self.check({"type": "polygon", "points": [[0, 0], [WIDTH, 0], [5, 5]]})
+            self.check(
+                {"type": "polygon", "points": [[0, 0], [2 * WIDTH + 1, 0], [5, 5]]}
+            )
 
     @pytest.mark.parametrize("font", ["../secret.ttf", "a/b.ttf", "", "x" * 200])
     def test_a_font_is_a_name_never_a_path(self, font: str) -> None:
@@ -303,3 +313,113 @@ def test_only_the_nine_anchors_of_the_renderer_are_offered(anchor: str) -> None:
     ):
         with pytest.raises(DashboardValidationError, match=r"primitive\.anchor"):
             DEFAULT_PRIMITIVES.normalize({**primitive, "anchor": anchor}, WIDTH, HEIGHT)
+
+
+class TestIconNames:
+    def check(self, primitive: dict[str, Any]) -> dict[str, Any]:
+        return DEFAULT_PRIMITIVES.normalize(primitive, WIDTH, HEIGHT)
+
+    @pytest.mark.parametrize("name", ["home", "mdi:home", "star-outline"])
+    def test_an_icon_the_renderer_has_is_accepted(self, name: str) -> None:
+        icon = self.check({"type": "icon", "value": name, "x": 1, "y": 1})
+
+        assert icon["value"] == name
+
+    @pytest.mark.parametrize("name", ["no-such-icon", "mdi:", "Home", "hass:home"])
+    def test_an_unknown_icon_is_rejected_instead_of_failing_the_picture(
+        self, name: str
+    ) -> None:
+        with pytest.raises(DashboardValidationError, match=r"primitive\.value"):
+            self.check({"type": "icon", "value": name, "x": 1, "y": 1})
+
+    def test_every_icon_of_a_sequence_is_checked(self) -> None:
+        with pytest.raises(DashboardValidationError, match=r"icons\[1\]"):
+            self.check(
+                {"type": "icon_sequence", "icons": ["home", "nope"], "x": 1, "y": 1}
+            )
+
+    def test_the_picker_lists_the_icons_the_renderer_draws(self) -> None:
+        assert "home" in SORTED_ICON_NAMES
+        assert sorted(SORTED_ICON_NAMES) == SORTED_ICON_NAMES
+        assert len(SORTED_ICON_NAMES) > 5000
+
+
+OUTSIDE_THE_DISPLAY: dict[str, dict[str, Any]] = {
+    "text": {"value": "Kitchen", "x": -40, "y": -10, "size": 32},
+    "multiline": {
+        "value": "One|Two",
+        "x": WIDTH - 20,
+        "y": HEIGHT - 10,
+        "size": 24,
+    },
+    "rectangle": {"x_start": -50, "y_start": -50, "x_end": 100, "y_end": 60},
+    "rectangle_pattern": {
+        "x_start": WIDTH - 30,
+        "y_start": HEIGHT - 20,
+        "x_size": 40,
+        "y_size": 30,
+        "x_offset": 5,
+        "y_offset": 5,
+        "x_repeat": 3,
+        "y_repeat": 3,
+    },
+    "line": {"x_start": -20, "y_start": -20, "x_end": 60, "y_end": 60},
+    "polygon": {"points": [[-30, 10], [60, -30], [20, 90]]},
+    "circle": {"x": -10, "y": HEIGHT + 10, "radius": 50},
+    "arc": {"x": WIDTH, "y": 0, "radius": 60, "start_angle": 0, "end_angle": 270},
+    "ellipse": {
+        "x_start": WIDTH - 60,
+        "y_start": -30,
+        "x_end": WIDTH + 80,
+        "y_end": 40,
+    },
+    "icon": {"value": "home", "x": -30, "y": -30, "size": 64},
+    "icon_sequence": {
+        "icons": ["home", "star"],
+        "x": WIDTH - 30,
+        "y": -10,
+        "size": 40,
+    },
+    "qrcode": {"data": "opendisplay", "x": -20, "y": HEIGHT - 30},
+    "progress_bar": {"x_start": -30, "y_start": 20, "x_end": 120, "y_end": 50},
+}
+
+
+class TestElementsOutsideTheDisplay:
+    """An element may hang out of the display; the picture must still render."""
+
+    @pytest.mark.parametrize("primitive_type", sorted(OUTSIDE_THE_DISPLAY))
+    async def test_the_part_that_is_in_view_is_drawn(self, primitive_type: str) -> None:
+        element = DEFAULT_PRIMITIVES.normalize(
+            {"type": primitive_type, **OUTSIDE_THE_DISPLAY[primitive_type]},
+            WIDTH,
+            HEIGHT,
+        )
+
+        image = await render([shift_primitive(element, 0, 0)])
+
+        assert image.size == (WIDTH, HEIGHT)
+        ink_box(image)
+
+    async def test_a_widget_that_hangs_out_is_compiled_and_rendered(
+        self, hass: HomeAssistant
+    ) -> None:
+        widget = {
+            "id": "w",
+            "kind": "widget",
+            "widget": {
+                "type": "sensor-card",
+                "version": "1",
+                "sources": {},
+                "options": {},
+            },
+            "frame": {"x": -120, "y": 40, "width": 300, "height": 160},
+        }
+        validated = validate_dashboard(dashboard_with([widget]), DEFAULT_REGISTRY)
+
+        compiled = await async_compile_dashboard(hass, validated, DEFAULT_REGISTRY)
+        image = await render(compiled.elements)
+
+        assert validated["items"][0]["frame"]["x"] == -120
+        assert compiled.item_bounds["w"]["x"] == -120
+        assert image.size == (WIDTH, HEIGHT)

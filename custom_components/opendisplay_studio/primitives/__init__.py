@@ -18,12 +18,14 @@ from typing import Any, Final, NoReturn
 
 import yaml  # type: ignore[import-untyped]
 
+from custom_components.opendisplay_studio.icons import ICON_NAMES, icon_name
 from custom_components.opendisplay_studio.validation import (
     MAX_TEXT_LENGTH,
     boolean,
     color,
     fail,
     integer,
+    reach,
     string,
 )
 
@@ -40,6 +42,8 @@ SHAPES: Final = frozenset(
         "string",
         "text",
         "font",
+        "icon",
+        "image",
         "points",
         "icons",
         "object",
@@ -397,7 +401,7 @@ def _check_coordinate(
     relative: bool,  # noqa: FBT001
 ) -> int:
     extent = display[0] if field["axis"] == "x" else display[1]
-    return _coordinate(value, name, extent, relative=relative)
+    return _coordinate(value, name, extent)
 
 
 def _check_enum(
@@ -430,6 +434,7 @@ _CHECKS: dict[str, Check] = {
     "color": _check_color,
     "flags": lambda field, value, name, _d, _r: _flags(value, field["options"], name),
     "font": lambda _f, value, name, _d, _r: _font(value, name),
+    "icon": lambda _f, value, name, _d, _r: _icon(value, name),
     "points": lambda _f, value, name, display, relative: _points(
         value, name, display, relative=relative
     ),
@@ -486,12 +491,8 @@ def _points(
             fail(f"{name}[{index}] must be a pair [x, y]")
         points.append(
             [
-                _coordinate(
-                    pair[0], f"{name}[{index}].x", display[0], relative=relative
-                ),
-                _coordinate(
-                    pair[1], f"{name}[{index}].y", display[1], relative=relative
-                ),
+                _coordinate(pair[0], f"{name}[{index}].x", display[0]),
+                _coordinate(pair[1], f"{name}[{index}].y", display[1]),
             ]
         )
     return points
@@ -501,13 +502,19 @@ def _icons(value: object, name: str) -> list[str]:
     """Return a list of one or more icon names."""
     if not isinstance(value, list) or not 1 <= len(value) <= MAX_ICONS:
         fail(f"{name} must have between 1 and {MAX_ICONS} icons")
-    return [string(entry, f"{name}[{index}]", 128) for index, entry in enumerate(value)]
+    return [_icon(entry, f"{name}[{index}]") for index, entry in enumerate(value)]
 
 
-def _coordinate(value: object, name: str, extent: int, *, relative: bool) -> int:
-    if relative:
-        return integer(value, name, -extent, extent)
-    return integer(value, name, 0, extent - 1)
+def _icon(value: object, name: str) -> str:
+    """Return an icon the renderer has; an unknown one would fail the whole picture."""
+    icon = string(value, name, 128)
+    if icon_name(icon) not in ICON_NAMES:
+        fail(f"{name} is not an icon of the Material Design Icons")
+    return icon
+
+
+def _coordinate(value: object, name: str, extent: int) -> int:
+    return integer(value, name, *reach(extent))
 
 
 def _limit(value: int | str, width: int, height: int) -> int:

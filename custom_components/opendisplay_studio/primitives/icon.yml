@@ -8,7 +8,7 @@ geometry: point
 fields:
   - key: value
     label: "MDI icon name"
-    shape: string
+    shape: icon
     required: true
     maxLength: 128
     default: star-outline

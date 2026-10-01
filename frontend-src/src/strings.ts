@@ -366,6 +366,27 @@ export const strings = {
     rb: "Bottom right",
   },
 
+  iconPicker: {
+    noMatch: "No icons found",
+    search: "Search icons…",
+    none: "No icons found",
+    add: "Add icon",
+    remove: "Remove icon",
+    left: "Move left",
+    right: "Move right",
+    empty: "No icon",
+  },
+
+  imagePicker: {
+    address: "Address or path",
+    media: "Choose from media",
+    entity: "Camera or image entity",
+    hint: "A file of the media browser, a camera or image entity, or a web address.",
+    unsupported:
+      "Not a web address, a camera or image entity, or a file of /local or /media.",
+    empty: "No image",
+  },
+
   colors: {
     clear: "Clear color",
     none: "None",

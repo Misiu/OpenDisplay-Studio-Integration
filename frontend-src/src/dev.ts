@@ -24,6 +24,28 @@ import type {
 
 const primitiveDefinitions = loadPrimitiveDefinitions();
 
+/** A few of the icons the renderer draws, enough for the icon picker to search. */
+const ICON_NAMES = [
+  "home",
+  "home-outline",
+  "home-assistant",
+  "thermometer",
+  "thermometer-low",
+  "water",
+  "water-percent",
+  "weather-sunny",
+  "weather-cloudy",
+  "star",
+  "star-outline",
+  "lightbulb",
+  "lightbulb-outline",
+  "lock",
+  "door",
+  "fan",
+  "battery",
+  "wifi",
+];
+
 /** The OpenDisplay devices the harness pretends Home Assistant has set up. */
 const DISPLAY_DEVICES: DisplayDevice[] = [
   {
@@ -829,6 +851,9 @@ const hass: HomeAssistant = {
         widgetErrors: widgetErrors(),
         primitives: primitiveDefinitions,
       } as T;
+    }
+    if (message.type === "opendisplay_studio/list_icons") {
+      return { icons: ICON_NAMES } as T;
     }
     if (message.type === "opendisplay_studio/send_to_device") {
       return {} as T;

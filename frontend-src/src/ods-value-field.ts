@@ -11,6 +11,8 @@ import type { HomeAssistant, PaletteId, PrimitiveField } from "./types";
 import "./ods-property-field";
 import { ANCHOR_POSITIONS, isAnchorPosition } from "./ods-anchor-picker";
 import "./ods-color-picker";
+import "./ods-icon-field";
+import "./ods-image-field";
 import "./ods-popover";
 
 /** How soon after a popover closed a click on its trigger is the click that closed it. */
@@ -273,6 +275,10 @@ export class OdsValueField extends LitElement {
     `;
   }
 
+  private optionLabel(option: string): string {
+    return this.field.optionLabels?.[option] ?? option;
+  }
+
   private renderSegmented(options: string[]): TemplateResult {
     return html`
       <div class="segmented" role="group" aria-label=${this.field.label}>
@@ -284,7 +290,7 @@ export class OdsValueField extends LitElement {
               .disabled=${this.disabled}
               @click=${() => this.change(option)}
             >
-              ${option}
+              ${this.optionLabel(option)}
             </button>
           `
         )}
@@ -306,7 +312,7 @@ export class OdsValueField extends LitElement {
           ${shown.map(
             (option) => html`
               <option value=${option} ?selected=${option === current}>
-                ${option}
+                ${this.optionLabel(option)}
               </option>
             `
           )}
@@ -351,7 +357,7 @@ export class OdsValueField extends LitElement {
     if (this.field.key === "anchor") return this.renderAnchor();
     const short =
       options.length <= SEGMENTED_MAXIMUM &&
-      options.every((option) => option.length <= 8);
+      options.every((option) => this.optionLabel(option).length <= 10);
     return short ? this.renderSegmented(options) : this.renderSelect(options);
   }
 
@@ -450,6 +456,29 @@ export class OdsValueField extends LitElement {
     `;
   }
 
+  /** Icons and images have their own fields, with a picker of Home Assistant's choices. */
+  private renderIcon(): TemplateResult {
+    return html`
+      <ods-icon-field
+        .hass=${this.hass}
+        .field=${this.field}
+        .value=${this.value}
+        .disabled=${this.disabled}
+      ></ods-icon-field>
+    `;
+  }
+
+  private renderImage(): TemplateResult {
+    return html`
+      <ods-image-field
+        .hass=${this.hass}
+        .field=${this.field}
+        .value=${String(this.value ?? "")}
+        .disabled=${this.disabled}
+      ></ods-image-field>
+    `;
+  }
+
   private renderFlags(): TemplateResult {
     const chosen = new Set(String(this.value ?? "").split(","));
     return html`
@@ -486,6 +515,9 @@ export class OdsValueField extends LitElement {
   /** Short controls carry their label inside; the rest have it above. */
   private isLabelledInside(): boolean {
     return (
+      this.field.shape === "icon" ||
+      this.field.shape === "icons" ||
+      this.field.shape === "image" ||
       this.field.shape === "number" ||
       this.field.shape === "coordinate" ||
       this.field.shape === "boolean" ||
@@ -509,8 +541,12 @@ export class OdsValueField extends LitElement {
         return this.renderSelect(this.field.options ?? [], true);
       case "flags":
         return this.renderFlags();
-      case "points":
+      case "icon":
       case "icons":
+        return this.renderIcon();
+      case "image":
+        return this.renderImage();
+      case "points":
         return this.renderList();
       case "object":
       case "objects":
@@ -538,7 +574,6 @@ export class OdsValueField extends LitElement {
                   .palette=${this.palette}
                   .value=${String(this.value ?? "")}
                   .nullable=${Boolean(this.field.nullable)}
-                  .accentHex=${colorHex("accent", this.palette) ?? "#000000"}
                   @color-change=${this.onColorChange}
                 ></ods-color-picker>
               `

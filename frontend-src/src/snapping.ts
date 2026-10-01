@@ -69,7 +69,7 @@ const bestCandidate = (
       for (const own of linesOf(moved, axis)) {
         const distance = Math.abs(line - own);
         if (distance <= threshold) {
-          found.push({ offset: line - own, distance, source });
+          found.push({ offset: Math.round(line - own), distance, source });
         }
       }
     }
@@ -101,6 +101,7 @@ export const snapAdjustment = (
   dy: bestCandidate(moved, targets, "y")?.offset ?? 0,
 });
 
+/** Whole pixels only, so a centre of an odd-sized box is the pixel nearest to it. */
 const SAME_LINE = 0.5;
 
 /** The guides for every line `box` shares with a sibling or its parent. */
@@ -114,7 +115,7 @@ export const alignmentGuides = (
     const across: Axis = axis === "x" ? "y" : "x";
     for (const own of linesOf(box, axis)) {
       const sharing = others.filter((other) =>
-        linesOf(other, axis).some((line) => Math.abs(line - own) < SAME_LINE)
+        linesOf(other, axis).some((line) => Math.abs(line - own) <= SAME_LINE)
       );
       if (sharing.length === 0) continue;
       const spans = [box, ...sharing].map((entry) => [
@@ -138,6 +139,6 @@ const uniqueGuides = (guides: Guide[]): Guide[] =>
       guides.findIndex(
         (other) =>
           other.axis === guide.axis &&
-          Math.abs(other.position - guide.position) < SAME_LINE
+          Math.abs(other.position - guide.position) <= SAME_LINE
       ) === index
   );

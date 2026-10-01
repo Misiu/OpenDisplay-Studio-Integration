@@ -150,7 +150,7 @@ describe("groupItems", () => {
     expect(group).toMatchObject({ width: 300, height: 40 });
   });
 
-  it("turns a single plain container into a group and drops its background", () => {
+  it("turns a single plain container into a group, which has no background", () => {
     const dashboard = dashboardWith([
       containerItem("box", [textItem("a")], {
         background: { fill: "white", outline: "black", width: 1, radius: 0 },
@@ -214,6 +214,47 @@ describe("ungroupItem", () => {
     ungroupItem(dashboard, id ?? "");
 
     expect(dashboard.items).toEqual(original.items);
+  });
+
+  it("gives a container back, as it was, when it was a container before it was a group", () => {
+    const background = { fill: "white", outline: "black", width: 2, radius: 4 };
+    const dashboard = dashboardWith([
+      containerItem("box", [textItem("a")], { background }),
+    ]);
+    const original = structuredClone(dashboard);
+
+    groupItems(dashboard, ["box"]);
+    const moved = ungroupItem(dashboard, "box");
+
+    expect(moved).toEqual(["box"]);
+    expect(dashboard.items).toEqual(original.items);
+  });
+
+  it("remembers a container that had no background too", () => {
+    const dashboard = dashboardWith([
+      containerItem("box", [textItem("a")], { background: null }),
+    ]);
+
+    groupItems(dashboard, ["box"]);
+    ungroupItem(dashboard, "box");
+
+    expect(dashboard.items[0]).toMatchObject({
+      grouped: false,
+      background: null,
+    });
+    expect(dashboard.items[0]).not.toHaveProperty("savedBackground");
+  });
+
+  it("dissolves a group made from a container and a selection around it", () => {
+    const dashboard = dashboardWith([
+      containerItem("box", [textItem("a")]),
+      textItem("b"),
+    ]);
+
+    const id = groupItems(dashboard, ["box", "b"]);
+    ungroupItem(dashboard, id ?? "");
+
+    expect(ids(dashboard.items)).toEqual(["box", "b"]);
   });
 
   it("only dissolves groups", () => {

@@ -6,9 +6,9 @@ import type { Dashboard, ItemBounds, StudioItem } from "./types";
 export type Movable = (item: StudioItem) => boolean;
 
 /**
- * Moves the selection by (dx, dy) display pixels, but never so far that the box around
- * what moves leaves the working area. Items that cannot move stay put. Returns whether
- * anything moved.
+ * Moves the selection by (dx, dy) display pixels. What moves may hang out of the working
+ * area, as far as its own size beyond each edge, but not farther. Items that cannot move
+ * stay put. Returns whether anything moved.
  */
 export const nudgeItems = (
   dashboard: Dashboard,
@@ -34,12 +34,12 @@ export const nudgeItems = (
   const right = Math.max(...boxes.map((box) => box.x + box.width));
   const bottom = Math.max(...boxes.map((box) => box.y + box.height));
   const stepX = Math.min(
-    Math.max(dx, area.x - left),
-    area.x + area.width - right
+    Math.max(dx, area.x - (right - left) - left),
+    area.x + area.width - left
   );
   const stepY = Math.min(
-    Math.max(dy, area.y - top),
-    area.y + area.height - bottom
+    Math.max(dy, area.y - (bottom - top) - top),
+    area.y + area.height - top
   );
   if (stepX === 0 && stepY === 0) return false;
   for (const { item } of moving) translateItem(item, stepX, stepY);

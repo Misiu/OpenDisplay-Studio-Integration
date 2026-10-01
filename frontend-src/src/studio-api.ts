@@ -87,3 +87,13 @@ export const sendToDevice = async (
     dashboard: structuredClone(dashboard),
   });
 };
+
+let iconNames: Promise<string[]> | undefined;
+
+/** The icons the renderer can draw; asked for once, since the list is long and never changes. */
+export const listIcons = (hass: HomeAssistant): Promise<string[]> => {
+  iconNames ??= hass
+    .callWS<{ icons: string[] }>({ type: "opendisplay_studio/list_icons" })
+    .then((result) => result.icons);
+  return iconNames;
+};

@@ -110,7 +110,18 @@ export const constrainItem = (
 };
 
 /**
- * Where an item may be dragged: the working area, widened to hold an item that already
+ * Where the start of an item `size` long may lie along a side of the working area: from
+ * its whole length before the edge to the far edge, so it can leave the display entirely
+ * on either side. ODL has no clipping and the renderer draws what is in view.
+ */
+export const outwardRange = (
+  start: number,
+  length: number,
+  size: number
+): [number, number] => [start - size, start + length];
+
+/**
+ * Where an item may be resized: the working area, widened to hold an item that already
  * hangs out of it. Text hangs out when its anchor is changed, and resizing or moving it
  * must not snap it back in at the first touch.
  */
@@ -280,16 +291,14 @@ const applyGesture = (
     return;
   }
   const before = itemBounds(item, options.measured);
-  const area = reachableArea(workingArea(dashboard), before);
+  const area = workingArea(dashboard);
   const nextX = clamp(
     snapToGrid(before.x + dx, dashboard, options.snapEnabled),
-    area.x,
-    Math.max(area.x, area.x + area.width - before.width)
+    ...outwardRange(area.x, area.width, before.width)
   );
   const nextY = clamp(
     snapToGrid(before.y + dy, dashboard, options.snapEnabled),
-    area.y,
-    Math.max(area.y, area.y + area.height - before.height)
+    ...outwardRange(area.y, area.height, before.height)
   );
   translateItem(item, nextX - before.x, nextY - before.y);
 };

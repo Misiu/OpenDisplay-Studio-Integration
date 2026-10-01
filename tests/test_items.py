@@ -161,7 +161,7 @@ class TestContainers:
         [
             ({"width": 0}, r"container\.width"),
             ({"height": 5000}, r"container\.height"),
-            ({"x": WIDTH}, r"container\.x"),
+            ({"x": 2 * WIDTH + 1}, r"container\.x"),
             ({"grouped": "yes"}, r"container\.grouped"),
             ({"background": {"fill": "pink"}}, r"background\.fill"),
             ({"background": "white"}, r"container\.background"),
@@ -310,3 +310,39 @@ class TestExpressions:
 
 def expressed_text(**expressions: str) -> dict[str, Any]:
     return {**text(), "expressions": expressions}
+
+
+class TestGroupedContainers:
+    def test_a_group_keeps_the_background_its_container_had(self) -> None:
+        saved = {"fill": "white", "outline": "black", "width": 2, "radius": 0}
+
+        [item] = validated(
+            [container(grouped=True, background=None, savedBackground=saved)]
+        )
+
+        assert item["background"] is None
+        assert item["savedBackground"] == saved
+
+    def test_a_group_made_from_a_plain_container_without_background_remembers_none(
+        self,
+    ) -> None:
+        [item] = validated([container(grouped=True, savedBackground=None)])
+
+        assert "savedBackground" in item
+        assert item["savedBackground"] is None
+
+    def test_a_group_made_from_a_selection_remembers_nothing(self) -> None:
+        [item] = validated([container(grouped=True)])
+
+        assert "savedBackground" not in item
+
+    def test_a_plain_container_drops_it(self) -> None:
+        [item] = validated(
+            [container(savedBackground={"fill": "white", "outline": "black"})]
+        )
+
+        assert "savedBackground" not in item
+
+    def test_the_remembered_background_is_validated_like_any_other(self) -> None:
+        with pytest.raises(DashboardValidationError, match="background"):
+            validated([container(grouped=True, savedBackground={"fill": "pink"})])

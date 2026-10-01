@@ -65,9 +65,11 @@ test.describe("a new widget", () => {
     await addAgenda(page);
 
     const sections = page.locator(".inspector-section > summary");
-    await expect(sections.nth(0)).toHaveText("Data sources");
-    await expect(sections.nth(1)).toHaveText("Content");
-    await expect(sections.nth(2)).toHaveText("Presentation");
+    // The layout comes first for every element, then what the widget asks for.
+    await expect(sections.nth(0)).toHaveText("Layout");
+    await expect(sections.nth(1)).toHaveText("Data sources");
+    await expect(sections.nth(2)).toHaveText("Content");
+    await expect(sections.nth(3)).toHaveText("Presentation");
     await expect(page.getByLabel("Calendars", { exact: true })).toBeVisible();
     await expect(page.getByLabel("Number of events")).toHaveValue("5");
   });
@@ -212,4 +214,36 @@ test("a widget whose package is gone keeps its place and says so", async ({
     page.getByText("The widget hello-world is not installed.")
   ).toBeVisible();
   await expect(page.locator(".layer-row")).toHaveCount(2);
+});
+
+test.describe("the properties of a widget", () => {
+  test("are edited with the same controls as those of any other element", async ({
+    page,
+  }) => {
+    await addAgenda(page);
+
+    const properties = page.locator(".properties");
+    // Switches, numbers and short choices are our own fields; only the pickers of Home
+    // Assistant (the calendars) keep its form.
+    await expect(properties.locator("ods-value-field").first()).toBeVisible();
+    await expect(properties.locator("ha-form")).toHaveCount(1);
+    await properties.getByText("Presentation", { exact: true }).click();
+    await expect(
+      properties.getByRole("switch", { name: "Group by day" })
+    ).toBeVisible();
+    await expect(
+      properties.getByRole("spinbutton", { name: "Number of events" })
+    ).toHaveValue("5");
+  });
+
+  test("change an option through the compact control", async ({ page }) => {
+    await addAgenda(page);
+
+    const days = page.getByRole("spinbutton", { name: "Look ahead (days)" });
+    await days.fill("7");
+    await days.press("Tab");
+
+    const widgets = await savedWidgets(page);
+    expect(widgets.at(-1)).toMatchObject({ options: { days: 7 } });
+  });
 });

@@ -432,16 +432,19 @@ test.describe("the shapes with their own geometry", () => {
     await expect(selectedChip(page)).toHaveText("185 × 69");
   });
 
-  test("a row of icons is outlined by its icons, and grows with the list", async ({
+  test("a row of icons is outlined by its icons, and shrinks when one is removed", async ({
     page,
   }) => {
     await libraryItem(page, "Icon sequence").click();
 
     // Three icons of 32 px, a quarter of that apart.
     await expect(selectedChip(page)).toHaveText("112 × 32");
-    const icons = page.getByRole("textbox", { name: "Icons", exact: true });
-    await icons.fill("home\nstar");
-    await icons.press("Tab");
+    await page
+      .locator("ods-icon-field .chip")
+      .first()
+      .getByRole("button", { name: /^Remove icon/ })
+      .click();
+
     await expect(selectedChip(page)).toHaveText("72 × 32");
   });
 
@@ -662,7 +665,6 @@ test.describe("the color picker", () => {
       "Black",
       "White",
       "Red",
-      "Accent",
     ]);
   });
 
@@ -897,5 +899,206 @@ test.describe("the sections", () => {
     await expect(layout).not.toHaveAttribute("open", "");
     await layout.locator(":scope > summary").click();
     await expect(layout).toHaveAttribute("open", "");
+  });
+});
+
+test.describe("snapping a circle to the centre of the canvas", () => {
+  test("never stores a coordinate between two pixels, so the preview still renders", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Circle").click();
+    const canvas = await page.locator(".canvas").boundingBox();
+    const outline = await page.locator(".selection.selected").boundingBox();
+    if (!canvas || !outline) {
+      throw new Error("The canvas or circle is not visible");
+    }
+    const centreX = canvas.x + canvas.width / 2;
+    const startX = outline.x + outline.width / 2;
+    const startY = outline.y + outline.height / 2;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    // Stop three pixels short of the vertical centre line of the canvas.
+    await page.mouse.move(centreX - 3, startY + 40, { steps: 10 });
+    await expect(page.locator(".guide.vertical").first()).toBeVisible();
+    await page.mouse.up();
+
+    for (const label of ["Center X", "Center Y"]) {
+      const value = await page.getByLabel(label, { exact: true }).inputValue();
+      expect(Number.isInteger(Number(value)), `${label} = ${value}`).toBe(true);
+    }
+    await expect(page.getByText("Could not render the preview")).toHaveCount(0);
+  });
+});
+
+test.describe("the icon picker", () => {
+  test("searches the icons the renderer draws and sets the icon", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Icon").click();
+
+    await page
+      .getByRole("button", { name: "MDI icon name", exact: true })
+      .click();
+    const picker = page.locator("ods-icon-picker");
+    await picker.getByRole("searchbox").fill("thermo");
+    await expect(picker.getByRole("button")).toHaveCount(2);
+    await picker
+      .getByRole("button", { name: "thermometer", exact: true })
+      .click();
+
+    await expect(picker).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "MDI icon name", exact: true })
+    ).toContainText("thermometer");
+  });
+
+  test("says when nothing matches", async ({ page }) => {
+    await libraryItem(page, "Icon").click();
+    await page
+      .getByRole("button", { name: "MDI icon name", exact: true })
+      .click();
+
+    await page.locator("ods-icon-picker").getByRole("searchbox").fill("zzzz");
+
+    await expect(page.getByText("No icons found")).toBeVisible();
+  });
+
+  test("builds a row of icons: add, replace, reorder and remove", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Icon sequence").click();
+    const chips = page.locator("ods-icon-field .chip");
+    await expect(chips).toHaveCount(3);
+
+    await page.getByRole("button", { name: "Add icon" }).click();
+    await page
+      .locator("ods-icon-picker")
+      .getByRole("button", { name: "lock", exact: true })
+      .click();
+    await expect(chips).toHaveCount(4);
+    await expect(chips.last()).toHaveAttribute("data-icon", "lock");
+
+    await chips.last().getByRole("button", { name: "Move left" }).click();
+    await expect(chips.nth(2)).toHaveAttribute("data-icon", "lock");
+
+    await chips
+      .first()
+      .getByRole("button", { name: /^Remove icon/ })
+      .click();
+    await expect(chips).toHaveCount(3);
+  });
+
+  test("never removes the last icon of a row", async ({ page }) => {
+    await libraryItem(page, "Icon sequence").click();
+    const chips = page.locator("ods-icon-field .chip");
+    const removeFirst = () =>
+      chips
+        .first()
+        .getByRole("button", { name: /^Remove icon/ })
+        .click();
+    await removeFirst();
+    await removeFirst();
+
+    await expect(chips).toHaveCount(1);
+    await expect(
+      chips.first().getByRole("button", { name: /^Remove icon/ })
+    ).toBeDisabled();
+  });
+});
+
+test.describe("the image picker", () => {
+  test("shows where the image comes from and takes an address", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Image").click();
+    const field = page
+      .locator(".properties")
+      .getByRole("button", { name: "Image", exact: true });
+    await expect(field).toContainText("/media/local/image.png");
+
+    await field.click();
+    const address = page
+      .locator("ods-image-picker")
+      .getByLabel("Address or path");
+    await address.fill("camera.front_door");
+    await address.press("Tab");
+
+    await expect(page.locator("ods-image-picker")).toHaveCount(0);
+    await expect(field).toContainText("camera.front_door");
+  });
+
+  test("offers the media browser and the camera and image entities", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Image").click();
+
+    await page
+      .locator(".properties")
+      .getByRole("button", { name: "Image", exact: true })
+      .click();
+
+    const picker = page.locator("ods-image-picker");
+    await expect(picker.getByLabel("Choose from media")).toBeVisible();
+    await expect(picker.getByLabel("Camera or image entity")).toBeVisible();
+  });
+});
+
+test.describe("the fields of a container", () => {
+  test("are the controls of every other element", async ({ page }) => {
+    await libraryItem(page, "Container").click();
+
+    await expect(
+      page.getByRole("button", { name: "Fill", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Outline", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("spinbutton", { name: "Outline width" })
+    ).toBeVisible();
+    await expect(page.locator("ods-value-field")).toHaveCount(5);
+    await expect(page.locator("ha-form")).toHaveCount(0);
+  });
+
+  test("pick their colors from the display", async ({ page }) => {
+    await libraryItem(page, "Container").click();
+
+    await page.getByRole("button", { name: "Outline", exact: true }).click();
+
+    await expect(
+      page.locator("ods-color-picker").getByRole("button")
+    ).toHaveText(["Black", "White", "Red"]);
+  });
+});
+
+test.describe("elements outside the canvas", () => {
+  test("can be dragged out of the display and stay there", async ({ page }) => {
+    await libraryItem(page, "Circle").click();
+    const canvas = await page.locator(".canvas").boundingBox();
+    const outline = await page.locator(".selection.selected").boundingBox();
+    if (!canvas || !outline) {
+      throw new Error("The canvas or circle is not visible");
+    }
+    const startX = outline.x + outline.width / 2;
+    const startY = outline.y + outline.height / 2;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(canvas.x - 20, startY, { steps: 12 });
+    await page.mouse.up();
+
+    const after = await page.locator(".selection.selected").boundingBox();
+    expect(after?.x).toBeLessThan(canvas.x);
+    await expect(page.getByText("Could not render the preview")).toHaveCount(0);
+  });
+
+  test("keep the layout section on top for every kind of element", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Circle").click();
+    await expect(
+      page.locator("details.inspector-section > summary").first()
+    ).toHaveText("Layout");
   });
 });

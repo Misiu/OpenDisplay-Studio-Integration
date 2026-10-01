@@ -77,7 +77,7 @@ export const canUngroup = (dashboard: Dashboard, id: string): boolean => {
 /**
  * Makes a group. Several items of one parent are wrapped in a new group the size of
  * their bounding box, placed where the topmost of them was; each keeps its place on
- * screen. A single plain container just loses its background and becomes a group.
+ * screen. A single plain container becomes a group and ungrouping makes it a container again.
  * Returns the id of the group, or undefined when nothing could be grouped.
  */
 export const groupItems = (
@@ -89,6 +89,7 @@ export const groupItems = (
   const [only] = ids;
   const single = only ? locate(dashboard.items, only)?.item : undefined;
   if (ids.length === 1 && single && isContainer(single)) {
+    single.savedBackground = single.background;
     single.grouped = true;
     single.background = null;
     return single.id;
@@ -136,6 +137,13 @@ export const ungroupItem = (dashboard: Dashboard, id: string): string[] => {
   const found = locate(dashboard.items, id);
   if (!found || !isContainer(found.item) || !found.item.grouped) return [];
   const group = found.item;
+  if (group.savedBackground !== undefined) {
+    // It was a container before: it stays one, as it was.
+    group.background = group.savedBackground;
+    group.grouped = false;
+    delete group.savedBackground;
+    return [group.id];
+  }
   for (const child of group.children) translateItem(child, group.x, group.y);
   found.siblings.splice(found.index, 1, ...group.children);
   return group.children.map((child) => child.id);

@@ -27,6 +27,8 @@ export class OdsPopover extends LitElement {
         inset: auto;
         margin: 0;
         z-index: 1100;
+        max-height: calc(100vh - 16px);
+        overflow: auto;
         padding: 10px 12px 12px;
         border: 1px solid var(--studio-border);
         border-radius: 12px;
@@ -82,12 +84,21 @@ export class OdsPopover extends LitElement {
   disconnectedCallback(): void {
     window.removeEventListener("pointerdown", this.onOutsidePointer, true);
     window.removeEventListener("keydown", this.onKey, true);
+    this.resizeObserver.disconnect();
     super.disconnectedCallback();
   }
+
+  /** The picker grows when its content arrives; keep it on screen as it does. */
+  private readonly resizeObserver = new ResizeObserver(() => this.place());
+  private observed?: HTMLElement;
 
   protected updated(): void {
     const panel = this.panel;
     if (panel && !panel.matches(":popover-open")) panel.showPopover();
+    if (panel && panel !== this.observed) {
+      this.observed = panel;
+      this.resizeObserver.observe(panel);
+    }
     this.place();
   }
 

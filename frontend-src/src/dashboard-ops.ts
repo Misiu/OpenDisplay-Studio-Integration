@@ -13,6 +13,7 @@ import {
 import {
   constrainItem,
   itemBounds,
+  outwardRange,
   snapToGrid,
   translateItem,
   workingArea,
@@ -62,10 +63,9 @@ const setStoredField = (
     const start = horizontal ? area.x : area.y;
     const extent = horizontal ? area.width : area.height;
     const size = horizontal ? bounds.width : bounds.height;
-    const lowest = start - offset;
-    const highest = start + extent - size - offset;
+    const [lowest, highest] = outwardRange(start, extent, size);
     Object.assign(primitive, {
-      [key]: clamp(value, lowest, Math.max(lowest, highest)),
+      [key]: clamp(value, lowest - offset, highest - offset),
     });
     return;
   }
@@ -84,16 +84,16 @@ const setBoxField = (
   area: ItemBounds
 ): void => {
   if (key === "x") {
-    box.x = clamp(value, area.x, area.x + area.width - box.width);
+    box.x = clamp(value, ...outwardRange(area.x, area.width, box.width));
   }
   if (key === "y") {
-    box.y = clamp(value, area.y, area.y + area.height - box.height);
+    box.y = clamp(value, ...outwardRange(area.y, area.height, box.height));
   }
   if (key === "width") {
-    box.width = clamp(value, 1, area.x + area.width - box.x);
+    box.width = clamp(value, 1, Math.max(1, area.x + area.width - box.x));
   }
   if (key === "height") {
-    box.height = clamp(value, 1, area.y + area.height - box.y);
+    box.height = clamp(value, 1, Math.max(1, area.y + area.height - box.y));
   }
 };
 
@@ -105,26 +105,32 @@ const setBoxPrimitiveField = (
 ): void => {
   if (key === "x") {
     const width = primitive.x_end - primitive.x_start;
-    primitive.x_start = clamp(value, area.x, area.x + area.width - width - 1);
+    primitive.x_start = clamp(
+      value,
+      ...outwardRange(area.x, area.width, width + 1)
+    );
     primitive.x_end = primitive.x_start + width;
   }
   if (key === "y") {
     const height = primitive.y_end - primitive.y_start;
-    primitive.y_start = clamp(value, area.y, area.y + area.height - height - 1);
+    primitive.y_start = clamp(
+      value,
+      ...outwardRange(area.y, area.height, height + 1)
+    );
     primitive.y_end = primitive.y_start + height;
   }
   if (key === "width") {
     primitive.x_end = clamp(
       primitive.x_start + Math.max(1, value) - 1,
       primitive.x_start + 1,
-      area.x + area.width - 1
+      Math.max(primitive.x_start + 1, area.x + area.width - 1)
     );
   }
   if (key === "height") {
     primitive.y_end = clamp(
       primitive.y_start + Math.max(1, value) - 1,
       primitive.y_start + 1,
-      area.y + area.height - 1
+      Math.max(primitive.y_start + 1, area.y + area.height - 1)
     );
   }
 };

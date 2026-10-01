@@ -368,15 +368,20 @@ test.describe("ods-inspector", () => {
 });
 
 test.describe("ods-property-field", () => {
-  test("clamps typed values into the working area", async ({ page }) => {
+  test("limits a typed position to one length outside the working area", async ({
+    page,
+  }) => {
     await openKitchen(page);
     await kitchenWidget(page).click();
     await xField(page).fill("99999");
     await xField(page).press("Tab");
-    await expect(xField(page)).toHaveValue("460");
+    await expect(xField(page)).toHaveValue("780");
+    await xField(page).fill("-9999");
+    await xField(page).press("Tab");
+    await expect(xField(page)).toHaveValue("-300");
     await xField(page).fill("5");
     await xField(page).press("Tab");
-    await expect(xField(page)).toHaveValue("20");
+    await expect(xField(page)).toHaveValue("5");
   });
 
   test("is disabled while the element is locked and enabled again after unlocking", async ({

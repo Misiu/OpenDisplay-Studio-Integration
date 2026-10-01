@@ -37,6 +37,8 @@ export interface OdsEventMap {
   "toggle-ready": undefined;
   "dashboard-save": undefined;
   "popover-close": undefined;
+  "icon-change": { icon: string };
+  "image-change": { image: string };
   "align-in-parent": { place: string };
   "anchor-change": { anchor: string };
   "color-change": { color: string | null };

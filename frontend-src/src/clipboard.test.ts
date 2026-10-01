@@ -303,17 +303,17 @@ describe("nudgeItems", () => {
     expect(textAt(dashboard.items[1])?.x).toBe(11);
   });
 
-  it("stops at the edge of the working area", () => {
+  it("lets an element hang out of the working area, by its own size at most", () => {
     const dashboard = dashboardWith([rectangleItem("r")]);
 
-    nudgeItems(dashboard, ["r"], -50, 0, area, anyone);
+    nudgeItems(dashboard, ["r"], -500, 0, area, anyone);
 
     const rectangle = dashboard.items[0];
     expect(
       rectangle?.kind === "primitive" && "x_start" in rectangle.primitive
         ? rectangle.primitive.x_start
         : undefined
-    ).toBe(0);
+    ).toBe(-100);
   });
 
   it("leaves locked items and items that are pinned where they are", () => {

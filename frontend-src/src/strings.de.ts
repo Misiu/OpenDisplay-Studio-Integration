@@ -278,6 +278,27 @@ export const german: StringsOverride = {
     rb: "Unten rechts",
   },
 
+  iconPicker: {
+    noMatch: "Keine Symbole gefunden",
+    search: "Symbole suchen…",
+    none: "Keine Symbole gefunden",
+    add: "Symbol hinzufügen",
+    remove: "Symbol entfernen",
+    left: "Nach links",
+    right: "Nach rechts",
+    empty: "Kein Symbol",
+  },
+
+  imagePicker: {
+    address: "Adresse oder Pfad",
+    media: "Aus Medien wählen",
+    entity: "Kamera- oder Bild-Entität",
+    hint: "Eine Datei des Medienbrowsers, eine Kamera- oder Bild-Entität oder eine Webadresse.",
+    unsupported:
+      "Keine Webadresse, Kamera- oder Bild-Entität und keine Datei aus /local oder /media.",
+    empty: "Kein Bild",
+  },
+
   colors: {
     clear: "Farbe entfernen",
     none: "Keine",

@@ -269,12 +269,12 @@ pixel sampling, e2e add-and-edit test, row in `docs/odl-coverage.md`.
   `y_size`, `x_offset`, `y_offset`, `x_repeat`, `y_repeat`, colors; resize
   changes the cell size.
 - [ ] **4.6 `icon_sequence`** - Done: `icons` (one per line), `size`,
-  `direction`, `spacing` (default `size/4`), `fill`, `anchor`. Open: an icon
-  picker per row and reordering.
+  `direction`, `spacing` (default `size/4`), `fill`, `anchor`, an icon picker with search
+  over the renderer's own icon index, a row editor to add, replace, reorder and remove icons.
 - [ ] **4.7 `dlimg`** - Done: `url`, `xsize`, `ysize`, `resize_method`,
   `rotate`; the backend resolves `camera.*`/`image.*` entities and `/local`,
-  `/media` paths to bytes and passes HA's shared aiohttp session. Open: the
-  entity picker shortcut next to the URL field.
+  `/media` paths to bytes and passes HA's shared aiohttp session; the picture is chosen in a
+  picker with the media browser, the camera and image entities and an address field.
 - [ ] **4.8 `plot`** - Done: bounds, `duration`, `low`, `high`,
   `round_values`, `font`, `debug`, nested `ylegend`, `yaxis`, `xlegend`,
   `xaxis` and the `data` series (edited with HA's object selector), and a

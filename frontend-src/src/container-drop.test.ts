@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   backgroundFormData,
   backgroundFromForm,
-  backgroundSchema,
+  backgroundFields,
 } from "./container-fields";
 import {
   insertOnDisplay,
@@ -195,7 +195,7 @@ describe("setItemNumber inside a container", () => {
     expect(textPosition(locate(dashboard.items, "b")?.item)?.x).toBe(25);
   });
 
-  it("keeps an item inside the working area whatever container it is in", () => {
+  it("keeps an item within reach of the working area whatever container it is in", () => {
     const dashboard = dashboardWith(
       [containerItem("panel", [rectangleItem("box")], { x: 300, y: 100 })],
       { width: 400, height: 300 }
@@ -209,7 +209,8 @@ describe("setItemNumber inside a container", () => {
       box?.kind === "primitive" && "x_start" in box.primitive
         ? box.primitive.x_start
         : 0;
-    expect(left + 300 + 99).toBeLessThanOrEqual(399);
+    // The box starts at the far edge at most: 400 on the display, 100 in the container.
+    expect(left + 300).toBeLessThanOrEqual(400);
   });
 
   it("edits the box of a container itself", () => {
@@ -273,7 +274,7 @@ describe("the background of a container", () => {
 
     expect(backgroundFormData(withBackground)).toEqual({
       enabled: true,
-      fill: "none",
+      fill: null,
       outline: "red",
       width: 2,
       radius: 1,
@@ -290,7 +291,7 @@ describe("the background of a container", () => {
     expect(
       backgroundFromForm({
         enabled: true,
-        fill: "none",
+        fill: null,
         outline: "red",
         width: 3.6,
         radius: 9999,
@@ -304,25 +305,25 @@ describe("the background of a container", () => {
     });
   });
 
-  it("offers the colours of the palette, and no fill", () => {
-    const schema = backgroundSchema("bw", {
-      enabled: "Background",
-      fill: "Fill",
-      outline: "Outline",
-      width: "Width",
-      radius: "Radius",
-    });
+  it("describes its fields like those of a primitive, with a fill that may be empty", () => {
+    const fields = backgroundFields();
 
-    expect(schema.map((field) => field.name)).toEqual([
+    expect(fields.map((field) => field.key)).toEqual([
       "enabled",
       "fill",
       "outline",
       "width",
       "radius",
     ]);
-    expect(schema[1]?.selector).toEqual({
-      select: { options: ["none", "black", "white", "accent"] },
-    });
+    expect(fields.map((field) => field.shape)).toEqual([
+      "boolean",
+      "color",
+      "color",
+      "number",
+      "number",
+    ]);
+    expect(fields[1].nullable).toBe(true);
+    expect(fields[2].nullable).toBeUndefined();
   });
 });
 

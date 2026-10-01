@@ -188,7 +188,7 @@ describe("transformItem", () => {
     expect(itemBounds(original).x).toBe(20);
   });
 
-  it("does not move an item out of the working area", () => {
+  it("moves an item out of the working area by its own size at most", () => {
     const moved = transformItem(
       rectangleItem(),
       { mode: "move" },
@@ -197,7 +197,7 @@ describe("transformItem", () => {
       dashboardWith(),
       options
     );
-    expect(itemBounds(moved)).toMatchObject({ x: 300, y: 0 });
+    expect(itemBounds(moved)).toMatchObject({ x: 400, y: -50 });
   });
 
   it("moves by whole pixels when snapping is off", () => {
@@ -316,7 +316,7 @@ describe("measured bounds", () => {
     expect(text.primitive).toMatchObject({ size: 60 });
   });
 
-  it("moves an item using its measured size to stay inside the display", () => {
+  it("moves an item up to the far edge of the display, whatever its measured size", () => {
     const moved = transformItem(
       qr(),
       { mode: "move" },
@@ -325,6 +325,6 @@ describe("measured bounds", () => {
       dashboardWith(),
       { snapEnabled: false, measured: measuredQr }
     );
-    expect(itemBounds(moved, measuredQr).x).toBe(400 - 81);
+    expect(itemBounds(moved, measuredQr).x).toBe(400);
   });
 });

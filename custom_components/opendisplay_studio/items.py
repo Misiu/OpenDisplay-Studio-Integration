@@ -14,6 +14,7 @@ from .validation import (
     expression,
     fail,
     integer,
+    reach,
     single_expression_body,
     string,
 )
@@ -96,22 +97,15 @@ def _with_expressions(item: dict[str, Any], expressions: dict[str, str]) -> None
         item["expressions"] = expressions
 
 
-def _validate_frame(
-    value: object, width: int, height: int, *, relative: bool
-) -> dict[str, int]:
+def _validate_frame(value: object, width: int, height: int) -> dict[str, int]:
     if not isinstance(value, dict):
         fail("widget frame must be an object")
-    if relative:
-        x = integer(value.get("x"), "frame.x", -width, width)
-        y = integer(value.get("y"), "frame.y", -height, height)
-    else:
-        x = integer(value.get("x"), "frame.x", 0, width - 1)
-        y = integer(value.get("y"), "frame.y", 0, height - 1)
-    frame_width = integer(value.get("width"), "frame.width", 1, width)
-    frame_height = integer(value.get("height"), "frame.height", 1, height)
-    if not relative and (x + frame_width > width or y + frame_height > height):
-        fail("widget frame exceeds the display")
-    return {"x": x, "y": y, "width": frame_width, "height": frame_height}
+    return {
+        "x": integer(value.get("x"), "frame.x", *reach(width)),
+        "y": integer(value.get("y"), "frame.y", *reach(height)),
+        "width": integer(value.get("width"), "frame.width", 1, width),
+        "height": integer(value.get("height"), "frame.height", 1, height),
+    }
 
 
 def _widget_body(widget: dict[str, Any], walk: _Walk) -> dict[str, Any]:
@@ -154,9 +148,7 @@ def _validate_widget(
         **state,
         "kind": "widget",
         "widget": body,
-        "frame": _validate_frame(
-            value.get("frame"), walk.width, walk.height, relative=relative
-        ),
+        "frame": _validate_frame(value.get("frame"), walk.width, walk.height),
         "layout": {
             "padding": integer(layout.get("padding", 0), "layout.padding", 0, 128)
         },
@@ -235,12 +227,8 @@ def _validate_container(
         fail(f"containers can be nested at most {MAX_DEPTH} levels")
     state = _item_state(value, walk)
     width, height = walk.width, walk.height
-    if relative:
-        x = integer(value.get("x"), "container.x", -width, width)
-        y = integer(value.get("y"), "container.y", -height, height)
-    else:
-        x = integer(value.get("x"), "container.x", 0, width - 1)
-        y = integer(value.get("y"), "container.y", 0, height - 1)
+    x = integer(value.get("x"), "container.x", *reach(width))
+    y = integer(value.get("y"), "container.y", *reach(height))
     grouped = boolean(value.get("grouped", False), "container.grouped")
     background = None if grouped else _validate_background(value.get("background"))
     raw_children = value.get("children", [])
@@ -260,6 +248,10 @@ def _validate_container(
             for child in raw_children
         ],
     }
+    if grouped and "savedBackground" in value:
+        # What the container looked like before it became a group, kept so that
+        # ungrouping can give it back instead of dissolving it.
+        item["savedBackground"] = _validate_background(value["savedBackground"])
     _with_expressions(
         item, _expressions(value, ITEM_EXPRESSIONS, single=_single(relative=True))
     )

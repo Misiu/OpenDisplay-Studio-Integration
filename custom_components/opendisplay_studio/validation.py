@@ -20,6 +20,17 @@ def fail(message: str) -> NoReturn:
     raise DashboardValidationError(message)
 
 
+def reach(extent: int) -> tuple[int, int]:
+    """
+    Return how far a position may lie from the display along a side of `extent` pixels.
+
+    An element may hang out of the display, as in the designer it is modelled on; ODL
+    has no clipping and the renderer draws what lies inside. One side's length beyond
+    each edge is far enough to place anything partly in view.
+    """
+    return -extent, 2 * extent
+
+
 def integer(value: object, name: str, minimum: int, maximum: int) -> int:
     """Return `value` when it is an integer (not a bool) inside the range."""
     if isinstance(value, bool) or not isinstance(value, int):

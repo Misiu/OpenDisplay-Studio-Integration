@@ -96,3 +96,27 @@ describe("alignmentGuides", () => {
     expect(alignmentGuides(box(21, 33, 17, 9), alone)).toEqual([]);
   });
 });
+
+describe("the pull", () => {
+  it("is a whole number of pixels, even to the centre of an odd-sized box", () => {
+    // A circle 81 px wide near the centre of a canvas 480 px wide: its centre is at 238.5.
+    const parent = box(0, 0, 480, 800);
+    const pull = snapAdjustment(box(198, 355, 81, 81), {
+      siblings: [],
+      parent,
+    });
+
+    expect(Number.isInteger(pull.dx)).toBe(true);
+    expect(Number.isInteger(pull.dy)).toBe(true);
+    expect(Math.abs(198 + pull.dx + 40.5 - 240)).toBeLessThanOrEqual(0.5);
+  });
+
+  it("still draws a guide for the pixel it settled on", () => {
+    const parent = box(0, 0, 480, 800);
+    const moved = box(200, 355, 81, 81); // centre 240.5, half a pixel off the centre line
+
+    expect(alignmentGuides(moved, { siblings: [], parent })).toContainEqual(
+      expect.objectContaining({ axis: "x", position: 240.5 })
+    );
+  });
+});

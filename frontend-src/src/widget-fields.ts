@@ -1,6 +1,7 @@
 import { PALETTE_COLORS } from "./display-profiles";
 import type {
   PaletteId,
+  PrimitiveField,
   WidgetDefinition,
   WidgetFieldDefinition,
   WidgetOptions,
@@ -22,6 +23,69 @@ export const formSelector = (
 ): Record<string, unknown> => {
   if (!(COLOR_SELECTOR in selector)) return selector;
   return { select: { options: [...PALETTE_COLORS[palette], ACCENT] } };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+/** The options of a `select` selector: plain values, or `{ value, label }` pairs. */
+const selectOptions = (
+  config: Record<string, unknown>
+): { options: string[]; labels: Record<string, string> } => {
+  const raw = Array.isArray(config.options) ? config.options : [];
+  const labels: Record<string, string> = {};
+  const options = raw.flatMap((entry: unknown) => {
+    if (typeof entry === "string") return [entry];
+    if (!isRecord(entry) || typeof entry.value !== "string") return [];
+    if (typeof entry.label === "string") labels[entry.value] = entry.label;
+    return [entry.value];
+  });
+  return { options, labels };
+};
+
+const numberLimit = (value: unknown): number | undefined =>
+  typeof value === "number" ? value : undefined;
+
+/**
+ * A widget field described like a field of a primitive, so a widget is edited with the same
+ * controls. Fields that need Home Assistant's own pickers (entities, devices, areas) have
+ * no such description and keep `ha-form`.
+ */
+export const widgetFieldAsPrimitive = (
+  field: WidgetFieldDefinition
+): PrimitiveField | undefined => {
+  const base = {
+    key: field.key,
+    label: field.label,
+    section: "appearance" as const,
+    default: field.default,
+  };
+  const { selector } = field;
+  if ("boolean" in selector) return { ...base, shape: "boolean" };
+  if (COLOR_SELECTOR in selector) return { ...base, shape: "color" };
+  const number = selector.number;
+  if (isRecord(number)) {
+    return {
+      ...base,
+      shape: "number",
+      min: numberLimit(number.min),
+      max: numberLimit(number.max),
+      unit:
+        typeof number.unit_of_measurement === "string"
+          ? number.unit_of_measurement
+          : undefined,
+    };
+  }
+  const select = selector.select;
+  if (isRecord(select) && select.multiple !== true) {
+    const { options, labels } = selectOptions(select);
+    return { ...base, shape: "enum", options, optionLabels: labels };
+  }
+  const text = selector.text;
+  if (isRecord(text)) {
+    return { ...base, shape: text.multiline === true ? "text" : "string" };
+  }
+  return undefined;
 };
 
 const isWidgetValue = (value: unknown): value is WidgetValue =>

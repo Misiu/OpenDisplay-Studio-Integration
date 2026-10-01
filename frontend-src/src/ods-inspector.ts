@@ -18,7 +18,7 @@ import {
 import { VISIBLE_KEY } from "./expressions";
 import { itemIcon } from "./item-labels";
 import { itemLocks } from "./locks";
-import { backgroundFormData, backgroundSchema } from "./container-fields";
+import { backgroundFields, backgroundFormData } from "./container-fields";
 import { selectionBox } from "./selection-gesture";
 import { findItem } from "./tree";
 import { clamp } from "./math";
@@ -46,6 +46,7 @@ import {
   idsFromPicks,
   picksFromIds,
   withPickFields,
+  widgetFieldAsPrimitive,
 } from "./widget-fields";
 import "./ods-expression-field";
 import "./ods-anchor-picker";
@@ -414,12 +415,6 @@ export class OdsInspector extends LitElement {
     }
   }
 
-  private onWidgetOptionsChange(
-    event: OdsEvent<"widget-options-change">
-  ): void {
-    emit(this, "widget-options-change", { value: event.detail.value });
-  }
-
   private onPicksChange(
     event: OdsEvent<"widget-options-change">,
     source: WidgetSourceDefinition,
@@ -430,19 +425,6 @@ export class OdsInspector extends LitElement {
     emit(this, "widget-picks-change", {
       sourceKey: source.key,
       picks: picksFromIds(previous, chosen),
-    });
-  }
-
-  private onPickFieldsChange(
-    event: OdsEvent<"widget-options-change">,
-    source: WidgetSourceDefinition,
-    item: WidgetItem,
-    pickId: string
-  ): void {
-    const picks = item.widget.sources[source.key] ?? [];
-    emit(this, "widget-picks-change", {
-      sourceKey: source.key,
-      picks: withPickFields(picks, pickId, event.detail.value, source),
     });
   }
 
@@ -714,6 +696,77 @@ export class OdsInspector extends LitElement {
     };
   }
 
+  /** One widget field: our own control where there is one, else Home Assistant's form. */
+  private renderWidgetField(
+    field: WidgetFieldDefinition,
+    value: unknown,
+    change: (key: string, value: unknown) => void
+  ): TemplateResult {
+    const spec = widgetFieldAsPrimitive(field);
+    if (!spec) return this.renderFormField(field, value, change);
+    const wide = spec.shape === "number" ? "value-field" : "value-field wide";
+    return html`
+      <div class=${wide}>
+        <ods-value-field
+          .hass=${this.hass}
+          .field=${spec}
+          .value=${value}
+          .palette=${this.dashboard.display.palette}
+          .display=${this.dashboard.display}
+          @primitive-field-change=${(
+            event: OdsEvent<"primitive-field-change">
+          ) => this.onWidgetFieldChange(event, change)}
+        ></ods-value-field>
+      </div>
+    `;
+  }
+
+  private onWidgetFieldChange(
+    event: OdsEvent<"primitive-field-change">,
+    change: (key: string, value: unknown) => void
+  ): void {
+    event.stopPropagation();
+    change(event.detail.key, event.detail.value);
+  }
+
+  /** A field that needs one of Home Assistant's pickers keeps its own form. */
+  private renderFormField(
+    field: WidgetFieldDefinition,
+    value: unknown,
+    change: (key: string, value: unknown) => void
+  ): TemplateResult {
+    return html`
+      <div class="value-field wide">
+        <ha-form
+          .hass=${this.hass}
+          .data=${{ [field.key]: value }}
+          .schema=${[this.formSchema(field)]}
+          .computeLabel=${formFieldLabel}
+          @value-changed=${(event: OdsEvent<"widget-options-change">) =>
+            change(field.key, event.detail.value[field.key])}
+        ></ha-form>
+      </div>
+    `;
+  }
+
+  private setWidgetOption(key: string, value: unknown): void {
+    emit(this, "widget-options-change", { value: { [key]: value } });
+  }
+
+  private setPickField(
+    item: WidgetItem,
+    source: WidgetSourceDefinition,
+    pickId: string,
+    key: string,
+    value: unknown
+  ): void {
+    const picks = item.widget.sources[source.key] ?? [];
+    emit(this, "widget-picks-change", {
+      sourceKey: source.key,
+      picks: withPickFields(picks, pickId, { [key]: value }, source),
+    });
+  }
+
   private renderPickFields(
     item: WidgetItem,
     source: WidgetSourceDefinition,
@@ -724,14 +777,13 @@ export class OdsInspector extends LitElement {
     return html`
       <details class="pick-fields" data-pick=${pick.id}>
         <summary>${label}</summary>
-        <ha-form
-          .hass=${this.hass}
-          .data=${pick}
-          .schema=${source.perSource.map((field) => this.formSchema(field))}
-          .computeLabel=${formFieldLabel}
-          @value-changed=${(event: OdsEvent<"widget-options-change">) =>
-            this.onPickFieldsChange(event, source, item, pick.id)}
-        ></ha-form>
+        <div class="value-fields">
+          ${source.perSource.map((field) =>
+            this.renderWidgetField(field, pick[field.key], (key, value) =>
+              this.setPickField(item, source, pick.id, key, value)
+            )
+          )}
+        </div>
       </details>
     `;
   }
@@ -784,13 +836,15 @@ export class OdsInspector extends LitElement {
       <details class="inspector-section" ?open=${open}>
         <summary>${section.section}</summary>
         <div class="section-body">
-          <ha-form
-            .hass=${this.hass}
-            .data=${item.widget.options}
-            .schema=${section.fields.map((field) => this.formSchema(field))}
-            .computeLabel=${formFieldLabel}
-            @value-changed=${this.onWidgetOptionsChange}
-          ></ha-form>
+          <div class="value-fields">
+            ${section.fields.map((field) =>
+              this.renderWidgetField(
+                field,
+                item.widget.options[field.key],
+                (key, value) => this.setWidgetOption(key, value)
+              )
+            )}
+          </div>
         </div>
       </details>
     `;
@@ -880,10 +934,39 @@ export class OdsInspector extends LitElement {
     `;
   }
 
-  private onContainerBackgroundChange(
-    event: OdsEvent<"widget-options-change">
+  private onBackgroundFieldChange(
+    item: ContainerItem,
+    event: OdsEvent<"primitive-field-change">
   ): void {
-    emit(this, "container-background-change", { value: event.detail.value });
+    event.stopPropagation();
+    const { key, value } = event.detail;
+    emit(this, "container-background-change", {
+      value: { ...backgroundFormData(item), [key]: value },
+    });
+  }
+
+  private renderBackgroundField(
+    item: ContainerItem,
+    field: PrimitiveField
+  ): TemplateResult {
+    const values = backgroundFormData(item);
+    return html`
+      <div
+        class=${field.shape === "number" ? "value-field" : "value-field wide"}
+      >
+        <ods-value-field
+          .hass=${this.hass}
+          .field=${field}
+          .value=${values[field.key]}
+          .palette=${this.dashboard.display.palette}
+          .display=${this.dashboard.display}
+          .disabled=${item.locked}
+          @primitive-field-change=${(
+            event: OdsEvent<"primitive-field-change">
+          ) => this.onBackgroundFieldChange(item, event)}
+        ></ods-value-field>
+      </div>
+    `;
   }
 
   /** The background of a plain container; a group has none. */
@@ -891,25 +974,15 @@ export class OdsInspector extends LitElement {
     item: ContainerItem
   ): TemplateResult | typeof nothing {
     if (item.grouped) return nothing;
-    const labels = strings.inspector;
-    const schema = backgroundSchema(this.dashboard.display.palette, {
-      enabled: labels.backgroundEnabled,
-      fill: labels.backgroundFill,
-      outline: labels.backgroundOutline,
-      width: labels.backgroundWidth,
-      radius: labels.backgroundRadius,
-    });
     return html`
       <details class="inspector-section" open>
-        <summary>${labels.background}</summary>
+        <summary>${strings.inspector.background}</summary>
         <div class="section-body">
-          <ha-form
-            .hass=${this.hass}
-            .data=${backgroundFormData(item)}
-            .schema=${schema}
-            .computeLabel=${formFieldLabel}
-            @value-changed=${this.onContainerBackgroundChange}
-          ></ha-form>
+          <div class="value-fields">
+            ${backgroundFields().map((field) =>
+              this.renderBackgroundField(item, field)
+            )}
+          </div>
         </div>
       </details>
     `;
@@ -919,7 +992,7 @@ export class OdsInspector extends LitElement {
   private renderItemSections(item: StudioItem): TemplateResult {
     if (item.kind === "widget") {
       return html`
-        ${this.renderWidgetSettings(item)} ${this.renderLayoutSection(item)}
+        ${this.renderLayoutSection(item)} ${this.renderWidgetSettings(item)}
       `;
     }
     if (item.kind === "container") {

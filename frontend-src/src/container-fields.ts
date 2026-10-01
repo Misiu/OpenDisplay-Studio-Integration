@@ -1,57 +1,73 @@
-import { PALETTE_COLORS } from "./display-profiles";
 import { defaultBackground } from "./container-ops";
+import { strings } from "./strings";
 import type {
   ContainerBackground,
   ContainerItem,
-  HaFormSchema,
-  PaletteId,
+  PrimitiveField,
 } from "./types";
-
-/** What the form calls a fill of "no colour". */
-const NO_FILL = "none";
 
 const MAX_OUTLINE = 32;
 const MAX_RADIUS = 256;
 
-/** The `ha-form` schema of a plain container's background. */
-export const backgroundSchema = (
-  palette: PaletteId,
-  labels: Record<"enabled" | "fill" | "outline" | "width" | "radius", string>
-): HaFormSchema[] => {
-  const colors = [...PALETTE_COLORS[palette], "accent"];
+/**
+ * The fields of a plain container's background, described like the fields of a primitive
+ * so they are edited with the same controls: a switch, two colors and two sizes.
+ */
+export const backgroundFields = (): PrimitiveField[] => {
+  const labels = strings.inspector;
   return [
-    { name: "enabled", label: labels.enabled, selector: { boolean: {} } },
     {
-      name: "fill",
-      label: labels.fill,
-      selector: { select: { options: [NO_FILL, ...colors] } },
+      key: "enabled",
+      label: labels.backgroundEnabled,
+      shape: "boolean",
+      section: "appearance",
+      default: false,
     },
     {
-      name: "outline",
-      label: labels.outline,
-      selector: { select: { options: colors } },
+      key: "fill",
+      label: labels.backgroundFill,
+      shape: "color",
+      section: "appearance",
+      nullable: true,
     },
     {
-      name: "width",
-      label: labels.width,
-      selector: { number: { min: 0, max: MAX_OUTLINE } },
+      key: "outline",
+      label: labels.backgroundOutline,
+      shape: "color",
+      section: "appearance",
+      default: "black",
     },
     {
-      name: "radius",
-      label: labels.radius,
-      selector: { number: { min: 0, max: MAX_RADIUS } },
+      key: "width",
+      label: labels.backgroundWidth,
+      shape: "number",
+      section: "appearance",
+      unit: "px",
+      min: 0,
+      max: MAX_OUTLINE,
+      default: 1,
+    },
+    {
+      key: "radius",
+      label: labels.backgroundRadius,
+      shape: "number",
+      section: "appearance",
+      unit: "px",
+      min: 0,
+      max: MAX_RADIUS,
+      default: 0,
     },
   ];
 };
 
-/** The values the background form shows; a container without one shows the defaults. */
+/** The values of the background fields; a container without one shows the defaults. */
 export const backgroundFormData = (
   item: ContainerItem
 ): Record<string, unknown> => {
   const background = item.background ?? defaultBackground();
   return {
     enabled: item.background !== null,
-    fill: background.fill ?? NO_FILL,
+    fill: background.fill,
     outline: background.outline,
     width: background.width,
     radius: background.radius,
@@ -67,15 +83,15 @@ const numberIn = (
   return Math.min(maximum, Math.max(0, Math.round(value)));
 };
 
-/** The background a form reports: none when it is switched off. */
+/** The background the fields describe: none when it is switched off. */
 export const backgroundFromForm = (
   values: Record<string, unknown>
 ): ContainerBackground | null => {
   if (values.enabled !== true) return null;
   const fallback = defaultBackground();
-  const fill = typeof values.fill === "string" ? values.fill : fallback.fill;
+  const fill = "fill" in values ? values.fill : fallback.fill;
   return {
-    fill: fill === NO_FILL ? null : fill,
+    fill: typeof fill === "string" ? fill : null,
     outline:
       typeof values.outline === "string" ? values.outline : fallback.outline,
     width: numberIn(values.width, fallback.width, MAX_OUTLINE),

@@ -169,8 +169,15 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   Percentage coordinates are allowed only for root-level items.
 - Inside a container, expression-driven coordinate fields must be a single `{{ … }}`
   expression, so the Code view can emit `{{ (<expr>) | float(0) + <offset> }}`.
-- ODL has no clipping. Children outside their container are still drawn; the
-  editor marks them with a warning badge.
+- **Elements may hang out of the canvas** (as in the designer this editor follows).
+  ODL has no clipping: the renderer draws what is in view, and it must never fail
+  because something lies outside. The backend accepts positions from one side's length
+  before the display to one length after it (`validation.reach`: `-size … 2×size`, for
+  primitives, widget frames, containers and points); sizes stay within the display.
+  The editor lets elements be dragged, nudged and typed out to that limit, and never
+  moves them back in on its own. Children outside their container are still drawn;
+  the editor marks them with a warning badge. A test renders every primitive type
+  partly outside the display; any new type or widget keeps passing it.
 
 Behaviour of the tree, containers, groups, context menus, clipboard, and
 shortcuts is specified in `ROADMAP.md` phases 5–6.
@@ -277,11 +284,20 @@ Hard-coded colors are allowed only for display-palette swatches. Concrete
 measurements are in `ROADMAP.md` phase 2; `docs/design/DESIGN_SPECS.md` keeps
 the information architecture.
 
+- **One look for every element.** Primitives, widgets and containers are edited with
+  the same controls, so the panel feels the same whatever is selected. The `Layout`
+  section is always the first section of the panel; type-specific sections follow it.
+  Widget options and per-source fields from `widget.yml` are mapped to the same controls
+  (`widgetFieldAsPrimitive`); `ha-form` stays only for what needs a picker of Home
+  Assistant (entities, devices, areas, calendars) and for nested plot settings. The
+  panel is dense: option lists of a few short words are a segmented control, longer ones a
+  compact select, never a list of radio buttons. A color is always picked from
+  `ods-color-picker`. Do not add a second look for a new kind of element.
 - Primitive properties use our compact field elements (`ods-property-field` for numbers,
   `ods-value-field` for every other shape; label inside a 28 px box, unit suffix, `{}`
   toggle). A color is picked from the colors of the display in `ods-color-picker`, an anchor
   in `ods-anchor-picker`, both in an `ods-popover`. Use `ha-form` only for widget
-  configuration from `widget.yml` selectors and for nested plot settings; use `ha-icon`,
+  configuration that needs Home Assistant's own pickers and for nested plot settings; use `ha-icon`,
   `ha-dialog`, `ha-button`, `ha-alert` where they fit.
 - **Palettes** are the color schemes of OpenDisplay and live in
   `custom_components/opendisplay_studio/palettes.json`, the one file both the backend and

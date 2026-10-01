@@ -137,8 +137,14 @@ def test_accent_colour_is_accepted_where_colours_are() -> None:
     ("primitive", "message"),
     [
         ({"type": "hexagon"}, "Unsupported primitive type: hexagon"),
-        ({"type": "text", "value": "a", "x": WIDTH, "y": 0}, "primitive.x must be"),
-        ({"type": "text", "value": "a", "x": 0, "y": HEIGHT}, "primitive.y must be"),
+        (
+            {"type": "text", "value": "a", "x": 2 * WIDTH + 1, "y": 0},
+            "primitive.x must be",
+        ),
+        (
+            {"type": "text", "value": "a", "x": 0, "y": 2 * HEIGHT + 1},
+            "primitive.y must be",
+        ),
         ({"type": "text", "value": "a", "x": True, "y": 0}, "primitive.x must be"),
         ({"type": "text", "value": "   ", "x": 0, "y": 0}, "primitive.value must"),
         ({"type": "text", "x": 0, "y": 0}, "primitive.value must be a string"),

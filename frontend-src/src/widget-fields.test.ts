@@ -10,6 +10,7 @@ import {
   optionsFromForm,
   picksFromIds,
   withPickFields,
+  widgetFieldAsPrimitive,
 } from "./widget-fields";
 
 const agenda = widgetDefinition("agenda");
@@ -155,5 +156,62 @@ describe("groupByCategory", () => {
       ["Sensors", 2],
       ["Calendar", 1],
     ]);
+  });
+});
+
+describe("widgetFieldAsPrimitive", () => {
+  const field = (selector: Record<string, unknown>, extra = {}) => ({
+    key: "k",
+    label: "Label",
+    selector,
+    ...extra,
+  });
+
+  it("describes the plain selectors like fields of a primitive", () => {
+    expect(widgetFieldAsPrimitive(field({ boolean: {} }))).toMatchObject({
+      shape: "boolean",
+    });
+    expect(widgetFieldAsPrimitive(field({ text: {} }))).toMatchObject({
+      shape: "string",
+    });
+    expect(
+      widgetFieldAsPrimitive(field({ text: { multiline: true } }))
+    ).toMatchObject({ shape: "text" });
+    expect(
+      widgetFieldAsPrimitive(field({ opendisplay_color: {} }))
+    ).toMatchObject({ shape: "color" });
+  });
+
+  it("carries the limits and the unit of a number", () => {
+    expect(
+      widgetFieldAsPrimitive(
+        field({ number: { min: 1, max: 9, unit_of_measurement: "°C" } })
+      )
+    ).toMatchObject({ shape: "number", min: 1, max: 9, unit: "°C" });
+  });
+
+  it("keeps the labels of the options of a select", () => {
+    const described = widgetFieldAsPrimitive(
+      field({
+        select: {
+          options: ["auto", { value: "small", label: "Small" }],
+        },
+      })
+    );
+
+    expect(described).toMatchObject({
+      shape: "enum",
+      options: ["auto", "small"],
+      optionLabels: { small: "Small" },
+    });
+  });
+
+  it("leaves what needs a picker of Home Assistant to its own form", () => {
+    expect(
+      widgetFieldAsPrimitive(field({ entity: { domain: "sensor" } }))
+    ).toBeUndefined();
+    expect(
+      widgetFieldAsPrimitive(field({ select: { multiple: true, options: [] } }))
+    ).toBeUndefined();
   });
 });

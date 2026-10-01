@@ -443,6 +443,7 @@ test.describe("the properties of a container", () => {
     await row(page, "panel").click();
 
     await page.getByLabel("Outline width").fill("5");
+    await page.getByLabel("Outline width").press("Tab");
     await page.getByLabel("Background", { exact: true }).uncheck();
 
     const panel = find(await saved(page), "panel");
@@ -593,6 +594,25 @@ test.describe("groups", () => {
     const panel = find(await saved(page), "panel");
     expect(panel).toMatchObject({ grouped: true, background: null });
     await expect(row(page, "panel").locator(".badge")).toHaveText("Group");
+  });
+
+  test("give a container back, with its background, when it was one before it became a group", async ({
+    page,
+  }) => {
+    await row(page, "panel").click();
+    await page.keyboard.press("Control+g");
+    await expect(row(page, "panel").locator(".badge")).toHaveText("Group");
+
+    await page.keyboard.press("Control+Shift+g");
+
+    await expect(row(page, "panel")).toHaveCount(1);
+    await expect(row(page, "panel").locator(".badge")).toHaveCount(0);
+    await expect(row(page, "chip")).toHaveAttribute("data-depth", "1");
+    const panel = find(await saved(page), "panel");
+    expect(panel).toMatchObject({
+      grouped: false,
+      background: { fill: "white", outline: "black", width: 2 },
+    });
   });
 
   test("are dissolved with Ctrl+Shift+G, leaving the members where they were", async ({

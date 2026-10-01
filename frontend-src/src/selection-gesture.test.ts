@@ -3,6 +3,7 @@ import {
   boxBetween,
   marqueeSelection,
   moveSelection,
+  snapTargetsFor,
   moveTargets,
   selectionBox,
 } from "./selection-gesture";
@@ -52,14 +53,14 @@ describe("moveSelection", () => {
     ).toBe(130);
   });
 
-  it("stops the main item at the edge of the working area, and the others with it", () => {
+  it("stops the main item one length outside the working area, and the others with it", () => {
     const dashboard = dashboardWith([rectangleItem("a"), rectangleItem("b")]);
     const targets = moveTargets(dashboard, ["a", "b"], nothingMeasured);
 
     const moved = moveSelection(targets, "a", -500, 0, dashboard, false);
 
-    expect(rectangleLeft(moved[0])).toBe(0);
-    expect(rectangleLeft(moved[1])).toBe(0);
+    expect(rectangleLeft(moved[0])).toBe(-100);
+    expect(rectangleLeft(moved[1])).toBe(-100);
   });
 
   it("leaves a locked item where it is while the rest move", () => {
@@ -198,5 +199,28 @@ describe("boxBetween", () => {
 
     expect(boxBetween({ x: 10, y: 20 }, { x: 40, y: 60 })).toEqual(expected);
     expect(boxBetween({ x: 40, y: 60 }, { x: 10, y: 20 })).toEqual(expected);
+  });
+});
+
+describe("snapping a circle to the centre of the canvas", () => {
+  it("leaves whole-pixel coordinates, which the backend accepts", () => {
+    const dashboard = dashboardWith([circleItem("c")], {
+      width: 480,
+      height: 800,
+    });
+    const targets = moveTargets(dashboard, ["c"], () => undefined);
+    const snap = snapTargetsFor(dashboard, ["c"], "c", () => undefined);
+
+    // The circle starts centred on (100, 100); drag its centre to about the canvas centre.
+    const items = moveSelection(targets, "c", 139, 301, dashboard, true, snap);
+
+    const circle = items[0];
+    if (circle.kind !== "primitive" || circle.primitive.type !== "circle") {
+      throw new Error("Expected a circle");
+    }
+    expect(Number.isInteger(circle.primitive.x)).toBe(true);
+    expect(Number.isInteger(circle.primitive.y)).toBe(true);
+    expect(Math.abs(circle.primitive.x - 240)).toBeLessThanOrEqual(1);
+    expect(Math.abs(circle.primitive.y - 400)).toBeLessThanOrEqual(1);
   });
 });

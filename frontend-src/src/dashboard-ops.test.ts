@@ -26,11 +26,11 @@ import {
 const sensor = widgetDefinition("sensor-card");
 
 describe("setItemNumber", () => {
-  it("moves a rectangle while keeping its size and staying inside the working area", () => {
+  it("moves a rectangle while keeping its size, up to the far edge of the working area", () => {
     const dashboard = dashboardWith([rectangleItem("r")]);
     setItemNumber(dashboard, "r", "x", 1000, primitiveDefinitions);
     expect(itemBounds(dashboard.items[0])).toMatchObject({
-      x: 300,
+      x: 400,
       width: 100,
     });
   });
@@ -180,14 +180,12 @@ describe("editing point primitives through their definition", () => {
     expect(dashboard.items[0]).toMatchObject({ primitive: { size: 6 } });
   });
 
-  it("keeps a circle inside the working area when its centre moves", () => {
+  it("lets a circle leave the working area when its centre moves, by its size at most", () => {
     const dashboard = dashboardWith([circleItem("c")]);
     setItemNumber(dashboard, "c", "x", 9999, primitiveDefinitions);
-    expect(
-      itemBounds(dashboard.items[0]).x + itemBounds(dashboard.items[0]).width
-    ).toBeLessThanOrEqual(400);
+    expect(itemBounds(dashboard.items[0]).x).toBe(400);
     setItemNumber(dashboard, "c", "x", -9999, primitiveDefinitions);
-    expect(itemBounds(dashboard.items[0]).x).toBe(0);
+    expect(itemBounds(dashboard.items[0]).x).toBe(-41);
   });
 
   it("ignores a key that is not a layout field of the primitive", () => {

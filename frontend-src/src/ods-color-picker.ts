@@ -6,12 +6,10 @@ import { strings } from "./strings";
 import { baseStyles } from "./studio-styles";
 import type { PaletteId } from "./types";
 
-const ACCENT = "accent";
-
 /**
  * The colors the display can show, as swatches with their names ("Panel colours" in the
  * color picker of lvgl.espboards.dev on an e-paper display). Nothing but the palette can
- * be picked, so there is no free color. A field that may be empty also offers "None".
+ * be picked, so there is no free color and no accent. A field that may be empty also offers "None".
  */
 @customElement("ods-color-picker")
 export class OdsColorPicker extends LitElement {
@@ -72,8 +70,6 @@ export class OdsColorPicker extends LitElement {
   @property() public value = "";
   /** Whether the field may be left without a color. */
   @property({ type: Boolean }) public nullable = false;
-  /** The color the accent alias stands for on this display, to draw it. */
-  @property() public accentHex = "#000000";
 
   private choose(color: string | null): void {
     emit(this, "color-change", { color });
@@ -121,13 +117,6 @@ export class OdsColorPicker extends LitElement {
               <span class="swatch" style=${`background:${color.hex}`}></span>
             `
           )
-        )}
-        ${this.renderChoice(
-          ACCENT,
-          colorLabel(ACCENT),
-          html`
-            <span class="swatch" style=${`background:${this.accentHex}`}></span>
-          `
         )}
       </div>
     `;

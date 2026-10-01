@@ -270,6 +270,11 @@ export interface ContainerItem extends ItemState {
   height: number;
   grouped: boolean;
   background: ContainerBackground | null;
+  /**
+   * What a plain container looked like before it was made a group. Ungrouping gives it
+   * back; a group made from a selection has none and is dissolved instead.
+   */
+  savedBackground?: ContainerBackground | null;
   children: StudioItem[];
 }
 
@@ -374,6 +379,8 @@ export type FieldShape =
   | "string"
   | "text"
   | "font"
+  | "icon"
+  | "image"
   | "points"
   | "icons"
   | "object"
@@ -410,6 +417,8 @@ export interface PrimitiveField {
   max?: FieldLimit;
   unit?: string;
   options?: string[];
+  /** What to call each option, where it is not the value itself. */
+  optionLabels?: Record<string, string>;
   maxLength?: number;
   maxBytes?: number;
   /** False for fields the backend fixes and the panel never shows. */

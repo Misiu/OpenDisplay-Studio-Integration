@@ -14,6 +14,7 @@ from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
 from .delivery import async_render_dashboard
 from .devices import async_send_to_device, list_display_devices
+from .icons import SORTED_ICON_NAMES
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
 from .widget_reload import async_reload_widgets
@@ -262,7 +263,21 @@ def websocket_list_devices(
     connection.send_result(msg["id"], {"devices": list_display_devices(hass)})
 
 
+@websocket_api.websocket_command(
+    {vol.Required("type"): "opendisplay_studio/list_icons"}
+)
+@websocket_api.require_admin
+def websocket_list_icons(
+    _hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the names of every icon the renderer can draw, for the icon picker."""
+    connection.send_result(msg["id"], {"icons": SORTED_ICON_NAMES})
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, websocket_list_icons)
     websocket_api.async_register_command(hass, websocket_list_devices)
     websocket_api.async_register_command(hass, websocket_send_to_device)
     websocket_api.async_register_command(hass, websocket_bootstrap)

@@ -291,6 +291,27 @@ export const polish: StringsOverride = {
     rb: "Prawy dolny",
   },
 
+  iconPicker: {
+    noMatch: "Nie znaleziono ikon",
+    search: "Szukaj ikon…",
+    none: "Nie znaleziono ikon",
+    add: "Dodaj ikonę",
+    remove: "Usuń ikonę",
+    left: "Przesuń w lewo",
+    right: "Przesuń w prawo",
+    empty: "Brak ikony",
+  },
+
+  imagePicker: {
+    address: "Adres lub ścieżka",
+    media: "Wybierz z multimediów",
+    entity: "Encja kamery lub obrazu",
+    hint: "Plik z przeglądarki multimediów, encja kamery lub obrazu albo adres internetowy.",
+    unsupported:
+      "To nie adres internetowy, encja kamery lub obrazu ani plik z /local lub /media.",
+    empty: "Brak obrazu",
+  },
+
   colors: {
     clear: "Wyczyść kolor",
     none: "Brak",
