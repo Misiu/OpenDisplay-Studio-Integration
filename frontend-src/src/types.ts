@@ -377,6 +377,7 @@ export type FieldShape =
   | "flags"
   | "color"
   | "string"
+  | "entity"
   | "text"
   | "font"
   | "icon"
@@ -408,6 +409,10 @@ export interface PrimitiveField {
   default?: PrimitiveValue;
   /** A colour that may be "no colour" (stored as null, shown as transparent). */
   nullable?: boolean;
+  /** Rarely needed: listed under `Advanced`, closed until asked for. */
+  advanced?: boolean;
+  /** A number that may have a fraction, such as a multiplier. */
+  decimal?: boolean;
   /** Left unset (`null`) when the user has not chosen a value; the renderer decides. */
   optional?: boolean;
   /** The fields of an `object`, or of each entry of `objects`. */

@@ -32,6 +32,7 @@ fields:
     default: 2
     unit: px
     section: appearance
+    advanced: true
   - key: space_length
     label: "Gap length"
     shape: number
@@ -40,6 +41,7 @@ fields:
     default: 4
     unit: px
     section: appearance
+    advanced: true
   - key: show_labels
     label: "Show labels"
     shape: boolean
@@ -53,11 +55,13 @@ fields:
     optional: true
     unit: px
     section: appearance
+    advanced: true
   - key: label_color
     label: "Label color"
     shape: color
     default: black
     section: appearance
+    advanced: true
   - key: label_font_size
     label: "Label size"
     shape: number
@@ -66,9 +70,11 @@ fields:
     default: 12
     unit: px
     section: appearance
+    advanced: true
   - key: font
     label: Font
     shape: font
     default: ppb.ttf
     options: [ppb.ttf, rbm.ttf]
     section: appearance
+    advanced: true

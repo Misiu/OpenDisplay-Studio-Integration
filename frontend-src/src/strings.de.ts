@@ -120,6 +120,15 @@ export const german: StringsOverride = {
   },
 
   library: {
+    sections: {
+      text: "Text",
+      shapes: "Formen",
+      media: "Symbole & Medien",
+      data: "Daten",
+      debug: "Werkzeuge",
+    },
+    collapseSection: (name: string): string => `Einklappen ${name}`,
+    expandSection: (name: string): string => `Ausklappen ${name}`,
     title: "Bibliothek",
     heading: "Elemente",
     expand: "Elementkatalog ausklappen",
@@ -138,7 +147,7 @@ export const german: StringsOverride = {
         ? `Widgets neu geladen — ${loaded} geladen`
         : `Widgets neu geladen — ${loaded} geladen, ${failed} fehlgeschlagen`,
     reloadFailed: "Die Widgets konnten nicht neu geladen werden",
-    noPrimitives: "Keine passenden Primitive",
+    noMatches: "Keine passenden Elemente",
     entryHint: (description: string): string =>
       `${description} Zum Hinzufügen klicken oder ziehen.`,
   },
@@ -154,6 +163,12 @@ export const german: StringsOverride = {
   },
 
   inspector: {
+    advanced: "Erweitert",
+    reset: "zurücksetzen",
+    resetTitle: (section: string): string =>
+      `${section} auf Standard zurücksetzen`,
+    changed: "Vom Standard abweichend",
+    hiddenSwitch: "Ausgeblendet",
     alignInParent: "Im Elternelement ausrichten",
     expand: "Inspektor ausklappen",
     rail: "Ebenen",
@@ -208,6 +223,13 @@ export const german: StringsOverride = {
       `${count} ${count === 1 ? "Ebene" : "Ebenen"}`,
     padding: (pixels: number): string => `Rand ${pixels}px`,
     snap: (pixels: number): string => `Einrasten ${pixels}px`,
+    grid: "Raster",
+    gridTitle: "Punkte des Einrastrasters zeigen",
+    pan: "Verschieben",
+    panTitle:
+      "Verschieben: Mausrad bewegt die Ansicht, Strg + Mausrad zoomt. Aus: Mausrad zoomt.",
+    pointHandle: (name: string, number: number): string =>
+      `Punkt ${number} von ${name} verschieben`,
     resizeHandle: (name: string, side: string): string =>
       `${name} von ${side} skalieren`,
     sides: {
@@ -287,6 +309,13 @@ export const german: StringsOverride = {
     left: "Nach links",
     right: "Nach rechts",
     empty: "Kein Symbol",
+  },
+
+  pointsField: {
+    x: "X",
+    y: "Y",
+    add: "Punkt hinzufügen",
+    remove: (number: number): string => `Punkt ${number} entfernen`,
   },
 
   imagePicker: {

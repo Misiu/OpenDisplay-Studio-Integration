@@ -201,6 +201,24 @@ describe("fieldFormSchema", () => {
     expect(Object.keys(axis.object.fields)).toContain("grid_style");
   });
 
+  it("picks the entity of a series with an entity picker", () => {
+    const series = schemaOf("plot", "data").selector as {
+      object: { fields: { entity: { selector: object } } };
+    };
+
+    expect(series.object.fields.entity.selector).toEqual({ entity: {} });
+  });
+
+  it("lets the multiplier of a series have a fraction", () => {
+    const series = schemaOf("plot", "data").selector as {
+      object: {
+        fields: { value_scale: { selector: { number: { step: string } } } };
+      };
+    };
+
+    expect(series.object.fields.value_scale.selector.number.step).toBe("any");
+  });
+
   it("limits the colors inside nested settings to the palette plus accent", () => {
     const series = schemaOf("plot", "data").selector as {
       object: {

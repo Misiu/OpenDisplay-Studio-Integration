@@ -18,7 +18,9 @@ from .const import (
     RENDER_CONCURRENCY,
 )
 from .dashboards import DashboardStore
+from .fonts import font_directories
 from .http import RenderedImageView
+from .measure import use_font_directories
 from .panel import async_register_panel
 from .rendering import OdlRenderService
 from .websocket import async_register_commands
@@ -46,6 +48,8 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     widgets = await async_load_registry(hass)
     dashboards = DashboardStore(hass, widgets)
     await dashboards.async_load()
+    fonts = font_directories(hass)
+    use_font_directories(fonts)
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(
             ttl_seconds=RENDER_CACHE_TTL_SECONDS,
@@ -53,7 +57,9 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
         ),
         dashboards=dashboards,
         renderer=OdlRenderService(
-            async_get_clientsession(hass), concurrency=RENDER_CONCURRENCY
+            async_get_clientsession(hass),
+            concurrency=RENDER_CONCURRENCY,
+            font_dirs=fonts,
         ),
         widgets=widgets,
     )

@@ -1,5 +1,5 @@
 type: qrcode
-order: 70
+order: 63
 name: QR code
 description: Locally generated QR code
 icon: mdi:qrcode

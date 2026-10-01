@@ -38,8 +38,15 @@ def _encode_png(image: Image.Image, rotation: int) -> bytes:
 class OdlRenderService:
     """Keep local rendering bounded without introducing another process."""
 
-    def __init__(self, session: ClientSession, *, concurrency: int = 2) -> None:
+    def __init__(
+        self,
+        session: ClientSession,
+        *,
+        concurrency: int = 2,
+        font_dirs: list[str] | None = None,
+    ) -> None:
         self._session = session
+        self._font_dirs = font_dirs or []
         self._semaphore = asyncio.Semaphore(concurrency)
 
     async def async_render(  # noqa: PLR0913
@@ -66,6 +73,7 @@ class OdlRenderService:
                     accent_color=accent_color,
                     session=self._session,
                     data_provider=history,
+                    font_dirs=self._font_dirs,
                 )
             except (TypeError, ValueError, OSError) as err:
                 raise OdlRenderError(str(err)) from err

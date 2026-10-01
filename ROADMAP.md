@@ -127,34 +127,40 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
   editable inline), center segmented control `Design · Code` (track 2 px padding,
   buttons 25 px high, 11 px/500 text, 6 px radius), right: status chip,
   `Set Ready/Draft`, `Save` (primary).
-- [ ] **2.2 Library (left)** 256 px, collapsible to a rail. Search 30 px, 12 px
+- [x] **2.2 Library (left)** 256 px, collapsible to a rail. Search 30 px, 12 px
   text, 8 px radius. Uppercase section labels 11 px/600 with collapse chevron:
   `CONTAINERS` (Container), `TEXT` (Text, Multiline), `SHAPES` (Line, Rectangle,
   Rectangle pattern, Polygon, Circle, Ellipse, Arc), `ICONS & MEDIA` (Icon, Icon
   sequence, Image, QR code), `DATA` (Progress bar, Plot), `TOOLS` (Debug grid),
   `WIDGETS` (semantic widgets). Two-column tiles, 34 px high, icon + 12 px/500
   label, 8 px radius, 6 px gap, 1 px border. Click adds at the canvas center of
-  the current parent; drag adds at the drop point.
-- [ ] **2.3 Canvas area.** Tab row 29 px (single dashboard tab, name). Tool row:
+  the current parent; drag adds at the drop point. Sections fold with a chevron (a search opens them
+  and hides those with nothing found), in the order above; the primitives are sorted into them by
+  their `category` (`primitiveSections`).
+- [ ] **2.3 Canvas area.** (Done: the `Pan`, `Snap` and `Grid` toggles, zoom readout, zoom bar. Open:
+  the tab row, the floating pill toolbar and the info and help buttons; the toolbar is one row
+  for now.) Tab row 29 px (single dashboard tab, name). Tool row:
   history icon, undo, redo left; resolution chip (`800×480`, 10 px, 6 px radius)
   and info button right. Floating pill toolbar top-left: `Pan`, `Snap`, `Grid`
   toggles (25 px buttons, 10 px/500). Zoom % chip top-right. Bottom-centered zoom
   bar 31 px: `−`, `0.5×`, `1×`, `2×`, `3×`, `+`, `Reset`, `Fit`. Help button
   bottom-left. Canvas padding 16 px.
-- [ ] **2.4 Right panel** 320 px (resizable 340–560, collapsible). Top:
+- [x] **2.4 Right panel** 320 px (resizable 340–560, collapsible). Top:
   **Elements** header (uppercase 11 px, info tooltip, total count badge,
   collapse chevron), search 27 px (6 px radius). Rows 30 px, 6 px radius,
   11 px name + 9 px secondary caption, selected row in primary color. Bottom:
   **Properties** (independently scrollable).
 - [ ] **2.5 Properties shell.** (Done: 38 px section headers with an arrow, 340 px minimum
-  width, `Align in Parent` in `Layout`. Open: `reset` links, non-default dots, `Hidden` switch.) Header: type icon tile, element name (13 px/600)
+  width, `Align in Parent` in `Layout`, a `reset` link and a dot on the sections of
+  appearance and of widget options that differ from the defaults (one undo step), the
+  `Hidden` switch in the header.) Header: type icon tile, element name (13 px/600)
   + type caption, `Hidden` switch right; padding 10 × 14 px. Sections are
   accordions: header 38 px, uppercase 11 px/600, letter-spacing ≈ .045em, icon,
   right-aligned `reset` link (section defaults, one undo step), dot marker when
   non-default. Body padding 0 14 px. Order: `Layout` first, type sections from
   the definition, `Visibility` last. With nothing selected: `Canvas` (display,
   palette, background, padding, snap).
-- [ ] **2.6 Field element `ods-property-field`.** Measurements:
+- [x] **2.6 Field element `ods-property-field`.** Measurements:
   `docs/design/LVGL_INSPECTOR_FIELDS.md`. Done: short numbers are 28 px boxes with the
   label and the `px` unit inside (`ods-property-field`, `ods-value-field`); 10 px / 8 px grid
   gaps; 38 px section headers; text in a textarea; fonts and long enums in a compact select;
@@ -162,26 +168,32 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
   flags as chips; the color as a swatch row with a clear button that opens a popover with
   the colors of the display (`ods-color-picker`, `ods-popover`); the anchor as a field that
   opens a popover with the 3 x 3 grid (`ods-anchor-picker`); nested plot settings keep
-  `ha-form`. Changing the anchor keeps the element where it is drawn. Open: the icon
+  `ha-form`. Changing the anchor keeps the element where it is drawn. Also done: the icon
   picker with search, the `Align in Parent` position editor built on the anchor grid, the
-  `reset` link and non-default dot on each section, disclosure rows (`Advanced`).
+  `reset` link and non-default dot on each section, and an `Advanced` disclosure for the
+  fields a definition marks `advanced`.
 - [ ] **2.7 Selection overlay.** Drawn in display pixels on a layer above the
   canvas, with every measure divided by the zoom so it keeps its screen size:
   1 px `#2196f3` outline, 8 px white square handles (1 px blue border) at four
   corners and four edge midpoints, 12 px edge hit strips and 20 px corner hit
   areas, dashed hover outline (offset 2 px), size badge under the element
   (`W × H`; `auto`, `W × auto`, `auto × H` for intrinsic size), live during
-  gestures. Details: `docs/design/LVGL_CANVAS_BEHAVIOUR.md`.
+  gestures. Details: `docs/design/LVGL_CANVAS_BEHAVIOUR.md`. Done: every overlay
+  measure is multiplied by `--ui` (1 / zoom) so it keeps its size on screen; 8 px handles
+  with a 20 px hit area; the hover outline is dashed, offset 2 px; the badge shows the
+  measured size, never `auto` (see Deviations).
 > **Priority.** 2.8–2.10 are important but not first: do them after the
 > element split (1.1) and the shell/properties work (2.1–2.7) are green and
 > tested. They only plug into seams the split creates (`snapping.ts`,
 > `viewport.ts`, the canvas element).
 
-- [ ] **2.8 Snapping and guides** (`snapping.ts`, pure, Vitest). Done for moving: edges and
+- [x] **2.8 Snapping and guides** (`snapping.ts`, pure, Vitest). Done for moving: edges and
   centres are pulled to those of siblings (5 px) and of the parent (8 px, preferred on a tie),
   magenta dashed guides for every shared line, `Ctrl`/`⌘` or the `Snap` toggle turn it off.
-  Open: sticky release, equal spacing and its badges, snapping while resizing, and the edge
-  magnet to the container. Spec: While moving,
+  Resizing pulls the dragged edges onto the same lines (`resizeWithSnapping`); a box pulled
+  to a line of its parent keeps to it until 12 px away; the box is pulled to the middle of the
+  gap between two siblings of its row or column, and both gaps get a size badge when they
+  are equal within 3 px (equal to another gap elsewhere is not offered). Spec: While moving,
   in this order: grid rounding to the dashboard snap size; edge magnet 8 px with
   sticky release after 12 px; per-axis candidates — siblings 5 px (edges and
   centres), canvas centre lines 8 px (wins ties by 2 px), equal spacing 8 px —
@@ -189,14 +201,19 @@ Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
   every candidate matching the winner; spacing badges when both gaps are equal
   within 3 px. `Ctrl`/`⌘` held, or the `Snap` toggle off, disables all of it.
   Library drops place the element's **top-left** at the drop point.
-- [ ] **2.9 Resize and nudge rules.** West/north handles keep the opposite edge
+- [x] **2.9 Resize and nudge rules.** (Done: `Esc` cancels a drag, a resize and a point
+  drag without a history step; a burst of nudges is one undo step (300 ms); `Alt`
+  turns off rounding and alignment while resizing; the dragged edges snap to siblings and the
+  parent, 8 px to the container. The 10 px minimum is a deviation, see below.) West/north handles keep the opposite edge
   fixed; `Shift` keeps the aspect ratio (corners follow the larger relative
   change); minimum 10 px; rounding to the snap size unless `Alt`; edge snap 4 px
   to the container with a guide; only the dragged axis gets an explicit size.
   Arrows nudge 1 px, `Shift` by the snap size (lvgl: 5 px), clamped to −size … 2×size; one burst of
   nudges is one history step (300 ms). `Esc` cancels a drag or resize in
   progress and restores the pre-gesture state.
-- [ ] **2.10 Viewport** (`viewport.ts`). Zoom 0.25×–5×; wheel pans, `Ctrl`/`⌘` +
+- [ ] **2.10 Viewport** (`viewport.ts`). Done: wheel pans, `Ctrl`/`⌘` + wheel zooms toward
+  the cursor, the `Pan` toggle, middle-button panning, `+`/`−` by 1.2, `Fit` toggles back to
+  100 %. Open: `Space` + drag, `Ctrl` + drag and touch. Zoom 0.25×–5×; wheel pans, `Ctrl`/`⌘` +
   wheel zooms toward the cursor with exponential steps (`Pan` toggle off: wheel
   zooms); pan with middle button, `Space` + drag or `Ctrl` + drag; touch: one
   finger pans, two pinch; `Fit` = 95 % of the available size minus 32 px and
@@ -262,29 +279,31 @@ pixel sampling, e2e add-and-edit test, row in `docs/odl-coverage.md`.
   `anchor`.
 - [x] **4.3 `arc`** - centre, `radius`, `start_angle`, `end_angle`, `fill`
   (pie) or `outline` + `width` (arc). Resize handles change the radius.
-- [ ] **4.4 `polygon`** - Done: `points` edited as one `x, y` pair per line,
-  move translates every point, resize stretches them, group scaling scales them.
-  Open: rows with add/remove buttons, and point handles that move one point.
+- [x] **4.4 `polygon`** - `points` edited as rows with `x` and `y` and add/remove
+  buttons (`ods-points-field`; three points at least), a round handle on every point of
+  the selected polygon moves that point alone (one undo step, `Esc` cancels), move
+  translates every point, resize stretches them, group scaling scales them.
 - [x] **4.5 `rectangle_pattern`** - `x_start`, `y_start`, `x_size`,
   `y_size`, `x_offset`, `y_offset`, `x_repeat`, `y_repeat`, colors; resize
   changes the cell size.
-- [ ] **4.6 `icon_sequence`** - Done: `icons` (one per line), `size`,
+- [x] **4.6 `icon_sequence`** - Done: `icons` (one per line), `size`,
   `direction`, `spacing` (default `size/4`), `fill`, `anchor`, an icon picker with search
   over the renderer's own icon index, a row editor to add, replace, reorder and remove icons.
-- [ ] **4.7 `dlimg`** - Done: `url`, `xsize`, `ysize`, `resize_method`,
+- [x] **4.7 `dlimg`** - Done: `url`, `xsize`, `ysize`, `resize_method`,
   `rotate`; the backend resolves `camera.*`/`image.*` entities and `/local`,
   `/media` paths to bytes and passes HA's shared aiohttp session; the picture is chosen in a
   picker with the media browser, the camera and image entities and an address field.
-- [ ] **4.8 `plot`** - Done: bounds, `duration`, `low`, `high`,
+- [x] **4.8 `plot`** - bounds, `duration`, `low`, `high`,
   `round_values`, `font`, `debug`, nested `ylegend`, `yaxis`, `xlegend`,
-  `xaxis` and the `data` series (edited with HA's object selector), and a
-  `DataProvider` on the recorder. Open: `value_scale`, an entity picker per
-  series, and a test against a real recorder database.
-- [ ] **4.9 `debug_grid`** - Done: canvas-wide, no bounds, not draggable or
-  resizable, shown/hidden like any item. Open: at most one per dashboard.
-- [ ] **4.10 Fonts.** Done: the definitions list the two bundled fonts and
-  accept another name. Open: the backend passes `font_dirs` (HA config fonts) and
-  lists the available fonts in `bootstrap`.
+  `xaxis` and the `data` series (edited with HA's object selector, an entity picker
+  per series, and a `value_scale` multiplier that may have a fraction), and a
+  `DataProvider` on the recorder, tested against a real recorder database.
+- [x] **4.9 `debug_grid`** - canvas-wide, no bounds, not draggable or
+  resizable, shown/hidden like any item. At most one per dashboard: the backend
+  rejects a second one and adding it again from the Library selects the first.
+- [x] **4.10 Fonts.** The backend passes `font_dirs`
+  (`<config>/opendisplay_studio/fonts`) to the renderer and to text measuring, and
+  `bootstrap` lists the bundled and installed fonts as the options of every font field.
 
 Out of scope (decided): `diagram`, `rotation`/`mirror`/`pivot`, the flow
 cursor (omitted `y`). Every created element has explicit coordinates.
@@ -868,6 +887,8 @@ deployment to devices.
 | Import YAML (`Ctrl+I`), Export (`Ctrl+E`) | `Ctrl+E` opens Code view; no import | Code view is read-only in this plan |
 | Preview mode (`Ctrl+P`) | — | The canvas already is the rendered preview |
 | Styles/states, Tabview, Tileview, several screens | — | No ODL equivalent |
+| Size badge says `auto` for an intrinsic size | Always the measured pixel size (`W × H`) | The backend measures every element; the real size is more useful than `auto` |
+| Elements are at least 10 px | The smallest size depends on the type (a rectangle may be 1 px, a QR code a module) | ODL drawings use 1 px dividers and the renderer sizes text and codes itself |
 | Shift+arrow nudges 10 px | Nudges by the dashboard snap size | Consistent with snap setting |
 | Drop from the library centres the element on the pointer | Top-left at the drop point, grid-rounded | Matches lvgl.espboards.dev (measured) |
 | Fixed 5 px grid | Grid step is the dashboard `snapSize`; all other thresholds as measured | Displays differ in resolution; user already sets snap size |

@@ -56,6 +56,7 @@ fields:
     shape: boolean
     default: false
     section: appearance
+    advanced: true
   - key: font
     label: Font
     shape: font
@@ -76,6 +77,7 @@ fields:
     default: 5
     unit: px
     section: appearance
+    advanced: true
   - key: stroke_width
     label: "Stroke width"
     shape: number
@@ -84,13 +86,16 @@ fields:
     default: 0
     unit: px
     section: appearance
+    advanced: true
   - key: stroke_fill
     label: "Stroke color"
     shape: color
     default: white
     section: appearance
+    advanced: true
   - key: parse_colors
     label: "Color markup"
     shape: boolean
     default: false
     section: appearance
+    advanced: true

@@ -9,6 +9,7 @@ import {
   setItemExpression,
   setItemNumber,
   toggleItemState,
+  resetPrimitiveFields,
   setPrimitiveField,
   updatePrimitiveFields,
 } from "./dashboard-ops";
@@ -262,6 +263,50 @@ describe("setItemExpression", () => {
     setItemExpression(dashboard, "t", "size", undefined);
 
     expect(dashboard.items[0]).not.toHaveProperty("expressions");
+  });
+});
+
+describe("resetPrimitiveFields", () => {
+  it("puts fields back to their values and drops the expressions that drove them", () => {
+    const item = {
+      ...textItem("t"),
+      expressions: { color: "{{ 'red' }}", size: "{{ 30 }}" },
+    };
+    const dashboard = dashboardWith([item]);
+    setPrimitiveField(dashboard, "t", "size", 40);
+
+    resetPrimitiveFields(dashboard, "t", { size: 20, color: "black" });
+
+    expect(dashboard.items[0]).toMatchObject({
+      primitive: { size: 20, color: "black" },
+    });
+    expect(dashboard.items[0]).not.toHaveProperty("expressions");
+  });
+
+  it("keeps the expressions of the fields it does not reset", () => {
+    const item = {
+      ...textItem("t"),
+      expressions: { x: "{{ 5 }}", size: "{{ 3 }}" },
+    };
+    const dashboard = dashboardWith([item]);
+
+    resetPrimitiveFields(dashboard, "t", { size: 20 });
+
+    expect(dashboard.items[0]).toMatchObject({ expressions: { x: "{{ 5 }}" } });
+  });
+
+  it("leaves a locked element alone", () => {
+    const base = textItem("t");
+    const locked = {
+      ...base,
+      locked: true,
+      primitive: { ...base.primitive, size: 33 },
+    };
+    const dashboard = dashboardWith([locked]);
+
+    resetPrimitiveFields(dashboard, "t", { size: 20 });
+
+    expect(dashboard.items[0]).toMatchObject({ primitive: { size: 33 } });
   });
 });
 

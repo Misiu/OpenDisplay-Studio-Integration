@@ -133,7 +133,7 @@ const reachableArea = (area: ItemBounds, bounds: ItemBounds): ItemBounds => {
   return { x: left, y: top, width: right - left, height: bottom - top };
 };
 
-interface ResizeItemOptions {
+export interface ResizeItemOptions {
   /**
    * Where the origin of the container the item is in lies on the display. The item's
    * coordinates are relative to it, while snapping and limits work on the display.

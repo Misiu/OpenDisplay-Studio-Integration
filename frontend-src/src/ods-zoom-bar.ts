@@ -5,7 +5,6 @@ import { strings } from "./strings";
 import { baseStyles } from "./studio-styles";
 
 const PRESETS = [0.5, 1, 2, 3];
-const STEP = 0.25;
 
 /**
  * Zoom buttons floating over the canvas. They report the wanted zoom; the
@@ -68,13 +67,14 @@ export class OdsZoomBar extends LitElement {
     emit(this, "zoom-change", { zoom });
   }
 
+  private step(direction: 1 | -1): void {
+    emit(this, "zoom-step", { direction });
+  }
+
   protected render(): TemplateResult {
     return html`
       <div class="zoom-controls">
-        <button
-          aria-label=${strings.zoom.out}
-          @click=${() => this.zoomTo(this.zoom - STEP)}
-        >
+        <button aria-label=${strings.zoom.out} @click=${() => this.step(-1)}>
           −
         </button>
         ${PRESETS.map(
@@ -88,10 +88,7 @@ export class OdsZoomBar extends LitElement {
             </button>
           `
         )}
-        <button
-          aria-label=${strings.zoom.in}
-          @click=${() => this.zoomTo(this.zoom + STEP)}
-        >
+        <button aria-label=${strings.zoom.in} @click=${() => this.step(1)}>
           +
         </button>
         <button

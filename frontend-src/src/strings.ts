@@ -156,6 +156,15 @@ export const strings = {
   },
 
   library: {
+    sections: {
+      text: "Text",
+      shapes: "Shapes",
+      media: "Icons & media",
+      data: "Data",
+      debug: "Tools",
+    },
+    collapseSection: (name: string): string => `Collapse ${name}`,
+    expandSection: (name: string): string => `Expand ${name}`,
     title: "Library",
     heading: "Elements",
     expand: "Expand element catalog",
@@ -167,7 +176,6 @@ export const strings = {
     containers: "Containers",
     container: "Container",
     containerHint: "Holds other elements and moves them together.",
-    noContainers: "No matching containers",
     noWidgets: "No matching widgets",
     reloadWidgets: "Reload widgets",
     userWidget: "user",
@@ -178,7 +186,7 @@ export const strings = {
         ? `Widgets reloaded — ${loaded} loaded`
         : `Widgets reloaded — ${loaded} loaded, ${failed} failed`,
     reloadFailed: "Could not reload the widgets",
-    noPrimitives: "No matching primitives",
+    noMatches: "No matching elements",
     entryHint: (description: string): string =>
       `${description} Click or drag to add.`,
   },
@@ -220,6 +228,11 @@ export const strings = {
   },
 
   inspector: {
+    advanced: "Advanced",
+    reset: "reset",
+    resetTitle: (section: string): string => `Reset ${section} to the defaults`,
+    changed: "Changed from the default",
+    hiddenSwitch: "Hidden",
     alignInParent: "Align in Parent",
     expand: "Expand inspector",
     rail: "Layers",
@@ -292,6 +305,13 @@ export const strings = {
     layers: (count: number): string => `${count} layers`,
     padding: (pixels: number): string => `Padding ${pixels}px`,
     snap: (pixels: number): string => `Snap ${pixels}px`,
+    grid: "Grid",
+    gridTitle: "Show the dots of the snap grid",
+    pan: "Pan",
+    panTitle:
+      "Pan: the wheel moves the view; Ctrl + wheel zooms. Off: the wheel zooms.",
+    pointHandle: (name: string, number: number): string =>
+      `Move point ${number} of ${name}`,
     resizeHandle: (name: string, side: string): string =>
       `Resize ${name} from ${side}`,
     sides: {
@@ -375,6 +395,13 @@ export const strings = {
     left: "Move left",
     right: "Move right",
     empty: "No icon",
+  },
+
+  pointsField: {
+    x: "X",
+    y: "Y",
+    add: "Add point",
+    remove: (number: number): string => `Remove point ${number}`,
   },
 
   imagePicker: {

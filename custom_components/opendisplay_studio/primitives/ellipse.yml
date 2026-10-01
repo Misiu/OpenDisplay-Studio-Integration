@@ -1,5 +1,5 @@
 type: ellipse
-order: 50
+order: 25
 name: Ellipse
 description: Filled or outlined ellipse
 icon: mdi:ellipse-outline

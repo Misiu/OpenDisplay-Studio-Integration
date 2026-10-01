@@ -189,6 +189,18 @@ const PRIMITIVES: PrimitiveExpectation[] = [
 
 const selectedChip = (page: Page) => page.locator(".selection-size");
 
+/** The rarely needed fields are closed until asked for. */
+const openAdvanced = async (page: Page) => {
+  const advanced = page.locator(".properties .disclosure", {
+    hasText: "Advanced",
+  });
+  if ((await advanced.count()) > 0) {
+    await advanced.evaluate((element: HTMLDetailsElement) => {
+      element.open = true;
+    });
+  }
+};
+
 const fieldNamed = (page: Page, label: string) =>
   page
     .locator(".properties")
@@ -204,32 +216,31 @@ test.beforeEach(async ({ page }) => {
 test("offers every primitive in the library, in the backend's order", async ({
   page,
 }) => {
-  const primitives = page
-    .locator("ods-library .catalog-section")
-    .nth(1)
-    .locator(".catalog-item strong");
+  const primitives = page.locator(
+    "ods-library .catalog-section:not([data-section='widgets']):not([data-section='containers']) .catalog-item strong"
+  );
 
   await expect(primitives).toHaveText([
     "Text",
     "Multiline text",
+    "Line",
     "Rectangle",
     "Rectangle pattern",
-    "Line",
     "Polygon",
     "Circle",
-    "Arc",
     "Ellipse",
+    "Arc",
     "Icon",
     "Icon sequence",
-    "QR code",
     "Image",
+    "QR code",
     "Progress bar",
     "History plot",
     "Debug grid",
   ]);
   await expect(
-    page.locator("ods-library .catalog-section").nth(1).locator(".count")
-  ).toHaveText("16");
+    page.locator("ods-library .catalog-section .catalog-item")
+  ).toHaveCount(16 + 1 + 3);
 });
 
 for (const primitive of PRIMITIVES) {
@@ -243,6 +254,7 @@ for (const primitive of PRIMITIVES) {
     await expect(
       page.locator(".selection.selected [data-resize-handle]")
     ).toHaveCount(primitive.handles ?? 8);
+    await openAdvanced(page);
     for (const label of primitive.fields) {
       await expect(
         fieldNamed(page, label),
@@ -307,7 +319,7 @@ test.describe("QR code", () => {
     await addQrCode(page);
     await setContent(page, "https://example.org/a/longer/address");
     await expect(selectedChip(page)).toHaveText("117 × 117");
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
 
     const box = await page.locator(".selection.selected").boundingBox();
     if (!box) {
@@ -329,7 +341,7 @@ test.describe("QR code", () => {
     await addQrCode(page);
     await setContent(page, "https://example.org/a/longer/address");
     await expect(selectedChip(page)).toHaveText("117 × 117");
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
 
     const handle = page.locator(
       '.selection.selected [data-resize-handle="se"]'
@@ -387,6 +399,9 @@ test.describe("Text", () => {
 });
 
 test.describe("the shapes with their own geometry", () => {
+  const pointInput = (page: Page, point: number, axis: "X" | "Y") =>
+    page.locator(`[data-point="${point}"]`).getByLabel(axis, { exact: true });
+
   test("a polygon is outlined by its points, and follows edits of them", async ({
     page,
   }) => {
@@ -394,23 +409,77 @@ test.describe("the shapes with their own geometry", () => {
     // The starting triangle is 81 wide and 71 tall, inclusive.
     await expect(selectedChip(page)).toHaveText("81 × 71");
 
-    const points = page.getByRole("textbox", { name: "Points", exact: true });
-    await points.fill("10, 10\n110, 10\n110, 60\n10, 60");
-    await points.press("Tab");
+    await pointInput(page, 0, "X").fill("10");
+    await pointInput(page, 0, "X").press("Tab");
+    await pointInput(page, 0, "Y").fill("10");
+    await pointInput(page, 0, "Y").press("Tab");
+    await pointInput(page, 1, "X").fill("110");
+    await pointInput(page, 1, "X").press("Tab");
+    await pointInput(page, 1, "Y").fill("10");
+    await pointInput(page, 1, "Y").press("Tab");
+    await pointInput(page, 2, "X").fill("10");
+    await pointInput(page, 2, "X").press("Tab");
+    await pointInput(page, 2, "Y").fill("60");
+    await pointInput(page, 2, "Y").press("Tab");
 
     await expect(selectedChip(page)).toHaveText("101 × 51");
   });
 
-  test("keeps the points it has while what is typed is not yet a list of pairs", async ({
+  test("points are added and removed, and a polygon keeps three", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+    const rows = page.locator("[data-point]");
+    await expect(rows).toHaveCount(3);
+    await expect(
+      page.getByRole("button", { name: "Remove point 1" })
+    ).toBeDisabled();
+
+    await page.getByRole("button", { name: "Add point" }).click();
+    await expect(rows).toHaveCount(4);
+    await expect(
+      page.getByRole("button", { name: "Remove point 4" })
+    ).toBeEnabled();
+
+    await page.getByRole("button", { name: "Remove point 4" }).click();
+    await expect(rows).toHaveCount(3);
+  });
+
+  test("keeps the point it has while what is typed is not a number", async ({
     page,
   }) => {
     await libraryItem(page, "Polygon").click();
 
-    const points = page.getByRole("textbox", { name: "Points", exact: true });
-    await points.fill("10, 10\nnot a point");
-    await points.press("Tab");
+    await pointInput(page, 0, "X").fill("");
+    await pointInput(page, 0, "X").press("Tab");
 
     await expect(selectedChip(page)).toHaveText("81 × 71");
+  });
+
+  test("a handle on a point moves that point alone, as one undo step", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+    const first = pointInput(page, 0, "X");
+    const second = pointInput(page, 1, "X");
+    const firstBefore = await first.inputValue();
+    const secondBefore = await second.inputValue();
+
+    const handle = page.locator('[data-point-handle="1"]');
+    const box = await handle.boundingBox();
+    if (!box) throw new Error("The point handle is not visible");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - 40, y, { steps: 6 });
+    await page.mouse.up();
+
+    await expect(second).not.toHaveValue(secondBefore);
+    await expect(first).toHaveValue(firstBefore);
+
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(second).toHaveValue(secondBefore);
   });
 
   test("an arc is outlined as the circle it is cut from", async ({ page }) => {
@@ -461,6 +530,18 @@ test.describe("the shapes with their own geometry", () => {
     await expect(
       page.locator(".selection.selected [data-resize-handle]")
     ).toHaveCount(0);
+  });
+
+  test("a second debug grid is not added: the first one is selected", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Debug grid").click();
+    await libraryItem(page, "QR code").click();
+    await libraryItem(page, "Debug grid").click();
+
+    await expect(
+      page.locator(".layer-row", { hasText: "debug_grid" })
+    ).toHaveCount(1);
   });
 
   test("a polygon is moved with all of its points by dragging it", async ({
@@ -850,6 +931,115 @@ test.describe("snap guides", () => {
     expect(Math.abs((after?.x ?? 0) - first.x)).toBeLessThanOrEqual(1);
   });
 
+  test("a resized element is pulled to the edge of another and a guide is drawn", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Rectangle").click();
+    const first = await page.locator(".selection.selected").boundingBox();
+    if (!first) throw new Error("The rectangle is not visible");
+    await libraryItem(page, "Rectangle").click();
+    const handle = page.locator(".selected [data-resize-handle='e']");
+    const grip = await handle.boundingBox();
+    if (!grip) throw new Error("The east handle is not visible");
+    const second = await page.locator(".selection.selected").boundingBox();
+    if (!second) throw new Error("The second rectangle is not visible");
+    const gripX = grip.x + grip.width / 2;
+    const gripY = grip.y + grip.height / 2;
+    const toFirstEdge = first.x + first.width - (second.x + second.width);
+
+    await page.mouse.move(gripX, gripY);
+    await page.mouse.down();
+    // Start the drag well away from the other edge, then bring it back to within a few pixels.
+    await page.mouse.move(gripX + 40, gripY, { steps: 4 });
+    await page.mouse.move(gripX + toFirstEdge + 2, gripY, { steps: 6 });
+
+    await expect(page.locator(".guide.vertical").first()).toBeVisible();
+    await page.mouse.up();
+    await expect(page.locator(".guide")).toHaveCount(0);
+    const after = await page.locator(".selection.selected").boundingBox();
+    const right = (after?.x ?? 0) + (after?.width ?? 0);
+    expect(Math.abs(right - (first.x + first.width))).toBeLessThanOrEqual(1);
+  });
+
+  test("Escape during a resize puts the size back", async ({ page }) => {
+    await libraryItem(page, "Rectangle").click();
+    const before = await page.locator(".selection.selected").boundingBox();
+    const grip = await page
+      .locator(".selected [data-resize-handle='e']")
+      .boundingBox();
+    if (!before || !grip) throw new Error("The rectangle is not visible");
+    const gripX = grip.x + grip.width / 2;
+    const gripY = grip.y + grip.height / 2;
+
+    await page.mouse.move(gripX, gripY);
+    await page.mouse.down();
+    await page.mouse.move(gripX + 60, gripY, { steps: 6 });
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+
+    const after = await page.locator(".selection.selected").boundingBox();
+    expect(after?.width).toBeCloseTo(before.width, 0);
+  });
+
+  const place = async (
+    page: Page,
+    box: { x: number; y: number; width: number; height: number }
+  ) => {
+    await libraryItem(page, "Rectangle").click();
+    for (const [label, value] of [
+      ["X", box.x],
+      ["Y", box.y],
+      ["Width", box.width],
+      ["Height", box.height],
+    ] as const) {
+      const field = page.getByLabel(label, { exact: true });
+      await field.fill(String(value));
+      await field.press("Tab");
+    }
+  };
+
+  test("a moved element stays on the edge of the working area until it is pulled away", async ({
+    page,
+  }) => {
+    await place(page, { x: 100, y: 100, width: 80, height: 40 });
+    const box = await page.locator(".selection.selected").boundingBox();
+    const area = await page.locator(".working-area").boundingBox();
+    if (!box || !area) throw new Error("The rectangle is not visible");
+    const startX = box.x + box.width / 2;
+    const startY = box.y + box.height / 2;
+    const toEdge = area.x - box.x;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    // Three pixels short of the edge it is pulled onto it; ten short is beyond a fresh pull.
+    await page.mouse.move(startX + toEdge + 3, startY, { steps: 8 });
+    await page.mouse.move(startX + toEdge + 10, startY, { steps: 4 });
+    const held = await page.locator(".selection.selected").boundingBox();
+    await page.mouse.up();
+
+    expect(Math.abs((held?.x ?? 0) - area.x)).toBeLessThanOrEqual(1);
+  });
+
+  test("the equal gaps on both sides of a moved element are shown with their size", async ({
+    page,
+  }) => {
+    await place(page, { x: 20, y: 100, width: 100, height: 40 });
+    await place(page, { x: 300, y: 100, width: 100, height: 40 });
+    await place(page, { x: 156, y: 100, width: 100, height: 40 });
+    const box = await page.locator(".selection.selected").boundingBox();
+    if (!box) throw new Error("The rectangle is not visible");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 8, y, { steps: 6 });
+
+    await expect(page.locator(".spacing span")).toHaveText(["40", "40"]);
+    await page.mouse.up();
+    await expect(page.locator(".spacing")).toHaveCount(0);
+  });
+
   test("holding Ctrl while dragging turns snapping off", async ({ page }) => {
     await libraryItem(page, "Rectangle").click();
     const first = await page.locator(".selection.selected").boundingBox();
@@ -1100,5 +1290,70 @@ test.describe("elements outside the canvas", () => {
     await expect(
       page.locator("details.inspector-section > summary").first()
     ).toHaveText("Layout");
+  });
+});
+
+test.describe("the sections of the properties", () => {
+  test("show a dot when something is not at its default, and reset puts it back in one step", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Circle").click();
+    const appearance = page.locator(".inspector-section", {
+      hasText: "Appearance",
+    });
+    await expect(appearance.locator(".changed-dot")).toHaveCount(0);
+    await expect(appearance.getByRole("button", { name: "reset" })).toHaveCount(
+      0
+    );
+
+    const outlineWidth = page.getByLabel("Outline width", { exact: true });
+    const defaultWidth = await outlineWidth.inputValue();
+    await outlineWidth.fill("7");
+    await outlineWidth.press("Tab");
+    await expect(appearance.locator(".changed-dot")).toHaveCount(1);
+
+    await appearance.getByRole("button", { name: "reset" }).click();
+
+    await expect(outlineWidth).toHaveValue(defaultWidth);
+    await expect(appearance.locator(".changed-dot")).toHaveCount(0);
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(outlineWidth).toHaveValue("7");
+  });
+
+  test("the Hidden switch of an element hides it and shows it again", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Circle").click();
+    const hidden = page.getByRole("switch", { name: "Hidden" });
+    await expect(hidden).not.toBeChecked();
+
+    await hidden.click();
+
+    await expect(hidden).toBeChecked();
+    await expect(page.locator(".selection.selected.hidden")).toHaveCount(1);
+    await hidden.click();
+    await expect(page.locator(".selection.selected.hidden")).toHaveCount(0);
+  });
+});
+
+test.describe("the advanced fields", () => {
+  test("are closed until asked for, and open again when one has been changed", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Text").click();
+    const advanced = page.locator(".properties .disclosure", {
+      hasText: "Advanced",
+    });
+    const strokeWidth = page.getByLabel("Stroke width", { exact: true });
+    await expect(strokeWidth).toBeHidden();
+
+    await advanced.locator("summary").click();
+    await strokeWidth.fill("2");
+    await strokeWidth.press("Tab");
+    // Another element and back: the panel is built again, now with a changed advanced field.
+    await libraryItem(page, "Circle").click();
+    await page.locator(".layer-row", { hasText: "text_1" }).click();
+
+    await expect(strokeWidth).toBeVisible();
   });
 });

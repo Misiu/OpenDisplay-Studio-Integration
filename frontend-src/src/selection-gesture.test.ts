@@ -5,6 +5,7 @@ import {
   moveSelection,
   snapTargetsFor,
   moveTargets,
+  resizeWithSnapping,
   selectionBox,
 } from "./selection-gesture";
 import {
@@ -222,5 +223,81 @@ describe("snapping a circle to the centre of the canvas", () => {
     expect(Number.isInteger(circle.primitive.y)).toBe(true);
     expect(Math.abs(circle.primitive.x - 240)).toBeLessThanOrEqual(1);
     expect(Math.abs(circle.primitive.y - 400)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("resizeWithSnapping", () => {
+  const parent = { x: 0, y: 0, width: 400, height: 300 };
+  const options = { snapEnabled: true };
+
+  const rightEdge = (item: StudioItem): number | undefined => {
+    if (item.kind !== "primitive" || !("x_end" in item.primitive)) {
+      return undefined;
+    }
+    return item.primitive.x_end;
+  };
+
+  it("pulls the dragged edge onto the edge of a sibling and reports the guide", () => {
+    // The rectangle spans x 20..119; a sibling's left edge is at 163.
+    const dashboard = dashboardWith([rectangleItem("r")], { snapSize: 1 });
+    const targets = {
+      siblings: [{ x: 163, y: 200, width: 40, height: 40 }],
+      parent,
+    };
+
+    const resized = resizeWithSnapping(
+      rectangleItem("r"),
+      "e",
+      false,
+      { dx: 42, dy: 0 },
+      dashboard,
+      options,
+      targets
+    );
+
+    // The box now ends on the line 163; its last pixel, `x_end`, is the one before it.
+    expect(rightEdge(resized.item)).toBe(162);
+    expect(resized.guides.some((guide) => guide.position === 163)).toBe(true);
+  });
+
+  it("leaves the edge where the pointer put it when nothing is within reach", () => {
+    const dashboard = dashboardWith([rectangleItem("r")], { snapSize: 1 });
+    const targets = {
+      siblings: [{ x: 300, y: 200, width: 40, height: 40 }],
+      parent,
+    };
+
+    const resized = resizeWithSnapping(
+      rectangleItem("r"),
+      "e",
+      false,
+      { dx: 42, dy: 0 },
+      dashboard,
+      options,
+      targets
+    );
+
+    expect(rightEdge(resized.item)).toBe(161);
+    expect(resized.guides).toEqual([]);
+  });
+
+  it("does not pull when snapping is off", () => {
+    const dashboard = dashboardWith([rectangleItem("r")], { snapSize: 1 });
+    const targets = {
+      siblings: [{ x: 163, y: 200, width: 40, height: 40 }],
+      parent,
+    };
+
+    const resized = resizeWithSnapping(
+      rectangleItem("r"),
+      "e",
+      false,
+      { dx: 42, dy: 0 },
+      dashboard,
+      { snapEnabled: false },
+      targets
+    );
+
+    expect(rightEdge(resized.item)).toBe(161);
   });
 });

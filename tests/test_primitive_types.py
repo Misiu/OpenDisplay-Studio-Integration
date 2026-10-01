@@ -240,6 +240,7 @@ class TestNestedAndListFields:
                 "point_size": 3,
                 "point_color": "black",
                 "span_gaps": False,
+                "value_scale": 1,
             }
         ]
 
@@ -249,6 +250,27 @@ class TestNestedAndListFields:
     def test_a_plot_needs_between_one_and_four_valid_series(self, data: Any) -> None:
         with pytest.raises(DashboardValidationError, match=r"primitive\.data"):
             self.check(self.plot(data=data))
+
+    def test_a_series_can_scale_its_values_by_a_fraction(self) -> None:
+        plot = self.check(
+            self.plot(data=[{"entity": "sensor.power", "value_scale": 0.001}])
+        )
+
+        assert DEFAULT_PRIMITIVES.element(plot)["data"][0]["value_scale"] == 0.001
+
+    @pytest.mark.parametrize("scale", ["2", True, float("inf"), 10**7])
+    def test_a_series_rejects_a_scale_that_is_no_usable_number(
+        self, scale: Any
+    ) -> None:
+        series = {"entity": "sensor.power", "value_scale": scale}
+
+        with pytest.raises(DashboardValidationError, match="value_scale"):
+            self.check(self.plot(data=[series]))
+
+    @pytest.mark.parametrize("entity", ["temperature", "Sensor.Temp", "sensor.", ""])
+    def test_a_series_needs_an_entity_id(self, entity: str) -> None:
+        with pytest.raises(DashboardValidationError, match=r"data\[0\]\.entity"):
+            self.check(self.plot(data=[{"entity": entity}]))
 
     def test_axes_are_optional_and_validated_when_given(self) -> None:
         plot = self.check(self.plot(yaxis={"grid_style": "dashed"}))

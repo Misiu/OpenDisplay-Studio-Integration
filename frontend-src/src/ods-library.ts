@@ -1,7 +1,7 @@
 import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { filterCatalog, groupByCategory } from "./catalog";
+import { filterCatalog, groupByCategory, primitiveSections } from "./catalog";
 import { inputValue } from "./dom";
 import { emit } from "./events";
 import { strings } from "./strings";
@@ -22,6 +22,10 @@ interface CatalogEntry {
   icon: string;
   /** An installed package, not one that ships with the integration. */
   user?: boolean;
+}
+/** A primitive of the library, which sorts them into sections by category. */
+interface PrimitiveEntry extends CatalogEntry {
+  category: string;
 }
 interface DragGhost {
   value: string;
@@ -116,6 +120,32 @@ export class OdsLibrary extends LitElement {
         font: 700 10px var(--code-font-family, monospace);
         letter-spacing: 0.11em;
         text-transform: uppercase;
+      }
+      .section-toggle {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        gap: 7px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        cursor: pointer;
+      }
+      /* The arrow that says a section opens and closes, as in the properties. */
+      .section-toggle::before {
+        content: "";
+        flex: none;
+        border: 4px solid transparent;
+        border-left: 5px solid currentColor;
+        border-right: 0;
+        transition: transform 0.12s;
+      }
+      .section-toggle[aria-expanded="true"]::before {
+        transform: rotate(90deg);
       }
       .catalog-category {
         margin: 10px 0 6px;
@@ -259,6 +289,8 @@ export class OdsLibrary extends LitElement {
   @property({ type: Boolean }) public collapsed = false;
 
   @state() private searchText = "";
+  /** The sections the viewer folded; a search opens them all. */
+  @state() private foldedSections = new Set<string>();
   @state() private ghost?: DragGhost;
   private suppressClick = false;
   private stopGesture?: () => void;
@@ -324,6 +356,55 @@ export class OdsLibrary extends LitElement {
     });
   }
 
+  private toggleSection(id: string): void {
+    const folded = new Set(this.foldedSections);
+    if (folded.has(id)) folded.delete(id);
+    else folded.add(id);
+    this.foldedSections = folded;
+  }
+
+  private isOpen(id: string): boolean {
+    return this.searchText !== "" || !this.foldedSections.has(id);
+  }
+
+  private sectionName(id: string): string {
+    const names: Record<string, string> = strings.library.sections;
+    return names[id] ?? id;
+  }
+
+  /** A section: a header that folds it, the count of what it holds, and its body. */
+  private renderSection(
+    id: string,
+    name: string,
+    count: number,
+    body: TemplateResult,
+    extra: TemplateResult | typeof nothing = nothing
+  ): TemplateResult {
+    const open = this.isOpen(id);
+    return html`
+      <section class="catalog-section" data-section=${id}>
+        <header>
+          <button
+            type="button"
+            class="section-toggle"
+            aria-expanded=${open ? "true" : "false"}
+            aria-label=${
+              open
+                ? strings.library.collapseSection(name)
+                : strings.library.expandSection(name)
+            }
+            @click=${() => this.toggleSection(id)}
+          >
+            <span>${name}</span>
+          </button>
+          <span class="count">${count}</span>
+          ${extra}
+        </header>
+        ${open ? body : nothing}
+      </section>
+    `;
+  }
+
   private onSearchInput(event: Event): void {
     this.searchText = inputValue(event);
   }
@@ -360,14 +441,8 @@ export class OdsLibrary extends LitElement {
 
   private renderEntries(
     entries: CatalogEntry[],
-    kind: EntryKind,
-    emptyText: string
+    kind: EntryKind
   ): TemplateResult {
-    if (!entries.length) {
-      return html`
-        <p class="empty-result">${emptyText}</p>
-      `;
-    }
     return html`
       ${entries.map((entry) => this.renderEntry(entry, kind))}
     `;
@@ -443,6 +518,83 @@ export class OdsLibrary extends LitElement {
     `;
   }
 
+  private renderContainerSection(containers: CatalogEntry[]): TemplateResult {
+    return this.renderSection(
+      "containers",
+      strings.library.containers,
+      containers.length,
+      html`
+        <div class="catalog-grid">
+          ${this.renderEntries(containers, "container")}
+        </div>
+      `
+    );
+  }
+
+  private renderPrimitiveSection(
+    id: string,
+    entries: PrimitiveEntry[]
+  ): TemplateResult {
+    return this.renderSection(
+      id,
+      this.sectionName(id),
+      entries.length,
+      html`
+        <div class="catalog-grid">
+          ${this.renderEntries(entries, "primitive")}
+        </div>
+      `
+    );
+  }
+
+  private renderWidgetSection(widgets: WidgetDefinition[]): TemplateResult {
+    const reload = html`
+      <button
+        class="icon-button"
+        title=${strings.library.reloadWidgets}
+        aria-label=${strings.library.reloadWidgets}
+        @click=${this.reloadWidgets}
+      >
+        <ha-icon icon="mdi:refresh"></ha-icon>
+      </button>
+    `;
+    return this.renderSection(
+      "widgets",
+      strings.library.widgets,
+      widgets.length,
+      html`
+        ${this.renderWidgetErrors()} ${this.renderWidgetEntries(widgets)}
+      `,
+      reload
+    );
+  }
+
+  /** The sections of the library; while searching, those with nothing found are left out. */
+  private renderSections(
+    containers: CatalogEntry[],
+    primitives: PrimitiveEntry[],
+    widgets: WidgetDefinition[]
+  ): TemplateResult {
+    const searching = this.searchText !== "";
+    if (
+      searching &&
+      !containers.length &&
+      !primitives.length &&
+      !widgets.length
+    ) {
+      return html`
+        <p class="empty-result">${strings.library.noMatches}</p>
+      `;
+    }
+    return html`
+      ${searching && containers.length === 0 ? nothing : this.renderContainerSection(containers)}
+      ${primitiveSections(primitives).map((section) =>
+        this.renderPrimitiveSection(section.id, section.entries)
+      )}
+      ${searching && widgets.length === 0 ? nothing : this.renderWidgetSection(widgets)}
+    `;
+  }
+
   protected render(): TemplateResult {
     if (this.collapsed) {
       return html`
@@ -462,7 +614,7 @@ export class OdsLibrary extends LitElement {
     const widgets = filterCatalog(this.widgets, this.searchText);
     const containers = filterCatalog([containerEntry()], this.searchText);
     const primitives = filterCatalog(this.primitives, this.searchText).map(
-      (definition): CatalogEntry => ({ ...definition, id: definition.type })
+      (definition): PrimitiveEntry => ({ ...definition, id: definition.type })
     );
     return html`
       ${this.renderGhost()}
@@ -492,39 +644,7 @@ export class OdsLibrary extends LitElement {
           />
         </label>
         <div class="catalog-scroll">
-          <section class="catalog-section">
-            <header>
-              <span>${strings.library.widgets}</span>
-              <span class="count">${widgets.length}</span>
-              <button
-                class="icon-button"
-                title=${strings.library.reloadWidgets}
-                aria-label=${strings.library.reloadWidgets}
-                @click=${this.reloadWidgets}
-              >
-                <ha-icon icon="mdi:refresh"></ha-icon>
-              </button>
-            </header>
-            ${this.renderWidgetErrors()} ${this.renderWidgetEntries(widgets)}
-          </section>
-          <section class="catalog-section">
-            <header>
-              <span>${strings.library.primitives}</span>
-              <span class="count">${primitives.length}</span>
-            </header>
-            <div class="catalog-grid">
-              ${this.renderEntries(primitives, "primitive", strings.library.noPrimitives)}
-            </div>
-          </section>
-          <section class="catalog-section">
-            <header>
-              <span>${strings.library.containers}</span>
-              <span class="count">${containers.length}</span>
-            </header>
-            <div class="catalog-grid">
-              ${this.renderEntries(containers, "container", strings.library.noContainers)}
-            </div>
-          </section>
+          ${this.renderSections(containers, primitives, widgets)}
         </div>
       </aside>
     `;

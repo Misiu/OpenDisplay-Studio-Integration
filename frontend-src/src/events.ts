@@ -43,6 +43,8 @@ export interface OdsEventMap {
   "anchor-change": { anchor: string };
   "color-change": { color: string | null };
   "primitive-field-change": { key: string; value: unknown };
+  /** A section was reset: these fields go back to their defaults, in one step. */
+  "primitive-fields-reset": { values: Record<string, unknown> };
   "send-to-device": undefined;
   // library
   "library-collapse": { collapsed: boolean };
@@ -57,6 +59,7 @@ export interface OdsEventMap {
   "group-enter": { groupId: string };
   "items-transform": { items: StudioItem[] };
   /** `drop` is set when one element was moved: where the pointer ended, on the display. */
+  "gesture-cancel": { before: Dashboard };
   "item-transform-end": {
     before: Dashboard;
     drop?: { itemId: string; x: number; y: number };
@@ -79,6 +82,7 @@ export interface OdsEventMap {
   command: { id: CommandId; itemId?: string };
   "viewport-change": Viewport;
   "zoom-change": { zoom: number };
+  "zoom-step": { direction: 1 | -1 };
   "zoom-reset": undefined;
   "zoom-fit": undefined;
   // structure and inspector

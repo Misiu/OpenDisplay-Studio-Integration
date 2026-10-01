@@ -23,6 +23,7 @@ from custom_components.opendisplay_studio.validation import (
     MAX_TEXT_LENGTH,
     boolean,
     color,
+    decimal,
     fail,
     integer,
     reach,
@@ -40,6 +41,7 @@ SHAPES: Final = frozenset(
         "flags",
         "color",
         "string",
+        "entity",
         "text",
         "font",
         "icon",
@@ -55,6 +57,8 @@ GEOMETRIES: Final = frozenset(
     {"point", "box", "line", "radial", "points", "pattern", "image", "canvas"}
 )
 BOXED_GEOMETRIES: Final = frozenset({"box", "line"})
+ENTITY_ID_PATTERN: Final = re.compile(r"^[a-z0-9_]+\.[a-z0-9_]+$")
+ENTITY_ID_LENGTH: Final = 255
 FONT_PATTERN: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,127}$")
 MAX_POINTS: Final = 256
 MAX_ICONS: Final = 64
@@ -384,13 +388,12 @@ def _check_number(
     name: str,
     display: tuple[int, int],
     _relative: bool,  # noqa: FBT001
-) -> int:
-    return integer(
-        value,
-        name,
-        _limit(field["min"], *display),
-        _limit(field["max"], *display),
-    )
+) -> float:
+    minimum = _limit(field["min"], *display)
+    maximum = _limit(field["max"], *display)
+    if field.get("decimal"):
+        return decimal(value, name, minimum, maximum)
+    return integer(value, name, minimum, maximum)
 
 
 def _check_coordinate(
@@ -439,6 +442,7 @@ _CHECKS: dict[str, Check] = {
         value, name, display, relative=relative
     ),
     "icons": lambda _f, value, name, _d, _r: _icons(value, name),
+    "entity": lambda _f, value, name, _d, _r: _entity_id(value, name),
 }
 
 
@@ -471,6 +475,13 @@ def _flags(value: object, options: list[str], name: str) -> str:
     if not chosen or not chosen <= set(options):
         fail(f"{name} must be a list of {', '.join(options)}")
     return ",".join(option for option in options if option in chosen)
+
+
+def _entity_id(value: object, name: str) -> str:
+    text = string(value, name, ENTITY_ID_LENGTH)
+    if ENTITY_ID_PATTERN.fullmatch(text) is None:
+        fail(f"{name} must be an entity id such as sensor.temperature")
+    return text
 
 
 def _font(value: object, name: str) -> str:

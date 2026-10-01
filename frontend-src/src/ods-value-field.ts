@@ -12,6 +12,7 @@ import "./ods-property-field";
 import { ANCHOR_POSITIONS, isAnchorPosition } from "./ods-anchor-picker";
 import "./ods-color-picker";
 import "./ods-icon-field";
+import "./ods-points-field";
 import "./ods-image-field";
 import "./ods-popover";
 
@@ -204,13 +205,6 @@ export class OdsValueField extends LitElement {
     ) {
       this.change(target.value);
     }
-  }
-
-  /** Points and icons are typed as lines of text; text that is not a value yet is ignored. */
-  private onListChange(event: Event): void {
-    if (!(event.target instanceof HTMLTextAreaElement)) return;
-    const value = valueFromForm(this.field, event.target.value);
-    if (value !== UNCHANGED) this.change(value);
   }
 
   private onSwitchChange(event: Event): void {
@@ -443,16 +437,14 @@ export class OdsValueField extends LitElement {
     `;
   }
 
-  private renderList(): TemplateResult {
+  /** The points of a polygon are edited row by row. */
+  private renderPoints(): TemplateResult {
     return html`
-      <textarea
-        class="compact mono"
-        rows="3"
-        aria-label=${this.field.label}
-        .value=${String(valueForForm(this.field, this.value) ?? "")}
+      <ods-points-field
+        .field=${this.field}
+        .value=${this.value}
         .disabled=${this.disabled}
-        @change=${this.onListChange}
-      ></textarea>
+      ></ods-points-field>
     `;
   }
 
@@ -547,7 +539,7 @@ export class OdsValueField extends LitElement {
       case "image":
         return this.renderImage();
       case "points":
-        return this.renderList();
+        return this.renderPoints();
       case "object":
       case "objects":
         return this.renderNested();

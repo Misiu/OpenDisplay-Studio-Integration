@@ -8,6 +8,9 @@ from unittest.mock import patch
 
 from homeassistant.util import dt as dt_util
 from odl_renderer import generate_image  # type: ignore[import-untyped]
+from pytest_homeassistant_custom_component.components.recorder.common import (
+    async_wait_recording_done,
+)
 
 from custom_components.opendisplay_studio.history import (
     RecordedHistory,
@@ -17,6 +20,7 @@ from custom_components.opendisplay_studio.history import (
 from .test_measure import HEIGHT, WIDTH, ink_box
 
 if TYPE_CHECKING:
+    from homeassistant.components.recorder import Recorder
     from homeassistant.core import HomeAssistant
 
 FETCH = "custom_components.opendisplay_studio.history._async_fetch"
@@ -114,3 +118,28 @@ async def test_the_state_in_force_at_the_start_opens_the_plot() -> None:
 
     assert [item["state"] for item in records] == ["10", "20"]
     assert records[0]["last_changed"] == start.isoformat()
+
+
+async def test_a_plot_is_drawn_from_what_a_real_recorder_stored(
+    recorder_mock: Recorder, hass: HomeAssistant
+) -> None:
+    hass.states.async_set("sensor.temperature", "10")
+    hass.states.async_set("sensor.temperature", "20")
+    hass.states.async_set("sensor.mode", "eco")
+    await async_wait_recording_done(hass)
+    warnings: list[str] = []
+
+    kept, history = await async_prefetch_history(
+        hass,
+        [plot_element("sensor.temperature"), plot_element("sensor.mode")],
+        warnings,
+    )
+
+    assert [element["data"][0]["entity"] for element in kept] == ["sensor.temperature"]
+    assert warnings == ["History plot: no numeric history for sensor.mode"]
+    assert history is not None
+    end = dt_util.utcnow()
+    stored = await history.get_history(
+        ["sensor.temperature"], end - timedelta(hours=1), end
+    )
+    assert [record["state"] for record in stored["sensor.temperature"]] == ["10", "20"]

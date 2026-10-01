@@ -17,6 +17,7 @@ import {
 } from "./item-fields";
 import { VISIBLE_KEY } from "./expressions";
 import { itemIcon } from "./item-labels";
+import { changedFields, defaultValues } from "./section-defaults";
 import { itemLocks } from "./locks";
 import { backgroundFields, backgroundFormData } from "./container-fields";
 import { selectionBox } from "./selection-gesture";
@@ -129,7 +130,7 @@ export class OdsInspector extends LitElement {
       .inspector-title {
         min-height: 46px;
         display: grid;
-        grid-template-columns: 30px minmax(0, 1fr);
+        grid-template-columns: 30px minmax(0, 1fr) auto;
         align-items: center;
         gap: 7px;
         padding: 6px 12px;
@@ -181,6 +182,35 @@ export class OdsInspector extends LitElement {
       }
       .section-body {
         padding: 0 14px 12px;
+      }
+      .changed-dot {
+        flex: none;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--studio-accent);
+      }
+      .reset-link {
+        margin-inline-start: auto;
+        padding: 2px 4px;
+        border: 0;
+        background: transparent;
+        color: var(--studio-accent);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-transform: none;
+        cursor: pointer;
+      }
+      .reset-link:hover {
+        text-decoration: underline;
+      }
+      .hidden-switch {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--studio-muted);
+        font-size: 11px;
       }
       .field-grid {
         display: grid;
@@ -445,7 +475,8 @@ export class OdsInspector extends LitElement {
   private renderHeader(
     title: string,
     subtitle: string,
-    icon: string
+    icon: string,
+    trailing: TemplateResult | typeof nothing = nothing
   ): TemplateResult {
     return html`
       <div class="inspector-title">
@@ -454,7 +485,29 @@ export class OdsInspector extends LitElement {
           <h2>${title}</h2>
           <p>${subtitle}</p>
         </div>
+        ${trailing}
       </div>
+    `;
+  }
+
+  private toggleHidden(): void {
+    emit(this, "command", { id: "toggle-hidden" });
+  }
+
+  /** The `Hidden` switch in the header of an element. */
+  private renderHiddenSwitch(item: StudioItem): TemplateResult {
+    return html`
+      <label class="hidden-switch">
+        <span>${strings.inspector.hiddenSwitch}</span>
+        <input
+          type="checkbox"
+          role="switch"
+          aria-checked=${item.hidden ? "true" : "false"}
+          aria-label=${strings.inspector.hiddenSwitch}
+          .checked=${item.hidden}
+          @change=${this.toggleHidden}
+        />
+      </label>
     `;
   }
 
@@ -827,14 +880,60 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  /**
+   * The header of a section that can be reset: a dot while something differs from the
+   * defaults, and the `reset` link that puts it all back in one undo step.
+   */
+  private renderResettableSummary(
+    label: string,
+    changed: boolean,
+    reset: () => void
+  ): TemplateResult {
+    const onReset = (event: Event): void => {
+      // The link sits in the summary: it must not also open or close the section.
+      event.preventDefault();
+      event.stopPropagation();
+      reset();
+    };
+    return html`
+      <summary>
+        ${label}
+        ${
+          changed
+            ? html`
+                <span
+                  class="changed-dot"
+                  title=${strings.inspector.changed}
+                ></span>
+                <button
+                  type="button"
+                  class="reset-link"
+                  title=${strings.inspector.resetTitle(label)}
+                  @click=${onReset}
+                >
+                  ${strings.inspector.reset}
+                </button>
+              `
+            : nothing
+        }
+      </summary>
+    `;
+  }
+
   private renderOptionSection(
     item: WidgetItem,
     section: WidgetOptionSection,
     open: boolean
   ): TemplateResult {
+    const resettable = section.fields.filter(
+      (field) => field.default !== undefined
+    );
+    const changed = changedFields(resettable, item.widget.options);
+    const reset = (): void =>
+      emit(this, "widget-options-change", { value: defaultValues(changed) });
     return html`
       <details class="inspector-section" ?open=${open}>
-        <summary>${section.section}</summary>
+        ${this.renderResettableSummary(section.section, changed.length > 0, reset)}
         <div class="section-body">
           <div class="value-fields">
             ${section.fields.map((field) =>
@@ -912,23 +1011,65 @@ export class OdsInspector extends LitElement {
 
   private renderValueFields(
     item: PrimitiveItem,
-    section: PrimitiveField["section"]
+    section: PrimitiveField["section"],
+    advanced = false
   ): TemplateResult {
+    const fields = primitiveFields(item, this.primitives, section).filter(
+      (field) => Boolean(field.advanced) === advanced
+    );
     return html`
       <div class="value-fields">
-        ${primitiveFields(item, this.primitives, section).map((field) =>
-          this.renderValueField(item, field)
-        )}
+        ${fields.map((field) => this.renderValueField(item, field))}
       </div>
     `;
   }
 
+  /** The rarely needed fields, closed until asked for or until one has been changed. */
+  private renderAdvancedFields(
+    item: PrimitiveItem
+  ): TemplateResult | typeof nothing {
+    const advanced = primitiveFields(
+      item,
+      this.primitives,
+      "appearance"
+    ).filter((field) => field.advanced);
+    if (advanced.length === 0) return nothing;
+    const changed = changedFields(
+      advanced,
+      { ...item.primitive },
+      item.expressions
+    );
+    return html`
+      <details class="disclosure" ?open=${changed.length > 0}>
+        <summary>${strings.inspector.advanced}</summary>
+        ${this.renderValueFields(item, "appearance", true)}
+      </details>
+    `;
+  }
+
   private renderAppearance(item: PrimitiveItem): TemplateResult {
+    const resettable = primitiveFields(
+      item,
+      this.primitives,
+      "appearance"
+    ).filter((field) => !field.required || field.default !== undefined);
+    const changed = changedFields(
+      resettable,
+      { ...item.primitive },
+      item.expressions
+    );
+    const reset = (): void =>
+      emit(this, "primitive-fields-reset", { values: defaultValues(changed) });
     return html`
       <details class="inspector-section" open>
-        <summary>${strings.inspector.appearance}</summary>
+        ${this.renderResettableSummary(
+          strings.inspector.appearance,
+          changed.length > 0,
+          reset
+        )}
         <div class="section-body">
           ${this.renderValueFields(item, "appearance")}
+          ${this.renderAdvancedFields(item)}
         </div>
       </details>
     `;
@@ -1033,7 +1174,8 @@ export class OdsInspector extends LitElement {
       ${this.renderHeader(
         item.name,
         strings.inspector.subtitle(this.kindOf(item), item.locked),
-        itemIcon(item, this.widgets, this.primitives)
+        itemIcon(item, this.widgets, this.primitives),
+        this.renderHiddenSwitch(item)
       )}
       ${this.renderGroupedChip(item)} ${this.renderLockedNotice(item)}
       ${this.renderItemSections(item)}

@@ -324,6 +324,24 @@ export const setPrimitiveField = (
   item.primitive = { ...item.primitive, [key]: value } as Primitive;
 };
 
+/**
+ * Put fields of a primitive back to `values`, their defaults, and drop the expressions that
+ * drove them: a reset is a plain value again.
+ */
+export const resetPrimitiveFields = (
+  dashboard: Dashboard,
+  itemId: string,
+  values: Record<string, unknown>
+): void => {
+  const item = findItem(dashboard.items, itemId);
+  if (item?.kind !== "primitive" || item.locked) return;
+  // The values are the defaults of the definition, which decided what a field may hold.
+  item.primitive = { ...item.primitive, ...values } as Primitive;
+  if (!item.expressions) return;
+  for (const key of Object.keys(values)) delete item.expressions[key];
+  if (Object.keys(item.expressions).length === 0) delete item.expressions;
+};
+
 export const updatePrimitiveFields = (
   dashboard: Dashboard,
   itemId: string,

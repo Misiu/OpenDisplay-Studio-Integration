@@ -25,6 +25,8 @@ MAX_ITEMS: Final = 256
 MAX_DEPTH: Final = 8
 MAX_NAME_LENGTH: Final = 100
 CONTAINER_KIND: Final = "container"
+# The grid covers the whole display, so a second one would only draw over the first.
+DEBUG_GRID: Final = "debug_grid"
 # Every kind of item can be shown or hidden by a template.
 ITEM_EXPRESSIONS: Final = frozenset({"visible"})
 
@@ -40,6 +42,7 @@ class _Walk:
     ids: set[str] = field(default_factory=set)
     used_names: set[str] = field(default_factory=set)
     count: int = 0
+    has_debug_grid: bool = False
 
 
 def _item_state(value: dict[str, Any], walk: _Walk) -> dict[str, Any]:
@@ -171,6 +174,10 @@ def _validate_primitive(
     if not isinstance(primitive_type, str):
         fail(f"Unsupported primitive type: {primitive_type}")
     # An unknown type has no fields; `normalize` reports it.
+    if primitive_type == DEBUG_GRID:
+        if walk.has_debug_grid:
+            fail("a dashboard can have only one debug_grid")
+        walk.has_debug_grid = True
     known = walk.primitives.field_keys(primitive_type)
     single = _single(relative=relative)
     if relative:

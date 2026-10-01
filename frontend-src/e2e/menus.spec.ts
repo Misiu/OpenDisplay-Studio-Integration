@@ -425,7 +425,7 @@ test.describe("keyboard shortcuts", () => {
     await page.keyboard.press("Control+0");
     await expect(readout).toHaveText("100%");
     await page.keyboard.press("Control+-");
-    await expect(readout).toHaveText("80%");
+    await expect(readout).toHaveText("83%");
   });
 
   test("shows every shortcut in a dialog opened from the help button or with ?", async ({

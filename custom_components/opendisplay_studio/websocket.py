@@ -14,6 +14,7 @@ from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
 from .delivery import async_render_dashboard
 from .devices import async_send_to_device, list_display_devices
+from .fonts import available_fonts, font_directories, with_font_options
 from .icons import SORTED_ICON_NAMES
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
@@ -49,12 +50,14 @@ def _error(
     }
 )
 @websocket_api.require_admin
-def websocket_bootstrap(
+@websocket_api.async_response
+async def websocket_bootstrap(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
     """Return authoritative dashboards, widgets, and primitive metadata."""
+    fonts = await hass.async_add_executor_job(available_fonts, font_directories(hass))
     connection.send_result(
         msg["id"],
         {
@@ -62,7 +65,9 @@ def websocket_bootstrap(
             "dashboards": _store(hass).list(),
             "widgets": _widgets(hass).definitions(msg["language"]),
             "widgetErrors": [error.as_dict() for error in _widgets(hass).errors],
-            "primitives": DEFAULT_PRIMITIVES.localized(msg["language"]),
+            "primitives": with_font_options(
+                DEFAULT_PRIMITIVES.localized(msg["language"]), fonts
+            ),
         },
     )
 

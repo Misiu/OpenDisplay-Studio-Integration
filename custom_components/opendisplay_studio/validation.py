@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import NoReturn
 
 from custom_components.opendisplay_studio.palette import SUPPORTED_COLORS
@@ -36,6 +37,15 @@ def integer(value: object, name: str, minimum: int, maximum: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         fail(f"{name} must be an integer")
     if not minimum <= value <= maximum:
+        fail(f"{name} must be between {minimum} and {maximum}")
+    return value
+
+
+def decimal(value: object, name: str, minimum: int, maximum: int) -> float:
+    """Return `value` when it is a finite number (not a bool) inside the range."""
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        fail(f"{name} must be a number")
+    if not math.isfinite(value) or not minimum <= value <= maximum:
         fail(f"{name} must be between {minimum} and {maximum}")
     return value
 

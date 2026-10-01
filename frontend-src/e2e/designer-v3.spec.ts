@@ -29,6 +29,8 @@ const moveCatalogPointerToCanvas = async (
   position = { x: 0.68, y: 0.62 }
 ) => {
   const source = page.getByRole("button", { name });
+  // The library is long; the widgets are at its end.
+  await source.scrollIntoViewIfNeeded();
   const sourceBox = await source.boundingBox();
   const canvasBox = await page.locator(".canvas").boundingBox();
   if (!sourceBox || !canvasBox) {
@@ -229,7 +231,7 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
   await expect(page.getByRole("spinbutton", { name: "Snap size" })).toHaveValue(
     "5"
   );
-  await expect(page.getByRole("button", { name: /^grid$/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^grid$/i })).toHaveCount(1);
 
   const toolboxBox = await page.locator(".toolbox").boundingBox();
   const searchBox = await page.locator(".search").boundingBox();
@@ -254,7 +256,10 @@ test("shows dashboard navigation, a searchable catalog and pixel-based canvas se
     name: "Search widgets and primitives",
   });
   await search.fill("rect");
-  await expect(page.getByText("No matching widgets")).toBeVisible();
+  // A section with nothing found is left out while searching.
+  await expect(
+    page.locator("ods-library [data-section='widgets']")
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Rectangle", exact: true })
   ).toBeVisible();
@@ -958,14 +963,15 @@ test("supports zoom, wheel panning, reset, fit and resizable collapsible panels"
   const stage = page.locator(".canvas-stage");
   const viewport = page.locator(".canvas-viewport");
   const initialTransform = await viewport.getAttribute("style");
-  await stage.dispatchEvent("wheel", { deltaY: -120, shiftKey: true });
+  await stage.dispatchEvent("wheel", { deltaY: -120, ctrlKey: true });
   await expect(page.locator(".zoom-readout")).not.toHaveText("100%");
   await stage.dispatchEvent("wheel", { deltaY: 70 });
   expect(await viewport.getAttribute("style")).not.toBe(initialTransform);
-  await stage.dispatchEvent("wheel", { deltaY: 80, altKey: true });
+  await page.getByRole("button", { name: "Pan", exact: true }).click();
+  await stage.dispatchEvent("wheel", { deltaY: 80 });
   await page.getByRole("button", { name: "2×" }).click();
   await expect(page.locator(".zoom-readout")).toHaveText("200%");
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(page.locator(".zoom-readout")).toHaveText("100%");
   await page.getByRole("button", { name: "Fit" }).click();
 

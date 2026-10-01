@@ -4,7 +4,10 @@ import {
   transformItem,
   translateItem,
   workingArea,
+  type ResizeItemOptions,
 } from "./geometry";
+import { remeasured } from "./primitive-shape";
+import type { ResizeHandle } from "./resize";
 import {
   absoluteBox,
   containerBox,
@@ -16,9 +19,14 @@ import {
 } from "./tree";
 import {
   alignmentGuides,
+  draggedEdge,
+  resizeSnapAdjustment,
   snapAdjustment,
+  spacingMarks,
   type Guide,
   type SnapTargets,
+  type SpacingMark,
+  type StickyState,
 } from "./snapping";
 import type { Dashboard, ItemBounds, StudioItem } from "./types";
 
@@ -85,6 +93,69 @@ const targetsBox = (targets: MoveTarget[]): ItemBounds =>
     )
   );
 
+export interface SnappedResize {
+  item: StudioItem;
+  /** The lines the dragged edges now share with siblings and the parent. */
+  guides: Guide[];
+}
+
+/** The box of `item` on the display; text and codes take the size they were measured at. */
+const resizedBox = (
+  original: StudioItem,
+  item: StudioItem,
+  measured: ItemBounds | undefined,
+  offset: Offset
+): ItemBounds => {
+  const size =
+    measured && original.kind === "primitive" && item.kind === "primitive"
+      ? remeasured(original.primitive, item.primitive, measured)
+      : measured;
+  return absoluteBox(itemBounds(item, size), offset);
+};
+
+/**
+ * `original` resized by dragging `handle` by (dx, dy). With `targets`, the dragged edges
+ * are pulled onto the lines of the siblings and the parent when they come close, and the
+ * lines they then share are returned as guides. Without them it is the plain resize.
+ */
+export const resizeWithSnapping = (
+  original: StudioItem,
+  handle: ResizeHandle,
+  shiftKey: boolean,
+  delta: { dx: number; dy: number },
+  dashboard: Dashboard,
+  options: ResizeItemOptions,
+  targets?: SnapTargets
+): SnappedResize => {
+  const offset = options.offset ?? { x: 0, y: 0 };
+  const run = (dx: number, dy: number, snapEnabled: boolean): StudioItem =>
+    transformItem(
+      original,
+      { mode: "resize", handle, shiftKey },
+      dx,
+      dy,
+      dashboard,
+      { ...options, snapEnabled }
+    );
+  const boxOf = (item: StudioItem): ItemBounds =>
+    resizedBox(original, item, options.measured, offset);
+  const first = run(delta.dx, delta.dy, options.snapEnabled);
+  if (!targets || !options.snapEnabled) return { item: first, guides: [] };
+  const firstBox = boxOf(first);
+  const pull = resizeSnapAdjustment(firstBox, handle, targets);
+  if (pull.dx === 0 && pull.dy === 0) {
+    return { item: first, guides: alignmentGuides(firstBox, targets) };
+  }
+  // The grid has already rounded the edges; ask for them where they are, plus the pull,
+  // and without the grid so it does not round the pull away.
+  const startBox = boxOf(original);
+  const moved = (axis: "x" | "y"): number =>
+    (draggedEdge(firstBox, handle, axis) ?? 0) -
+    (draggedEdge(startBox, handle, axis) ?? 0);
+  const pulled = run(moved("x") + pull.dx, moved("y") + pull.dy, false);
+  return { item: pulled, guides: alignmentGuides(boxOf(pulled), targets) };
+};
+
 /**
  * What the moved items snap to: the visible siblings of the main item and the box they
  * live in, a container or the working area, all on the display.
@@ -140,7 +211,8 @@ export const moveSelection = (
   dy: number,
   dashboard: Dashboard,
   snapEnabled: boolean,
-  snap?: SnapTargets
+  snap?: SnapTargets,
+  sticky?: StickyState
 ): StudioItem[] => {
   const primary = targets.find((target) => target.original.id === primaryId);
   if (!primary) return [];
@@ -158,7 +230,11 @@ export const moveSelection = (
   let actualY = after.y - before.y;
   if (snap && snapEnabled && !primary.original.locked) {
     const box = targetsBox(targets);
-    const pull = snapAdjustment({ ...box, x: box.x + dx, y: box.y + dy }, snap);
+    const pull = snapAdjustment(
+      { ...box, x: box.x + dx, y: box.y + dy },
+      snap,
+      sticky
+    );
     if (pull.dx !== 0) actualX = dx + pull.dx;
     if (pull.dy !== 0) actualY = dy + pull.dy;
   }
@@ -189,6 +265,23 @@ export const movedGuides = (
       : [];
   });
   return boxes.length > 0 ? alignmentGuides(boundingBox(boxes), snap) : [];
+};
+
+/** The badges for the equal gaps between the moved items and their siblings. */
+export const movedSpacing = (
+  targets: MoveTarget[],
+  moved: StudioItem[],
+  snap: SnapTargets
+): SpacingMark[] => {
+  const boxes = targets.flatMap((target) => {
+    const item = moved.find((entry) => entry.id === target.original.id);
+    return item
+      ? [absoluteBox(itemBounds(item, target.measured), target.offset)]
+      : [];
+  });
+  return boxes.length > 0
+    ? spacingMarks(boundingBox(boxes), snap.siblings)
+    : [];
 };
 
 /** The box of an item on the display. */

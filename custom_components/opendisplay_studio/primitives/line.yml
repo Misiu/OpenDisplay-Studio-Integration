@@ -1,5 +1,5 @@
 type: line
-order: 30
+order: 20
 name: Line
 description: Solid or dashed line between two points
 icon: mdi:vector-line
@@ -59,6 +59,7 @@ fields:
     default: 5
     unit: px
     section: appearance
+    advanced: true
   - key: space_length
     label: "Gap length"
     shape: number
@@ -67,3 +68,4 @@ fields:
     default: 3
     unit: px
     section: appearance
+    advanced: true

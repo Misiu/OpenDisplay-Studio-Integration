@@ -1,5 +1,5 @@
 type: circle
-order: 40
+order: 24
 name: Circle
 description: Filled or outlined circle
 icon: mdi:circle-outline

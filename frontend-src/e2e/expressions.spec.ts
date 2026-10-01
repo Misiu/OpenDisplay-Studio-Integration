@@ -103,9 +103,11 @@ test.describe("locks", () => {
   const dragBy = async (page: Page, dx: number, dy: number) => {
     const box = await reading(page).boundingBox();
     if (!box) throw new Error("The element is not visible");
-    await page.mouse.move(box.x + 6, box.y + 6);
+    // From the centre: the corners are resize handles.
+    const centre = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    await page.mouse.move(centre.x, centre.y);
     await page.mouse.down();
-    await page.mouse.move(box.x + 6 + dx, box.y + 6 + dy, { steps: 6 });
+    await page.mouse.move(centre.x + dx, centre.y + dy, { steps: 6 });
     await page.mouse.up();
     return box;
   };

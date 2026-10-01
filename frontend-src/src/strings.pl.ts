@@ -134,6 +134,15 @@ export const polish: StringsOverride = {
   },
 
   library: {
+    sections: {
+      text: "Tekst",
+      shapes: "Kształty",
+      media: "Ikony i media",
+      data: "Dane",
+      debug: "Narzędzia",
+    },
+    collapseSection: (name: string): string => `Zwiń ${name}`,
+    expandSection: (name: string): string => `Rozwiń ${name}`,
     title: "Biblioteka",
     heading: "Elementy",
     expand: "Rozwiń katalog elementów",
@@ -152,7 +161,7 @@ export const polish: StringsOverride = {
         ? `Widżety przeładowane — załadowano: ${loaded}`
         : `Widżety przeładowane — załadowano: ${loaded}, błędy: ${failed}`,
     reloadFailed: "Nie udało się przeładować widżetów",
-    noPrimitives: "Brak pasujących prymitywów",
+    noMatches: "Brak pasujących elementów",
     entryHint: (description: string): string =>
       `${description} Kliknij lub przeciągnij, aby dodać.`,
   },
@@ -168,6 +177,11 @@ export const polish: StringsOverride = {
   },
 
   inspector: {
+    advanced: "Zaawansowane",
+    reset: "przywróć",
+    resetTitle: (section: string): string => `Przywróć domyślne: ${section}`,
+    changed: "Zmienione względem domyślnych",
+    hiddenSwitch: "Ukryty",
     alignInParent: "Wyrównaj w rodzicu",
     expand: "Rozwiń inspektor",
     rail: "Warstwy",
@@ -222,6 +236,13 @@ export const polish: StringsOverride = {
       `${count} ${plural(count, "warstwa", "warstwy", "warstw")}`,
     padding: (pixels: number): string => `Margines ${pixels}px`,
     snap: (pixels: number): string => `Przyciąganie ${pixels}px`,
+    grid: "Siatka",
+    gridTitle: "Pokaż punkty siatki przyciągania",
+    pan: "Przesuwanie",
+    panTitle:
+      "Przesuwanie: kółko przesuwa widok, Ctrl + kółko zmienia powiększenie. Wyłączone: kółko zmienia powiększenie.",
+    pointHandle: (name: string, number: number): string =>
+      `Przesuń punkt ${number}: ${name}`,
     resizeHandle: (name: string, side: string): string =>
       `Zmień rozmiar: ${name}, od strony ${side}`,
     sides: {
@@ -300,6 +321,13 @@ export const polish: StringsOverride = {
     left: "Przesuń w lewo",
     right: "Przesuń w prawo",
     empty: "Brak ikony",
+  },
+
+  pointsField: {
+    x: "X",
+    y: "Y",
+    add: "Dodaj punkt",
+    remove: (number: number): string => `Usuń punkt ${number}`,
   },
 
   imagePicker: {

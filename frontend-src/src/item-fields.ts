@@ -221,8 +221,12 @@ const formSelector = (
         number: {
           min: typeof field.min === "number" ? field.min : undefined,
           max: typeof field.max === "number" ? field.max : undefined,
+          step: field.decimal ? "any" : undefined,
+          mode: field.decimal ? "box" : undefined,
         },
       };
+    case "entity":
+      return { entity: {} };
     case "points":
     case "icons":
       return { text: { multiline: true } };

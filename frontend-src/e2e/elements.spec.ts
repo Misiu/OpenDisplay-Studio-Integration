@@ -196,8 +196,7 @@ test.describe("ods-library", () => {
       name: "Search widgets and primitives",
     });
     await search.fill("zzzz");
-    await expect(page.getByText("No matching widgets")).toBeVisible();
-    await expect(page.getByText("No matching primitives")).toBeVisible();
+    await expect(page.getByText("No matching elements")).toBeVisible();
     await search.fill("");
     await expect(
       page.getByRole("button", { name: "Rectangle", exact: true })
@@ -420,20 +419,20 @@ test.describe("ods-zoom-bar", () => {
       /active/
     );
     await page.getByRole("button", { name: "Zoom in" }).click();
-    await expect(zoomReadout(page)).toHaveText("225%");
+    await expect(zoomReadout(page)).toHaveText("240%");
     await page.getByRole("button", { name: "Zoom out" }).click();
     await expect(zoomReadout(page)).toHaveText("200%");
 
     for (let step = 0; step < 12; step += 1) {
       await page.getByRole("button", { name: "Zoom in" }).click();
     }
-    await expect(zoomReadout(page)).toHaveText("400%");
+    await expect(zoomReadout(page)).toHaveText("500%");
     for (let step = 0; step < 20; step += 1) {
       await page.getByRole("button", { name: "Zoom out" }).click();
     }
     await expect(zoomReadout(page)).toHaveText("25%");
 
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
     await expect(zoomReadout(page)).toHaveText("100%");
     await page.getByRole("button", { name: "Fit" }).click();
     await expect(zoomReadout(page)).not.toHaveText("100%");
@@ -451,7 +450,7 @@ test.describe("ods-canvas", () => {
     page,
   }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
     await kitchenWidget(page).click();
     await expect(xField(page)).toHaveValue("40");
 
@@ -473,11 +472,117 @@ test.describe("ods-canvas", () => {
     await expect(xField(page)).toHaveValue("68");
   });
 
+  test("the Grid toggle shows and hides the dots of the snap grid", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    const area = page.locator(".working-area");
+    const dots = () =>
+      area.evaluate((element) => getComputedStyle(element).backgroundImage);
+    expect(await dots()).not.toBe("none");
+
+    await page.getByRole("button", { name: /^Grid$/ }).click();
+
+    expect(await dots()).toBe("none");
+    await page.getByRole("button", { name: /^Grid$/ }).click();
+    expect(await dots()).not.toBe("none");
+  });
+
+  test("Space and drag moves the view, not the element under the pointer", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await kitchenWidget(page).click();
+    await expect(xField(page)).toHaveValue("40");
+    const viewport = page.locator(".canvas-viewport");
+    const transformBefore = await viewport.getAttribute("style");
+
+    await page.keyboard.down("Space");
+    await dragBy(page, kitchenWidget(page), 50, 30);
+    await page.keyboard.up("Space");
+
+    await expect(xField(page)).toHaveValue("40");
+    expect(await viewport.getAttribute("style")).not.toBe(transformBefore);
+  });
+
+  test("Ctrl and drag on the empty stage moves the view", async ({ page }) => {
+    await openKitchen(page);
+    const stage = await page.locator(".canvas-stage").boundingBox();
+    if (!stage) throw new Error("The stage is not visible");
+    const viewport = page.locator(".canvas-viewport");
+    const transformBefore = await viewport.getAttribute("style");
+
+    await page.keyboard.down("Control");
+    await page.mouse.move(stage.x + 20, stage.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(stage.x + 70, stage.y + 50, { steps: 5 });
+    await page.mouse.up();
+    await page.keyboard.up("Control");
+
+    expect(await viewport.getAttribute("style")).not.toBe(transformBefore);
+  });
+
+  test("the handles and the size badge keep their size on screen at any zoom", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await kitchenWidget(page).click();
+    const handle = page.locator(".selected [data-resize-handle='nw']");
+    const badge = page.locator(".selected .selection-size");
+    const handleBefore = await handle.boundingBox();
+    const badgeBefore = await badge.boundingBox();
+
+    await page.getByRole("button", { name: "2×" }).click();
+
+    const handleAfter = await handle.boundingBox();
+    const badgeAfter = await badge.boundingBox();
+    expect(handleAfter?.width).toBeCloseTo(handleBefore?.width ?? 0, 0);
+    expect(badgeAfter?.height).toBeCloseTo(badgeBefore?.height ?? 0, 0);
+  });
+
+  test("Escape cancels a drag and leaves nothing to undo", async ({ page }) => {
+    await openKitchen(page);
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await kitchenWidget(page).click();
+    await expect(xField(page)).toHaveValue("40");
+
+    const box = await kitchenWidget(page).boundingBox();
+    if (!box) throw new Error("Widget is not visible");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 40, y, { steps: 6 });
+    await expect(xField(page)).not.toHaveValue("40");
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+
+    await expect(xField(page)).toHaveValue("40");
+    await expect(page.getByRole("button", { name: "Undo" })).toBeDisabled();
+  });
+
+  test("a burst of arrow presses is one undo step", async ({ page }) => {
+    await openKitchen(page);
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
+    await kitchenWidget(page).click();
+    await expect(xField(page)).toHaveValue("40");
+
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect(xField(page)).toHaveValue("43");
+
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(xField(page)).toHaveValue("40");
+  });
+
   test("does not move a locked element but still selects it", async ({
     page,
   }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
     await revealRowActions(page);
     await page.getByRole("button", { name: "Lock Kitchen" }).click();
     await dragBy(page, kitchenWidget(page), 80);
@@ -499,7 +604,7 @@ test.describe("ods-canvas", () => {
     page,
   }) => {
     await openKitchen(page);
-    await page.getByRole("button", { name: "Reset" }).click();
+    await page.getByRole("button", { name: "Reset", exact: true }).click();
     const previewsBefore = await callCount(
       page,
       "opendisplay_studio/compose_preview"

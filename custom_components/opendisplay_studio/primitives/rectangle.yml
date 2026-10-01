@@ -1,5 +1,5 @@
 type: rectangle
-order: 20
+order: 21
 name: Rectangle
 description: Filled or outlined rectangle
 icon: mdi:rectangle-outline

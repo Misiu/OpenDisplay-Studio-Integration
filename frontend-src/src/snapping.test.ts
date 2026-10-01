@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { alignmentGuides, snapAdjustment, type SnapTargets } from "./snapping";
+import {
+  alignmentGuides,
+  resizeSnapAdjustment,
+  snapAdjustment,
+  spacingMarks,
+  type SnapTargets,
+  type StickyState,
+} from "./snapping";
 
 const box = (x: number, y: number, width: number, height: number) => ({
   x,
@@ -118,5 +125,113 @@ describe("the pull", () => {
     expect(alignmentGuides(moved, { siblings: [], parent })).toContainEqual(
       expect.objectContaining({ axis: "x", position: 240.5 })
     );
+  });
+});
+
+describe("resizeSnapAdjustment", () => {
+  const sibling = { siblings: [box(300, 300, 100, 40)], parent };
+
+  it("pulls the dragged right edge to a line of a sibling within reach", () => {
+    // The right edge is at 253; the sibling's left edge is at 300, its centre at 350.
+    expect(resizeSnapAdjustment(box(200, 50, 53, 30), "e", sibling)).toEqual({
+      dx: 0,
+      dy: 0,
+    });
+    expect(resizeSnapAdjustment(box(200, 50, 98, 30), "e", sibling)).toEqual({
+      dx: 2,
+      dy: 0,
+    });
+  });
+
+  it("pulls the dragged left edge, and only that one", () => {
+    // Left edge 297 is 3 from the sibling's 300; the right edge 400 is on a line too.
+    expect(resizeSnapAdjustment(box(297, 50, 103, 30), "w", sibling)).toEqual({
+      dx: 3,
+      dy: 0,
+    });
+  });
+
+  it("pulls both dragged edges of a corner, each along its own axis", () => {
+    const targets = { siblings: [box(300, 300, 100, 40)], parent };
+
+    expect(resizeSnapAdjustment(box(200, 200, 98, 98), "se", targets)).toEqual({
+      dx: 2,
+      dy: 2,
+    });
+  });
+
+  it("pulls an edge to the edge of the parent, and leaves the edges not dragged alone", () => {
+    // The top edge is 6 from the parent's top, the left edge 3 from its left: only north moves.
+    expect(resizeSnapAdjustment(box(3, 6, 60, 60), "n", alone)).toEqual({
+      dx: 0,
+      dy: -6,
+    });
+  });
+});
+
+describe("snapAdjustment held by the parent", () => {
+  it("keeps a box on an edge of the parent until the pointer is twelve pixels away", () => {
+    const sticky: StickyState = {};
+
+    // 6 from the left edge: pulled onto it, and remembered.
+    expect(snapAdjustment(box(6, 100, 50, 30), alone, sticky).dx).toBe(-6);
+    // 11 away: beyond the eight of a fresh pull, but still held.
+    expect(snapAdjustment(box(11, 100, 50, 30), alone, sticky).dx).toBe(-11);
+    // 13 away: let go.
+    expect(snapAdjustment(box(13, 100, 50, 30), alone, sticky).dx).toBe(0);
+    // And once let go it does not come back from 11, which is out of reach.
+    expect(snapAdjustment(box(11, 100, 50, 30), alone, sticky).dx).toBe(0);
+  });
+
+  it("does not hold anything without a state to remember it in", () => {
+    expect(snapAdjustment(box(6, 100, 50, 30), alone).dx).toBe(-6);
+    expect(snapAdjustment(box(11, 100, 50, 30), alone).dx).toBe(0);
+  });
+
+  it("lets go of the parent for a line that is nearer", () => {
+    const sticky: StickyState = {};
+    const targets = { siblings: [box(206, 300, 40, 40)], parent };
+    snapAdjustment(box(6, 100, 50, 30), targets, sticky);
+
+    // 10 from the parent's edge, but 1 from the sibling's left edge.
+    expect(snapAdjustment(box(205, 100, 50, 30), targets, sticky).dx).toBe(1);
+  });
+});
+
+describe("equal spacing", () => {
+  const row = {
+    siblings: [box(0, 100, 100, 40), box(300, 100, 100, 40)],
+    parent: box(0, 0, 800, 480),
+  };
+
+  it("pulls a box to the middle of the gap between two siblings of its row", () => {
+    // The room between them is 200 wide; a 60 wide box sits best at x 170.
+    expect(snapAdjustment(box(165, 100, 60, 40), row).dx).toBe(5);
+    expect(snapAdjustment(box(176, 100, 60, 40), row).dx).toBe(-6);
+    expect(snapAdjustment(box(185, 100, 60, 40), row).dx).toBe(0);
+  });
+
+  it("ignores siblings that are not in its row", () => {
+    expect(snapAdjustment(box(165, 300, 60, 40), row).dx).toBe(0);
+  });
+});
+
+describe("spacingMarks", () => {
+  const siblings = [box(0, 100, 100, 40), box(300, 100, 100, 40)];
+
+  it("shows both gaps when they are equal within three pixels", () => {
+    expect(spacingMarks(box(170, 100, 60, 40), siblings)).toEqual([
+      { axis: "x", from: 100, to: 170, across: 120 },
+      { axis: "x", from: 230, to: 300, across: 120 },
+    ]);
+    expect(spacingMarks(box(171, 100, 60, 40), siblings)).toHaveLength(2);
+  });
+
+  it("shows nothing when the gaps differ by more", () => {
+    expect(spacingMarks(box(180, 100, 60, 40), siblings)).toEqual([]);
+  });
+
+  it("shows nothing without a sibling on both sides", () => {
+    expect(spacingMarks(box(170, 100, 60, 40), [siblings[0]])).toEqual([]);
   });
 });

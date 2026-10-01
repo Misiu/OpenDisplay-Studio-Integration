@@ -43,9 +43,8 @@ fields:
     nested:
       - key: entity
         label: Entity
-        shape: string
+        shape: entity
         required: true
-        maxLength: 255
       - key: color
         label: Color
         shape: color
@@ -83,6 +82,13 @@ fields:
         label: "Join across gaps"
         shape: boolean
         default: false
+      - key: value_scale
+        label: "Value multiplier"
+        shape: number
+        decimal: true
+        min: -1000000
+        max: 1000000
+        default: 1
     section: appearance
   - key: duration
     label: "Time span"
@@ -111,6 +117,7 @@ fields:
     shape: boolean
     default: false
     section: appearance
+    advanced: true
   - key: font
     label: Font
     shape: font
@@ -122,6 +129,7 @@ fields:
     shape: boolean
     default: false
     section: appearance
+    advanced: true
   - key: ylegend
     label: "Value labels"
     shape: object

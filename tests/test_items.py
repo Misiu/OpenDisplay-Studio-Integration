@@ -209,6 +209,25 @@ class TestContainers:
             validated([{**text(), "children": []}])
 
 
+class TestDebugGrid:
+    @staticmethod
+    def grid(item_id: str) -> dict[str, Any]:
+        return {
+            "id": item_id,
+            "kind": "primitive",
+            "primitive": {"type": "debug_grid"},
+        }
+
+    def test_one_grid_is_accepted_even_inside_a_container(self) -> None:
+        items = validated([container("c", [self.grid("g")])])
+
+        assert items[0]["children"][0]["primitive"]["type"] == "debug_grid"
+
+    def test_a_second_grid_is_rejected_wherever_it_is(self) -> None:
+        with pytest.raises(DashboardValidationError, match="only one debug_grid"):
+            validated([self.grid("g1"), container("c", [self.grid("g2")])])
+
+
 class TestExpressions:
     def test_an_expression_field_is_stored_verbatim_beside_its_literal(self) -> None:
         item = validated(

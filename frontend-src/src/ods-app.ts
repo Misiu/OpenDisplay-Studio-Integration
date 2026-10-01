@@ -11,7 +11,7 @@ import {
 import { nudgeItems } from "./nudge";
 import { itemLocks } from "./locks";
 import { bringToFront, sendToBack, stepItems } from "./tree";
-import { withZoom } from "./viewport";
+import { zoomStep } from "./viewport";
 import {
   canGroup,
   canUngroup,
@@ -23,6 +23,7 @@ import {
   ungroupItem,
 } from "./container-ops";
 import {
+  allItems,
   ancestors,
   replaceItem,
   containerAt,
@@ -60,6 +61,7 @@ import {
   setWidgetOptions,
   setWidgetPicks,
   toggleItemState,
+  resetPrimitiveFields,
   setPrimitiveField,
   updatePrimitiveFields,
 } from "./dashboard-ops";
@@ -123,7 +125,6 @@ const ancestorIds = (dashboard: Dashboard, id: string): string[] =>
   ancestors(dashboard.items, id).map((container) => container.id);
 
 const CLIPBOARD_KEY = "opendisplay_studio.clipboard";
-const ZOOM_STEP = 1.25;
 const MENU_WIDTH = 228;
 const MENU_ROW = 36;
 const MENU_SEPARATOR = 9;
@@ -164,6 +165,9 @@ const writeClipboard = (data: ClipboardData): void => {
     // The clipboard still works in memory when storage is not available.
   }
 };
+
+const NUDGE_BURST_MS = 300;
+const DEBUG_GRID_TYPE = "debug_grid";
 
 /** The move a nudge makes: `step` pixels in a direction. */
 const nudgeVector = (
@@ -846,6 +850,8 @@ export class OdsApp extends LitElement {
     });
   }
 
+  private lastNudgeAt = 0;
+
   private nudge(
     itemIds: string[],
     direction: "left" | "right" | "up" | "down",
@@ -855,16 +861,23 @@ export class OdsApp extends LitElement {
     if (!dashboard) return;
     const step = snapped ? dashboard.display.snapSize : 1;
     const { dx, dy } = nudgeVector(direction, step);
-    this.mutate((next) => {
-      nudgeItems(
-        next,
-        itemIds,
-        dx,
-        dy,
-        workingArea(next),
-        (item) => itemLocks(item, this.primitives).position.length === 0
-      );
-    });
+    // A burst of key presses is one undo step: only its first press is recorded.
+    const startsBurst = Date.now() - this.lastNudgeAt > NUDGE_BURST_MS;
+    this.lastNudgeAt = Date.now();
+    this.mutate(
+      (next) => {
+        nudgeItems(
+          next,
+          itemIds,
+          dx,
+          dy,
+          workingArea(next),
+          (item) => itemLocks(item, this.primitives).position.length === 0
+        );
+      },
+      true,
+      startsBurst
+    );
   }
 
   private zoom(how: "in" | "out" | "reset"): void {
@@ -872,8 +885,7 @@ export class OdsApp extends LitElement {
       this.canvas?.resetView();
       return;
     }
-    const factor = how === "in" ? ZOOM_STEP : 1 / ZOOM_STEP;
-    this.viewport = withZoom(this.viewport, this.viewport.zoom * factor);
+    this.viewport = zoomStep(this.viewport, how === "in" ? 1 : -1);
   }
 
   // --- context menus -------------------------------------------------------------
@@ -1112,9 +1124,23 @@ export class OdsApp extends LitElement {
         ? createWidgetItem(definition, x, y, dashboard)
         : undefined;
     }
+    if (type === DEBUG_GRID_TYPE && this.selectExistingGrid(dashboard)) {
+      return undefined;
+    }
     const item = createPrimitiveItem(this.primitives, type, x, y, dashboard);
     if (!item) this.error = strings.app.unsupportedPrimitive(type);
     return item;
+  }
+
+  /** A dashboard has one debug grid: adding another selects the one it has. */
+  private selectExistingGrid(dashboard: Dashboard): boolean {
+    const grid = allItems(dashboard.items).find(
+      (item) =>
+        item.kind === "primitive" && item.primitive.type === DEBUG_GRID_TYPE
+    );
+    if (!grid) return false;
+    this.selectItem(grid.id);
+    return true;
   }
 
   /** Adds a catalog item centred on a display point, inside `parentId` when given. */
@@ -1345,6 +1371,12 @@ export class OdsApp extends LitElement {
     );
   }
 
+  /** Escape during a drag or resize puts the dashboard back, without an undo step. */
+  private onGestureCancel(event: OdsEvent<"gesture-cancel">): void {
+    this.current = event.detail.before;
+    this.schedulePreview();
+  }
+
   private onItemTransformEnd(event: OdsEvent<"item-transform-end">): void {
     const { before, drop } = event.detail;
     if (drop) this.dropOnContainer(drop.itemId, drop.x, drop.y);
@@ -1481,6 +1513,15 @@ export class OdsApp extends LitElement {
     this.mutate((next) => setPrimitiveField(next, id, key, value, measured));
   }
 
+  private onPrimitiveFieldsReset(
+    event: OdsEvent<"primitive-fields-reset">
+  ): void {
+    const { values } = event.detail;
+    this.mutate((next) =>
+      resetPrimitiveFields(next, this.selectedItemId, values)
+    );
+  }
+
   private onPrimitiveChange(event: OdsEvent<"primitive-change">): void {
     const { value } = event.detail;
     this.mutate((next) =>
@@ -1615,6 +1656,7 @@ export class OdsApp extends LitElement {
           @viewport-change=${this.onViewportChange}
           @items-transform=${this.onItemsTransform}
           @item-transform-end=${this.onItemTransformEnd}
+          @gesture-cancel=${this.onGestureCancel}
           @snap-toggle=${this.toggleSnap}
         ></ods-canvas>
         <ods-inspector
@@ -1639,6 +1681,7 @@ export class OdsApp extends LitElement {
           @widgets-reload=${this.reloadWidgets}
           @primitive-change=${this.onPrimitiveChange}
           @primitive-field-change=${this.onPrimitiveFieldChange}
+          @primitive-fields-reset=${this.onPrimitiveFieldsReset}
           @align-in-parent=${this.onAlignInParent}
           @container-background-change=${this.onContainerBackgroundChange}
           @expression-change=${this.onExpressionChange}

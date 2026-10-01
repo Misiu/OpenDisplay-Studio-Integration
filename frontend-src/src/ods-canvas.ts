@@ -3,16 +3,18 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { commandById, commandView, type CommandId } from "./commands";
-import { isMacPlatform } from "./dom";
+import { isMacPlatform, isTypingTarget } from "./dom";
 import { emit, type OdsEvent } from "./events";
-import { transformItem, workingArea, type ItemGesture } from "./geometry";
+import { snapToGrid, workingArea } from "./geometry";
 import {
   boxBetween,
   marqueeSelection,
   moveSelection,
   displayBoxOf,
   movedGuides,
+  movedSpacing,
   moveTargets,
+  resizeWithSnapping,
   snapTargetsFor,
   type MeasuredBox,
   selectionBox,
@@ -28,9 +30,11 @@ import {
   type Placed,
 } from "./tree";
 import { trackPointerGesture } from "./pointer-gesture";
+import { movePoint, pointsOf, type Point } from "./polygon-points";
 import { remeasured } from "./primitive-shape";
-import type { Guide } from "./snapping";
+import type { Guide, SpacingMark, StickyState } from "./snapping";
 import { itemLocks } from "./locks";
+import { clamp } from "./math";
 import { isResizable } from "./primitive-resize";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
 import { baseStyles } from "./studio-styles";
@@ -40,19 +44,25 @@ import type {
   Dashboard,
   ItemBounds,
   PrimitiveDefinition,
+  PolygonPrimitive,
+  PrimitiveItem,
   StudioItem,
   WidgetDefinition,
 } from "./types";
 import {
   DEFAULT_VIEWPORT,
   fitViewport,
+  panBy,
+  toggleFit,
   withZoom,
   wheelViewport,
+  zoomStep,
   type Viewport,
 } from "./viewport";
 import "./ods-zoom-bar";
 
 const GESTURE_THRESHOLD = 3;
+const MIDDLE_BUTTON = 1;
 
 /** A box in display pixels as percentages of the display, so it scales with the canvas. */
 const percentBox = (
@@ -187,7 +197,13 @@ export class OdsCanvas extends LitElement {
         transform-origin: center;
         overflow-anchor: none;
       }
+      .view-drag,
+      .view-drag .selection {
+        cursor: grab;
+      }
       .canvas {
+        --line: calc(1px * var(--ui, 1));
+        --line-strong: calc(2px * var(--ui, 1));
         position: absolute;
         left: 50%;
         top: 50%;
@@ -216,7 +232,7 @@ export class OdsCanvas extends LitElement {
         position: absolute;
         pointer-events: none;
         z-index: 2;
-        border: 1px dashed rgba(3, 169, 244, 0.72);
+        border: var(--line) dashed rgba(3, 169, 244, 0.72);
         background-image: radial-gradient(
           circle,
           rgba(3, 169, 244, 0.22) 0.7px,
@@ -224,20 +240,25 @@ export class OdsCanvas extends LitElement {
         );
         background-size: max(12px, var(--snap-size)) max(12px, var(--snap-size));
       }
+      .working-area.no-grid {
+        background-image: none;
+      }
       .selection {
         position: absolute;
         z-index: 3;
-        min-width: 3px;
-        min-height: 3px;
-        border: 1px solid transparent;
+        min-width: calc(3px * var(--ui, 1));
+        min-height: calc(3px * var(--ui, 1));
+        border: var(--line) solid transparent;
         cursor: move;
         touch-action: none;
       }
+      /* A dashed outline just outside the element, so hovering never moves its border. */
       .selection:hover {
-        border-color: rgba(3, 169, 244, 0.65);
+        outline: var(--line) dashed rgba(3, 169, 244, 0.65);
+        outline-offset: calc(2px * var(--ui, 1));
       }
       .selection.selected {
-        border: 2px solid #00aef0;
+        border: var(--line-strong) solid #00aef0;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
       }
       .selection.container {
@@ -248,24 +269,26 @@ export class OdsCanvas extends LitElement {
         border-color: rgba(3, 169, 244, 0.5);
       }
       .selection.holds-selection {
-        border: 1px solid rgba(3, 169, 244, 0.7);
+        border: var(--line) solid rgba(3, 169, 244, 0.7);
       }
       .selection.group {
         border-style: dashed;
       }
       .selection.entered {
-        border: 2px dashed #00aef0;
+        border: var(--line-strong) dashed #00aef0;
         background: rgba(3, 169, 244, 0.05);
       }
       .selection.drop-target {
-        border: 2px solid #00aef0;
+        border: var(--line-strong) solid #00aef0;
         background: rgba(3, 169, 244, 0.14);
       }
       .group-hint {
         position: absolute;
         left: 0;
-        bottom: calc(100% + 6px);
+        bottom: calc(100% + 6px * var(--ui, 1));
         min-width: max-content;
+        transform: scale(var(--ui, 1));
+        transform-origin: left bottom;
         padding: 2px 7px;
         border-radius: 4px;
         color: #fff;
@@ -276,7 +299,7 @@ export class OdsCanvas extends LitElement {
       .multi-selection {
         position: absolute;
         z-index: 5;
-        border: 2px dashed #00aef0;
+        border: var(--line-strong) dashed #00aef0;
         pointer-events: none;
       }
       .guide {
@@ -285,18 +308,49 @@ export class OdsCanvas extends LitElement {
         border: 0 dashed #e91e8c;
         pointer-events: none;
       }
+      .spacing {
+        position: absolute;
+        z-index: 7;
+        border: 0 solid #e91e8c;
+        pointer-events: none;
+      }
+      .spacing.horizontal {
+        height: 0;
+        border-top-width: var(--line);
+      }
+      .spacing.vertical {
+        width: 0;
+        border-left-width: var(--line);
+      }
+      .spacing span {
+        position: absolute;
+        padding: 1px 4px;
+        border-radius: 3px;
+        color: #fff;
+        background: #e91e8c;
+        font: 700 9px/1.2 var(--code-font-family, monospace);
+        transform: translate(-50%, -50%) scale(var(--ui, 1));
+      }
+      .spacing.horizontal span {
+        left: 50%;
+        top: 0;
+      }
+      .spacing.vertical span {
+        left: 0;
+        top: 50%;
+      }
       .guide.vertical {
         width: 0;
-        border-left-width: 1px;
+        border-left-width: var(--line);
       }
       .guide.horizontal {
         height: 0;
-        border-top-width: 1px;
+        border-top-width: var(--line);
       }
       .marquee {
         position: absolute;
         z-index: 6;
-        border: 1px solid #00aef0;
+        border: var(--line) solid #00aef0;
         background: rgba(0, 174, 240, 0.12);
         pointer-events: none;
       }
@@ -306,12 +360,14 @@ export class OdsCanvas extends LitElement {
       }
       .selection.hidden {
         background: rgba(3, 169, 244, 0.09);
-        border: 1px dashed rgba(3, 169, 244, 0.75);
+        border: var(--line) dashed rgba(3, 169, 244, 0.75);
       }
       .hidden-label {
         position: absolute;
         left: 3px;
         top: 3px;
+        transform: scale(var(--ui, 1));
+        transform-origin: left top;
         color: #006d99;
         background: rgba(255, 255, 255, 0.9);
         padding: 1px 4px;
@@ -331,13 +387,33 @@ export class OdsCanvas extends LitElement {
       .resize-handle {
         position: absolute;
         z-index: 7;
-        width: 11px;
-        height: 11px;
+        width: calc(8px * var(--ui, 1));
+        height: calc(8px * var(--ui, 1));
         padding: 0;
-        border: 2px solid #00aef0;
+        border: var(--line) solid #00aef0;
         border-radius: 1px;
         background: #fff;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+        touch-action: none;
+      }
+      .resize-handle::after,
+      .point-handle::after {
+        content: "";
+        position: absolute;
+        inset: calc(-6px * var(--ui, 1));
+      }
+      .point-handle {
+        position: absolute;
+        z-index: 8;
+        width: calc(8px * var(--ui, 1));
+        height: calc(8px * var(--ui, 1));
+        padding: 0;
+        border: var(--line) solid #00aef0;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+        transform: translate(-50%, -50%);
+        cursor: move;
         touch-action: none;
       }
       .resize-nw {
@@ -392,11 +468,12 @@ export class OdsCanvas extends LitElement {
         position: absolute;
         z-index: 6;
         left: 50%;
-        top: calc(100% + 9px);
-        transform: translateX(-50%);
+        top: calc(100% + 9px * var(--ui, 1));
+        transform: translateX(-50%) scale(var(--ui, 1));
+        transform-origin: top center;
         min-width: max-content;
         padding: 2px 7px;
-        border: 1px solid #2788b8;
+        border: var(--line) solid #2788b8;
         border-radius: 999px;
         color: #9cddff;
         background: #102033;
@@ -443,10 +520,28 @@ export class OdsCanvas extends LitElement {
   @state() private marquee?: ItemBounds;
   /** The lines the moved items share with their siblings and parent. */
   @state() private guides: Guide[] = [];
+  /** The equal gaps between the moved elements and their siblings, with their sizes. */
+  @state() private spacing: SpacingMark[] = [];
+  /** With Pan on the wheel moves the view; with it off the wheel zooms. */
+  @state() private panMode = true;
+  /** The dots of the snap grid on the working area; the Grid toggle shows or hides them. */
+  @state() private gridVisible = true;
+  /** While Space is held a drag moves the view, whatever is under the pointer. */
+  @state() private spaceHeld = false;
   private stopGesture?: () => void;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    window.addEventListener("keydown", this.onSpaceDown);
+    window.addEventListener("keyup", this.onSpaceUp);
+    window.addEventListener("blur", this.releaseSpace);
+  }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
+    window.removeEventListener("keydown", this.onSpaceDown);
+    window.removeEventListener("keyup", this.onSpaceUp);
+    window.removeEventListener("blur", this.releaseSpace);
     this.stopGesture?.();
   }
 
@@ -481,22 +576,98 @@ export class OdsCanvas extends LitElement {
     this.setViewport(DEFAULT_VIEWPORT);
   }
 
+  private get stageSize(): { width: number; height: number } | undefined {
+    const stage = this.stage;
+    if (!stage) return undefined;
+    return { width: stage.clientWidth, height: stage.clientHeight };
+  }
+
   /** Zoom so the whole display fits the stage with a margin. */
   public fitView(): void {
-    const stage = this.stage;
-    if (stage) {
-      this.setViewport(
-        fitViewport(
-          { width: stage.clientWidth, height: stage.clientHeight },
-          this.dashboard.display
-        )
-      );
+    const size = this.stageSize;
+    if (size) this.setViewport(fitViewport(size, this.dashboard.display));
+  }
+
+  /** The Fit button: fit, or back to 100 % when the display already fits. */
+  private toggleFitView(): void {
+    const size = this.stageSize;
+    if (size) {
+      this.setViewport(toggleFit(this.viewport, size, this.dashboard.display));
     }
+  }
+
+  /** A point of the stage, measured from its centre, where the canvas is centred. */
+  private stagePoint(
+    clientX: number,
+    clientY: number
+  ): { x: number; y: number } {
+    const rect = this.stage?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return {
+      x: clientX - rect.left - rect.width / 2,
+      y: clientY - rect.top - rect.height / 2,
+    };
   }
 
   private onWheel(event: WheelEvent): void {
     event.preventDefault();
-    this.setViewport(wheelViewport(this.viewport, event));
+    const point = this.stagePoint(event.clientX, event.clientY);
+    this.setViewport(wheelViewport(this.viewport, event, point, this.panMode));
+  }
+
+  private onSpaceDown = (event: KeyboardEvent): void => {
+    if (event.key !== " " || isTypingTarget(event)) return;
+    // Space would otherwise scroll the page or press the focused button.
+    event.preventDefault();
+    this.spaceHeld = true;
+  };
+
+  private onSpaceUp = (event: KeyboardEvent): void => {
+    if (event.key === " ") this.releaseSpace();
+  };
+
+  private releaseSpace = (): void => {
+    this.spaceHeld = false;
+  };
+
+  /**
+   * Whether a press drags the view: the middle button, or Space held. On the empty
+   * canvas and stage `Ctrl` or `Cmd` held does too; on an element it keeps meaning
+   * "do not snap", which is held before the press as well.
+   */
+  private startsViewDrag(event: PointerEvent, onEmptyArea = false): boolean {
+    if (event.button === MIDDLE_BUTTON) return true;
+    if (event.button !== 0) return false;
+    return this.spaceHeld || (onEmptyArea && (event.ctrlKey || event.metaKey));
+  }
+
+  /** A drag that moves the view, wherever the pointer is. */
+  private onStagePointerDown(event: PointerEvent): void {
+    if (!this.startsViewDrag(event, true)) return;
+    event.preventDefault();
+    let last = event;
+    this.stopGesture?.();
+    this.stopGesture = trackPointerGesture({
+      origin: event,
+      onMove: (move) => {
+        this.setViewport(
+          panBy(
+            this.viewport,
+            move.clientX - last.clientX,
+            move.clientY - last.clientY
+          )
+        );
+        last = move;
+      },
+    });
+  }
+
+  private toggleGrid(): void {
+    this.gridVisible = !this.gridVisible;
+  }
+
+  private togglePan(): void {
+    this.panMode = !this.panMode;
   }
 
   /**
@@ -570,6 +741,7 @@ export class OdsCanvas extends LitElement {
   }
 
   private onItemPointerDown(event: PointerEvent, pressed: StudioItem): void {
+    if (this.startsViewDrag(event)) return;
     event.stopPropagation();
     event.preventDefault();
     const target = this.targetOf(pressed);
@@ -591,6 +763,7 @@ export class OdsCanvas extends LitElement {
     item: StudioItem,
     handle: ResizeHandle
   ): void {
+    if (this.startsViewDrag(event)) return;
     event.stopPropagation();
     event.preventDefault();
     emit(this, "item-select", { itemId: item.id });
@@ -608,6 +781,12 @@ export class OdsCanvas extends LitElement {
     if (target.locked || locks.position.length > 0) return;
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
+    const stopWatching = this.watchEscape(before, () => {
+      this.dropContainerId = "";
+      this.guides = [];
+      this.spacing = [];
+    });
+    const sticky: StickyState = {};
     const targets = moveTargets(this.dashboard, moving, this.measure);
     const snap = snapTargetsFor(
       this.dashboard,
@@ -616,7 +795,7 @@ export class OdsCanvas extends LitElement {
       this.measure
     );
     let last = { clientX: event.clientX, clientY: event.clientY };
-    this.stopGesture = trackPointerGesture({
+    const stopTracking = trackPointerGesture({
       origin: event,
       threshold: GESTURE_THRESHOLD,
       onMove: (move) => {
@@ -631,15 +810,20 @@ export class OdsCanvas extends LitElement {
           dy,
           this.dashboard,
           snapping,
-          snap
+          snap,
+          sticky
         );
         this.guides = snapping && snap ? movedGuides(targets, items, snap) : [];
+        this.spacing =
+          snapping && snap ? movedSpacing(targets, items, snap) : [];
         emit(this, "items-transform", { items });
         this.updateDropContainer(last, moving);
       },
       onEnd: (_end, activated) => {
+        stopWatching();
         this.dropContainerId = "";
         this.guides = [];
+        this.spacing = [];
         if (!activated) return;
         const point = this.clampedPointAt(last.clientX, last.clientY);
         const drop =
@@ -649,10 +833,33 @@ export class OdsCanvas extends LitElement {
         emit(this, "item-transform-end", { before, drop });
       },
       onCancel: () => {
+        stopWatching();
         this.dropContainerId = "";
         this.guides = [];
+        this.spacing = [];
       },
     });
+    this.stopGesture = () => {
+      stopTracking();
+      stopWatching();
+    };
+  }
+
+  /**
+   * Escape cancels the drag or resize in progress: the pointer listeners go, the dashboard
+   * is put back as it was before the gesture, and no history step is made. It listens
+   * in the capture phase so the shell does not also treat the key as "deselect".
+   */
+  private watchEscape(before: Dashboard, cleanup: () => void): () => void {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      this.stopGesture?.();
+      cleanup();
+      emit(this, "gesture-cancel", { before });
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }
 
   private beginResize(
@@ -662,45 +869,66 @@ export class OdsCanvas extends LitElement {
   ): void {
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
+    const stopWatching = this.watchEscape(before, () => {
+      this.resizing = undefined;
+      this.guides = [];
+    });
     const original = structuredClone(item);
     const found = locate(this.dashboard.items, item.id);
     const measured = this.measure(item);
     this.resizing = { original, measured };
+    const targets = snapTargetsFor(
+      this.dashboard,
+      [item.id],
+      item.id,
+      this.measure
+    );
     const minSize =
       item.kind === "widget"
         ? this.widgets.find((widget) => widget.id === item.widget.type)?.layout
             .minSize
         : undefined;
-    this.stopGesture = trackPointerGesture({
+    const stopTracking = trackPointerGesture({
       origin: event,
       threshold: GESTURE_THRESHOLD,
       onMove: (move) => {
-        const { dx, dy } = this.displayDelta(event, move);
-        const gesture: ItemGesture = {
-          mode: "resize",
+        // Alt, like Ctrl or Cmd, turns off the grid and the alignment with other elements.
+        const snapping =
+          this.snapEnabled && !move.altKey && !move.ctrlKey && !move.metaKey;
+        const resized = resizeWithSnapping(
+          original,
           handle,
-          shiftKey: move.shiftKey,
-        };
-        emit(this, "items-transform", {
-          items: [
-            transformItem(original, gesture, dx, dy, this.dashboard, {
-              snapEnabled: this.snapEnabled,
-              minSize,
-              measured,
-              definitions: this.primitives,
-              offset: found?.offset,
-            }),
-          ],
-        });
+          move.shiftKey,
+          this.displayDelta(event, move),
+          this.dashboard,
+          {
+            snapEnabled: snapping,
+            minSize,
+            measured,
+            definitions: this.primitives,
+            offset: found?.offset,
+          },
+          targets
+        );
+        this.guides = resized.guides;
+        emit(this, "items-transform", { items: [resized.item] });
       },
       onEnd: (_end, activated) => {
+        stopWatching();
         this.resizing = undefined;
+        this.guides = [];
         if (activated) emit(this, "item-transform-end", { before });
       },
       onCancel: () => {
+        stopWatching();
         this.resizing = undefined;
+        this.guides = [];
       },
     });
+    this.stopGesture = () => {
+      stopTracking();
+      stopWatching();
+    };
   }
 
   /** How far the pointer moved since the gesture began, in display pixels. */
@@ -742,6 +970,7 @@ export class OdsCanvas extends LitElement {
 
   /** Drag out a box on empty canvas to select what it touches; a plain click deselects. */
   private onCanvasPointerDown(event: PointerEvent): void {
+    if (this.startsViewDrag(event, true)) return;
     const start = this.clampedPointAt(event.clientX, event.clientY);
     if (!start) return;
     const additive = event.shiftKey;
@@ -838,9 +1067,14 @@ export class OdsCanvas extends LitElement {
     this.resetView();
   }
 
+  private onZoomStep(event: OdsEvent<"zoom-step">): void {
+    event.stopPropagation();
+    this.setViewport(zoomStep(this.viewport, event.detail.direction));
+  }
+
   private onZoomFit(event: Event): void {
     event.stopPropagation();
-    this.fitView();
+    this.toggleFitView();
   }
 
   // --- items -----------------------------------------------------------------
@@ -922,6 +1156,101 @@ export class OdsCanvas extends LitElement {
     );
   }
 
+  /** A selected polygon has a handle on each of its points; dragging one moves that point. */
+  private renderPointHandles(
+    item: StudioItem,
+    offset: { x: number; y: number },
+    box: ItemBounds
+  ): TemplateResult[] {
+    if (item.kind !== "primitive" || item.primitive.type !== "polygon") {
+      return [];
+    }
+    if (itemLocks(item, this.primitives).position.length > 0) return [];
+    return pointsOf(item.primitive.points).map(
+      ([x, y], index) => html`
+        <button
+          data-point-handle=${index}
+          class="point-handle"
+          tabindex="-1"
+          aria-label=${strings.canvas.pointHandle(item.name, index + 1)}
+          style=${styleMap({
+            left: `${((x + offset.x - box.x + 0.5) / Math.max(box.width, 1)) * 100}%`,
+            top: `${((y + offset.y - box.y + 0.5) / Math.max(box.height, 1)) * 100}%`,
+          })}
+          @pointerdown=${(event: PointerEvent) =>
+            this.onPointHandlePointerDown(event, item, index)}
+        ></button>
+      `
+    );
+  }
+
+  private onPointHandlePointerDown(
+    event: PointerEvent,
+    item: StudioItem,
+    index: number
+  ): void {
+    if (this.startsViewDrag(event)) return;
+    event.stopPropagation();
+    event.preventDefault();
+    emit(this, "item-select", { itemId: item.id });
+    if (item.kind !== "primitive" || item.primitive.type !== "polygon") return;
+    if (item.locked) return;
+    this.beginPointDrag(event, item, item.primitive, index);
+  }
+
+  /** Drag one point of a polygon; the others stay where they are. */
+  private beginPointDrag(
+    event: PointerEvent,
+    item: PrimitiveItem,
+    polygon: PolygonPrimitive,
+    index: number
+  ): void {
+    this.stopGesture?.();
+    const before = structuredClone(this.dashboard);
+    const stopWatching = this.watchEscape(before, () => undefined);
+    const original = pointsOf(polygon.points);
+    const offset = locate(this.dashboard.items, item.id)?.offset ?? {
+      x: 0,
+      y: 0,
+    };
+    const { width, height } = this.dashboard.display;
+    const stopTracking = trackPointerGesture({
+      origin: event,
+      threshold: GESTURE_THRESHOLD,
+      onMove: (move) => {
+        const { dx, dy } = this.displayDelta(event, move);
+        const snapping = this.snapEnabled && !move.ctrlKey && !move.metaKey;
+        const place = (value: number, shift: number, extent: number): number =>
+          clamp(
+            snapToGrid(value + shift, this.dashboard, snapping) - shift,
+            -extent,
+            2 * extent
+          );
+        const target: Point = [
+          place(original[index][0] + dx, offset.x, width),
+          place(original[index][1] + dy, offset.y, height),
+        ];
+        const moved: PrimitiveItem = {
+          ...item,
+          primitive: {
+            ...polygon,
+            points: movePoint(original, index, target),
+          },
+        };
+        emit(this, "items-transform", { items: [moved] });
+      },
+      onEnd: (_end, activated) => {
+        stopWatching();
+        if (activated) emit(this, "item-transform-end", { before });
+      },
+      onCancel: stopWatching,
+    });
+    this.stopGesture = () => {
+      stopTracking();
+      stopWatching();
+    };
+  }
+
   /** Several items have no shared handles; a group scales what is in it. */
   private showsHandles(item: StudioItem, selected: boolean): boolean {
     if (!selected || item.locked || this.selectedItemIds.length !== 1) {
@@ -987,6 +1316,11 @@ export class OdsCanvas extends LitElement {
         ${selected && single ? this.renderSelectionSize(box) : nothing}
         ${this.showsGroupHint(item, selected) ? this.renderGroupHint() : nothing}
         ${this.showsHandles(item, selected) ? this.renderHandles(item) : nothing}
+        ${
+          this.showsHandles(item, selected)
+            ? this.renderPointHandles(item, placed.offset, box)
+            : nothing
+        }
       </div>
     `;
   }
@@ -1006,6 +1340,31 @@ export class OdsCanvas extends LitElement {
         style=${styleMap(percentBox(box, this.dashboard.display))}
       >
         ${this.renderSelectionSize(box)}
+      </div>
+    `;
+  }
+
+  /** A gap between two elements: a line across it with its size on a label. */
+  private renderSpacing(mark: SpacingMark): TemplateResult {
+    const { width, height } = this.dashboard.display;
+    const horizontal = mark.axis === "x";
+    const style = horizontal
+      ? {
+          left: `${(mark.from / width) * 100}%`,
+          width: `${((mark.to - mark.from) / width) * 100}%`,
+          top: `${(mark.across / height) * 100}%`,
+        }
+      : {
+          top: `${(mark.from / height) * 100}%`,
+          height: `${((mark.to - mark.from) / height) * 100}%`,
+          left: `${(mark.across / width) * 100}%`,
+        };
+    return html`
+      <div
+        class="spacing ${horizontal ? "horizontal" : "vertical"}"
+        style=${styleMap(style)}
+      >
+        <span>${Math.round(mark.to - mark.from)}</span>
       </div>
     `;
   }
@@ -1069,6 +1428,14 @@ export class OdsCanvas extends LitElement {
       "tool-toggle": true,
       active: this.snapEnabled,
     });
+    const panClasses = classMap({
+      "tool-toggle": true,
+      active: this.panMode,
+    });
+    const gridClasses = classMap({
+      "tool-toggle": true,
+      active: this.gridVisible,
+    });
     return html`
       <div class="workspace-meta">
         <span>${strings.common.sizeInPixels(width, height)}</span>
@@ -1078,6 +1445,24 @@ export class OdsCanvas extends LitElement {
           ${this.renderHistoryButton("undo")}
           ${this.renderHistoryButton("redo")}
         </div>
+        <button
+          class=${panClasses}
+          aria-pressed=${this.panMode}
+          title=${strings.canvas.panTitle}
+          @click=${this.togglePan}
+        >
+          <ha-icon icon="mdi:pan"></ha-icon>
+          <span>${strings.canvas.pan}</span>
+        </button>
+        <button
+          class=${gridClasses}
+          aria-pressed=${this.gridVisible}
+          title=${strings.canvas.gridTitle}
+          @click=${this.toggleGrid}
+        >
+          <ha-icon icon="mdi:grid"></ha-icon>
+          <span>${strings.canvas.grid}</span>
+        </button>
         <button
           class=${snapClasses}
           aria-pressed=${this.snapEnabled}
@@ -1118,6 +1503,8 @@ export class OdsCanvas extends LitElement {
     const canvasStyle = styleMap({
       width: `${width}px`,
       height: `${height}px`,
+      // The overlay is drawn inside the zoomed canvas; this brings its sizes back to the screen.
+      "--ui": String(1 / zoom),
     });
     const workingAreaStyle = styleMap({
       ...percentBox(workingArea(dashboard), dashboard.display),
@@ -1125,12 +1512,14 @@ export class OdsCanvas extends LitElement {
     });
     const stageClasses = classMap({
       "canvas-stage": true,
+      "view-drag": this.spaceHeld,
       "accepting-drop": this.acceptingDrop,
     });
     return html`
       <section
         class=${stageClasses}
         @wheel=${this.onWheel}
+        @pointerdown=${this.onStagePointerDown}
         @dragover=${this.onStageDragOver}
         @drop=${this.onStageDrop}
       >
@@ -1143,7 +1532,7 @@ export class OdsCanvas extends LitElement {
           >
             ${this.renderPreview()}
             <div
-              class="working-area"
+              class="working-area ${this.gridVisible ? "" : "no-grid"}"
               aria-hidden="true"
               style=${workingAreaStyle}
             ></div>
@@ -1152,11 +1541,13 @@ export class OdsCanvas extends LitElement {
             )}
             ${this.renderSelectionBox()} ${this.renderMarquee()}
             ${this.guides.map((guide) => this.renderGuide(guide))}
+            ${this.spacing.map((mark) => this.renderSpacing(mark))}
           </div>
         </div>
         <ods-zoom-bar
           .zoom=${zoom}
           @zoom-change=${this.onZoomChange}
+          @zoom-step=${this.onZoomStep}
           @zoom-reset=${this.onZoomReset}
           @zoom-fit=${this.onZoomFit}
         ></ods-zoom-bar>

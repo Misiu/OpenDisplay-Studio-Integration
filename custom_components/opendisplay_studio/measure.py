@@ -20,7 +20,20 @@ from PIL import Image, ImageDraw, ImageFont
 from custom_components.opendisplay_studio.odl import Box
 
 DEFAULT_FONT: Final = "ppb.ttf"
-_FONTS: Final = FontManager()
+# The fonts are looked up in the same folders the renderer searches, so a text is
+# measured with the font it is drawn with.
+_FONTS: Final[dict[str, FontManager]] = {"manager": FontManager()}
+
+
+def use_font_directories(directories: list[str]) -> None:
+    """Search `directories` for fonts by name; forget sizes measured without them."""
+    _FONTS["manager"] = FontManager(directories)
+    text_size.cache_clear()
+
+
+def _font(name: str, size: int) -> ImageFont.FreeTypeFont:
+    font: ImageFont.FreeTypeFont = _FONTS["manager"].get_font(name, size)
+    return font
 
 
 @lru_cache(maxsize=64)
@@ -75,7 +88,7 @@ def text_size(  # noqa: PLR0913
     The height is the font's ascent plus descent for every line, so it always
     contains the glyphs. The width ends exactly where the widest line's ink ends.
     """
-    font = _FONTS.get_font(font_name, size)
+    font = _font(font_name, size)
     metrics = measure_text(
         value,
         font,
@@ -140,7 +153,7 @@ def _text_box(primitive: dict[str, Any]) -> Box:
     )
     default_anchor = "la" if "\n" in value or max_width else "lt"
     anchor = primitive.get("anchor") or default_anchor
-    ascent = _FONTS.get_font(font_name, primitive["size"]).getmetrics()[0]
+    ascent = _font(font_name, primitive["size"]).getmetrics()[0]
     return anchored_box(primitive["x"], primitive["y"], size, anchor, ascent)
 
 

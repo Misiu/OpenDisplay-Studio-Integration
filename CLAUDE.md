@@ -234,7 +234,9 @@ Shapes: `number`, `coordinate` (pixels; `%` is a documented gap), `boolean`,
 `enum`, `flags` (a comma-separated subset of `options`), `color`, `string`,
 `text`, `font`, `points`, `icons`, `object` and `objects` (fields listed in
 `nested`). A field may be `optional`: left unset it is omitted from the ODL element,
-so the renderer applies its own default.
+so the renderer applies its own default. A field marked `advanced` is listed under
+`Advanced`, closed until asked for. A `number` with `decimal: true` may have a fraction;
+an `entity` is an entity id.
 
 - `bootstrap` returns the definitions; the inspector renders **generic**
   controls from them. No per-type branches in inspector code, no per-type

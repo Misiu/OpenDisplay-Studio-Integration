@@ -38,9 +38,6 @@ the backend validates from the same data.
   coordinates, and the validator rejects percentages.
 - Expressions inside a plot's series and axes: they are edited as literals. A
   template can drive any top-level field.
-- `plot.value_scale` (per series).
-- The font list holds the two fonts the renderer bundles (`ppb.ttf`, `rbm.ttf`);
-  another name is accepted, but the backend does not yet pass `font_dirs`.
 - The `points` of a polygon cannot be an expression inside a container: the
   container's offset would have to be added to every point of the result.
 
@@ -107,7 +104,11 @@ arrives, and to move an element smoothly during a drag.
   span any plot asks for, and hands the renderer that history. A plot without
   numeric history, or without a running recorder, is left out with a warning
   instead of failing the picture.
-- **Fonts.** A font is a file name or family, never a path.
+- **Fonts.** A font is a file name, never a path. The renderer searches
+  `<config>/opendisplay_studio/fonts` (passed as `font_dirs`, and used for measuring too)
+  before its bundled `ppb.ttf` and `rbm.ttf`; `bootstrap` lists both as the options of
+  every font field, so a `.ttf` or `.otf` dropped in that folder shows up after a reload
+  of the panel.
 
 ### Palettes
 
