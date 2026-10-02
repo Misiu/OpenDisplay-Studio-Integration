@@ -16,6 +16,7 @@ from .validation import (
     integer,
     reach,
     single_expression_body,
+    size_limit,
     string,
 )
 from .widgets import WidgetRegistry
@@ -106,8 +107,8 @@ def _validate_frame(value: object, width: int, height: int) -> dict[str, int]:
     return {
         "x": integer(value.get("x"), "frame.x", *reach(width)),
         "y": integer(value.get("y"), "frame.y", *reach(height)),
-        "width": integer(value.get("width"), "frame.width", 1, width),
-        "height": integer(value.get("height"), "frame.height", 1, height),
+        "width": integer(value.get("width"), "frame.width", 1, size_limit(width)),
+        "height": integer(value.get("height"), "frame.height", 1, size_limit(height)),
     }
 
 
@@ -246,8 +247,10 @@ def _validate_container(
         "kind": CONTAINER_KIND,
         "x": x,
         "y": y,
-        "width": integer(value.get("width"), "container.width", 1, width),
-        "height": integer(value.get("height"), "container.height", 1, height),
+        "width": integer(value.get("width"), "container.width", 1, size_limit(width)),
+        "height": integer(
+            value.get("height"), "container.height", 1, size_limit(height)
+        ),
         "grouped": grouped,
         "background": background,
         "children": [

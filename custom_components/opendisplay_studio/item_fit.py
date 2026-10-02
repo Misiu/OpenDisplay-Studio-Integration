@@ -16,7 +16,7 @@ from custom_components.opendisplay_studio.primitives import (
     PrimitiveRegistry,
     resolve_limit,
 )
-from custom_components.opendisplay_studio.validation import reach
+from custom_components.opendisplay_studio.validation import reach, size_limit
 
 
 def _is_number(value: object) -> TypeGuard[int]:
@@ -65,7 +65,7 @@ def _fit_box(box: dict[str, Any], width: int, height: int) -> None:
             box[key] = _clamp(box[key], reach(extent))
     for key, extent in (("width", width), ("height", height)):
         if _is_number(box.get(key)):
-            box[key] = _clamp(box[key], (1, extent))
+            box[key] = _clamp(box[key], (1, size_limit(extent)))
 
 
 def _fit(

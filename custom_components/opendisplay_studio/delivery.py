@@ -74,6 +74,7 @@ async def async_render_dashboard(
         background=display["background"],
         accent_color=accent_color_for_palette(display["palette"]),
         rotation=display["rotation"] if for_device else 0,
+        margin=margin,
     )
     pipeline_ms = round((monotonic() - started) * 1000, 2)
     LOGGER.info(

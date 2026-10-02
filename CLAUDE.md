@@ -139,7 +139,8 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   preview but not in the Media Source output is a bug. The one difference is the
   editor's picture, which is larger than the display by a margin on every side
   (`preview_margin`; elements are shifted into it just before rendering), so what hangs
-  out of the display is seen; the canvas dims the margin and outlines the display.
+  out of the display is seen (the empty margin is transparent) and the canvas outlines
+  the display.
   Item bounds stay in display coordinates, and the Media Source picture has no margin.
 - **The dashboard document is the only persisted state** (HA `Store`,
   versioned). No `localStorage`/IndexedDB for dashboards. Per-viewer UI
@@ -176,7 +177,8 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   ODL has no clipping: the renderer draws what is in view, and it must never fail
   because something lies outside. The backend accepts positions from one side's length
   before the display to one length after it (`validation.reach`: `-size … 2×size`, for
-  primitives, widget frames, containers and points); sizes stay within the display.
+  primitives, widget frames, containers and points); sizes go up to twice the display
+  (`validation.size_limit`), so an imported design keeps the sizes it had.
   The editor lets elements be dragged, nudged and typed out to that limit, and never
   moves them back in on its own. The preview shows what hangs out (see above). Children
   outside their container are still drawn;

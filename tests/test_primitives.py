@@ -157,8 +157,8 @@ def test_accent_colour_is_accepted_where_colours_are() -> None:
             "primitive.color is not a supported palette color",
         ),
         (
-            {"type": "circle", "x": 0, "y": 0, "radius": HEIGHT + 1},
-            "primitive.radius must be between 1 and 480",
+            {"type": "circle", "x": 0, "y": 0, "radius": 2 * HEIGHT + 1},
+            "primitive.radius must be between 1 and 960",
         ),
         (
             {

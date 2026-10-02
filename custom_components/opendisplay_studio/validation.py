@@ -32,6 +32,16 @@ def reach(extent: int) -> tuple[int, int]:
     return -extent, 2 * extent
 
 
+def size_limit(extent: int) -> int:
+    """
+    Return the largest size an element may have along a side of `extent` pixels.
+
+    As far as it may reach beyond the display: an imported design made for a bigger
+    display keeps its sizes, and the user moves and resizes it afterwards.
+    """
+    return 2 * extent
+
+
 def integer(value: object, name: str, minimum: int, maximum: int) -> int:
     """Return `value` when it is an integer (not a bool) inside the range."""
     if isinstance(value, bool) or not isinstance(value, int):

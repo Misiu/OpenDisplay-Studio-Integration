@@ -137,6 +137,22 @@ test.describe("locks", () => {
     );
   });
 
+  test("the badge of an expression stays where it is when the item is selected", async ({
+    page,
+  }) => {
+    await toggle(page, "x").click();
+    await page.keyboard.press("Escape");
+    const badge = reading(page).locator(".expression-lock");
+    const before = await badge.boundingBox();
+
+    await page.locator(".layer-row").filter({ hasText: "Reading" }).click();
+    await expect(reading(page)).toHaveClass(/selected/);
+    const after = await badge.boundingBox();
+
+    expect(after?.x).toBeCloseTo(before?.x ?? 0, 0);
+    expect(after?.y).toBeCloseTo(before?.y ?? 0, 0);
+  });
+
   test("an expression on the size takes every handle away, but not moving", async ({
     page,
   }) => {

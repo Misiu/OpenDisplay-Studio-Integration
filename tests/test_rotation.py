@@ -144,6 +144,10 @@ class TestTurningThePicture:
             # The square starts 30 px left of the display: black there, white beyond it.
             assert pixels.getpixel((margin - 20, margin + 5)) == (0, 0, 0)
             assert pixels.getpixel((margin - 40, margin + 5)) == (255, 255, 255)
+            # The empty margin lets the backdrop through; the display is opaque.
+            assert picture.getpixel((margin - 40, margin + 5))[3] == 0
+            assert picture.getpixel((margin - 20, margin + 5))[3] == 255
+            assert picture.getpixel((margin + 100, margin + 100))[3] == 255
 
     async def test_the_media_picture_has_no_margin(self, hass: HomeAssistant) -> None:
         use_services(hass)

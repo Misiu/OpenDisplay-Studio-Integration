@@ -141,9 +141,10 @@ describe("resolveLimit", () => {
 
   it("passes a fixed limit through and reads display-relative ones", () => {
     expect(resolveLimit(7, display, 0)).toBe(7);
-    expect(resolveLimit("display_width", display, 0)).toBe(800);
-    expect(resolveLimit("display_height", display, 0)).toBe(480);
-    expect(resolveLimit("display_shorter_side", display, 0)).toBe(480);
+    // An element may measure up to twice the display, as far as it may reach beyond it.
+    expect(resolveLimit("display_width", display, 0)).toBe(1600);
+    expect(resolveLimit("display_height", display, 0)).toBe(960);
+    expect(resolveLimit("display_shorter_side", display, 0)).toBe(960);
   });
 
   it("uses the fallback when a limit is missing", () => {

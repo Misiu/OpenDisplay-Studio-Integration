@@ -235,7 +235,7 @@ class TestOtherDisplaySize:
                     "x": 0,
                     "y": 0,
                     "xsize": 480,
-                    "ysize": 800,
+                    "ysize": 5000,
                     "resize_method": "contain",
                     "rotate": 0,
                 },
@@ -248,7 +248,7 @@ class TestOtherDisplaySize:
         items = {item["id"]: item for item in result["items"]}
         assert result["adjusted"] is True
         assert items["r"]["primitive"]["x_end"] == 960
-        assert items["photo"]["primitive"]["ysize"] == 480
+        assert items["photo"]["primitive"]["ysize"] == 960
         assert items["photo"]["primitive"]["xsize"] == 480
 
     def test_a_design_that_fits_is_not_marked_adjusted(self) -> None:
@@ -265,9 +265,9 @@ class TestOtherDisplaySize:
 
         fitted = {item["id"]: item for item in result["items"]}
         assert fitted["agenda"]["frame"]["x"] == 800
-        assert fitted["agenda"]["frame"]["width"] == 400
+        assert fitted["agenda"]["frame"]["width"] == 800
         assert fitted["box"]["y"] == -400
-        assert fitted["box"]["height"] == 400
+        assert fitted["box"]["height"] == 800
 
 
 @pytest.mark.parametrize(

@@ -236,14 +236,6 @@ export class OdsCanvas extends LitElement {
         color: #59636b;
         background: #fff;
       }
-      .clip-ring {
-        position: absolute;
-        z-index: 1;
-        inset: calc(-1 * var(--margin));
-        box-sizing: border-box;
-        border: var(--margin) solid rgba(8, 15, 24, 0.2);
-        pointer-events: none;
-      }
       .clip-frame {
         position: absolute;
         z-index: 2;
@@ -271,7 +263,9 @@ export class OdsCanvas extends LitElement {
         z-index: 3;
         min-width: calc(3px * var(--ui, 1));
         min-height: calc(3px * var(--ui, 1));
-        border: var(--line) solid transparent;
+        /* Badges are placed from the border box, which this width must not move. */
+        --border: var(--line);
+        border: var(--border) solid transparent;
         cursor: move;
         touch-action: none;
       }
@@ -281,7 +275,8 @@ export class OdsCanvas extends LitElement {
         outline-offset: calc(2px * var(--ui, 1));
       }
       .selection.selected {
-        border: var(--line-strong) solid #00aef0;
+        --border: var(--line-strong);
+        border: var(--border) solid #00aef0;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9);
       }
       .selection.container {
@@ -292,17 +287,20 @@ export class OdsCanvas extends LitElement {
         border-color: rgba(3, 169, 244, 0.5);
       }
       .selection.holds-selection {
-        border: var(--line) solid rgba(3, 169, 244, 0.7);
+        --border: var(--line);
+        border: var(--border) solid rgba(3, 169, 244, 0.7);
       }
       .selection.group {
         border-style: dashed;
       }
       .selection.entered {
-        border: var(--line-strong) dashed #00aef0;
+        --border: var(--line-strong);
+        border: var(--border) dashed #00aef0;
         background: rgba(3, 169, 244, 0.05);
       }
       .selection.drop-target {
-        border: var(--line-strong) solid #00aef0;
+        --border: var(--line-strong);
+        border: var(--border) solid #00aef0;
         background: rgba(3, 169, 244, 0.14);
       }
       .group-hint {
@@ -383,12 +381,13 @@ export class OdsCanvas extends LitElement {
       }
       .selection.hidden {
         background: rgba(3, 169, 244, 0.09);
-        border: var(--line) dashed rgba(3, 169, 244, 0.75);
+        --border: var(--line);
+        border: var(--border) dashed rgba(3, 169, 244, 0.75);
       }
       .hidden-label {
         position: absolute;
-        left: 3px;
-        top: 3px;
+        left: calc(3px - var(--border));
+        top: calc(3px - var(--border));
         transform: scale(var(--ui, 1));
         transform-origin: left top;
         color: #006d99;
@@ -398,8 +397,8 @@ export class OdsCanvas extends LitElement {
       }
       .lock-badge {
         position: absolute;
-        right: 2px;
-        top: 2px;
+        right: calc(2px - var(--border));
+        top: calc(2px - var(--border));
         width: 15px;
         height: 15px;
         padding: 2px;
@@ -1642,15 +1641,10 @@ export class OdsCanvas extends LitElement {
     };
   }
 
-  /** Dims the margin and outlines the display: what is outside the frame is cut off. */
+  /** Outlines the display: what is outside the frame is cut off. */
   private renderClipFrame(margin: number): TemplateResult | typeof nothing {
     if (margin === 0) return nothing;
     return html`
-      <div
-        class="clip-ring"
-        aria-hidden="true"
-        style=${styleMap({ "--margin": `${margin}px` })}
-      ></div>
       <div class="clip-frame" aria-hidden="true"></div>
     `;
   }

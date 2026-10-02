@@ -388,6 +388,8 @@ test.describe("ods-property-field", () => {
   }) => {
     await openKitchen(page);
     await kitchenWidget(page).click();
+    // Row actions show for the selected row.
+    await page.locator(".layer-row").first().click();
     await page.getByRole("button", { name: "Lock Kitchen" }).click();
     await expect(page.getByText("Position is locked")).toBeVisible();
     await expect(xField(page)).toBeDisabled();
@@ -506,13 +508,30 @@ test.describe("ods-canvas", () => {
     expect((picture.width - canvas.width) / pixel).toBeCloseTo(96, 0);
     expect((canvas.x - picture.x) / pixel).toBeCloseTo(48, 0);
     await expect(page.locator(".clip-frame")).toBeVisible();
-    await expect(page.locator(".clip-ring")).toBeVisible();
   });
 
   test("without a margin there is no frame to draw", async ({ page }) => {
     await openKitchen(page);
 
     await expect(page.locator(".clip-frame")).toHaveCount(0);
+  });
+
+  test("the lock badge stays where it is when a locked element is selected", async ({
+    page,
+  }) => {
+    await openKitchen(page);
+    await kitchenWidget(page).click();
+    await page.getByRole("button", { name: "Lock Kitchen" }).click();
+    await page.keyboard.press("Escape");
+    const badge = kitchenWidget(page).locator(".lock-badge");
+    const before = await badge.boundingBox();
+
+    await kitchenWidget(page).click();
+    await expect(kitchenWidget(page)).toHaveClass(/selected/);
+    const after = await badge.boundingBox();
+
+    expect(after?.x).toBeCloseTo(before?.x ?? 0, 0);
+    expect(after?.y).toBeCloseTo(before?.y ?? 0, 0);
   });
 
   test("Space and drag moves the view, not the element under the pointer", async ({

@@ -194,6 +194,23 @@ test.describe("hide and lock", () => {
     await expect(page.getByText("Position is locked")).toHaveCount(0);
   });
 
+  test("the label of a hidden element stays where it is when the element is selected", async ({
+    page,
+  }) => {
+    await kitchenWidget(page).click();
+    await page.getByRole("button", { name: "Hide Kitchen" }).click();
+    await page.keyboard.press("Escape");
+    const label = kitchenWidget(page).locator(".hidden-label");
+    const before = await label.boundingBox();
+
+    await layerRow(page).click();
+    await expect(kitchenWidget(page)).toHaveClass(/selected/);
+    const after = await label.boundingBox();
+
+    expect(after?.x).toBeCloseTo(before?.x ?? 0, 0);
+    expect(after?.y).toBeCloseTo(before?.y ?? 0, 0);
+  });
+
   test("are one undo step each", async ({ page }) => {
     await hideKitchen(page);
     await page.getByRole("button", { name: "Lock Kitchen" }).click();

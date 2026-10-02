@@ -11,7 +11,7 @@ from typing import Any
 from aiohttp import ClientSession
 from odl_renderer import generate_image  # type: ignore[import-untyped]
 from odl_renderer.types import DataProvider  # type: ignore[import-untyped]
-from PIL import Image
+from PIL import Image, ImageChops, ImageDraw
 
 
 class OdlRenderError(RuntimeError):
@@ -26,12 +26,38 @@ class OdlRenderResult:
     timings: dict[str, float]
 
 
-def _encode_png(image: Image.Image, rotation: int) -> bytes:
+def _with_clear_margin(image: Image.Image, margin: int) -> Image.Image:
+    """
+    Return the picture with the margin around the display see-through where it is empty.
+
+    The renderer paints the background everywhere. In the margin that would hide the
+    editor's own backdrop and make the display look larger than it is, so the pixels
+    there that still have the background color become transparent; the display itself
+    stays opaque.
+    """
+    rgb = image.convert("RGB")
+    background = Image.new("RGB", rgb.size, rgb.getpixel((0, 0)))
+    alpha = (
+        ImageChops.difference(rgb, background)
+        .convert("L")
+        .point(lambda value: 255 if value else 0)
+    )
+    ImageDraw.Draw(alpha).rectangle(
+        (margin, margin, rgb.width - margin - 1, rgb.height - margin - 1), fill=255
+    )
+    rgb.putalpha(alpha)
+    return rgb
+
+
+def _encode_png(image: Image.Image, rotation: int, margin: int = 0) -> bytes:
     if rotation:
         # PIL turns counter-clockwise; the dashboard setting is clockwise.
         image = image.rotate(-rotation, expand=True)
     output = BytesIO()
-    image.convert("RGB").save(output, format="PNG", optimize=False)
+    if margin:
+        _with_clear_margin(image, margin).save(output, format="PNG", optimize=False)
+    else:
+        image.convert("RGB").save(output, format="PNG", optimize=False)
     return output.getvalue()
 
 
@@ -59,6 +85,7 @@ class OdlRenderService:
         accent_color: str,
         history: DataProvider | None = None,
         rotation: int = 0,
+        margin: int = 0,
     ) -> OdlRenderResult:
         """Render ODL, check the size, then turn the picture clockwise by `rotation`."""
         requested_at = monotonic()
@@ -84,7 +111,7 @@ class OdlRenderService:
                     f"expected {width}x{height}"
                 )
                 raise OdlRenderError(message)
-            png = await asyncio.to_thread(_encode_png, image, rotation)
+            png = await asyncio.to_thread(_encode_png, image, rotation, margin)
             completed_at = monotonic()
         return OdlRenderResult(
             png=png,

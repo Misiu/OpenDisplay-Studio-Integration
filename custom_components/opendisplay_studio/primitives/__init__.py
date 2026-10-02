@@ -27,6 +27,7 @@ from custom_components.opendisplay_studio.validation import (
     fail,
     integer,
     reach,
+    size_limit,
     string,
 )
 
@@ -531,11 +532,11 @@ def _coordinate(value: object, name: str, extent: int) -> int:
 def resolve_limit(value: int | str, width: int, height: int) -> int:
     """Return a number limit, which may be taken from the size of the display."""
     if value == "display_width":
-        return width
+        return size_limit(width)
     if value == "display_height":
-        return height
+        return size_limit(height)
     if value == "display_shorter_side":
-        return min(width, height)
+        return size_limit(min(width, height))
     return int(value)
 
 

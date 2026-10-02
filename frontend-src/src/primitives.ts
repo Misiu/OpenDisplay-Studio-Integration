@@ -19,23 +19,37 @@ interface PrimitiveFactoryContext {
   displayHeight: number;
 }
 
-/** A field limit as a number for a display of the given size. */
+/** The most an element may measure along a side: as far as it may reach beyond the display. */
+export const sizeLimit = (extent: number): number => 2 * extent;
+
+/** A field limit as a number for a display of the given size, scaled by `scale`. */
+const limitFor = (
+  limit: FieldLimit | undefined,
+  display: DisplaySize,
+  fallback: number,
+  scale: (extent: number) => number
+): number => {
+  if (limit === "display_width") return scale(display.width);
+  if (limit === "display_height") return scale(display.height);
+  if (limit === "display_shorter_side") {
+    return scale(Math.min(display.width, display.height));
+  }
+  return limit ?? fallback;
+};
+
+/** A field limit as a number for a display of the given size: the most a value may be. */
 export const resolveLimit = (
   limit: FieldLimit | undefined,
   display: DisplaySize,
   fallback: number
-): number => {
-  if (limit === "display_width") {
-    return display.width;
-  }
-  if (limit === "display_height") {
-    return display.height;
-  }
-  if (limit === "display_shorter_side") {
-    return Math.min(display.width, display.height);
-  }
-  return limit ?? fallback;
-};
+): number => limitFor(limit, display, fallback, sizeLimit);
+
+/** The same limit as the display itself, which is how big a new element starts at most. */
+const startingLimit = (
+  limit: FieldLimit | undefined,
+  display: DisplaySize,
+  fallback: number
+): number => limitFor(limit, display, fallback, (extent) => extent);
 
 /** What a new item starts with for one field, before it is placed on the display. */
 const startingValue = (
@@ -50,8 +64,8 @@ const startingValue = (
   }
   return clamp(
     field.default,
-    resolveLimit(field.min, display, Number.NEGATIVE_INFINITY),
-    resolveLimit(field.max, display, Number.POSITIVE_INFINITY)
+    startingLimit(field.min, display, Number.NEGATIVE_INFINITY),
+    startingLimit(field.max, display, Number.POSITIVE_INFINITY)
   );
 };
 
