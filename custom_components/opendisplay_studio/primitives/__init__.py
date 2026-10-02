@@ -389,8 +389,8 @@ def _check_number(
     display: tuple[int, int],
     _relative: bool,  # noqa: FBT001
 ) -> float:
-    minimum = _limit(field["min"], *display)
-    maximum = _limit(field["max"], *display)
+    minimum = resolve_limit(field["min"], *display)
+    maximum = resolve_limit(field["max"], *display)
     if field.get("decimal"):
         return decimal(value, name, minimum, maximum)
     return integer(value, name, minimum, maximum)
@@ -528,7 +528,8 @@ def _coordinate(value: object, name: str, extent: int) -> int:
     return integer(value, name, *reach(extent))
 
 
-def _limit(value: int | str, width: int, height: int) -> int:
+def resolve_limit(value: int | str, width: int, height: int) -> int:
+    """Return a number limit, which may be taken from the size of the display."""
     if value == "display_width":
         return width
     if value == "display_height":

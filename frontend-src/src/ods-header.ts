@@ -177,6 +177,27 @@ export class OdsHeader extends LitElement {
     emit(this, "send-to-device");
   }
 
+  private renderFileButtons(): TemplateResult {
+    return html`
+      <ha-button
+        appearance="plain"
+        title=${strings.header.exportTitle}
+        @click=${() => emit(this, "dashboard-export")}
+      >
+        <ha-icon slot="start" icon="mdi:download"></ha-icon>
+        ${strings.header.exportDashboard}
+      </ha-button>
+      <ha-button
+        appearance="plain"
+        title=${strings.header.importTitle}
+        @click=${() => emit(this, "dashboard-import")}
+      >
+        <ha-icon slot="start" icon="mdi:upload"></ha-icon>
+        ${strings.header.importDashboard}
+      </ha-button>
+    `;
+  }
+
   /** The button that tries the design on the device the dashboard is made for. */
   private renderSendButton(): TemplateResult | typeof nothing {
     if (!this.dashboard.display.deviceId) return nothing;
@@ -232,7 +253,7 @@ export class OdsHeader extends LitElement {
           </button>
         </nav>
         <div class="editor-actions">
-          ${this.renderSendButton()}
+          ${this.renderFileButtons()} ${this.renderSendButton()}
           <span class="status ${dashboard.status}">${dashboard.status}</span>
           <ha-button
             appearance="plain"

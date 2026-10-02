@@ -136,7 +136,11 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   drop targets) from the authoritative `itemBounds` returned by the backend. The
   only local geometry is the optimistic position during an active gesture.
 - **Preview and Media Source share one code path.** Anything that works in
-  preview but not in the Media Source output is a bug.
+  preview but not in the Media Source output is a bug. The one difference is the
+  editor's picture, which is larger than the display by a margin on every side
+  (`preview_margin`; elements are shifted into it just before rendering), so what hangs
+  out of the display is seen; the canvas dims the margin and outlines the display.
+  Item bounds stay in display coordinates, and the Media Source picture has no margin.
 - **The dashboard document is the only persisted state** (HA `Store`,
   versioned). No `localStorage`/IndexedDB for dashboards. Per-viewer UI
   conveniences (panel widths, collapsed sections, clipboard) may use memory or
@@ -174,7 +178,8 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   before the display to one length after it (`validation.reach`: `-size … 2×size`, for
   primitives, widget frames, containers and points); sizes stay within the display.
   The editor lets elements be dragged, nudged and typed out to that limit, and never
-  moves them back in on its own. Children outside their container are still drawn;
+  moves them back in on its own. The preview shows what hangs out (see above). Children
+  outside their container are still drawn;
   the editor marks them with a warning badge. A test renders every primitive type
   partly outside the display; any new type or widget keeps passing it.
 

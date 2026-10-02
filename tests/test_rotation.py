@@ -124,6 +124,36 @@ class TestTurningThePicture:
 
         assert black_corner(rendered.picture.png) == (size, corner)
 
+    async def test_the_editor_picture_shows_what_hangs_out_of_the_display(
+        self, hass: HomeAssistant
+    ) -> None:
+        use_services(hass)
+        hanging = design()
+        hanging["items"][0]["primitive"]["x_start"] = -30
+        hanging["items"][0]["primitive"]["x_end"] = 9
+
+        rendered = await async_render_dashboard(
+            hass, hanging, for_device=False, with_margin=True
+        )
+
+        margin = rendered.margin
+        assert margin == 192
+        with Image.open(BytesIO(rendered.picture.png)) as picture:
+            assert picture.size == (480 + 2 * margin, 800 + 2 * margin)
+            pixels = picture.convert("RGB")
+            # The square starts 30 px left of the display: black there, white beyond it.
+            assert pixels.getpixel((margin - 20, margin + 5)) == (0, 0, 0)
+            assert pixels.getpixel((margin - 40, margin + 5)) == (255, 255, 255)
+
+    async def test_the_media_picture_has_no_margin(self, hass: HomeAssistant) -> None:
+        use_services(hass)
+
+        rendered = await async_render_dashboard(hass, design(), for_device=False)
+
+        assert rendered.margin == 0
+        with Image.open(BytesIO(rendered.picture.png)) as picture:
+            assert picture.size == (480, 800)
+
     async def test_the_editor_always_shows_the_canvas_as_designed(
         self, hass: HomeAssistant
     ) -> None:

@@ -50,6 +50,17 @@ export const paletteSchemes = (palette: PaletteId): string[] =>
 
 const ACCENT = "accent";
 
+/** The color to draw for a stored value, whichever palette has it, or `undefined`. */
+export const sourceColorHex = (value: string): string | undefined => {
+  for (const id of PALETTE_IDS) {
+    const found = data[id].colors.find(
+      (color) => color.value === value || color.id === value
+    );
+    if (found) return found.hex;
+  }
+  return value.startsWith("#") ? value : undefined;
+};
+
 /** The color to draw for a stored value on a display, or `undefined` if it is not one. */
 export const colorHex = (
   value: string,

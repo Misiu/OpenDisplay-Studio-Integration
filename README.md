@@ -121,6 +121,15 @@ an automation if you prefer to drive a display yourself.
   <img src="docs/images/code-view.webp" alt="The generated ODL YAML" width="900">
 </p>
 
+## Move a design between dashboards
+
+**Export** saves the open dashboard as a JSON file; **Import** replaces the
+elements of the open dashboard with those of such a file, keeping its name, id
+and display settings. If the file was made for a display with more colours than
+yours, the import lists the colours your palette lacks and lets you pick a
+colour of your own for each; colours both displays have are kept. An import is
+one undo step and is not saved until you save.
+
 ## Working with the canvas
 
 | Do this | To get this |

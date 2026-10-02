@@ -4,6 +4,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./ods-app";
 import { createId } from "./ids";
+import { PALETTE_COLORS, PALETTE_IDS } from "./palettes";
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
 import { primitiveBounds } from "./primitive-shape";
 import { createPrimitive } from "./primitives";
@@ -16,6 +17,7 @@ import type {
   HomeAssistant,
   Dashboard,
   DisplayDevice,
+  PaletteId,
   LeafItem,
   Primitive,
   PrimitiveItem,
@@ -728,6 +730,8 @@ interface PromoHooks {
   dashboards?: Dashboard[];
   images?: Record<string, string>;
   yamls?: Record<string, string>;
+  /** Pixels the picture shows beyond the display, as the backend's preview does. */
+  margin?: number;
 }
 
 const promo = window.__ODS_PROMO__;
@@ -832,6 +836,81 @@ const collectBounds = (
   }
 };
 
+/** The file of a dashboard, as the backend writes it. */
+const exportedFile = (dashboard: Dashboard): unknown => {
+  // The device belongs to an installation; JSON leaves an undefined value out.
+  const display = { ...dashboard.display, deviceId: undefined };
+  return {
+    format: "opendisplay-studio-dashboard",
+    version: 1,
+    exportedAt: now,
+    dashboard: { name: dashboard.name, display, items: dashboard.items },
+  };
+};
+
+const COLOR_KEYS = ["fill", "outline", "color"];
+const EVERY_COLOR = new Set(
+  PALETTE_IDS.flatMap((palette) => PALETTE_COLORS[palette])
+);
+
+/** Every color a file's elements use, in order of first use. */
+const colorsUsed = (value: unknown, found = new Set<string>()): Set<string> => {
+  if (Array.isArray(value)) {
+    value.forEach((entry) => colorsUsed(entry, found));
+  } else if (typeof value === "object" && value !== null) {
+    for (const [key, entry] of Object.entries(value)) {
+      if (COLOR_KEYS.includes(key) && typeof entry === "string") {
+        if (EVERY_COLOR.has(entry)) found.add(entry);
+      } else {
+        colorsUsed(entry, found);
+      }
+    }
+  }
+  return found;
+};
+
+const recoloured = (value: unknown, map: Record<string, string>): unknown => {
+  if (Array.isArray(value)) return value.map((entry) => recoloured(entry, map));
+  if (typeof value !== "object" || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entry]) => [
+      key,
+      COLOR_KEYS.includes(key) && typeof entry === "string"
+        ? (map[entry] ?? entry)
+        : recoloured(entry, map),
+    ])
+  );
+};
+
+/** What the backend makes of a file: its elements, and the colors still to be mapped. */
+const preparedImport = (message: Record<string, unknown>): unknown => {
+  const file = message.file as {
+    format?: string;
+    dashboard?: { items: unknown[]; display: { palette: string } };
+  };
+  if (file?.format !== "opendisplay-studio-dashboard" || !file.dashboard) {
+    throw Object.assign(new Error("This is not a dashboard file"), {
+      code: "not_a_dashboard_file",
+    });
+  }
+  const { palette } = message.display as { palette: PaletteId };
+  const map = (message.colorMap ?? {}) as Record<string, string>;
+  const lacking = [...colorsUsed(file.dashboard.items)].filter(
+    (color) => !PALETTE_COLORS[palette].includes(color)
+  );
+  return {
+    items: recoloured(file.dashboard.items, map),
+    colorsToMap: lacking
+      .filter((color) => !(color in map))
+      .map((color) => ({
+        source: color,
+        suggestion: PALETTE_COLORS[palette][0],
+      })),
+    sourcePalette: file.dashboard.display.palette,
+    adjusted: false,
+  };
+};
+
 const itemBounds = (dashboard: Dashboard): Record<string, Box> => {
   const result: Record<string, Box> = {};
   collectBounds(dashboard.items, { x: 0, y: 0 }, result);
@@ -913,6 +992,12 @@ const hass: HomeAssistant = {
     if (message.type === "opendisplay_studio/send_to_device") {
       return {} as T;
     }
+    if (message.type === "opendisplay_studio/export_dashboard") {
+      return { file: exportedFile(message.dashboard as Dashboard) } as T;
+    }
+    if (message.type === "opendisplay_studio/prepare_import") {
+      return preparedImport(message) as T;
+    }
     if (message.type === "opendisplay_studio/list_devices") {
       return { devices: DISPLAY_DEVICES } as T;
     }
@@ -935,6 +1020,7 @@ const hass: HomeAssistant = {
         .join("\n");
       return {
         imageUrl: preview(dashboard),
+        margin: promo?.margin ?? 0,
         yaml: promo?.yamls?.[dashboard.id] ?? yaml,
         itemBounds: itemBounds(dashboard),
         warnings: [],

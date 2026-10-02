@@ -488,6 +488,33 @@ test.describe("ods-canvas", () => {
     expect(await dots()).not.toBe("none");
   });
 
+  test("the picture shows what hangs out of the display, and a frame shows where it is cut", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      window.__ODS_PROMO__ = { margin: 48 };
+    });
+    await openKitchen(page);
+    const canvas = await page.locator(".canvas").boundingBox();
+    const picture = await page
+      .getByAltText("Authoritative rendered display preview")
+      .boundingBox();
+    if (!canvas || !picture) throw new Error("The canvas is not visible");
+
+    // The display is 800 px wide on the canvas; the picture has 48 px more on each side.
+    const pixel = canvas.width / 800;
+    expect((picture.width - canvas.width) / pixel).toBeCloseTo(96, 0);
+    expect((canvas.x - picture.x) / pixel).toBeCloseTo(48, 0);
+    await expect(page.locator(".clip-frame")).toBeVisible();
+    await expect(page.locator(".clip-ring")).toBeVisible();
+  });
+
+  test("without a margin there is no frame to draw", async ({ page }) => {
+    await openKitchen(page);
+
+    await expect(page.locator(".clip-frame")).toHaveCount(0);
+  });
+
   test("Space and drag moves the view, not the element under the pointer", async ({
     page,
   }) => {

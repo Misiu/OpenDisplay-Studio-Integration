@@ -55,6 +55,10 @@ export const strings = {
   },
 
   app: {
+    exportFailed: "Could not export the dashboard",
+    importFailed: "Could not read the file",
+    notAJsonFile: "The file is not a JSON file",
+    imported: (count: number): string => `Imported ${count} elements`,
     loading: "Loading OpenDisplay Studio…",
     loadFailed: "Could not load OpenDisplay Studio",
     createFailed: "Could not create the dashboard",
@@ -140,6 +144,10 @@ export const strings = {
   },
 
   header: {
+    exportDashboard: "Export",
+    exportTitle: "Download this dashboard as a file",
+    importDashboard: "Import",
+    importTitle: "Replace the elements with those of a dashboard file",
     studio: "OpenDisplay Studio",
     dashboards: "Dashboards",
     name: "Dashboard name",
@@ -411,6 +419,19 @@ export const strings = {
     settings: "Line settings",
     add: "Add series",
     remove: (number: number): string => `Remove series ${number}`,
+  },
+
+  importDialog: {
+    eyebrow: "Import",
+    heading: "Import a dashboard",
+    replaces:
+      "Importing replaces the elements of this dashboard. Its name, id and display settings stay.",
+    adjusted:
+      "The file was made for a larger display, so some elements were made smaller or moved nearer. Move them where you want after the import.",
+    colorsTitle: "The file was made for another set of colors",
+    colorsHelp:
+      "Choose a color of this dashboard for each color the file uses. Colors both have are kept.",
+    confirm: "Import",
   },
 
   imagePicker: {

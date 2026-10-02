@@ -23,6 +23,10 @@ export const german: StringsOverride = {
   },
 
   app: {
+    exportFailed: "Das Dashboard konnte nicht exportiert werden",
+    importFailed: "Die Datei konnte nicht gelesen werden",
+    notAJsonFile: "Die Datei ist keine JSON-Datei",
+    imported: (count: number): string => `${count} Elemente importiert`,
     loading: "OpenDisplay Studio wird geladen…",
     loadFailed: "OpenDisplay Studio konnte nicht geladen werden",
     createFailed: "Das Dashboard konnte nicht erstellt werden",
@@ -106,6 +110,10 @@ export const german: StringsOverride = {
   },
 
   header: {
+    exportDashboard: "Exportieren",
+    exportTitle: "Dieses Dashboard als Datei herunterladen",
+    importDashboard: "Importieren",
+    importTitle: "Die Elemente durch die einer Dashboard-Datei ersetzen",
     dashboards: "Dashboards",
     name: "Dashboard-Name",
     view: "Dashboard-Ansicht",
@@ -325,6 +333,19 @@ export const german: StringsOverride = {
     settings: "Linieneinstellungen",
     add: "Reihe hinzufügen",
     remove: (number: number): string => `Reihe ${number} entfernen`,
+  },
+
+  importDialog: {
+    eyebrow: "Import",
+    heading: "Dashboard importieren",
+    replaces:
+      "Der Import ersetzt die Elemente dieses Dashboards. Name, ID und Anzeigeeinstellungen bleiben.",
+    adjusted:
+      "Die Datei wurde für eine größere Anzeige erstellt, daher wurden einige Elemente verkleinert oder näher gerückt. Verschiebe sie nach dem Import, wohin du möchtest.",
+    colorsTitle: "Die Datei wurde für andere Farben erstellt",
+    colorsHelp:
+      "Wähle für jede Farbe der Datei eine Farbe dieses Dashboards. Gemeinsame Farben bleiben.",
+    confirm: "Importieren",
   },
 
   imagePicker: {

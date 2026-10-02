@@ -881,18 +881,18 @@ several screens per dashboard.
 Moves the design of a dashboard from one dashboard or installation to another, and into
 and out of backups. Deliberately simple: export writes a file, import reads a file.
 
-- [ ] **11.1 Dashboard file format.** One JSON object:
+- [x] **11.1 Dashboard file format.** One JSON object:
   `{ "format": "opendisplay-studio-dashboard", "version": 1, "exportedAt": …,
   "dashboard": { name, display, items } }`. No store id, no `createdAt`/`updatedAt`, no
   device id (a device belongs to an installation). Item ids are kept. Written by one
   function in the backend (`dashboard_files.py`) and read by one, both tested with a stored
   fixture per `version`; a file with a newer `version` is refused with a message that says
   to update the integration.
-- [ ] **11.2 Export.** An `Export` button in the header, next to `Save`, downloads the
+- [x] **11.2 Export.** An `Export` button in the header, next to `Save`, downloads the
   dashboard as `<dashboard name as a slug>.json` (`dashboard.json` when the name is
   empty). There is no preview, no clipboard and no dialog. Exporting does not save or
   change the dashboard. It is a command in the registry like every other action.
-- [ ] **11.3 Import.** An `Import` button in the header opens a file chooser for a `.json`
+- [x] **11.3 Import.** An `Import` button in the header opens a file chooser for a `.json`
   file; there is no paste area. The file is validated by the backend
   (`opendisplay_studio/validate_import`, which runs the same `validate_dashboard` as
   saving); an invalid file shows the error that names the item and field, and nothing
@@ -913,7 +913,7 @@ and out of backups. Deliberately simple: export writes a file, import reads a fi
     field, nested ones (plot series, axes) and widget options included.
   - `Import` applies the mapping and replaces the items in **one undo step**; it does not
     save by itself. `Cancel` and `Esc` leave everything as it was.
-- [ ] **11.4 Tests.** Backend: a round trip (export → import) renders the same PNG; every
+- [x] **11.4 Tests.** Backend: a round trip (export → import) renders the same PNG; every
   version fixture imports; an invalid or too new file is refused with a stable error code.
   Frontend unit: the file name, finding the colors a file uses, matching and nearest-color
   suggestion, applying a mapping to nested fields. E2E: download, import by file, the

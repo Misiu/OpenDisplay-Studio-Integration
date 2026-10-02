@@ -11,11 +11,14 @@ from homeassistant.exceptions import HomeAssistantError, ServiceNotFound
 
 from .compiler import DashboardCompileError
 from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
+from .dashboard_files import DashboardFileError, export_file
+from .dashboard_import import prepare_import
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
 from .delivery import async_render_dashboard
 from .devices import async_send_to_device, list_display_devices
 from .fonts import available_fonts, font_directories, with_font_options
 from .icons import SORTED_ICON_NAMES
+from .palette import PALETTE_COLORS
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
 from .widget_reload import async_reload_widgets
@@ -154,7 +157,9 @@ async def websocket_compose_preview(
     """Compile and render the canvas, as designed, for the editor."""
     try:
         dashboard = validate_dashboard(msg["dashboard"], _widgets(hass))
-        rendered = await async_render_dashboard(hass, dashboard, for_device=False)
+        rendered = await async_render_dashboard(
+            hass, dashboard, for_device=False, with_margin=True
+        )
     except DashboardValidationError as err:
         _error(connection, msg, err)
         return
@@ -173,6 +178,7 @@ async def websocket_compose_preview(
         msg["id"],
         {
             "imageUrl": RENDER_HTTP_PATH.replace("{token}", token),
+            "margin": rendered.margin,
             "yaml": compiled.yaml,
             "itemBounds": compiled.item_bounds,
             "warnings": compiled.warnings,
@@ -281,7 +287,69 @@ def websocket_list_icons(
     connection.send_result(msg["id"], {"icons": SORTED_ICON_NAMES})
 
 
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/export_dashboard",
+        vol.Required("dashboard"): dict,
+    }
+)
+@websocket_api.require_admin
+def websocket_export_dashboard(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Return the file for the dashboard as the panel has it, saved or not."""
+    try:
+        dashboard = validate_dashboard(msg["dashboard"], _widgets(hass))
+    except DashboardValidationError as err:
+        _error(connection, msg, err)
+        return
+    connection.send_result(msg["id"], {"file": export_file(dashboard)})
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): "opendisplay_studio/prepare_import",
+        vol.Required("file"): object,
+        vol.Required("display"): vol.Schema(
+            {
+                vol.Required("width"): int,
+                vol.Required("height"): int,
+                vol.Required("palette"): vol.In(list(PALETTE_COLORS)),
+            },
+            extra=vol.ALLOW_EXTRA,
+        ),
+        vol.Optional("colorMap", default={}): {str: str},
+    }
+)
+@websocket_api.require_admin
+def websocket_prepare_import(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+) -> None:
+    """Check a dashboard file against the open dashboard and bring its colors over."""
+    try:
+        result = prepare_import(
+            msg["file"],
+            msg["display"],
+            msg["colorMap"],
+            _widgets(hass),
+            DEFAULT_PRIMITIVES,
+        )
+    except DashboardFileError as err:
+        connection.send_error(msg["id"], err.code, str(err))
+        return
+    except DashboardValidationError as err:
+        _error(connection, msg, err)
+        return
+    connection.send_result(msg["id"], result)
+
+
 def async_register_commands(hass: HomeAssistant) -> None:
+    websocket_api.async_register_command(hass, websocket_export_dashboard)
+    websocket_api.async_register_command(hass, websocket_prepare_import)
     websocket_api.async_register_command(hass, websocket_list_icons)
     websocket_api.async_register_command(hass, websocket_list_devices)
     websocket_api.async_register_command(hass, websocket_send_to_device)

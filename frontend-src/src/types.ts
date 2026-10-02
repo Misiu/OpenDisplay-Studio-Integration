@@ -469,8 +469,20 @@ export interface PreviewState extends ComposePreviewResponse {
   composedFrom: Dashboard;
 }
 
+/** What the backend makes of a dashboard file for the dashboard that is open. */
+export interface ImportPlan {
+  items: StudioItem[];
+  /** The colors the file uses that the palette lacks, each with the nearest color. */
+  colorsToMap: Array<{ source: string; suggestion: string }>;
+  sourcePalette: string | null;
+  /** Elements were made smaller or moved nearer so that they fit this display. */
+  adjusted: boolean;
+}
+
 export interface ComposePreviewResponse {
   imageUrl: string;
+  /** Pixels the picture shows beyond each edge of the display, where elements hang out. */
+  margin?: number;
   yaml: string;
   itemBounds: Record<string, ItemBounds>;
   warnings: string[];

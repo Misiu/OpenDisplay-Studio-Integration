@@ -89,7 +89,9 @@ import {
   freshDashboard,
   type DashboardSource,
 } from "./dashboards";
-import { isMacPlatform, isTypingTarget } from "./dom";
+import { chooseFile, downloadFile, isMacPlatform, isTypingTarget } from "./dom";
+import { exportFileName, parseJson } from "./dashboard-file";
+import { messageFrom } from "./error-message";
 import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
@@ -104,6 +106,7 @@ import type {
   Dashboard,
   DisplayDevice,
   HomeAssistant,
+  ImportPlan,
   PrimitiveDefinition,
   StudioItem,
   WidgetLoadError,
@@ -113,6 +116,7 @@ import type { OdsCanvas } from "./ods-canvas";
 import "./ods-canvas";
 import "./ods-code-view";
 import "./ods-confirm-dialog";
+import "./ods-import-dialog";
 import "./ods-context-menu";
 import "./ods-shortcuts-dialog";
 import "./ods-gallery";
@@ -182,16 +186,6 @@ const nudgeVector = (
 
 const PREVIEW_DELAY_MS = 220;
 const NOTICE_MS = 5000;
-const messageFrom = (error: unknown, fallback: string): string => {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  if (typeof error === "string" && error) {
-    return error;
-  }
-  return fallback;
-};
-
 /**
  * The panel shell. It owns the dashboards, the open dashboard, the selection and the history;
  * every child element reports intent through events and this element applies it.
@@ -284,6 +278,8 @@ export class OdsApp extends LitElement {
   @state() private widgetErrors: WidgetLoadError[] = [];
   @state() private notice = "";
   @state() private sending = false;
+  /** A dashboard file waiting for the user to confirm its import. */
+  @state() private importing?: { file: unknown; plan: ImportPlan };
   private noticeTimer?: number;
   @state() private primitives: PrimitiveDefinition[] = [];
   @state() private current?: Dashboard;
@@ -478,6 +474,72 @@ export class OdsApp extends LitElement {
     }
   }
   /** Tries the design as it is, saved or not, on the device the dashboard is made for. */
+  private async exportDashboard(): Promise<void> {
+    if (!this.hass || !this.current) return;
+    this.error = "";
+    try {
+      const file = await api.exportDashboard(this.hass, this.current);
+      downloadFile(
+        exportFileName(this.current.name),
+        JSON.stringify(file, null, 2)
+      );
+    } catch (error) {
+      this.error = messageFrom(error, strings.app.exportFailed);
+    }
+  }
+
+  /** Reads a dashboard file and, if the backend accepts it, asks the user to confirm. */
+  private async chooseImport(): Promise<void> {
+    if (!this.hass || !this.current) return;
+    const chosen = await chooseFile(".json,application/json");
+    if (!chosen) return;
+    this.error = "";
+    const file = parseJson(await chosen.text());
+    if (file === undefined) {
+      this.error = strings.app.notAJsonFile;
+      return;
+    }
+    try {
+      const plan = await api.prepareImport(
+        this.hass,
+        file,
+        this.current.display
+      );
+      this.importing = { file, plan };
+    } catch (error) {
+      this.error = messageFrom(error, strings.app.importFailed);
+    }
+  }
+
+  private cancelImport(): void {
+    this.importing = undefined;
+  }
+
+  /** Replaces the elements with those of the file: one undo step, nothing saved. */
+  private async confirmImport(
+    event: OdsEvent<"import-confirm">
+  ): Promise<void> {
+    const { importing, hass, current } = this;
+    if (!importing || !hass || !current) return;
+    try {
+      const { items } = await api.prepareImport(
+        hass,
+        importing.file,
+        current.display,
+        event.detail.colorMap
+      );
+      this.mutate((next) => {
+        next.items = items;
+      });
+      this.clearSelection();
+      this.importing = undefined;
+      this.showNotice(strings.app.imported(items.length));
+    } catch (error) {
+      this.importing = undefined;
+      this.error = messageFrom(error, strings.app.importFailed);
+    }
+  }
+
   private async sendToDevice(): Promise<void> {
     if (!this.hass || !this.current) return;
     this.sending = true;
@@ -1562,6 +1624,22 @@ export class OdsApp extends LitElement {
     `;
   }
 
+  private renderImportDialog(): TemplateResult | typeof nothing {
+    const { importing, current } = this;
+    if (!importing || !current) return nothing;
+    return html`
+      <ods-import-dialog
+        .hass=${this.hass}
+        .display=${current.display}
+        .colors=${importing.plan.colorsToMap}
+        .adjusted=${importing.plan.adjusted}
+        .replaces=${current.items.length > 0}
+        @import-confirm=${this.confirmImport}
+        @import-cancel=${this.cancelImport}
+      ></ods-import-dialog>
+    `;
+  }
+
   private renderNewDashboardDialog(): TemplateResult | typeof nothing {
     if (!this.newDashboardOpen) {
       return nothing;
@@ -1688,8 +1766,8 @@ export class OdsApp extends LitElement {
           @expression-change=${this.onExpressionChange}
         ></ods-inspector>
       </div>
-      ${this.renderDeleteDialog()} ${this.renderMenu()}
-      ${this.renderShortcutsDialog()}
+      ${this.renderDeleteDialog()} ${this.renderImportDialog()}
+      ${this.renderMenu()} ${this.renderShortcutsDialog()}
     `;
   }
 
@@ -1726,6 +1804,8 @@ export class OdsApp extends LitElement {
           @toggle-ready=${this.toggleReady}
           @dashboard-save=${this.saveDashboard}
           @send-to-device=${this.sendToDevice}
+          @dashboard-export=${this.exportDashboard}
+          @dashboard-import=${this.chooseImport}
           @help-open=${() => {
             this.shortcutsOpen = true;
           }}

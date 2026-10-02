@@ -46,6 +46,10 @@ export interface OdsEventMap {
   /** A section was reset: these fields go back to their defaults, in one step. */
   "primitive-fields-reset": { values: Record<string, unknown> };
   "send-to-device": undefined;
+  "dashboard-export": undefined;
+  "dashboard-import": undefined;
+  "import-confirm": { colorMap: Record<string, string> };
+  "import-cancel": undefined;
   // library
   "library-collapse": { collapsed: boolean };
   "catalog-add": { value: string };

@@ -38,6 +38,10 @@ export const polish: StringsOverride = {
   },
 
   app: {
+    exportFailed: "Nie udało się wyeksportować dashboardu",
+    importFailed: "Nie udało się odczytać pliku",
+    notAJsonFile: "To nie jest plik JSON",
+    imported: (count: number): string => `Zaimportowano elementy: ${count}`,
     loading: "Ładowanie OpenDisplay Studio…",
     loadFailed: "Nie udało się załadować OpenDisplay Studio",
     createFailed: "Nie udało się utworzyć dashboardu",
@@ -120,6 +124,10 @@ export const polish: StringsOverride = {
   },
 
   header: {
+    exportDashboard: "Eksportuj",
+    exportTitle: "Pobierz ten dashboard jako plik",
+    importDashboard: "Importuj",
+    importTitle: "Zastąp elementy elementami z pliku dashboardu",
     dashboards: "Dashboardy",
     name: "Nazwa dashboardu",
     view: "Widok dashboardu",
@@ -337,6 +345,19 @@ export const polish: StringsOverride = {
     settings: "Ustawienia linii",
     add: "Dodaj serię",
     remove: (number: number): string => `Usuń serię ${number}`,
+  },
+
+  importDialog: {
+    eyebrow: "Import",
+    heading: "Importuj dashboard",
+    replaces:
+      "Import zastępuje elementy tego dashboardu. Jego nazwa, id i ustawienia wyświetlacza zostają.",
+    adjusted:
+      "Plik powstał dla większego wyświetlacza, więc część elementów zmniejszono lub przysunięto. Po imporcie przesuń je, gdzie chcesz.",
+    colorsTitle: "Plik powstał dla innego zestawu kolorów",
+    colorsHelp:
+      "Wybierz kolor tego dashboardu dla każdego koloru z pliku. Kolory wspólne zostają bez zmian.",
+    confirm: "Importuj",
   },
 
   imagePicker: {

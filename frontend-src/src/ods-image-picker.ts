@@ -43,7 +43,10 @@ export class OdsImagePicker extends LitElement {
     }
   }
 
-  /** The media selector reports `{ media_content_id }`; a source that is no file is reported when it is drawn. */
+  /**
+   * The media selector reports `{ media_content_id }`. A source that is no file is reported
+   * as a warning when the image is drawn.
+   */
   private onMedia(
     event: CustomEvent<{ value: Record<string, unknown> }>
   ): void {

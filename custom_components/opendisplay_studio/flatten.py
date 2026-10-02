@@ -80,6 +80,29 @@ def shift_primitive(
     return shifted
 
 
+X_KEYS = ("x", "x_start", "x_end")
+Y_KEYS = ("y", "y_start", "y_end")
+
+
+def translate_elements(
+    elements: list[dict[str, Any]], offset_x: int, offset_y: int
+) -> list[dict[str, Any]]:
+    """Return ODL elements with every position moved by the offset."""
+    moved = []
+    for element in elements:
+        copy = dict(element)
+        for key in X_KEYS:
+            if key in copy:
+                copy[key] += offset_x
+        for key in Y_KEYS:
+            if key in copy:
+                copy[key] += offset_y
+        if "points" in copy:
+            copy["points"] = [[x + offset_x, y + offset_y] for x, y in copy["points"]]
+        moved.append(copy)
+    return moved
+
+
 def background_element(container: dict[str, Any], x: int, y: int) -> dict[str, Any]:
     """Return the rectangle a container's background is drawn as."""
     background = container["background"]

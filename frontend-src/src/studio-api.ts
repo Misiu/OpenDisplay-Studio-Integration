@@ -4,6 +4,7 @@ import type {
   Dashboard,
   DisplayDevice,
   HomeAssistant,
+  ImportPlan,
   ReloadWidgetsResponse,
 } from "./types";
 
@@ -87,6 +88,36 @@ export const sendToDevice = async (
     dashboard: structuredClone(dashboard),
   });
 };
+
+/** The file for a dashboard as the panel has it, saved or not. */
+export const exportDashboard = async (
+  hass: HomeAssistant,
+  dashboard: Dashboard
+): Promise<unknown> => {
+  const result = await hass.callWS<{ file: unknown }>({
+    type: "opendisplay_studio/export_dashboard",
+    dashboard: structuredClone(dashboard),
+  });
+  return result.file;
+};
+
+/**
+ * Checks a dashboard file against the display of the open dashboard and returns the
+ * elements to import. `colorMap` says which color of the dashboard's palette each color
+ * of the file becomes.
+ */
+export const prepareImport = (
+  hass: HomeAssistant,
+  file: unknown,
+  display: Dashboard["display"],
+  colorMap: Record<string, string> = {}
+): Promise<ImportPlan> =>
+  hass.callWS<ImportPlan>({
+    type: "opendisplay_studio/prepare_import",
+    file,
+    display,
+    colorMap,
+  });
 
 let iconNames: Promise<string[]> | undefined;
 

@@ -236,6 +236,21 @@ export class OdsCanvas extends LitElement {
         color: #59636b;
         background: #fff;
       }
+      .clip-ring {
+        position: absolute;
+        z-index: 1;
+        inset: calc(-1 * var(--margin));
+        box-sizing: border-box;
+        border: var(--margin) solid rgba(8, 15, 24, 0.2);
+        pointer-events: none;
+      }
+      .clip-frame {
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        box-shadow: 0 0 0 var(--line) rgba(8, 15, 24, 0.7);
+        pointer-events: none;
+      }
       .working-area {
         position: absolute;
         pointer-events: none;
@@ -1602,12 +1617,41 @@ export class OdsCanvas extends LitElement {
         <div class="canvas-placeholder">${strings.canvas.rendering}</div>
       `;
     }
+    const margin = this.preview.margin ?? 0;
     return html`
       <img
         draggable="false"
         src=${this.preview.imageUrl}
         alt=${strings.canvas.previewAlt}
+        style=${styleMap(this.pictureBox(margin))}
       />
+      ${this.renderClipFrame(margin)}
+    `;
+  }
+
+  /**
+   * The picture is larger than the display by `margin` on each side, so what hangs out of
+   * the display is seen; its middle is the display.
+   */
+  private pictureBox(margin: number): Record<string, string> {
+    return {
+      left: `${-margin}px`,
+      top: `${-margin}px`,
+      width: `calc(100% + ${2 * margin}px)`,
+      height: `calc(100% + ${2 * margin}px)`,
+    };
+  }
+
+  /** Dims the margin and outlines the display: what is outside the frame is cut off. */
+  private renderClipFrame(margin: number): TemplateResult | typeof nothing {
+    if (margin === 0) return nothing;
+    return html`
+      <div
+        class="clip-ring"
+        aria-hidden="true"
+        style=${styleMap({ "--margin": `${margin}px` })}
+      ></div>
+      <div class="clip-frame" aria-hidden="true"></div>
     `;
   }
 
