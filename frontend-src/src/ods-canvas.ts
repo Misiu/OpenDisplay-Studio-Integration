@@ -30,7 +30,16 @@ import {
   type Placed,
 } from "./tree";
 import { trackPointerGesture } from "./pointer-gesture";
-import { movePoint, pointsOf, type Point } from "./polygon-points";
+import {
+  canAddPoint,
+  editablePoints,
+  insertPoint,
+  midpoint,
+  movePoint,
+  removePoint,
+  withEditablePoints,
+  type Point,
+} from "./polygon-points";
 import { remeasured } from "./primitive-shape";
 import type { Guide, SpacingMark, StickyState } from "./snapping";
 import { itemLocks } from "./locks";
@@ -44,7 +53,6 @@ import type {
   Dashboard,
   ItemBounds,
   PrimitiveDefinition,
-  PolygonPrimitive,
   PrimitiveItem,
   StudioItem,
   WidgetDefinition,
@@ -402,18 +410,44 @@ export class OdsCanvas extends LitElement {
         position: absolute;
         inset: calc(-6px * var(--ui, 1));
       }
+      .edge-add {
+        position: absolute;
+        z-index: 7;
+        display: grid;
+        place-items: center;
+        width: calc(12px * var(--ui, 1));
+        height: calc(12px * var(--ui, 1));
+        padding: 0;
+        border: var(--line) dashed #00aef0;
+        border-radius: 50%;
+        color: #00aef0;
+        background: rgba(255, 255, 255, 0.92);
+        transform: translate(-50%, -50%);
+        cursor: crosshair;
+        touch-action: none;
+      }
+      .edge-add::before {
+        content: "+";
+        font: 700 calc(11px * var(--ui, 1)) / 1 sans-serif;
+      }
+      .edge-add::after {
+        content: "";
+        position: absolute;
+        inset: calc(-4px * var(--ui, 1));
+      }
       .point-handle {
         position: absolute;
         z-index: 8;
-        width: calc(8px * var(--ui, 1));
-        height: calc(8px * var(--ui, 1));
+        width: calc(11px * var(--ui, 1));
+        height: calc(11px * var(--ui, 1));
         padding: 0;
-        border: var(--line) solid #00aef0;
+        border: var(--line-strong) solid #00aef0;
         border-radius: 50%;
         background: #fff;
         box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
         transform: translate(-50%, -50%);
-        cursor: move;
+        /* A cross, not the arrows that move a whole element: this edits one point. */
+        cursor: crosshair;
         touch-action: none;
       }
       .resize-nw {
@@ -1141,6 +1175,8 @@ export class OdsCanvas extends LitElement {
 
   private renderHandles(item: StudioItem): TemplateResult[] {
     if (item.kind === "primitive" && !isResizable(item.primitive)) return [];
+    // A line is shaped by its two ends, which have handles of their own.
+    if (item.kind === "primitive" && item.primitive.type === "line") return [];
     const disabled = itemLocks(item, this.primitives).handles;
     return RESIZE_HANDLES.filter((handle) => !disabled.includes(handle)).map(
       (handle) => html`
@@ -1156,32 +1192,115 @@ export class OdsCanvas extends LitElement {
     );
   }
 
-  /** A selected polygon has a handle on each of its points; dragging one moves that point. */
+  /** Where a point of the item lies inside the item's selection box, in percent. */
+  private pointPosition(
+    point: Point,
+    offset: { x: number; y: number },
+    box: ItemBounds
+  ): Record<string, string> {
+    const left =
+      ((point[0] + offset.x - box.x + 0.5) / Math.max(box.width, 1)) * 100;
+    const top =
+      ((point[1] + offset.y - box.y + 0.5) / Math.max(box.height, 1)) * 100;
+    return { left: `${left}%`, top: `${top}%` };
+  }
+
+  /**
+   * A selected polygon or line has a round handle on each of its points. Dragging one moves
+   * that point, double-clicking one of a polygon removes it, and the `+` in the middle of an
+   * edge of a polygon adds a point there.
+   */
   private renderPointHandles(
     item: StudioItem,
     offset: { x: number; y: number },
     box: ItemBounds
   ): TemplateResult[] {
-    if (item.kind !== "primitive" || item.primitive.type !== "polygon") {
+    if (item.kind !== "primitive") return [];
+    const points = editablePoints(item.primitive);
+    if (!points || itemLocks(item, this.primitives).position.length > 0) {
       return [];
     }
-    if (itemLocks(item, this.primitives).position.length > 0) return [];
-    return pointsOf(item.primitive.points).map(
-      ([x, y], index) => html`
+    const handles = points.map(
+      (point, index) => html`
         <button
           data-point-handle=${index}
           class="point-handle"
           tabindex="-1"
           aria-label=${strings.canvas.pointHandle(item.name, index + 1)}
-          style=${styleMap({
-            left: `${((x + offset.x - box.x + 0.5) / Math.max(box.width, 1)) * 100}%`,
-            top: `${((y + offset.y - box.y + 0.5) / Math.max(box.height, 1)) * 100}%`,
-          })}
+          style=${styleMap(this.pointPosition(point, offset, box))}
           @pointerdown=${(event: PointerEvent) =>
             this.onPointHandlePointerDown(event, item, index)}
+          @dblclick=${(event: MouseEvent) =>
+            this.onPointHandleDoubleClick(event, item, index)}
         ></button>
       `
     );
+    return [...handles, ...this.renderEdgeAdders(item, points, offset, box)];
+  }
+
+  /** The `+` handles in the middle of every edge of a polygon, closing edge included. */
+  private renderEdgeAdders(
+    item: PrimitiveItem,
+    points: Point[],
+    offset: { x: number; y: number },
+    box: ItemBounds
+  ): TemplateResult[] {
+    if (item.primitive.type !== "polygon" || !canAddPoint(points)) return [];
+    return points.map(
+      (point, index) => html`
+        <button
+          data-edge-add=${index}
+          class="edge-add"
+          tabindex="-1"
+          aria-label=${strings.canvas.addPoint(item.name, index + 1)}
+          style=${styleMap(
+            this.pointPosition(
+              midpoint(point, points[(index + 1) % points.length]),
+              offset,
+              box
+            )
+          )}
+          @pointerdown=${this.stopHandlePress}
+          @click=${() => this.addPointAfter(item, points, index)}
+        ></button>
+      `
+    );
+  }
+
+  /** A press on an add handle must not start moving the element under it. */
+  private stopHandlePress(event: PointerEvent): void {
+    if (this.startsViewDrag(event)) return;
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  private changePoints(item: PrimitiveItem, points: Point[]): void {
+    emit(this, "item-select", { itemId: item.id });
+    emit(this, "primitive-field-change", { key: "points", value: points });
+  }
+
+  private addPointAfter(
+    item: PrimitiveItem,
+    points: Point[],
+    index: number
+  ): void {
+    const next = points[(index + 1) % points.length];
+    this.changePoints(
+      item,
+      insertPoint(points, index, midpoint(points[index], next))
+    );
+  }
+
+  private onPointHandleDoubleClick(
+    event: MouseEvent,
+    item: StudioItem,
+    index: number
+  ): void {
+    event.stopPropagation();
+    if (item.kind !== "primitive" || item.locked) return;
+    const points = editablePoints(item.primitive);
+    if (!points || item.primitive.type !== "polygon") return;
+    this.changePoints(item, removePoint(points, index));
   }
 
   private onPointHandlePointerDown(
@@ -1193,22 +1312,21 @@ export class OdsCanvas extends LitElement {
     event.stopPropagation();
     event.preventDefault();
     emit(this, "item-select", { itemId: item.id });
-    if (item.kind !== "primitive" || item.primitive.type !== "polygon") return;
-    if (item.locked) return;
-    this.beginPointDrag(event, item, item.primitive, index);
+    if (item.kind !== "primitive" || item.locked) return;
+    this.beginPointDrag(event, item, index);
   }
 
-  /** Drag one point of a polygon; the others stay where they are. */
+  /** Drag one point of a polygon or line; the others stay where they are. */
   private beginPointDrag(
     event: PointerEvent,
     item: PrimitiveItem,
-    polygon: PolygonPrimitive,
     index: number
   ): void {
+    const original = editablePoints(item.primitive);
+    if (!original) return;
     this.stopGesture?.();
     const before = structuredClone(this.dashboard);
     const stopWatching = this.watchEscape(before, () => undefined);
-    const original = pointsOf(polygon.points);
     const offset = locate(this.dashboard.items, item.id)?.offset ?? {
       x: 0,
       y: 0,
@@ -1232,10 +1350,10 @@ export class OdsCanvas extends LitElement {
         ];
         const moved: PrimitiveItem = {
           ...item,
-          primitive: {
-            ...polygon,
-            points: movePoint(original, index, target),
-          },
+          primitive: withEditablePoints(
+            item.primitive,
+            movePoint(original, index, target)
+          ),
         };
         emit(this, "items-transform", { items: [moved] });
       },

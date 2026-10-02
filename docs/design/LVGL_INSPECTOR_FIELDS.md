@@ -1,4 +1,4 @@
-# The properties panel of lvgl.espboards.dev, measured
+# The properties panel of the reference designer, measured
 
 Measured on the live editor (a dashboard open, a Label selected, 1440 × 900, dark theme)
 with the browser's computed styles. Colors are the editor's own; ours come from the

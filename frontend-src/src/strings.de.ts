@@ -228,6 +228,8 @@ export const german: StringsOverride = {
     pan: "Verschieben",
     panTitle:
       "Verschieben: Mausrad bewegt die Ansicht, Strg + Mausrad zoomt. Aus: Mausrad zoomt.",
+    addPoint: (name: string, number: number): string =>
+      `Punkt zu ${name} nach Punkt ${number} hinzufügen`,
     pointHandle: (name: string, number: number): string =>
       `Punkt ${number} von ${name} verschieben`,
     resizeHandle: (name: string, side: string): string =>
@@ -318,13 +320,20 @@ export const german: StringsOverride = {
     remove: (number: number): string => `Punkt ${number} entfernen`,
   },
 
+  seriesField: {
+    entity: "Entität",
+    settings: "Linieneinstellungen",
+    add: "Reihe hinzufügen",
+    remove: (number: number): string => `Reihe ${number} entfernen`,
+  },
+
   imagePicker: {
     address: "Adresse oder Pfad",
     media: "Aus Medien wählen",
     entity: "Kamera- oder Bild-Entität",
-    hint: "Eine Datei des Medienbrowsers, eine Kamera- oder Bild-Entität oder eine Webadresse.",
+    hint: "Eine Datei des Medienbrowsers (lokale Medien, Image upload und andere Quellen, die eine Datei auf diesem Server sind), eine Kamera- oder Bild-Entität oder eine Webadresse. Streams und Online-Dienste lassen sich nicht zeichnen.",
     unsupported:
-      "Keine Webadresse, Kamera- oder Bild-Entität und keine Datei aus /local oder /media.",
+      "Keine Webadresse, Kamera- oder Bild-Entität, keine Medienquelle und keine Datei aus /local oder /media.",
     empty: "Kein Bild",
   },
 

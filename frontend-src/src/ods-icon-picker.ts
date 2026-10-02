@@ -1,13 +1,16 @@
 import type { nothing } from "lit";
 import { css, html, LitElement, type TemplateResult } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { customElement, property, query, state } from "lit/decorators.js";
+import { styleMap } from "lit/directives/style-map.js";
 import { emit } from "./events";
 import { strings } from "./strings";
 import { baseStyles, fieldStyles } from "./studio-styles";
 
-/** How many matches are drawn; the rest is one more letter of the search away. */
-const MAX_SHOWN = 96;
 const MDI = "mdi:";
+const ROW_HEIGHT = 36;
+const LIST_HEIGHT = 288;
+/** Rows drawn above and below the visible ones, so a fast scroll does not show gaps. */
+const OVERSCAN = 6;
 
 /** The name an icon is stored under: without the `mdi:` prefix, as ODL writes it. */
 export const storedIconName = (value: string): string =>
@@ -16,15 +19,27 @@ export const storedIconName = (value: string): string =>
 /** The icons whose name contains every word of the search, names that start with it first. */
 export const matchingIcons = (icons: string[], search: string): string[] => {
   const words = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return icons.slice(0, MAX_SHOWN);
+  if (words.length === 0) return icons;
   const matches = icons.filter((icon) =>
     words.every((word) => icon.includes(word))
   );
   const first = words[0];
   const starting = matches.filter((icon) => icon.startsWith(first));
   const rest = matches.filter((icon) => !icon.startsWith(first));
-  return [...starting, ...rest].slice(0, MAX_SHOWN);
+  return [...starting, ...rest];
 };
+
+/** The rows of a long list worth drawing for a scroll position, with a margin. */
+export const visibleRows = (
+  scrollTop: number,
+  rowCount: number
+): { first: number; last: number } => ({
+  first: Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN),
+  last: Math.min(
+    rowCount,
+    Math.ceil((scrollTop + LIST_HEIGHT) / ROW_HEIGHT) + OVERSCAN
+  ),
+});
 
 /**
  * Picks one of the Material Design icons the renderer can draw: a search box and a grid
@@ -39,32 +54,47 @@ export class OdsIconPicker extends LitElement {
       :host {
         display: block;
       }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 4px;
-        max-height: 216px;
+      .list {
+        position: relative;
+        height: ${LIST_HEIGHT}px;
         margin-top: 8px;
         overflow: auto;
+        overscroll-behavior: contain;
       }
-      .grid button {
-        display: grid;
-        place-items: center;
-        height: 34px;
-        padding: 0;
+      .rows {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+      }
+      .list button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        height: ${ROW_HEIGHT}px;
+        padding: 0 8px;
         border: 1px solid transparent;
         border-radius: 7px;
         background: transparent;
         color: var(--studio-text);
+        font-size: 12px;
+        text-align: start;
       }
-      .grid button:hover {
+      .list button span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .list button:hover {
         background: var(--studio-accent-soft);
       }
-      .grid button[aria-pressed="true"] {
+      .list button[aria-pressed="true"] {
         border-color: var(--primary-color);
         color: var(--primary-color);
       }
       ha-icon {
+        flex: none;
         --mdi-icon-size: 22px;
         width: 22px;
         height: 22px;
@@ -82,12 +112,23 @@ export class OdsIconPicker extends LitElement {
   @property() public value = "";
 
   @state() private search = "";
+  @state() private listScroll = 0;
 
   private onSearch(event: Event): void {
     if (event.target instanceof HTMLInputElement) {
       this.search = event.target.value;
+      this.listScroll = 0;
+      this.list?.scrollTo({ top: 0 });
     }
   }
+
+  private onScroll(event: Event): void {
+    if (event.target instanceof HTMLElement) {
+      this.listScroll = event.target.scrollTop;
+    }
+  }
+
+  @query(".list") private list?: HTMLElement;
 
   private choose(icon: string): void {
     emit(this, "icon-change", { icon });
@@ -103,6 +144,7 @@ export class OdsIconPicker extends LitElement {
         @click=${() => this.choose(icon)}
       >
         <ha-icon icon=${`${MDI}${icon}`}></ha-icon>
+        <span>${icon}</span>
       </button>
     `;
   }
@@ -114,8 +156,18 @@ export class OdsIconPicker extends LitElement {
         <p class="empty">${strings.iconPicker.noMatch}</p>
       `;
     }
+    const { first, last } = visibleRows(this.listScroll, shown.length);
     return html`
-      <div class="grid">${shown.map((icon) => this.renderIcon(icon))}</div>
+      <div class="list" @scroll=${this.onScroll}>
+        <div style=${styleMap({ height: `${shown.length * ROW_HEIGHT}px` })}>
+          <div
+            class="rows"
+            style=${styleMap({ top: `${first * ROW_HEIGHT}px` })}
+          >
+            ${shown.slice(first, last).map((icon) => this.renderIcon(icon))}
+          </div>
+        </div>
+      </div>
     `;
   }
 

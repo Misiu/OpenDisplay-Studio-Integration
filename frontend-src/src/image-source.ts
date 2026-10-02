@@ -1,28 +1,34 @@
 /**
  * Where an image comes from, as the backend (`images.py`) understands it: a web address,
- * a camera or image entity, a file under `/local` (the `www` folder) or `/media/<source>/…`.
+ * a camera or image entity, a file under `/local` (the `www` folder), `/media/<source>/…`,
+ * or any media source that is a file on this machine (`media-source://image_upload/…`).
  */
 
 export type ImageKind = "entity" | "web" | "file" | "other";
 
 const ENTITY = /^(camera|image)\.[a-z0-9_]+$/;
-const MEDIA_SOURCE = /^media-source:\/\/media_source\/([^/]+)\/(.+)$/;
+const LOCAL_MEDIA = /^media-source:\/\/media_source\/([^/]+)\/(.+)$/;
+const MEDIA_SOURCE_PREFIX = "media-source://";
 
 /** What kind of source a stored value is. */
 export const imageKind = (value: string): ImageKind => {
   if (ENTITY.test(value)) return "entity";
   if (/^https?:\/\//.test(value) || value.startsWith("data:")) return "web";
   if (value.startsWith("/local/") || value.startsWith("/media/")) return "file";
+  if (value.startsWith(MEDIA_SOURCE_PREFIX)) return "file";
   return "other";
 };
 
 /**
- * The path of a file chosen in Home Assistant's media browser. Only files of the local
- * media sources can be read; anything else (a camera stream, a radio) gives `undefined`.
+ * What to store for an item chosen in Home Assistant's media browser. A file of a local
+ * media source is stored as its path, which also reads well; any other source (Image
+ * upload, …) as its media source address, which the backend resolves to a file. Whether
+ * a source has a file to draw is the backend's to say: it reports it as a warning.
  */
-export const mediaPath = (mediaContentId: string): string | undefined => {
-  const match = MEDIA_SOURCE.exec(mediaContentId);
-  return match
-    ? `/media/${match[1]}/${decodeURIComponent(match[2])}`
+export const mediaReference = (mediaContentId: string): string | undefined => {
+  const local = LOCAL_MEDIA.exec(mediaContentId);
+  if (local) return `/media/${local[1]}/${decodeURIComponent(local[2])}`;
+  return mediaContentId.startsWith(MEDIA_SOURCE_PREFIX)
+    ? mediaContentId
     : undefined;
 };

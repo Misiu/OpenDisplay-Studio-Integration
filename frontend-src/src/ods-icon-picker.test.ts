@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchingIcons, storedIconName } from "./ods-icon-picker";
+import { matchingIcons, storedIconName, visibleRows } from "./ods-icon-picker";
 
 const icons = [
   "home",
@@ -28,10 +28,10 @@ describe("matchingIcons", () => {
     expect(matchingIcons(icons, "zzz")).toEqual([]);
   });
 
-  it("never draws more than a screenful", () => {
-    const many = Array.from({ length: 500 }, (_, index) => `icon-${index}`);
+  it("lists every match, however many there are", () => {
+    const many = Array.from({ length: 5000 }, (_, index) => `icon-${index}`);
 
-    expect(matchingIcons(many, "icon")).toHaveLength(96);
+    expect(matchingIcons(many, "icon")).toHaveLength(5000);
   });
 });
 
@@ -39,5 +39,13 @@ describe("storedIconName", () => {
   it("drops the mdi prefix, as ODL writes the names", () => {
     expect(storedIconName("mdi:home")).toBe("home");
     expect(storedIconName("home")).toBe("home");
+  });
+});
+
+describe("visibleRows", () => {
+  it("draws the rows in view with a margin, and none beyond the list", () => {
+    expect(visibleRows(0, 13000)).toEqual({ first: 0, last: 14 });
+    expect(visibleRows(3600, 13000)).toEqual({ first: 94, last: 114 });
+    expect(visibleRows(0, 3)).toEqual({ first: 0, last: 3 });
   });
 });

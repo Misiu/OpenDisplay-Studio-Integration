@@ -38,6 +38,8 @@ const PRIMITIVES: PrimitiveExpectation[] = [
     type: "line",
     name: "Line",
     fields: ["X", "Y", "Width", "Height", "Color", "Line width", "Dashed"],
+    // The two ends have handles of their own instead.
+    handles: 0,
   },
   {
     type: "circle",
@@ -480,6 +482,49 @@ test.describe("the shapes with their own geometry", () => {
 
     await page.getByRole("button", { name: "Undo" }).click();
     await expect(second).toHaveValue(secondBefore);
+  });
+
+  test("a plus in the middle of an edge adds a point, a double click on a point removes it", async ({
+    page,
+  }) => {
+    await libraryItem(page, "Polygon").click();
+    const rows = page.locator("[data-point]");
+    await expect(rows).toHaveCount(3);
+
+    await page.locator("[data-edge-add='0']").click();
+    await expect(rows).toHaveCount(4);
+    await expect(page.locator("[data-point-handle]")).toHaveCount(4);
+
+    await page.locator("[data-point-handle='1']").dblclick();
+    await expect(rows).toHaveCount(3);
+    // A polygon keeps three points.
+    await page.locator("[data-point-handle='0']").dblclick();
+    await expect(rows).toHaveCount(3);
+    await page.getByRole("button", { name: "Undo" }).click();
+    await expect(rows).toHaveCount(4);
+  });
+
+  test("a line is shaped by handles on its two ends", async ({ page }) => {
+    await libraryItem(page, "Line").click();
+    await expect(page.locator("[data-point-handle]")).toHaveCount(2);
+    await expect(
+      page.locator(".selection.selected [data-resize-handle]")
+    ).toHaveCount(0);
+    const end = page.locator("[data-point-handle='1']");
+    const box = await end.boundingBox();
+    const before = await page.locator(".selection.selected").boundingBox();
+    if (!box || !before) throw new Error("The line is not visible");
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 40, y + 40, { steps: 6 });
+    await page.mouse.up();
+
+    const after = await page.locator(".selection.selected").boundingBox();
+    expect((after?.width ?? 0) > before.width).toBe(true);
+    expect(after?.x).toBeCloseTo(before.x, 0);
   });
 
   test("an arc is outlined as the circle it is cut from", async ({ page }) => {
@@ -1162,6 +1207,7 @@ test.describe("the icon picker", () => {
     await expect(chips).toHaveCount(3);
 
     await page.getByRole("button", { name: "Add icon" }).click();
+    await page.locator("ods-icon-picker").getByRole("searchbox").fill("lock");
     await page
       .locator("ods-icon-picker")
       .getByRole("button", { name: "lock", exact: true })
@@ -1355,5 +1401,31 @@ test.describe("the advanced fields", () => {
     await page.locator(".layer-row", { hasText: "text_1" }).click();
 
     await expect(strokeWidth).toBeVisible();
+  });
+});
+
+test.describe("the series of a history plot", () => {
+  test("are picked with an entity picker each, and added and removed", async ({
+    page,
+  }) => {
+    await libraryItem(page, "History plot").click();
+    const cards = page.locator("[data-series]");
+    await expect(cards).toHaveCount(1);
+    await expect(
+      page.getByRole("button", { name: "Remove series 1" })
+    ).toBeDisabled();
+
+    const entity = cards.first().getByLabel("Entity", { exact: true });
+    await entity.fill("sensor.kitchen_power");
+    await entity.press("Tab");
+    await expect(entity).toHaveValue("sensor.kitchen_power");
+
+    await page.getByRole("button", { name: "Add series" }).click();
+    await expect(cards).toHaveCount(2);
+    await page.getByRole("button", { name: "Remove series 2" }).click();
+    await expect(cards).toHaveCount(1);
+    await expect(
+      cards.first().getByLabel("Entity", { exact: true })
+    ).toHaveValue("sensor.kitchen_power");
   });
 });

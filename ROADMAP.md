@@ -1,7 +1,7 @@
 # ROADMAP — OpenDisplay Studio editor
 
-The complete plan for turning the current editor into a clone of the ESPboards
-LVGL Designer (https://lvgl.espboards.dev/) that produces OpenDisplay Language.
+The complete plan for turning the current editor into a clone of a reference
+LVGL designer that produces OpenDisplay Language.
 Phases are ordered; each lists what we add, how it must behave, and how it is
 accepted. Rules for *how* to build are in [`CLAUDE.md`](CLAUDE.md).
 
@@ -32,6 +32,7 @@ Tick a step's box in the same change that completes it.
 | 8 | Widget platform (package format, sources, SDK, dynamic loading) | 1, 2, 3 |
 | 9 | Widget catalog (Sensor card, Agenda, Weather, …) | 8 |
 | 10 | Finishing | all |
+| 11 | Import and export of dashboards | 1, 8 |
 
 Phases 3 and 5 may run in parallel once phase 2 has landed the inspector shell.
 Phase 8 may start in parallel with phases 4–7.
@@ -121,7 +122,7 @@ text equals the ink box of the rendered PNG within 1 px.
 
 ## Phase 2 — LVGL shell and density
 
-Measured on lvgl.espboards.dev at 1280×800. Colors from HA theme tokens only.
+Measured on the reference designer at 1280×800. Colors from HA theme tokens only.
 
 - [ ] **2.1 Header** 48 px: brand, breadcrumb `Dashboards / <name>` (name
   editable inline), center segmented control `Design · Code` (track 2 px padding,
@@ -316,7 +317,7 @@ identically.
 
 ## Phase 5 — Structure tree, containers, groups
 
-Reference behaviour observed on lvgl.espboards.dev (Sept 2026), adapted to ODL.
+Reference behaviour observed on the reference designer (Sept 2026), adapted to ODL.
 
 **The concept.** A dashboard is a tree. An **object** (our *container*) holds other
 elements and any element can be nested in it to any depth; children are positioned
@@ -871,8 +872,53 @@ fixture.
     package folder is the only artefact.
 
 Not planned without a separate decision: editable Code view / YAML import,
-multi-select, several screens per dashboard, "From OpenDisplay device" setup,
-deployment to devices.
+several screens per dashboard.
+
+---
+
+## Phase 11 — Import and export of dashboards
+
+Moves the design of a dashboard from one dashboard or installation to another, and into
+and out of backups. Deliberately simple: export writes a file, import reads a file.
+
+- [ ] **11.1 Dashboard file format.** One JSON object:
+  `{ "format": "opendisplay-studio-dashboard", "version": 1, "exportedAt": …,
+  "dashboard": { name, display, items } }`. No store id, no `createdAt`/`updatedAt`, no
+  device id (a device belongs to an installation). Item ids are kept. Written by one
+  function in the backend (`dashboard_files.py`) and read by one, both tested with a stored
+  fixture per `version`; a file with a newer `version` is refused with a message that says
+  to update the integration.
+- [ ] **11.2 Export.** An `Export` button in the header, next to `Save`, downloads the
+  dashboard as `<dashboard name as a slug>.json` (`dashboard.json` when the name is
+  empty). There is no preview, no clipboard and no dialog. Exporting does not save or
+  change the dashboard. It is a command in the registry like every other action.
+- [ ] **11.3 Import.** An `Import` button in the header opens a file chooser for a `.json`
+  file; there is no paste area. The file is validated by the backend
+  (`opendisplay_studio/validate_import`, which runs the same `validate_dashboard` as
+  saving); an invalid file shows the error that names the item and field, and nothing
+  changes. A valid file opens a confirmation dialog (`ha-dialog`):
+  - A notice: "Importing replaces the elements of this dashboard." The dashboard keeps its
+    **name, id and display settings** (size, palette, background, padding, snap, rotation,
+    device); only the items come from the file. With an empty dashboard the notice is left
+    out.
+  - **Color mapping.** When the file uses colors the dashboard's palette does not have, the
+    dialog warns ("The file was made for another set of colors") and lists one row for each
+    such color the file really uses, from its items, containers and widgets: the **source
+    color** from the file (a swatch and its name) and a **target color** chosen in
+    `ods-color-picker` of the dashboard's palette. Colors both palettes have are matched by
+    themselves and are not listed; for the others the picker starts on the nearest color of
+    the palette, so the dialog can always be confirmed and the user changes what they want.
+    A file made for a palette with more colors than the dashboard (six colors into three) is
+    the common case, but the reverse needs no other rule. Mapping applies to every color
+    field, nested ones (plot series, axes) and widget options included.
+  - `Import` applies the mapping and replaces the items in **one undo step**; it does not
+    save by itself. `Cancel` and `Esc` leave everything as it was.
+- [ ] **11.4 Tests.** Backend: a round trip (export → import) renders the same PNG; every
+  version fixture imports; an invalid or too new file is refused with a stable error code.
+  Frontend unit: the file name, finding the colors a file uses, matching and nearest-color
+  suggestion, applying a mapping to nested fields. E2E: download, import by file, the
+  replace notice, an invalid file, the mapping rows for a six-color file into a three-color
+  dashboard, undo after import.
 
 ---
 
@@ -884,13 +930,13 @@ deployment to devices.
 | Children clipped to parent | Not clipped; warning badge | ODL has no clipping |
 | Tree re-parent resets position to 0,0 | Visual position preserved | Less surprising; matches canvas re-parenting |
 | Reparent to Root inserts at index 0 | Inserted after former parent | Keeps z-order predictable |
-| Import YAML (`Ctrl+I`), Export (`Ctrl+E`) | `Ctrl+E` opens Code view; no import | Code view is read-only in this plan |
+| Import and export YAML (`Ctrl+I`, `Ctrl+E`) | Header buttons that export and import the dashboard document as JSON (phase 11); `Ctrl+E` opens the Code view | The Code view's ODL YAML is flat and cannot be turned back into a dashboard |
 | Preview mode (`Ctrl+P`) | — | The canvas already is the rendered preview |
 | Styles/states, Tabview, Tileview, several screens | — | No ODL equivalent |
 | Size badge says `auto` for an intrinsic size | Always the measured pixel size (`W × H`) | The backend measures every element; the real size is more useful than `auto` |
 | Elements are at least 10 px | The smallest size depends on the type (a rectangle may be 1 px, a QR code a module) | ODL drawings use 1 px dividers and the renderer sizes text and codes itself |
 | Shift+arrow nudges 10 px | Nudges by the dashboard snap size | Consistent with snap setting |
-| Drop from the library centres the element on the pointer | Top-left at the drop point, grid-rounded | Matches lvgl.espboards.dev (measured) |
+| Drop from the library centres the element on the pointer | Top-left at the drop point, grid-rounded | Matches the reference designer (measured) |
 | Fixed 5 px grid | Grid step is the dashboard `snapSize`; all other thresholds as measured | Displays differ in resolution; user already sets snap size |
 | — (not an LVGL matter) | Document `schemaVersion` stays 1 and shape changes ship without migrations until the first public release of the dashboard model | Pre-release; the model changes shape every phase (flat list → tree → containers) |
 | One field holds either a literal or an expression | Item `expressions` map beside the literals | Literals keep their shape (typed TS/Python, `ha-form`), switching the `{}` toggle off restores the value without loss |

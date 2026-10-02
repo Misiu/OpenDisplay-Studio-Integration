@@ -6,7 +6,7 @@ import { baseStyles } from "./studio-styles";
 
 /**
  * The nine places an anchor can be, drawn as the 3 x 3 grid of "Align in Parent" on
- * lvgl.espboards.dev: the first letter of a position is the column (left, middle,
+ * the reference designer: the first letter of a position is the column (left, middle,
  * right), the second the row (top, middle, bottom). The chosen place has a large dot.
  */
 export const ANCHOR_POSITIONS = [

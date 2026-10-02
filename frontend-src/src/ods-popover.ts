@@ -9,7 +9,7 @@ const MARGIN = 8;
 
 /**
  * A small panel that opens next to the control that asked for it, as the color and
- * anchor pickers of lvgl.espboards.dev do. It stays inside the window (below the control,
+ * anchor pickers of the reference designer do. It stays inside the window (below the control,
  * or above when there is no room) and closes on Escape, on a click outside it, or with
  * its close button, which it reports with `popover-close`.
  */

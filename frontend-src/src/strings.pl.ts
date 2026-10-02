@@ -241,6 +241,8 @@ export const polish: StringsOverride = {
     pan: "Przesuwanie",
     panTitle:
       "Przesuwanie: kółko przesuwa widok, Ctrl + kółko zmienia powiększenie. Wyłączone: kółko zmienia powiększenie.",
+    addPoint: (name: string, number: number): string =>
+      `Dodaj punkt: ${name}, po punkcie ${number}`,
     pointHandle: (name: string, number: number): string =>
       `Przesuń punkt ${number}: ${name}`,
     resizeHandle: (name: string, side: string): string =>
@@ -330,13 +332,20 @@ export const polish: StringsOverride = {
     remove: (number: number): string => `Usuń punkt ${number}`,
   },
 
+  seriesField: {
+    entity: "Encja",
+    settings: "Ustawienia linii",
+    add: "Dodaj serię",
+    remove: (number: number): string => `Usuń serię ${number}`,
+  },
+
   imagePicker: {
     address: "Adres lub ścieżka",
     media: "Wybierz z multimediów",
     entity: "Encja kamery lub obrazu",
-    hint: "Plik z przeglądarki multimediów, encja kamery lub obrazu albo adres internetowy.",
+    hint: "Plik z przeglądarki multimediów (multimedia lokalne, Image upload i inne źródła będące plikiem na tym serwerze), encja kamery lub obrazu albo adres internetowy. Strumieni i usług online nie można narysować.",
     unsupported:
-      "To nie adres internetowy, encja kamery lub obrazu ani plik z /local lub /media.",
+      "To nie adres internetowy, encja kamery lub obrazu, źródło multimediów ani plik z /local lub /media.",
     empty: "Brak obrazu",
   },
 

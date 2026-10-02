@@ -1,3 +1,5 @@
+import type { Primitive } from "./types";
+
 /** The corner points of a polygon, as `[x, y]` pairs, and the edits the points editor makes. */
 export type Point = [number, number];
 
@@ -53,3 +55,47 @@ export const setPointCoordinate = (
 /** Move one whole point. */
 export const movePoint = (points: Point[], index: number, to: Point): Point[] =>
   points.map((point, at) => (at === index ? to : point));
+
+/** A new point after `index`, at `point`. */
+export const insertPoint = (
+  points: Point[],
+  index: number,
+  point: Point
+): Point[] =>
+  canAddPoint(points)
+    ? [...points.slice(0, index + 1), point, ...points.slice(index + 1)]
+    : points;
+
+/** The point halfway between two others, on whole pixels. */
+export const midpoint = (first: Point, second: Point): Point => [
+  Math.round((first[0] + second[0]) / 2),
+  Math.round((first[1] + second[1]) / 2),
+];
+
+/**
+ * The points a primitive is drawn between and the editor lets the user move one by one: the
+ * corners of a polygon, the two ends of a line. Other shapes have none.
+ */
+export const editablePoints = (primitive: Primitive): Point[] | undefined => {
+  if (primitive.type === "polygon") return pointsOf(primitive.points);
+  if (primitive.type === "line") {
+    return [
+      [primitive.x_start, primitive.y_start],
+      [primitive.x_end, primitive.y_end],
+    ];
+  }
+  return undefined;
+};
+
+/** The primitive with its editable points replaced; a primitive without any is unchanged. */
+export const withEditablePoints = (
+  primitive: Primitive,
+  points: Point[]
+): Primitive => {
+  if (primitive.type === "polygon") return { ...primitive, points };
+  if (primitive.type === "line" && points.length === 2) {
+    const [[x_start, y_start], [x_end, y_end]] = points;
+    return { ...primitive, x_start, y_start, x_end, y_end };
+  }
+  return primitive;
+};

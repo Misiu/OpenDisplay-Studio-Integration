@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   addPoint,
+  editablePoints,
+  insertPoint,
+  midpoint,
+  withEditablePoints,
   canRemovePoint,
   MAXIMUM_POINTS,
   movePoint,
@@ -9,6 +13,7 @@ import {
   setPointCoordinate,
   type Point,
 } from "./polygon-points";
+import { circleItem } from "./test-support";
 
 const triangle: Point[] = [
   [0, 0],
@@ -70,5 +75,60 @@ describe("setPointCoordinate and movePoint", () => {
     setPointCoordinate(triangle, 0, 0, 99);
 
     expect(triangle[0]).toEqual([0, 0]);
+  });
+});
+
+describe("insertPoint and midpoint", () => {
+  it("puts a point after the one given, the closing edge included", () => {
+    expect(insertPoint(triangle, 0, [50, 0])).toEqual([
+      [0, 0],
+      [50, 0],
+      [100, 0],
+      [50, 80],
+    ]);
+    expect(insertPoint(triangle, 2, [25, 40])[3]).toEqual([25, 40]);
+  });
+
+  it("finds the middle of an edge on whole pixels", () => {
+    expect(midpoint([0, 0], [101, 51])).toEqual([51, 26]);
+  });
+});
+
+describe("editablePoints and withEditablePoints", () => {
+  const line = {
+    type: "line" as const,
+    x_start: 10,
+    y_start: 20,
+    x_end: 110,
+    y_end: 70,
+    fill: "black",
+    width: 1,
+    dashed: false,
+    dash_length: 5,
+    space_length: 3,
+  };
+
+  it("give a line its two ends and write them back to its fields", () => {
+    expect(editablePoints(line)).toEqual([
+      [10, 20],
+      [110, 70],
+    ]);
+    expect(
+      withEditablePoints(line, [
+        [1, 2],
+        [3, 4],
+      ])
+    ).toMatchObject({ x_start: 1, y_start: 2, x_end: 3, y_end: 4 });
+  });
+
+  it("give a polygon its corners and a circle nothing", () => {
+    const polygon = {
+      type: "polygon" as const,
+      points: triangle,
+      fill: null,
+      outline: "black",
+    };
+    expect(editablePoints(polygon)).toEqual(triangle);
+    expect(editablePoints(circleItem("c").primitive)).toBeUndefined();
   });
 });

@@ -48,6 +48,8 @@
     "src/ods-value-field.ts",
     "src/ods-icon-field.ts",
     "src/ods-points-field.ts",
+    "src/ods-series-field.ts",
+    "src/series.ts",
     "src/polygon-points.ts",
     "src/ods-icon-picker.ts",
     "src/ods-image-field.ts",

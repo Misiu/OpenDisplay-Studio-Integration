@@ -22,7 +22,7 @@
   that API disabled.
 - Preserve the pointer hotspot in a compact source-sized catalog drag preview
   and place the center of a dropped widget or primitive at the drop point.
-- Match the compact ESPBoards catalog density and make a persisted position
+- Match the compact reference designer's catalog density and make a persisted position
   lock explicit and directly unlockable from the element inspector.
 - Add regressions for catalog geometry, UUID fallback, centered primitive and
   widget drops, Temperature lock/unlock parity, and immediate widget movement.

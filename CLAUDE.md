@@ -66,12 +66,11 @@ built from **ODL primitives**, **containers**, and **semantic widgets**. Ready
 dashboards are exposed as dynamic image Media Sources
 (`media-source://opendisplay_studio/<dashboard-id>`) rendered from live HA data.
 
-**Our model is the ESPboards LVGL Designer — https://lvgl.espboards.dev/.** The
-editor is a functional and visual clone of it: layout, sizes, density, structure
+**Our model is a reference designer for LVGL screens, measured in
+`docs/design/`.** The editor is a functional and visual clone of it: layout, sizes, density, structure
 tree, containers and groups, context menus, keyboard shortcuts. The difference:
 it produces **OpenDisplay Language (ODL)** instead of LVGL YAML. When a
-behaviour is not specified in `ROADMAP.md`, check how lvgl.espboards.dev does it
-and do the same, unless ODL makes it impossible; record deliberate deviations in
+behaviour is not specified in `ROADMAP.md`, check `docs/design/` and do the same, unless ODL makes it impossible; record deliberate deviations in
 `ROADMAP.md`.
 
 On top of the LVGL model:
@@ -84,7 +83,7 @@ On top of the LVGL model:
 
 | Source | Take | Do not take |
 |---|---|---|
-| lvgl.espboards.dev | Everything about the editor: shell, panel widths, control sizes, property sections, tree, containers/groups, context menus, shortcuts, canvas toolbars, zoom bar | Its hard-coded dark palette (we use HA theme tokens), LVGL-only concepts (styles/states, several screens per dashboard, tabview/tileview, component marketplace), YAML import |
+| The reference designer | Everything about the editor: shell, panel widths, control sizes, property sections, tree, containers/groups, context menus, shortcuts, canvas toolbars, zoom bar | Its hard-coded dark palette (we use HA theme tokens), LVGL-only concepts (styles/states, several screens per dashboard, tabview/tileview, component marketplace), YAML import |
 | schlomo/odl-drawcustom-designer | Field-shape model, expression toggle UX, locks for expression-driven geometry, ODL gap knowledge, behavior-test policy | React code, client-side Nunjucks, IndexedDB, share links, embed seams |
 | `odl-renderer` (pinned in `manifest.json`) | **The rendering truth**: field semantics, defaults, coercion | — |
 
@@ -277,7 +276,7 @@ an `entity` is an entity id.
 
 ## UI rules
 
-Sizes and density come from lvgl.espboards.dev; **colors come only from HA
+Sizes and density come from the reference designer (`docs/design/`); **colors come only from HA
 theme variables** (`--primary-color`, `--card-background-color`,
 `--primary-background-color`, `--secondary-background-color`,
 `--divider-color`, `--primary-text-color`, `--secondary-text-color`,
@@ -408,7 +407,7 @@ committed; rebuild it in the same change as its source.
 - Work phase by phase in `ROADMAP.md` order; a later phase may start only when
   the phases it depends on are done.
 - One change = one roadmap step. Tick the step's checkbox in the same change.
-- A behaviour decision not covered by the roadmap: follow lvgl.espboards.dev;
+- A behaviour decision not covered by the roadmap: follow the reference designer (`docs/design/`);
   if ODL makes that impossible, ask the user and record the answer in the
   roadmap's "Deviations from LVGL" table.
 

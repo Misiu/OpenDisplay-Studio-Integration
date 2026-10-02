@@ -1,7 +1,7 @@
 import { css, html, LitElement, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { emit } from "./events";
-import { imageKind, mediaPath } from "./image-source";
+import { imageKind, mediaReference } from "./image-source";
 import { strings } from "./strings";
 import { baseStyles, fieldStyles } from "./studio-styles";
 import type { HomeAssistant } from "./types";
@@ -43,7 +43,7 @@ export class OdsImagePicker extends LitElement {
     }
   }
 
-  /** The media selector reports `{ media_content_id }`; only local files can be read. */
+  /** The media selector reports `{ media_content_id }`; a source that is no file is reported when it is drawn. */
   private onMedia(
     event: CustomEvent<{ value: Record<string, unknown> }>
   ): void {
@@ -55,7 +55,7 @@ export class OdsImagePicker extends LitElement {
       "media_content_id" in chosen
         ? String(chosen.media_content_id)
         : String(chosen ?? "");
-    const path = mediaPath(id);
+    const path = mediaReference(id);
     if (path) this.choose(path);
   }
 

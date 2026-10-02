@@ -201,6 +201,47 @@ interface DemoFormSchema {
   schema?: DemoFormSchema[];
 }
 
+if (!customElements.get("ha-entity-picker")) {
+  customElements.define(
+    "ha-entity-picker",
+    class DemoEntityPicker extends HTMLElement {
+      private current = "";
+      private text = "";
+      set hass(_value: unknown) {}
+      set includeDomains(_value: unknown) {}
+      set disabled(_value: unknown) {}
+      set label(value: string) {
+        this.text = value;
+        this.draw();
+      }
+      set value(value: string) {
+        this.current = value;
+        this.draw();
+      }
+      connectedCallback(): void {
+        this.draw();
+      }
+      private draw(): void {
+        if (!this.isConnected) return;
+        const input = document.createElement("input");
+        input.setAttribute("aria-label", this.text);
+        input.value = this.current;
+        input.style.cssText = "width:100%;box-sizing:border-box;height:32px";
+        input.addEventListener("change", () =>
+          this.dispatchEvent(
+            new CustomEvent("value-changed", {
+              detail: { value: input.value },
+              bubbles: true,
+              composed: true,
+            })
+          )
+        );
+        this.replaceChildren(input);
+      }
+    }
+  );
+}
+
 if (!customElements.get("ha-form")) {
   customElements.define(
     "ha-form",
@@ -679,7 +720,21 @@ const officeDashboard: Dashboard = {
   updatedAt: "2026-09-22T09:15:00+00:00",
 };
 
+/**
+ * Pictures and dashboards a script (the promo screenshots) hands the harness: the picture
+ * of a dashboard as the real renderer drew it, and the dashboards to list.
+ */
+interface PromoHooks {
+  dashboards?: Dashboard[];
+  images?: Record<string, string>;
+  yamls?: Record<string, string>;
+}
+
+const promo = window.__ODS_PROMO__;
+
 const preview = (dashboard: Dashboard): string => {
+  const promoImage = promo?.images?.[dashboard.id];
+  if (promoImage) return promoImage;
   const { width, height } = dashboard.display;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${dashboard.display.background}"/><rect x="8" y="8" width="388" height="149" rx="3" fill="white" stroke="black"/><circle cx="42" cy="94" r="10" fill="black"/><rect x="38" y="45" width="8" height="50" rx="4" fill="black"/><text x="225" y="52" text-anchor="middle" font-family="Roboto" font-size="22">${dashboard.items.length ? "Kitchen" : ""}</text><text x="225" y="116" text-anchor="middle" font-family="Roboto" font-size="58">21.4 °C</text></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -783,9 +838,9 @@ const itemBounds = (dashboard: Dashboard): Record<string, Box> => {
   return result;
 };
 
-let dashboards = [demoDashboard, hallwayDashboard, officeDashboard].map(
-  (dashboard) => structuredClone(dashboard)
-);
+let dashboards = (
+  promo?.dashboards ?? [demoDashboard, hallwayDashboard, officeDashboard]
+).map((dashboard) => structuredClone(dashboard));
 const calls: Array<Record<string, unknown>> = [];
 
 /** Packages an e2e test "installs" in the user folder; a reload picks them up. */
@@ -880,7 +935,7 @@ const hass: HomeAssistant = {
         .join("\n");
       return {
         imageUrl: preview(dashboard),
-        yaml,
+        yaml: promo?.yamls?.[dashboard.id] ?? yaml,
         itemBounds: itemBounds(dashboard),
         warnings: [],
         dependencies: {
@@ -943,6 +998,7 @@ const assignFreshHass = (): void => {
 
 declare global {
   interface Window {
+    __ODS_PROMO__?: PromoHooks;
     __ODS_E2E__: {
       calls: () => Array<Record<string, unknown>>;
       dashboards: () => Dashboard[];

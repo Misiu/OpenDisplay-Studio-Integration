@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from homeassistant.components.media_source import PlayMedia, Unresolvable
 from PIL import Image
 
 from custom_components.opendisplay_studio.images import async_load_images
@@ -56,6 +57,53 @@ async def test_a_media_file_is_drawn_where_the_image_is_placed(
 
     assert warnings == []
     assert ink_box(await render(loaded)) == (20, 30, 70, 70)
+
+
+async def test_an_uploaded_image_is_drawn_from_its_media_source(
+    hass: HomeAssistant, tmp_path: Path
+) -> None:
+    (tmp_path / "original").write_bytes(png())
+    hass.config.allowlist_external_dirs = {str(tmp_path)}
+    playable = PlayMedia(
+        "/api/image/serve/abc/original", "image/png", path=tmp_path / "original"
+    )
+
+    with patch(
+        "homeassistant.components.media_source.async_resolve_media",
+        AsyncMock(return_value=playable),
+    ):
+        loaded, warnings = await load(hass, "media-source://image_upload/abc")
+
+    assert warnings == []
+    assert ink_box(await render(loaded)) == (20, 30, 70, 70)
+
+
+async def test_a_media_source_without_a_file_is_reported_not_drawn(
+    hass: HomeAssistant,
+) -> None:
+    stream = PlayMedia("https://example.org/live", "video/mp4")
+
+    with patch(
+        "homeassistant.components.media_source.async_resolve_media",
+        AsyncMock(return_value=stream),
+    ):
+        loaded, warnings = await load(hass, "media-source://radio/live")
+
+    assert loaded == []
+    assert "gives no file" in warnings[0]
+
+
+async def test_an_unknown_media_source_is_reported_not_drawn(
+    hass: HomeAssistant,
+) -> None:
+    with patch(
+        "homeassistant.components.media_source.async_resolve_media",
+        AsyncMock(side_effect=Unresolvable("no such item")),
+    ):
+        loaded, warnings = await load(hass, "media-source://image_upload/missing")
+
+    assert loaded == []
+    assert "no such item" in warnings[0]
 
 
 async def test_a_camera_entity_is_drawn_from_its_current_picture(

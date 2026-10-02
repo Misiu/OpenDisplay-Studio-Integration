@@ -1657,6 +1657,7 @@ export class OdsApp extends LitElement {
           @items-transform=${this.onItemsTransform}
           @item-transform-end=${this.onItemTransformEnd}
           @gesture-cancel=${this.onGestureCancel}
+          @primitive-field-change=${this.onPrimitiveFieldChange}
           @snap-toggle=${this.toggleSnap}
         ></ods-canvas>
         <ods-inspector

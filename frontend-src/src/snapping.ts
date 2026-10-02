@@ -2,7 +2,7 @@ import type { ResizeHandle } from "./resize";
 import type { ItemBounds } from "./types";
 
 /**
- * Snapping while an element is moved, after lvgl.espboards.dev: the left, centre and right
+ * Snapping while an element is moved, after the reference designer: the left, centre and right
  * edges (and the top, middle and bottom) of the moved box are pulled to the same lines of
  * its siblings and of its parent when they come close, and the lines it then shares are
  * drawn as guides. Pure, in display pixels.

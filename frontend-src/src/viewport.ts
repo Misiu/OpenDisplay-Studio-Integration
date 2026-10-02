@@ -1,7 +1,7 @@
 import { clamp } from "./math";
 
 /**
- * Pan and zoom of the canvas stage, after lvgl.espboards.dev. The canvas is drawn from
+ * Pan and zoom of the canvas stage, after the reference designer. The canvas is drawn from
  * this and reports changes to it. The canvas sits in the middle of the stage; a display
  * point `d` (from the centre of the display) is on screen at `pan + zoom * d` from the
  * centre of the stage, so a point of the stage can be kept fixed while zooming.

@@ -1,4 +1,4 @@
-# Canvas behaviour of lvgl.espboards.dev
+# Canvas behaviour of the reference designer
 
 Measured on the live editor (v1.4.0, September 2026) by using it and by reading
 the behaviour of its public bundle. This is a **specification of behaviour**:

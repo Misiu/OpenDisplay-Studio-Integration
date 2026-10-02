@@ -8,7 +8,7 @@ import type { PaletteId } from "./types";
 
 /**
  * The colors the display can show, as swatches with their names ("Panel colours" in the
- * color picker of lvgl.espboards.dev on an e-paper display). Nothing but the palette can
+ * color picker of the reference designer on an e-paper display). Nothing but the palette can
  * be picked, so there is no free color and no accent. A field that may be empty also offers "None".
  */
 @customElement("ods-color-picker")

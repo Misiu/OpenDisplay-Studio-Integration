@@ -310,6 +310,8 @@ export const strings = {
     pan: "Pan",
     panTitle:
       "Pan: the wheel moves the view; Ctrl + wheel zooms. Off: the wheel zooms.",
+    addPoint: (name: string, number: number): string =>
+      `Add a point to ${name} after point ${number}`,
     pointHandle: (name: string, number: number): string =>
       `Move point ${number} of ${name}`,
     resizeHandle: (name: string, side: string): string =>
@@ -404,13 +406,20 @@ export const strings = {
     remove: (number: number): string => `Remove point ${number}`,
   },
 
+  seriesField: {
+    entity: "Entity",
+    settings: "Line settings",
+    add: "Add series",
+    remove: (number: number): string => `Remove series ${number}`,
+  },
+
   imagePicker: {
     address: "Address or path",
     media: "Choose from media",
     entity: "Camera or image entity",
-    hint: "A file of the media browser, a camera or image entity, or a web address.",
+    hint: "A file of the media browser (local media, Image upload and other sources that are a file on this server), a camera or image entity, or a web address. Streams and online services cannot be drawn.",
     unsupported:
-      "Not a web address, a camera or image entity, or a file of /local or /media.",
+      "Not a web address, a camera or image entity, a media source, or a file of /local or /media.",
     empty: "No image",
   },
 

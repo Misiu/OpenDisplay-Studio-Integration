@@ -5,7 +5,7 @@ import type { Dashboard, ItemBounds } from "./types";
 
 /**
  * "Align in Parent": put an element at one of nine places of the box it lives in, as the
- * 3 x 3 grid of lvgl.espboards.dev does. The first letter of a place is the column (left,
+ * 3 x 3 grid of the reference designer does. The first letter of a place is the column (left,
  * middle, right), the second the row (top, middle, bottom), the same as an anchor.
  */
 

@@ -1,6 +1,7 @@
 import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { emit, type OdsEvent } from "./events";
+import { isSeriesField } from "./series";
 import { UNCHANGED, valueForForm, valueFromForm } from "./field-codecs";
 import { fieldFormSchema } from "./item-fields";
 import { colorHex, colorLabel, PALETTE_SWATCHES } from "./palettes";
@@ -13,6 +14,7 @@ import { ANCHOR_POSITIONS, isAnchorPosition } from "./ods-anchor-picker";
 import "./ods-color-picker";
 import "./ods-icon-field";
 import "./ods-points-field";
+import "./ods-series-field";
 import "./ods-image-field";
 import "./ods-popover";
 
@@ -491,8 +493,22 @@ export class OdsValueField extends LitElement {
     `;
   }
 
+  /** The series of a plot are cards with an entity picker each. */
+  private renderSeries(): TemplateResult {
+    return html`
+      <ods-series-field
+        .hass=${this.hass}
+        .field=${this.field}
+        .value=${this.value}
+        .palette=${this.palette}
+        .disabled=${this.disabled}
+      ></ods-series-field>
+    `;
+  }
+
   /** Nested settings keep Home Assistant's own editor: they are rare and structured. */
   private renderNested(): TemplateResult {
+    if (isSeriesField(this.field)) return this.renderSeries();
     return html`
       <ha-form
         .hass=${this.hass}
@@ -514,7 +530,7 @@ export class OdsValueField extends LitElement {
       this.field.shape === "coordinate" ||
       this.field.shape === "boolean" ||
       this.field.shape === "object" ||
-      this.field.shape === "objects"
+      (this.field.shape === "objects" && !isSeriesField(this.field))
     );
   }
 

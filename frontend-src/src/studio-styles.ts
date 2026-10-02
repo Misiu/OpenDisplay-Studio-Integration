@@ -106,7 +106,7 @@ export const tileStyles = css`
 `;
 
 /**
- * The compact controls of the properties panel, measured on lvgl.espboards.dev: a 28 px
+ * The compact controls of the properties panel, measured on the reference designer: a 28 px
  * box with its label inside at the left and its unit inside at the right, a 7 px radius
  * and a 1 px border. Longer values put an 11 px label above a 28-30 px control.
  */
