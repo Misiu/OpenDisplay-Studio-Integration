@@ -773,7 +773,7 @@ rendering**. The 0.9.5 widgets are reference for data handling only.
   most useful entities (battery, temperature, humidity, power, state) chosen by
   device class, via `device_entities`.
 
-- [ ] **9.12 Week timetable** (school timetable), ported from the
+- [x] **9.12 School timetable**, ported from the
   *OpenDisplay – Weekly school timetable* blueprint (Misiu) — its Jinja payload
   logic becomes a Python renderer; the automation parts (refresh interval,
   quiet hours, `drawcustom` push) are not the widget's job, the dashboard is
@@ -800,6 +800,9 @@ rendering**. The 0.9.5 widgets are reference for data handling only.
     footer (`Timetable · 29.09–03.10.2026 · Skipped entries: 2`), render time
     at the right.
   - No lessons → centered "No lessons this week" (translated).
+  *(Done as `school-timetable`. Differences: aliases and removed texts are
+  multi-line text options, one entry per line; the lesson in progress text turns
+  white on a black highlight.)*
   Improvements over the blueprint: text measured with the real font
   (`sdk.fit_text` / `measure_text`) instead of a hard-coded width table; layout
   scales to any frame instead of fixed 800 × 480 coordinates; palette-aware

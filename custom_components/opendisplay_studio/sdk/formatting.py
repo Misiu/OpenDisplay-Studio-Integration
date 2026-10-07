@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from custom_components.opendisplay_studio.odl import WidgetContext
 
@@ -10,6 +10,82 @@ _WEEKDAYS = {
     "en": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     "de": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
     "pl": ["pon.", "wt.", "śr.", "czw.", "pt.", "sob.", "niedz."],
+}
+
+_WEEKDAYS_FULL = {
+    "en": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ],
+    "de": [
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+        "Samstag",
+        "Sonntag",
+    ],
+    "pl": [
+        "Poniedziałek",
+        "Wtorek",
+        "Środa",
+        "Czwartek",
+        "Piątek",
+        "Sobota",
+        "Niedziela",
+    ],
+}
+
+# The month as it follows a day number: "28 września".
+_MONTHS = {
+    "en": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ],
+    "de": [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
+    ],
+    "pl": [
+        "stycznia",
+        "lutego",
+        "marca",
+        "kwietnia",
+        "maja",
+        "czerwca",
+        "lipca",
+        "sierpnia",
+        "września",
+        "października",
+        "listopada",
+        "grudnia",
+    ],
 }
 
 _CONDITION_ICONS = {
@@ -60,10 +136,26 @@ _DOMAIN_ICONS = {
 }
 
 
-def weekday_name(day: date, language: str) -> str:
-    """Return the short weekday name in `language`, English when unknown."""
-    names = _WEEKDAYS.get(language.split("-", maxsplit=1)[0], _WEEKDAYS["en"])
-    return names[day.weekday()]
+def weekday_name(day: date, language: str, *, full: bool = False) -> str:
+    """Return the weekday name in `language`, short unless `full`; else English."""
+    names = _WEEKDAYS_FULL if full else _WEEKDAYS
+    chosen = names.get(language.split("-", maxsplit=1)[0], names["en"])
+    return chosen[day.weekday()]
+
+
+def format_long_date(day: date, language: str) -> str:
+    """Return a day with its month in words: "28 września", "28. September"."""
+    code = language.split("-", maxsplit=1)[0]
+    month = _MONTHS.get(code, _MONTHS["en"])[day.month - 1]
+    return f"{day.day}. {month}" if code == "de" else f"{day.day} {month}"
+
+
+def week_start(today: date, *, next_on_weekend: bool = False) -> date:
+    """Return the Monday of `today`'s week; of the next week on a weekend if asked."""
+    monday = today - timedelta(days=today.weekday())
+    if next_on_weekend and today.weekday() >= 5:
+        monday += timedelta(days=7)
+    return monday
 
 
 def format_time(moment: datetime, *, use_24h: bool = True) -> str:

@@ -1,0 +1,15 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: small, width: 480, height: 280}
+docs:
+  - {title: "A school week, the lesson in progress highlighted", state: school-week, size: full, options: {highlightColor: black}}
+  - {title: "Short names and removed substitution markers", state: substitution, size: full}
+  - {title: "On a BWRY display the lesson in progress is red", state: school-week, size: full, options: {highlightColor: red}, palette: bwry}
+  - {title: "Seven days", state: seven-days, size: full}
+  - {title: "On a weekend the next week can be shown", state: weekend, size: small}
+  - {title: "White on black without grid lines", state: school-week, size: small, options: {color: white, background: black, showGrid: false}}
+  - {title: "No lessons", state: empty, size: small}

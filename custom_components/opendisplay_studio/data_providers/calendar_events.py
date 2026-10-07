@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any, override
 
 from homeassistant.util import dt as dt_util
 
+from custom_components.opendisplay_studio.sdk.formatting import week_start
+
 from . import DataProvider, response_items
 
 if TYPE_CHECKING:
@@ -39,8 +41,22 @@ def normalize_event(raw: dict[str, Any], source_id: str) -> dict[str, Any]:
     }
 
 
+def _range_start(params: dict[str, Any]) -> datetime:
+    """Return where the range begins: today, or the Monday of this or the next week."""
+    week = params.get("week", "")
+    if not week:
+        return dt_util.start_of_local_day()
+    monday = week_start(dt_util.now().date(), next_on_weekend=week == "next")
+    return datetime.combine(monday, time.min, tzinfo=dt_util.get_default_time_zone())
+
+
 class CalendarEventsProvider(DataProvider):
-    """Events from today's midnight to `days` days ahead."""
+    """
+    Events from the start of the range to `days` days ahead.
+
+    The range starts at today's midnight, or with `week` set to `current` or `next`
+    at the Monday of the current week (`next`: of the next week on a weekend).
+    """
 
     name = "calendar_events"
 
@@ -54,7 +70,7 @@ class CalendarEventsProvider(DataProvider):
     ) -> dict[str, Any]:
         del language
         days = int(params.get("days", DEFAULT_DAYS))
-        start = dt_util.start_of_local_day()
+        start = _range_start(params)
         response = await hass.services.async_call(
             "calendar",
             "get_events",

@@ -1,0 +1,92 @@
+api: 1
+id: school-timetable
+name: School timetable
+version: 1.0.0
+description: A school week of one calendar as a table of days and lesson slots.
+icon: mdi:calendar-week
+category: Calendar
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 800, height: 480 }
+  minSize: { width: 360, height: 200 }
+
+sources:
+  - key: calendars
+    label: Calendar
+    selector:
+      entity: { filter: { domain: calendar } }
+    required: true
+    max: 1
+    data: calendar_events
+
+options:
+  - section: week
+    fields:
+      - key: days
+        label: Days
+        default: "5"
+        selector:
+          select:
+            options: ["5", "7"]
+      - key: weekend
+        label: On a weekend show
+        default: current
+        selector:
+          select:
+            options: [current, next]
+      - key: dayNames
+        label: Day names
+        default: auto
+        selector:
+          select:
+            options: [auto, short, full]
+      - key: use24h
+        label: 24 h clock
+        default: true
+        selector: { boolean: {} }
+  - section: titles
+    fields:
+      - key: aliases
+        label: Short names (one "Full name = Short" per line)
+        default: ""
+        selector: { text: { multiline: true } }
+      - key: stripText
+        label: Text to remove from titles (one per line)
+        default: "[ZASTĘPSTWO]"
+        selector: { text: { multiline: true } }
+  - section: appearance
+    fields:
+      - key: highlightColor
+        label: Lesson in progress
+        default: accent
+        selector: { opendisplay_color: {} }
+      - key: showGrid
+        label: Show grid lines
+        default: true
+        selector: { boolean: {} }
+      - key: showFooter
+        label: Show footer
+        default: true
+        selector: { boolean: {} }
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }
+
+data:
+  calendar_events:
+    days: "@options.days"
+    week: "@options.weekend"

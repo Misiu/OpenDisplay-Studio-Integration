@@ -20,8 +20,10 @@ from .formatting import (
     condition_icon,
     entity_icon,
     format_date,
+    format_long_date,
     format_relative_day,
     format_time,
+    week_start,
     weekday_name,
 )
 from .layout import columns, grid, inset, rows
@@ -39,6 +41,7 @@ __all__ = [
     "entity_icon",
     "fit_text",
     "format_date",
+    "format_long_date",
     "format_relative_day",
     "format_time",
     "grid",
@@ -52,5 +55,6 @@ __all__ = [
     "text",
     "text_width",
     "truncate",
+    "week_start",
     "weekday_name",
 ]

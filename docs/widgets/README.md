@@ -83,6 +83,71 @@ Default size 360 x 240 px, smallest 180 x 90 px. Id: `agenda`.
 ![Nothing planned](images/agenda-8.png)
 *Nothing planned*
 
+## School timetable
+
+A school week of one calendar as a table of days and lesson slots.
+
+Default size 800 x 480 px, smallest 360 x 200 px. Id: `school-timetable`.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Calendar | one calendar entity | — |
+
+### Options
+
+**Week**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Days | `days` | one of `5`, `7` | `5` |
+| On a weekend show | `weekend` | one of `current`, `next` | `current` |
+| Day names | `dayNames` | one of `auto`, `short`, `full` | `auto` |
+| 24 h clock | `use24h` | on / off | on |
+
+**Titles**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Short names (one "Full name = Short" per line) | `aliases` | text | empty |
+| Text to remove from titles (one per line) | `stripText` | text | `[ZASTĘPSTWO]` |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Lesson in progress | `highlightColor` | color | `accent` |
+| Show grid lines | `showGrid` | on / off | on |
+| Show footer | `showFooter` | on / off | on |
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![A school week, the lesson in progress highlighted](images/school-timetable-1.png)
+*A school week, the lesson in progress highlighted*
+
+![Short names and removed substitution markers](images/school-timetable-2.png)
+*Short names and removed substitution markers*
+
+![On a BWRY display the lesson in progress is red](images/school-timetable-3.png)
+*On a BWRY display the lesson in progress is red*
+
+![Seven days](images/school-timetable-4.png)
+*Seven days*
+
+![On a weekend the next week can be shown](images/school-timetable-5.png)
+*On a weekend the next week can be shown*
+
+![White on black without grid lines](images/school-timetable-6.png)
+*White on black without grid lines*
+
+![No lessons](images/school-timetable-7.png)
+*No lessons*
+
 ## Sensor card
 
 The value of one entity as a tile that follows the shape of its frame.

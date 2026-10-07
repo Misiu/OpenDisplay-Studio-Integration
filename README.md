@@ -21,8 +21,8 @@ display can fetch.
 - **Every OpenDisplay drawing type**: text, multiline text, lines, rectangles,
   patterns, polygons, circles, ellipses, arcs, icons, icon rows, images, QR
   codes, progress bars, history plots and a debug grid.
-- **Live widgets**: Sensor card, Sensor list, Sensor chart, Agenda and Weather read
-  your entities, calendars and forecasts. Write your own widget as a small Python package (see
+- **Live widgets**: Sensor card, Sensor list, Sensor chart, Agenda, Week
+  timetable and Weather read your entities, calendars and forecasts. Write your own widget as a small Python package (see
   [`docs/widget-sdk.md`](docs/widget-sdk.md)).
 - **Your data in any property.** Switch the `{}` toggle next to a field and
   type a Home Assistant template. The panel re-renders when the entities it

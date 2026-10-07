@@ -1,0 +1,211 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+school-week:
+  name: A school week, a lesson in progress
+  language: pl
+  now: "2026-09-30T10:00:00+02:00"
+  options: {aliases: "Wychowanie fizyczne = WF\nZajęcia z wychowawcą = Wych.\nJęzyk angielski = Angielski"}
+  sources:
+    calendars:
+      - {id: calendar.school}
+  data:
+    calendars:
+      - id: calendar.school
+        missing: false
+        events:
+          - {summary: "Matematyka", start: "2026-09-28T08:00:00+02:00", end: "2026-09-28T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-28T08:55:00+02:00", end: "2026-09-28T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-09-28T09:50:00+02:00", end: "2026-09-28T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-28T10:45:00+02:00", end: "2026-09-28T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Informatyka", start: "2026-09-28T11:45:00+02:00", end: "2026-09-28T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-28T12:40:00+02:00", end: "2026-09-28T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-09-28T13:35:00+02:00", end: "2026-09-28T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-09-29T08:00:00+02:00", end: "2026-09-29T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-29T08:55:00+02:00", end: "2026-09-29T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-09-29T09:50:00+02:00", end: "2026-09-29T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Geografia", start: "2026-09-29T10:45:00+02:00", end: "2026-09-29T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-29T11:45:00+02:00", end: "2026-09-29T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Zajęcia z wychowawcą", start: "2026-09-29T12:40:00+02:00", end: "2026-09-29T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-09-30T08:00:00+02:00", end: "2026-09-30T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-09-30T08:55:00+02:00", end: "2026-09-30T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-30T09:50:00+02:00", end: "2026-09-30T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-30T10:45:00+02:00", end: "2026-09-30T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Plastyka", start: "2026-09-30T11:45:00+02:00", end: "2026-09-30T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-30T12:40:00+02:00", end: "2026-09-30T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-01T08:00:00+02:00", end: "2026-10-01T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-10-01T08:55:00+02:00", end: "2026-10-01T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-01T09:50:00+02:00", end: "2026-10-01T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-01T10:45:00+02:00", end: "2026-10-01T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Muzyka", start: "2026-10-01T11:45:00+02:00", end: "2026-10-01T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Technika", start: "2026-10-01T12:40:00+02:00", end: "2026-10-01T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-10-01T13:35:00+02:00", end: "2026-10-01T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-02T08:00:00+02:00", end: "2026-10-02T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-10-02T08:55:00+02:00", end: "2026-10-02T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-02T09:50:00+02:00", end: "2026-10-02T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-10-02T10:45:00+02:00", end: "2026-10-02T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-02T11:45:00+02:00", end: "2026-10-02T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-02T12:40:00+02:00", end: "2026-10-02T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+
+substitution:
+  name: Substitutions, an all-day entry and a trip
+  language: pl
+  now: "2026-09-29T08:20:00+02:00"
+  options: {}
+  sources:
+    calendars:
+      - {id: calendar.school}
+  data:
+    calendars:
+      - id: calendar.school
+        missing: false
+        events:
+          - {summary: "Matematyka", start: "2026-09-28T08:00:00+02:00", end: "2026-09-28T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-28T08:55:00+02:00", end: "2026-09-28T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-09-28T09:50:00+02:00", end: "2026-09-28T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-28T10:45:00+02:00", end: "2026-09-28T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Informatyka", start: "2026-09-28T11:45:00+02:00", end: "2026-09-28T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-28T12:40:00+02:00", end: "2026-09-28T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-09-28T13:35:00+02:00", end: "2026-09-28T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "[ZASTĘPSTWO] Język angielski", start: "2026-09-29T08:00:00+02:00", end: "2026-09-29T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-29T08:55:00+02:00", end: "2026-09-29T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-09-29T09:50:00+02:00", end: "2026-09-29T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Geografia", start: "2026-09-29T10:45:00+02:00", end: "2026-09-29T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-29T11:45:00+02:00", end: "2026-09-29T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Zajęcia z wychowawcą", start: "2026-09-29T12:40:00+02:00", end: "2026-09-29T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-09-30T08:00:00+02:00", end: "2026-09-30T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-09-30T08:55:00+02:00", end: "2026-09-30T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-30T09:50:00+02:00", end: "2026-09-30T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-30T10:45:00+02:00", end: "2026-09-30T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Plastyka", start: "2026-09-30T11:45:00+02:00", end: "2026-09-30T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-30T12:40:00+02:00", end: "2026-09-30T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-01T08:00:00+02:00", end: "2026-10-01T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-10-01T08:55:00+02:00", end: "2026-10-01T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-01T09:50:00+02:00", end: "2026-10-01T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "[ZASTĘPSTWO] Matematyka", start: "2026-10-01T10:45:00+02:00", end: "2026-10-01T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Muzyka", start: "2026-10-01T11:45:00+02:00", end: "2026-10-01T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Technika", start: "2026-10-01T12:40:00+02:00", end: "2026-10-01T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-10-01T13:35:00+02:00", end: "2026-10-01T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-02T08:00:00+02:00", end: "2026-10-02T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-10-02T08:55:00+02:00", end: "2026-10-02T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-02T09:50:00+02:00", end: "2026-10-02T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-10-02T10:45:00+02:00", end: "2026-10-02T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-02T11:45:00+02:00", end: "2026-10-02T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-02T12:40:00+02:00", end: "2026-10-02T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Dzień sportu", start: "2026-09-30T00:00:00+02:00", end: "2026-10-01T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.school}
+          - {summary: "Wycieczka", start: "2026-10-01T08:00:00+02:00", end: "2026-10-02T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Świetlica", start: "2026-09-29T08:55:00+02:00", end: "2026-09-29T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+
+weekend:
+  name: On Saturday it shows the next week
+  language: en
+  now: "2026-10-03T09:00:00+02:00"
+  options: {weekend: next}
+  sources:
+    calendars:
+      - {id: calendar.school}
+  data:
+    calendars:
+      - id: calendar.school
+        missing: false
+        events:
+          - {summary: "Matematyka", start: "2026-10-05T08:00:00+02:00", end: "2026-10-05T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-05T08:55:00+02:00", end: "2026-10-05T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-10-05T09:50:00+02:00", end: "2026-10-05T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-10-05T10:45:00+02:00", end: "2026-10-05T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Informatyka", start: "2026-10-05T11:45:00+02:00", end: "2026-10-05T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-05T12:40:00+02:00", end: "2026-10-05T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-10-05T13:35:00+02:00", end: "2026-10-05T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-06T08:00:00+02:00", end: "2026-10-06T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-06T08:55:00+02:00", end: "2026-10-06T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-10-06T09:50:00+02:00", end: "2026-10-06T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Geografia", start: "2026-10-06T10:45:00+02:00", end: "2026-10-06T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-06T11:45:00+02:00", end: "2026-10-06T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Zajęcia z wychowawcą", start: "2026-10-06T12:40:00+02:00", end: "2026-10-06T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-10-07T08:00:00+02:00", end: "2026-10-07T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-07T08:55:00+02:00", end: "2026-10-07T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-07T09:50:00+02:00", end: "2026-10-07T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-07T10:45:00+02:00", end: "2026-10-07T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Plastyka", start: "2026-10-07T11:45:00+02:00", end: "2026-10-07T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-10-07T12:40:00+02:00", end: "2026-10-07T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-08T08:00:00+02:00", end: "2026-10-08T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-10-08T08:55:00+02:00", end: "2026-10-08T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-08T09:50:00+02:00", end: "2026-10-08T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-08T10:45:00+02:00", end: "2026-10-08T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Muzyka", start: "2026-10-08T11:45:00+02:00", end: "2026-10-08T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Technika", start: "2026-10-08T12:40:00+02:00", end: "2026-10-08T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-10-08T13:35:00+02:00", end: "2026-10-08T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-09T08:00:00+02:00", end: "2026-10-09T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-10-09T08:55:00+02:00", end: "2026-10-09T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-09T09:50:00+02:00", end: "2026-10-09T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-10-09T10:45:00+02:00", end: "2026-10-09T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-09T11:45:00+02:00", end: "2026-10-09T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-09T12:40:00+02:00", end: "2026-10-09T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+
+seven-days:
+  name: Seven days with a Saturday class
+  language: pl
+  now: "2026-09-30T14:00:00+02:00"
+  options: {days: "7"}
+  sources:
+    calendars:
+      - {id: calendar.school}
+  data:
+    calendars:
+      - id: calendar.school
+        missing: false
+        events:
+          - {summary: "Matematyka", start: "2026-09-28T08:00:00+02:00", end: "2026-09-28T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-28T08:55:00+02:00", end: "2026-09-28T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-09-28T09:50:00+02:00", end: "2026-09-28T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-28T10:45:00+02:00", end: "2026-09-28T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Informatyka", start: "2026-09-28T11:45:00+02:00", end: "2026-09-28T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-28T12:40:00+02:00", end: "2026-09-28T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-09-28T13:35:00+02:00", end: "2026-09-28T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-09-29T08:00:00+02:00", end: "2026-09-29T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-29T08:55:00+02:00", end: "2026-09-29T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-09-29T09:50:00+02:00", end: "2026-09-29T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Geografia", start: "2026-09-29T10:45:00+02:00", end: "2026-09-29T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-09-29T11:45:00+02:00", end: "2026-09-29T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Zajęcia z wychowawcą", start: "2026-09-29T12:40:00+02:00", end: "2026-09-29T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-09-30T08:00:00+02:00", end: "2026-09-30T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-09-30T08:55:00+02:00", end: "2026-09-30T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-09-30T09:50:00+02:00", end: "2026-09-30T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-09-30T10:45:00+02:00", end: "2026-09-30T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Plastyka", start: "2026-09-30T11:45:00+02:00", end: "2026-09-30T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Historia", start: "2026-09-30T12:40:00+02:00", end: "2026-09-30T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-01T08:00:00+02:00", end: "2026-10-01T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Biologia", start: "2026-10-01T08:55:00+02:00", end: "2026-10-01T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-01T09:50:00+02:00", end: "2026-10-01T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-01T10:45:00+02:00", end: "2026-10-01T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Muzyka", start: "2026-10-01T11:45:00+02:00", end: "2026-10-01T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Technika", start: "2026-10-01T12:40:00+02:00", end: "2026-10-01T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Religia", start: "2026-10-01T13:35:00+02:00", end: "2026-10-01T14:20:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Wychowanie fizyczne", start: "2026-10-02T08:00:00+02:00", end: "2026-10-02T08:45:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Fizyka", start: "2026-10-02T08:55:00+02:00", end: "2026-10-02T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język polski", start: "2026-10-02T09:50:00+02:00", end: "2026-10-02T10:35:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Chemia", start: "2026-10-02T10:45:00+02:00", end: "2026-10-02T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Język angielski", start: "2026-10-02T11:45:00+02:00", end: "2026-10-02T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Matematyka", start: "2026-10-02T12:40:00+02:00", end: "2026-10-02T13:25:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+          - {summary: "Zajęcia dodatkowe", start: "2026-10-03T08:55:00+02:00", end: "2026-10-03T09:40:00+02:00", all_day: false, location: "", description: "", source: calendar.school}
+
+empty:
+  name: A week without lessons
+  language: en
+  now: "2026-09-30T10:00:00+02:00"
+  options: {}
+  sources:
+    calendars:
+      - {id: calendar.school}
+  data:
+    calendars:
+      - {id: calendar.school, missing: false, events: []}
+
+missing-sources:
+  name: No calendar chosen yet
+  language: en
+  now: "2026-09-30T10:00:00+02:00"
+  options: {}
+  sources:
+    calendars: []
+  data:
+    calendars: []

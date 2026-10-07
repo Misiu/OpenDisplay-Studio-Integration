@@ -119,6 +119,7 @@ class TestBuiltInCatalog:
             "sensor-list",
             "agenda",
             "weather",
+            "school-timetable",
         }
 
     def test_labels_come_in_the_dashboard_language(self) -> None:
@@ -142,7 +143,15 @@ class TestBuiltInCatalog:
 
     @pytest.mark.parametrize("language", ["pl", "de"])
     @pytest.mark.parametrize(
-        "widget_id", ["sensor-card", "sensor-chart", "sensor-list", "agenda", "weather"]
+        "widget_id",
+        [
+            "sensor-card",
+            "sensor-chart",
+            "sensor-list",
+            "agenda",
+            "weather",
+            "school-timetable",
+        ],
     )
     def test_every_language_translates_everything_english_does(
         self, widget_id: str, language: str
@@ -152,7 +161,15 @@ class TestBuiltInCatalog:
         assert set(translations["en"]) <= set(translations[language])
 
     @pytest.mark.parametrize(
-        "widget_id", ["sensor-card", "sensor-chart", "sensor-list", "agenda", "weather"]
+        "widget_id",
+        [
+            "sensor-card",
+            "sensor-chart",
+            "sensor-list",
+            "agenda",
+            "weather",
+            "school-timetable",
+        ],
     )
     def test_every_label_the_panel_shows_is_translated(self, widget_id: str) -> None:
         manifest = DEFAULT_REGISTRY.definition(widget_id)
