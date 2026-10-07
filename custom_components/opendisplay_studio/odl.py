@@ -54,6 +54,8 @@ class DisplayContext:
     palette: str
     background: str
     accent_color: str
+    # Folders searched for a font by name, the same the renderer is given.
+    font_dirs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

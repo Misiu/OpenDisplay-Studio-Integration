@@ -25,5 +25,8 @@
   "options.valueSize.auto": "Automatyczny",
   "options.valueSize.small": "Mały",
   "options.valueSize.medium": "Średni",
-  "options.valueSize.large": "Duży"
+  "options.valueSize.large": "Duży",
+  "sections.appearance": "Wygląd",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.invert": "Odwróć kolory"
 }

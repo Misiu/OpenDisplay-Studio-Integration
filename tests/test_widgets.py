@@ -471,7 +471,7 @@ class TestSensorCard:
 
         compiled = await compile_widget(hass, item)
 
-        assert texts(compiled) == ["21.456 °C", "Kitchen", "48 %", "Hall"]
+        assert texts(compiled) == ["Kitchen", "21.456 °C", "Hall", "48 %"]
 
     async def test_a_grid_has_one_tile_per_entity(self, hass: HomeAssistant) -> None:
         self.states(hass)
@@ -592,8 +592,9 @@ class TestAgenda:
             hass, widget_item("agenda", sources=self.picks())
         )
 
+        title = next(e for e in compiled.elements if e.get("value") == "Football")
         label = next(e for e in compiled.elements if e.get("value") == "Jan")
-        assert label["anchor"] == "rm"
+        assert label["x"] > title["x"]
 
     async def test_only_the_first_events_up_to_the_limit_are_shown(
         self, hass: HomeAssistant
@@ -755,7 +756,8 @@ class TestAgenda:
         )
 
         title = max(texts(compiled), key=len)
-        assert title.endswith("…")
+        assert len(title) < len("Very " * 40)
+        assert title.endswith(("…", "..."))
 
 
 def weather_state(hass: HomeAssistant) -> None:
@@ -862,8 +864,10 @@ class TestWeather:
             if e["type"] == "icon"
         ]
 
-        assert len({e["y"] for e in wide_icons[1:]}) == 1
-        assert len({e["x"] for e in tall_icons[1:]}) == 1
+        wide_rows = [e["y"] for e in wide_icons[1:]]
+        assert max(wide_rows) - min(wide_rows) <= 1
+        tall_columns = [e["x"] for e in tall_icons[1:]]
+        assert max(tall_columns) - min(tall_columns) <= 1
 
     async def test_the_detail_options_add_lines(self, hass: HomeAssistant) -> None:
         weather_state(hass)

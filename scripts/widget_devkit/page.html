@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Widget preview</title>
+    <style>
+      :root {
+        --background: #f4f5f7;
+        --surface: #ffffff;
+        --text: #1b1d21;
+        --muted: #6b7078;
+        --line: #d5d8de;
+        --accent: #2563eb;
+        --error: #c62828;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        height: 100vh;
+        font: 14px system-ui, sans-serif;
+        color: var(--text);
+        background: var(--background);
+      }
+      aside {
+        overflow-y: auto;
+        padding: 16px;
+        background: var(--surface);
+        border-right: 1px solid var(--line);
+      }
+      main { overflow: auto; padding: 16px; }
+      h1 { margin: 0 0 12px; font-size: 16px; }
+      h2 {
+        margin: 16px 0 6px;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      label { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+      label.field { flex-direction: column; align-items: stretch; gap: 2px; }
+      select, input[type="text"], input[type="number"], textarea {
+        width: 100%;
+        padding: 6px;
+        font: inherit;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--background);
+        color: var(--text);
+      }
+      textarea { height: 260px; font: 12px ui-monospace, monospace; }
+      .sizes { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+      figure { margin: 0; }
+      figcaption { margin-bottom: 4px; color: var(--muted); font-size: 12px; }
+      img { display: block; border: 1px solid var(--line); background: #fff; }
+      .failure {
+        max-width: 480px;
+        padding: 8px;
+        color: var(--error);
+        border: 1px solid var(--error);
+        border-radius: 4px;
+        white-space: pre-wrap;
+      }
+      #status { margin-top: 12px; color: var(--muted); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <h1>Widget preview</h1>
+      <label class="field">Widget <select id="widget"></select></label>
+      <label class="field">State <select id="state"></select></label>
+      <label class="field">
+        Palette
+        <select id="palette">
+          <option>bw</option>
+          <option>bwr</option>
+          <option>bwy</option>
+          <option>bwry</option>
+          <option>spectra6</option>
+        </select>
+      </label>
+      <label class="field">
+        Scale
+        <select id="scale">
+          <option value="1">100%</option>
+          <option value="0.5">50%</option>
+          <option value="2">200%</option>
+        </select>
+      </label>
+      <h2>Options</h2>
+      <div id="options"></div>
+      <h2>State (edit to simulate other data)</h2>
+      <textarea id="stateText" spellcheck="false"></textarea>
+      <div id="status"></div>
+    </aside>
+    <main>
+      <div id="load-errors"></div>
+      <div id="sizes" class="sizes"></div>
+    </main>
+
+    <script>
+      const elements = {
+        widget: document.getElementById("widget"),
+        state: document.getElementById("state"),
+        palette: document.getElementById("palette"),
+        scale: document.getElementById("scale"),
+        options: document.getElementById("options"),
+        stateText: document.getElementById("stateText"),
+        sizes: document.getElementById("sizes"),
+        status: document.getElementById("status"),
+        loadErrors: document.getElementById("load-errors"),
+      };
+
+      let widget = null;
+      let optionValues = {};
+      let drawing = 0;
+
+      async function loadWidgets() {
+        const response = await fetch("/api/widgets");
+        const body = await response.json();
+        showLoadErrors(body.errors);
+        const chosen = elements.widget.value;
+        elements.widget.replaceChildren(
+          ...body.widgets.map((item) => new Option(item.name, item.id)),
+        );
+        if (chosen) {
+          elements.widget.value = chosen;
+        }
+        await loadWidget();
+      }
+
+      function showLoadErrors(errors) {
+        const messages = errors.map((error) => `${error.folder}: ${error.message}`);
+        elements.loadErrors.replaceChildren(
+          ...messages.map((message) => failure(message)),
+        );
+      }
+
+      function failure(message) {
+        const box = document.createElement("div");
+        box.className = "failure";
+        box.textContent = message;
+        return box;
+      }
+
+      async function loadWidget() {
+        if (!elements.widget.value) {
+          return;
+        }
+        const response = await fetch(`/api/widgets/${elements.widget.value}`);
+        widget = await response.json();
+        const chosen = elements.state.value;
+        elements.state.replaceChildren(
+          ...Object.entries(widget.states).map(
+            ([id, state]) => new Option(state.name || id, id),
+          ),
+        );
+        if (chosen in widget.states) {
+          elements.state.value = chosen;
+        }
+        elements.palette.value = widget.palette;
+        optionValues = {};
+        renderOptionsForm();
+        showState();
+      }
+
+      function renderOptionsForm() {
+        const sections = widget.definition.options.map(renderSection);
+        elements.options.replaceChildren(...sections.flat());
+      }
+
+      function renderSection(section) {
+        const heading = document.createElement("h2");
+        heading.textContent = section.section;
+        return [heading, ...section.fields.map(renderOption)];
+      }
+
+      function renderOption(option) {
+        const kind = Object.keys(option.selector)[0];
+        const label = document.createElement("label");
+        const input = createInput(option, kind);
+        if (kind === "boolean") {
+          label.append(input, option.label);
+        } else {
+          label.className = "field";
+          label.append(option.label, input);
+        }
+        return label;
+      }
+
+      function createInput(option, kind) {
+        if (kind === "select") {
+          return createSelect(option);
+        }
+        const input = document.createElement("input");
+        if (kind === "boolean") {
+          input.type = "checkbox";
+          input.checked = option.default;
+          input.addEventListener("change", () => setOption(option.key, input.checked));
+          return input;
+        }
+        input.type = kind === "number" ? "number" : "text";
+        input.value = option.default ?? "";
+        input.addEventListener("input", () => {
+          const value = kind === "number" ? Number(input.value) : input.value;
+          setOption(option.key, value);
+        });
+        return input;
+      }
+
+      function createSelect(option) {
+        const select = document.createElement("select");
+        const choices = option.selector.select.options;
+        select.replaceChildren(
+          ...choices.map((choice) => new Option(choice.label, choice.value)),
+        );
+        select.value = option.default;
+        select.addEventListener("change", () => setOption(option.key, select.value));
+        return select;
+      }
+
+      function setOption(key, value) {
+        optionValues[key] = value;
+        drawAll();
+      }
+
+      function showState() {
+        const state = widget.states[elements.state.value];
+        elements.stateText.value = state ? JSON.stringify(state, null, 2) : "";
+        drawAll();
+      }
+
+      function currentState() {
+        try {
+          const state = JSON.parse(elements.stateText.value);
+          elements.status.textContent = "";
+          return state;
+        } catch (error) {
+          elements.status.textContent = `State is not valid JSON: ${error.message}`;
+          return null;
+        }
+      }
+
+      async function drawAll() {
+        const state = currentState();
+        if (!widget || !state) {
+          return;
+        }
+        const generation = ++drawing;
+        const figures = widget.sizes.map(createFigure);
+        elements.sizes.replaceChildren(...figures.map((item) => item.figure));
+        for (const item of figures) {
+          const result = await drawSize(state, item.size);
+          if (generation !== drawing) {
+            return;
+          }
+          item.figure.append(result);
+        }
+      }
+
+      function createFigure(size) {
+        const figure = document.createElement("figure");
+        const caption = document.createElement("figcaption");
+        caption.textContent = `${size.name} · ${size.width}×${size.height}`;
+        figure.append(caption);
+        return { figure, size };
+      }
+
+      async function drawSize(state, size) {
+        const response = await fetch("/api/render", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            widget: widget.definition.id,
+            state,
+            width: size.width,
+            height: size.height,
+            palette: elements.palette.value,
+            options: optionValues,
+          }),
+        });
+        if (!response.ok) {
+          const body = await response.json();
+          return failure(body.error);
+        }
+        const image = document.createElement("img");
+        const scale = Number(elements.scale.value);
+        image.width = size.width * scale;
+        image.height = size.height * scale;
+        image.style.imageRendering = scale > 1 ? "pixelated" : "auto";
+        image.src = URL.createObjectURL(await response.blob());
+        return image;
+      }
+
+      elements.widget.addEventListener("change", loadWidget);
+      elements.state.addEventListener("change", showState);
+      elements.palette.addEventListener("change", drawAll);
+      elements.scale.addEventListener("change", drawAll);
+      elements.stateText.addEventListener("input", drawAll);
+      new EventSource("/events").addEventListener("message", loadWidgets);
+      loadWidgets();
+    </script>
+  </body>
+</html>

@@ -19,5 +19,10 @@
   "runtime.no_events": "Brak nadchodzących wydarzeń",
   "runtime.today": "Dzisiaj",
   "runtime.tomorrow": "Jutro",
-  "runtime.all_day": "Cały dzień"
+  "runtime.all_day": "Cały dzień",
+  "sections.appearance": "Wygląd",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.invert": "Odwróć kolory",
+  "sources.calendars.icon": "Ikona",
+  "options.showIcons": "Pokaż ikony kalendarzy"
 }

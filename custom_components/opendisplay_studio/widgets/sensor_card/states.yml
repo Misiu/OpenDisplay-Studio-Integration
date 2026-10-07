@@ -1,0 +1,62 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+alert-list:
+  name: A list where one value is past its threshold
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options:
+    layout: list
+    alertAbove: "60"
+    alertColor: accent
+  sources:
+    entities:
+      - {id: sensor.living_temperature, label: Living room}
+      - {id: sensor.hall_humidity, label: Hall}
+      - {id: sensor.garage_humidity, label: Garage}
+  data:
+    entities:
+      - {id: sensor.living_temperature, missing: false, name: Living room temperature, state: "22.1", display_state: "22.1", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+      - {id: sensor.hall_humidity, missing: false, name: Hall humidity, state: "48", display_state: "48", unit: "%", icon: water-percent, device_class: humidity, available: true, last_changed: ""}
+      - {id: sensor.garage_humidity, missing: false, name: Garage humidity, state: "71", display_state: "71", unit: "%", icon: water-percent, device_class: humidity, available: true, last_changed: ""}
+
+grid:
+  name: Four sensors in a grid, in Polish
+  language: pl
+  now: "2026-09-30T08:30:00+02:00"
+  options:
+    layout: grid
+    decimals: "0"
+  sources:
+    entities:
+      - {id: sensor.a, label: Salon}
+      - {id: sensor.b, label: Kuchnia}
+      - {id: sensor.c, label: Łazienka}
+      - {id: sensor.d, label: Garaż}
+  data:
+    entities:
+      - {id: sensor.a, missing: false, name: A, state: "21.6", display_state: "21.6", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+      - {id: sensor.b, missing: false, name: B, state: "23.2", display_state: "23.2", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+      - {id: sensor.c, missing: false, name: C, state: "55", display_state: "55", unit: "%", icon: water-percent, device_class: humidity, available: true, last_changed: ""}
+      - {id: sensor.d, missing: false, name: D, state: unavailable, display_state: Niedostępny, unit: "", icon: thermometer, device_class: null, available: false, last_changed: ""}
+
+missing-sources:
+  name: No entity chosen yet
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities: []
+  data:
+    entities: []
+
+single:
+  name: One temperature sensor
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities:
+      - id: sensor.kitchen_temperature
+  data:
+    entities:
+      - {id: sensor.kitchen_temperature, missing: false, name: Kitchen temperature, state: "21.4", display_state: "21.4", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}

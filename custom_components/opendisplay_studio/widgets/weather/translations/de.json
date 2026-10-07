@@ -31,5 +31,8 @@
   "runtime.condition.snowy-rainy": "Schneeregen",
   "runtime.condition.sunny": "Sonnig",
   "runtime.condition.windy": "Windig",
-  "runtime.condition.windy-variant": "Windig"
+  "runtime.condition.windy-variant": "Windig",
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.invert": "Farben umkehren"
 }

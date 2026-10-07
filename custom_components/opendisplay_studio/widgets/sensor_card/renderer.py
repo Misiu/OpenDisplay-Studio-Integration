@@ -7,22 +7,18 @@ from math import ceil, sqrt
 from typing import Any, Final
 
 from custom_components.opendisplay_studio.sdk import (
-    Box,
+    Look,
     WidgetContext,
     clamp,
+    compose,
     fit_text,
-    grid,
-    icon,
-    inset,
-    line,
-    rectangle,
-    rows,
-    text,
-    text_width,
-    truncate,
+    line_height,
 )
 
 MIN_ROW_HEIGHT: Final = 22
+GRID_GAP: Final = 4
+MIN_TILE_WIDTH: Final = 56
+MIN_TILE_HEIGHT: Final = 40
 VALUE_SCALE: Final = {"auto": 1.0, "small": 0.55, "medium": 0.8, "large": 1.0}
 
 
@@ -69,7 +65,7 @@ def _is_alert(state: str, options: dict[str, Any]) -> bool:
     )
 
 
-def _readings(context: WidgetContext) -> list[Reading]:
+def _readings(context: WidgetContext, look: Look) -> list[Reading]:
     options = context.options
     readings: list[Reading] = []
     for pick, data in zip(
@@ -84,153 +80,159 @@ def _readings(context: WidgetContext) -> list[Reading]:
                     data["state"], data["display_state"], options["decimals"]
                 ),
                 unit=data["unit"] if options["showUnit"] else "",
-                color=options["alertColor"] if alert else "black",
+                color=options["alertColor"] if alert else look.ink,
             )
         )
     return readings
 
 
-def _placeholder(context: WidgetContext) -> list[dict[str, Any]]:
+def _placeholder(context: WidgetContext, look: Look) -> dict[str, Any]:
     box = context.box
     size = clamp(min(box.height // 5, box.width // 12), 12, 24)
-    return [
-        rectangle(box, fill="white", outline="black", width=1),
-        text(
-            context.t("choose_entities"),
-            x=box.x + box.width // 2,
-            y=box.y + box.height // 2,
-            size=size,
-            anchor="mm",
-            max_width=box.width - 8,
-            truncate=True,
-        ),
-    ]
+    return {
+        "type": "column",
+        "justify": "center",
+        "padding": 4,
+        **look.frame(),
+        "children": [
+            look.text(
+                context.t("choose_entities"),
+                size=size,
+                align="center",
+                truncate=True,
+            )
+        ],
+    }
 
 
-def _tile(context: WidgetContext, box: Box, reading: Reading) -> list[dict[str, Any]]:
-    """One reading as a bordered tile: name on top, icon and big value below."""
+def _tile(
+    context: WidgetContext, look: Look, reading: Reading, cell: tuple[int, int]
+) -> dict[str, Any]:
+    """One reading as a tile: name on top, icon and big value below."""
     options = context.options
-    elements = [rectangle(box, fill="white", outline="black", width=1, radius=2)]
-    area = inset(box, clamp(min(box.width, box.height) // 14, 4, 14))
-    name_height = 0
-    if options["showName"]:
-        name_size = clamp(area.height // 6, 10, 22)
-        name_height = name_size + 6
-        elements.append(
-            text(
-                truncate(reading.name, area.width, name_size),
-                x=area.x + area.width // 2,
-                y=area.y,
-                size=name_size,
-                anchor="mt",
-            )
-        )
-    content = Box(area.x, area.y + name_height, area.width, area.height - name_height)
-    icon_size = clamp(min(content.height, content.width // 4), 16, 48)
+    width, height = cell
+    padding = clamp(min(width, height) // 14, 4, 14)
+    area = inset_size(width, height, padding)
+    name_size = clamp(area[1] // 6, 10, 22)
+    name_height = line_height(name_size) + 6 if options["showName"] else 0
+    content_width, content_height = area[0], area[1] - name_height
+    icon_size = clamp(min(content_height, content_width // 4), 16, 48)
     icon_slot = icon_size + 8 if options["showIcon"] else 0
-    ceiling = round(clamp(content.height, 12, 96) * VALUE_SCALE[options["valueSize"]])
-    value_size = fit_text(reading.text, content.width - icon_slot, max(10, ceiling))
-    center_y = content.y + content.height // 2
+    ceiling = round(clamp(content_height, 12, 96) * VALUE_SCALE[options["valueSize"]])
+    ceiling = _tallest_size(ceiling, content_height)
+    value_size = fit_text(reading.text, content_width - icon_slot - 4, max(10, ceiling))
+    value_row: list[dict[str, Any]] = []
     if options["showIcon"]:
-        elements.append(
-            icon(
-                reading.icon,
-                x=content.x + icon_size // 2,
-                y=center_y,
-                size=icon_size,
-                color=reading.color,
-                anchor="mm",
-            )
+        value_row.append(look.icon(reading.icon, size=icon_size, color=reading.color))
+    value_row.append(look.text(reading.text, size=value_size, color=reading.color))
+    children: list[dict[str, Any]] = []
+    if options["showName"]:
+        children.append(
+            look.text(reading.name, size=name_size, align="center", truncate=True)
         )
-    elements.append(
-        text(
-            reading.text,
-            x=content.x + icon_slot + (content.width - icon_slot) // 2,
-            y=center_y,
-            size=value_size,
-            color=reading.color,
-            anchor="mm",
-        )
+    children.append(
+        {
+            "type": "row",
+            "justify": "center",
+            "gap": 8,
+            "grow": 1,
+            "children": value_row,
+        }
     )
-    return elements
+    return {
+        "type": "column",
+        "padding": padding,
+        "gap": 6,
+        **look.frame(),
+        "children": children,
+    }
+
+
+def _tallest_size(ceiling: int, height: int) -> int:
+    """Return the largest size up to `ceiling` whose line fits `height`."""
+    while ceiling > 10 and line_height(ceiling) > height:
+        ceiling -= 1
+    return ceiling
+
+
+def inset_size(width: int, height: int, padding: int) -> tuple[int, int]:
+    """Return the size left inside a box after `padding` on every side."""
+    return max(1, width - 2 * padding), max(1, height - 2 * padding)
+
+
+def _row(
+    context: WidgetContext, look: Look, reading: Reading, height: int
+) -> dict[str, Any]:
+    """One reading as a line: icon, name, and the value at the right."""
+    options = context.options
+    size = clamp(height * 6 // 10, 10, 28)
+    children: list[dict[str, Any]] = []
+    if options["showIcon"]:
+        children.append(look.icon(reading.icon, size=size, color=reading.color))
+    name = look.text(reading.name, size=size, truncate=True, grow=1)
+    if not options["showName"]:
+        name = {"type": "spacer"}
+    children.append(name)
+    children.append(look.text(reading.text, size=size, color=reading.color))
+    return {
+        "type": "row",
+        "gap": 8,
+        "padding": [0, 8],
+        "grow": 1,
+        "children": children,
+    }
 
 
 def _list(
-    context: WidgetContext, box: Box, readings: list[Reading]
-) -> list[dict[str, Any]]:
+    context: WidgetContext, look: Look, readings: list[Reading]
+) -> dict[str, Any]:
+    box = context.box
     shown = readings[: max(1, box.height // MIN_ROW_HEIGHT)]
-    elements = [rectangle(box, fill="white", outline="black", width=1, radius=2)]
-    options = context.options
-    for index, (row, reading) in enumerate(
-        zip(rows(box, len(shown)), shown, strict=True)
-    ):
-        size = clamp(row.height * 6 // 10, 10, 28)
-        left = row.x + 8
-        if options["showIcon"]:
-            elements.append(
-                icon(
-                    reading.icon,
-                    x=left + size // 2,
-                    y=row.y + row.height // 2,
-                    size=size,
-                    color=reading.color,
-                    anchor="mm",
-                )
-            )
-            left += size + 8
-        value_width = text_width(reading.text, size)
-        elements.append(
-            text(
-                reading.text,
-                x=row.right - 8,
-                y=row.y + row.height // 2,
-                size=size,
-                color=reading.color,
-                anchor="rm",
-            )
-        )
-        if options["showName"]:
-            room = row.right - 16 - value_width - left
-            elements.append(
-                text(
-                    truncate(reading.name, max(20, room), size),
-                    x=left,
-                    y=row.y + row.height // 2,
-                    size=size,
-                    anchor="lm",
-                )
-            )
-        if index < len(shown) - 1:
-            elements.append(
-                line((row.x + 4, row.bottom - 1), (row.right - 5, row.bottom - 1))
-            )
-    return elements
+    row_height = box.height // len(shown)
+    children: list[dict[str, Any]] = []
+    for index, reading in enumerate(shown):
+        if index:
+            children.append(look.divider())
+        children.append(_row(context, look, reading, row_height))
+    return {"type": "column", **look.frame(), "children": children}
 
 
 def _grid(
-    context: WidgetContext, box: Box, readings: list[Reading]
-) -> list[dict[str, Any]]:
-    count = len(readings)
-    column_count = clamp(ceil(sqrt(count * box.width / box.height)), 1, count)
-    row_count = ceil(count / column_count)
-    cells = grid(box, column_count, row_count, gap=4)
-    elements: list[dict[str, Any]] = []
-    for cell, reading in zip(cells, readings, strict=False):
-        elements.extend(_tile(context, cell, reading))
-    return elements
+    context: WidgetContext, look: Look, readings: list[Reading]
+) -> dict[str, Any]:
+    """Tiles in as many columns and rows as keep every tile readable."""
+    box = context.box
+    most_columns = max(1, (box.width + GRID_GAP) // (MIN_TILE_WIDTH + GRID_GAP))
+    most_rows = max(1, (box.height + GRID_GAP) // (MIN_TILE_HEIGHT + GRID_GAP))
+    wanted = clamp(ceil(sqrt(len(readings) * box.width / box.height)), 1, len(readings))
+    column_count = min(wanted, most_columns)
+    shown = readings[: column_count * most_rows]
+    row_count = ceil(len(shown) / column_count)
+    cell = (
+        (box.width - GRID_GAP * (column_count - 1)) // column_count,
+        (box.height - GRID_GAP * (row_count - 1)) // row_count,
+    )
+    return {
+        "type": "grid",
+        "cols": column_count,
+        "gap": GRID_GAP,
+        "children": [_tile(context, look, reading, cell) for reading in shown],
+    }
 
 
 def render(context: WidgetContext) -> list[dict[str, Any]]:
     """Draw the picked entities as a tile, a list or a grid that fits the frame."""
-    readings = _readings(context)
+    look = Look.of(context)
+    readings = _readings(context, look)
     if not readings:
-        return _placeholder(context)
+        return compose(context, _placeholder(context, look))
     layout = context.options["layout"]
     if layout == "list" and len(readings) > 1:
-        return _list(context, context.box, readings)
+        return compose(context, _list(context, look, readings))
     if layout == "grid" and len(readings) > 1:
-        return _grid(context, context.box, readings)
-    return _tile(context, context.box, readings[0])
+        return compose(context, _grid(context, look, readings))
+    box = context.box
+    return compose(context, _tile(context, look, readings[0], (box.width, box.height)))
 
 
 RENDERER = render

@@ -25,5 +25,8 @@
   "options.valueSize.small": "Klein",
   "options.valueSize.medium": "Mittel",
   "options.valueSize.large": "Groß",
-  "runtime.choose_entities": "Entitäten wählen"
+  "runtime.choose_entities": "Entitäten wählen",
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.invert": "Farben umkehren"
 }

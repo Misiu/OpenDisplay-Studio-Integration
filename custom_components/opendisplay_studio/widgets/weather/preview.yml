@@ -1,0 +1,15 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: small, width: 296, height: 128}
+docs:
+  - {title: Daily forecast, state: daily, size: half horizontal}
+  - {title: Inverted colors, state: daily, size: half horizontal, options: {invert: true}}
+  - {title: Without frame and background, state: daily, size: half horizontal, options: {showFrame: false}}
+  - {title: Hourly forecast with details, state: hourly-details, size: half vertical}
+  - {title: Small frame, state: daily, size: small}
+  - {title: Nothing chosen yet, state: missing-sources, size: small}

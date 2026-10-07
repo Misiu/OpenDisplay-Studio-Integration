@@ -7,24 +7,24 @@ from datetime import date
 from typing import Any, Final
 
 from custom_components.opendisplay_studio.sdk import (
-    Box,
+    Look,
     WidgetContext,
     clamp,
+    compose,
     format_date,
     format_relative_day,
     format_time,
-    line,
-    rectangle,
-    text,
+    line_height,
     text_width,
-    truncate,
 )
 
 MAX_SIZE: Final = 22
 MIN_SIZE: Final = 10
-LINE_PADDING: Final = 6
+LINE_PADDING: Final = 2
 MARKER_WIDTH: Final = 4
 GAP: Final = 6
+FRAME_PADDING: Final = 6
+DEFAULT_ICON: Final = "mdi:calendar"
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +34,7 @@ class Entry:
     event: dict[str, Any]
     label: str
     color: str
+    icon: str
 
     @property
     def day(self) -> date:
@@ -51,14 +52,19 @@ class Row:
     entry: Entry | None = None
 
 
-def _entries(context: WidgetContext) -> list[Entry]:
+def _entries(context: WidgetContext, look: Look) -> list[Entry]:
     """Merge all calendars, drop finished events, sort, keep the first N."""
     entries: list[Entry] = []
     for pick, data in zip(
         context.sources["calendars"], context.data["calendars"], strict=True
     ):
         entries.extend(
-            Entry(event, pick.get("label", ""), pick.get("color", "black"))
+            Entry(
+                event,
+                pick.get("label", ""),
+                pick.get("color", look.ink),
+                pick.get("icon") or data.get("icon") or DEFAULT_ICON,
+            )
             for event in data["events"]
             if event["end"] > context.now
         )
@@ -89,12 +95,18 @@ def _rows(context: WidgetContext, entries: list[Entry]) -> list[Row]:
 
 def _fit(context: WidgetContext, entries: list[Entry]) -> tuple[list[Row], int]:
     """Show as many events as fit at a readable size, at the largest size that fits."""
+    room = context.box.height - 2 * FRAME_PADDING
     for count in range(len(entries), 0, -1):
         rows = _rows(context, entries[:count])
-        size = min(MAX_SIZE, context.box.height // len(rows) - LINE_PADDING)
-        if size >= MIN_SIZE:
-            return rows, size
+        for size in range(MAX_SIZE, MIN_SIZE - 1, -1):
+            if len(rows) * _row_height(size) <= room:
+                return rows, size
     return _rows(context, entries[:1]), MIN_SIZE
+
+
+def _row_height(size: int) -> int:
+    """Return the height of one line of the list: the text plus a little air."""
+    return line_height(size) + LINE_PADDING
 
 
 def _time_text(context: WidgetContext, entry: Entry) -> str:
@@ -111,115 +123,119 @@ def _time_text(context: WidgetContext, entry: Entry) -> str:
     return f"{format_date(entry.day)} {label}"
 
 
-def _message(context: WidgetContext, message: str) -> list[dict[str, Any]]:
+def _card(look: Look, children: list[dict[str, Any]], **fields: Any) -> dict[str, Any]:
+    return {
+        "type": "column",
+        "padding": FRAME_PADDING,
+        **look.frame(),
+        **fields,
+        "children": children,
+    }
+
+
+def _message(context: WidgetContext, look: Look, message: str) -> dict[str, Any]:
     box = context.box
     size = clamp(min(box.height // 5, box.width // 14), MIN_SIZE, 20)
-    return [
-        text(
-            truncate(message, box.width - 8, size),
-            x=box.x + box.width // 2,
-            y=box.y + box.height // 2,
-            size=size,
-            anchor="mm",
-        )
-    ]
+    text = look.text(message, size=size, align="center", truncate=True)
+    return _card(look, [text], justify="center")
+
+
+def _lead_width(context: WidgetContext, size: int) -> int:
+    """Return the width of what starts a row: the calendar's icon or its color bar."""
+    return line_height(size) if context.options["showIcons"] else MARKER_WIDTH
+
+
+def _lead(
+    context: WidgetContext, look: Look, entry: Entry, size: int
+) -> dict[str, Any]:
+    """Return what starts an event row, in the color of its calendar."""
+    if context.options["showIcons"]:
+        return look.icon(entry.icon, size=line_height(size), color=entry.color)
+    return {
+        "type": "rectangle",
+        "w": MARKER_WIDTH,
+        "h": size,
+        "fill": entry.color,
+        "outline": entry.color,
+        "width": 0,
+    }
 
 
 def _event_row(
-    context: WidgetContext, row: Row, top: int, size: int, time_width: int
-) -> list[dict[str, Any]]:
+    context: WidgetContext, look: Look, row: Row, size: int, time_width: int
+) -> dict[str, Any]:
     entry = row.entry
-    if entry is None:
-        return []
-    box = context.box
-    middle = top + (size + LINE_PADDING) // 2
-    elements = [
-        rectangle(
-            Box(box.x, top + 2, MARKER_WIDTH, size + LINE_PADDING - 4),
-            fill=entry.color,
-            outline=entry.color,
-            width=0,
-        )
-    ]
-    left = box.x + MARKER_WIDTH + GAP
-    if time_width:
-        elements.append(
-            text(_time_text(context, entry), x=left, y=middle, size=size, anchor="lm")
-        )
-        left += time_width + GAP
-    right = box.right
-    if context.options["showCalendarLabel"] and entry.label:
-        label = truncate(entry.label, box.width // 4, max(MIN_SIZE, size - 2))
-        elements.append(
-            text(
-                label,
-                x=right,
-                y=middle,
-                size=max(MIN_SIZE, size - 2),
-                color=entry.color,
-                anchor="rm",
-            )
-        )
-        right -= text_width(label, max(MIN_SIZE, size - 2)) + GAP
-    title = truncate(entry.event["summary"], right - left, size)
-    elements.append(text(title, x=left, y=middle, size=size, anchor="lm"))
-    return elements
-
-
-def _detail_row(
-    context: WidgetContext, row: Row, top: int, size: int, left: int
-) -> list[dict[str, Any]]:
+    assert entry is not None
     small = max(MIN_SIZE, size - 2)
-    middle = top + (size + LINE_PADDING) // 2
-    return [
-        text(
-            truncate(row.text, context.box.right - left, small),
-            x=left,
-            y=middle,
-            size=small,
-            anchor="lm",
+    children: list[dict[str, Any]] = [_lead(context, look, entry, size)]
+    if time_width:
+        children.append(look.text(_time_text(context, entry), size=size, w=time_width))
+    children.append(look.text(entry.event["summary"], size=size, truncate=True, grow=1))
+    if context.options["showCalendarLabel"] and entry.label:
+        children.append(
+            look.text(entry.label, size=small, color=entry.color, truncate=True)
         )
-    ]
+    return {
+        "type": "row",
+        "gap": GAP,
+        "h": _row_height(size),
+        "children": children,
+    }
 
 
-def _draw(context: WidgetContext, rows: list[Row], size: int) -> list[dict[str, Any]]:
-    box = context.box
-    height = size + LINE_PADDING
+def _header_row(look: Look, row: Row, size: int) -> dict[str, Any]:
+    return {
+        "type": "column",
+        "justify": "space-between",
+        "h": _row_height(size),
+        "children": [look.text(row.text, size=size), look.divider()],
+    }
+
+
+def _detail_row(look: Look, row: Row, size: int, indent: int) -> dict[str, Any]:
+    small = max(MIN_SIZE, size - 2)
+    return {
+        "type": "row",
+        "padding": [0, 0, 0, indent],
+        "h": _row_height(size),
+        "children": [look.text(row.text, size=small, truncate=True, grow=1)],
+    }
+
+
+def _list(
+    context: WidgetContext, look: Look, rows: list[Row], size: int
+) -> dict[str, Any]:
     times = [
         text_width(label, size)
         for row in rows
         if row.kind == "event" and row.entry is not None
         if (label := _time_text(context, row.entry))
     ]
-    time_width = max(times, default=0)
-    body_left = box.x + MARKER_WIDTH + GAP + (time_width + GAP if time_width else 0)
-    elements: list[dict[str, Any]] = []
-    for index, row in enumerate(rows):
-        top = box.y + index * height
+    # A little slack: text measured alone wraps when the box is exactly as wide.
+    time_width = max(times, default=-4) + 4
+    indent = _lead_width(context, size) + GAP + (time_width + GAP if time_width else 0)
+    children: list[dict[str, Any]] = []
+    for row in rows:
         if row.kind == "header":
-            elements.append(
-                text(row.text, x=box.x, y=top + height // 2, size=size, anchor="lm")
-            )
-            elements.append(
-                line((box.x, top + height - 1), (box.right - 1, top + height - 1))
-            )
+            children.append(_header_row(look, row, size))
         elif row.kind == "event":
-            elements.extend(_event_row(context, row, top, size, time_width))
+            children.append(_event_row(context, look, row, size, time_width))
         else:
-            elements.extend(_detail_row(context, row, top, size, body_left))
-    return elements
+            children.append(_detail_row(look, row, size, indent))
+    return _card(look, children)
 
 
 def render(context: WidgetContext) -> list[dict[str, Any]]:
     """Draw the merged agenda, or say why there is nothing to show."""
+    look = Look.of(context)
     if not context.sources["calendars"]:
-        return _message(context, context.t("choose_calendars"))
-    entries = _entries(context)
+        return compose(context, _message(context, look, context.t("choose_calendars")))
+    entries = _entries(context, look)
     if not entries:
         empty = context.options["emptyText"] or context.t("no_events")
-        return _message(context, empty)
+        return compose(context, _message(context, look, empty))
     rows, size = _fit(context, entries)
-    return _draw(context, rows, size)
+    return compose(context, _list(context, look, rows, size))
 
 
 RENDERER = render

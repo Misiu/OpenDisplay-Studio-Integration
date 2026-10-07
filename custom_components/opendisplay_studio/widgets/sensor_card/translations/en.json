@@ -25,5 +25,8 @@
   "options.valueSize.auto": "Automatic",
   "options.valueSize.small": "Small",
   "options.valueSize.medium": "Medium",
-  "options.valueSize.large": "Large"
+  "options.valueSize.large": "Large",
+  "sections.appearance": "Appearance",
+  "options.showFrame": "Show frame",
+  "options.invert": "Invert colors"
 }

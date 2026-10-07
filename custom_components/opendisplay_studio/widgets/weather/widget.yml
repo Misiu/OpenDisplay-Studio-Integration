@@ -47,6 +47,16 @@ options:
         label: Show wind
         default: false
         selector: { boolean: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: invert
+        label: Invert colors
+        default: false
+        selector: { boolean: {} }
 
 data:
   weather_forecast:

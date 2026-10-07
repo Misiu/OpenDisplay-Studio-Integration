@@ -31,5 +31,8 @@
   "runtime.condition.windy": "Windy",
   "runtime.condition.windy-variant": "Windy",
   "options.forecastType.daily": "Daily",
-  "options.forecastType.hourly": "Hourly"
+  "options.forecastType.hourly": "Hourly",
+  "sections.appearance": "Appearance",
+  "options.showFrame": "Show frame",
+  "options.invert": "Invert colors"
 }

@@ -26,6 +26,9 @@ sources:
       - key: color
         label: Color
         selector: { opendisplay_color: {} }
+      - key: icon
+        label: Icon
+        selector: { text: {} }
 
 options:
   - section: content
@@ -56,6 +59,10 @@ options:
         label: Show location
         default: false
         selector: { boolean: {} }
+      - key: showIcons
+        label: Show calendar icons
+        default: false
+        selector: { boolean: {} }
       - key: showCalendarLabel
         label: Show calendar label
         default: true
@@ -63,6 +70,16 @@ options:
       - key: use24h
         label: 24 h clock
         default: true
+        selector: { boolean: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: invert
+        label: Invert colors
+        default: false
         selector: { boolean: {} }
 
 data:

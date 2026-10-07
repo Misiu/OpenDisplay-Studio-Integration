@@ -9,7 +9,7 @@
   "integration_type": "service",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/Misiu/OpenDisplay-Studio-Integration/issues",
-  "requirements": ["odl-renderer==0.5.13"],
+  "requirements": ["odl-layout==0.1.1", "odl-renderer==0.5.13"],
   "single_config_entry": true,
   "version": "3.0.6"
 }

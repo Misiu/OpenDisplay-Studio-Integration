@@ -219,9 +219,16 @@ phase 8 and `WIDGET_CONTRACT.md`; the rules:
   keep the item and show a placeholder.
 - **Versioned config.** Stored widget items carry the package version; breaking
   option changes ship a migration in `migrations.py`.
-- **Every built-in widget** has golden-image tests at minimum, default, and a
-  large size, from YAML fixtures in `tests/widgets/fixtures/<id>/`, including one
-  with missing sources.
+- **Renderers describe, `odl-layout` places.** A renderer builds a row/column/grid
+  description and passes it to `sdk.compose`; it does not compute coordinates by
+  hand. Every widget has an `appearance` section with `showFrame` and `invert`,
+  read through `sdk.Look`; black on white inside a frame is the default.
+- **Every built-in widget** has a `states.yml` (simulated states, one of them
+  `missing-sources`) and a `preview.yml` (sizes, palette, documentation pictures)
+  in its folder. Golden-image tests draw every state at minimum, default and a
+  large size. `python -m scripts.widget_devkit serve` previews them live;
+  `python -m scripts.widget_docs` regenerates `docs/widgets/README.md`, which a
+  test keeps up to date.
 - Absolute imports in new Python (`custom_components.opendisplay_studio.…`) —
   ruff's `TID252` forbids `..`; user packages import `opendisplay_studio.sdk`.
 

@@ -23,6 +23,7 @@ from .flatten import (
     flatten_items,
     shift_primitive,
 )
+from .fonts import font_directories
 from .history import RecordedHistory, async_prefetch_history
 from .images import async_load_images
 from .measure import primitive_box
@@ -219,6 +220,8 @@ async def async_compile_dashboard(
         palette=display_value["palette"],
         background=display_value["background"],
         accent_color=accent_color_for_palette(display_value["palette"]),
+        # Only widgets lay text out by font name; most dashboards never need the folder.
+        font_dirs=tuple(font_directories(hass)) if jobs else (),
     )
     primitive_bounds = await asyncio.to_thread(
         _measure_primitives,
@@ -263,7 +266,9 @@ async def async_compile_dashboard(
                 elements.extend(_missing_widget_elements(frame, item["widget"]["type"]))
                 continue
             content_box = frame.inset(item.get("layout", {}).get("padding", 0))
-            rendered = _render_widget(
+            # Laying a widget out reads font files, so it runs off the event loop.
+            rendered = await asyncio.to_thread(
+                _render_widget,
                 jobs[item["id"]],
                 resolver,
                 (content_box, display, dashboard["language"], now),

@@ -19,5 +19,10 @@
   "runtime.no_events": "No upcoming events",
   "runtime.today": "Today",
   "runtime.tomorrow": "Tomorrow",
-  "runtime.all_day": "All day"
+  "runtime.all_day": "All day",
+  "sections.appearance": "Appearance",
+  "options.showFrame": "Show frame",
+  "options.invert": "Invert colors",
+  "sources.calendars.icon": "Icon",
+  "options.showIcons": "Show calendar icons"
 }

@@ -76,3 +76,13 @@ options:
         label: Alert color
         default: accent
         selector: { opendisplay_color: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: invert
+        label: Invert colors
+        default: false
+        selector: { boolean: {} }

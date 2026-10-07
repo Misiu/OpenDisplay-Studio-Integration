@@ -18,7 +18,13 @@ options:
         label: Who to greet
         default: world
         selector: { text: {} }
-      - key: color
-        label: Color
-        default: black
-        selector: { opendisplay_color: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: invert
+        label: Invert colors
+        default: false
+        selector: { boolean: {} }

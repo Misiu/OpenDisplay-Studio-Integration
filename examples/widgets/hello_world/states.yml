@@ -1,0 +1,17 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+default:
+  name: A short name
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {who: world}
+  sources: {}
+  data: {}
+
+long-name:
+  name: A name that needs a smaller font, in Polish
+  language: pl
+  now: "2026-09-30T08:30:00+02:00"
+  options: {who: wszystkich uczestników demonstracji}
+  sources: {}
+  data: {}

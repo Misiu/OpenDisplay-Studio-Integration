@@ -70,8 +70,10 @@ class CalendarEventsProvider(DataProvider):
             normalize_event(raw, source_id)
             for raw in response_items(response, source_id, "events")
         ]
-        return {"id": source_id, "missing": False, "events": events}
+        state = hass.states.get(source_id)
+        icon = state.attributes.get("icon") if state else None
+        return {"id": source_id, "missing": False, "icon": icon, "events": events}
 
     @override
     def placeholder(self, source_id: str) -> dict[str, Any]:
-        return {"id": source_id, "missing": True, "events": []}
+        return {"id": source_id, "missing": True, "icon": None, "events": []}

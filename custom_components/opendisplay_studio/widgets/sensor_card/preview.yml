@@ -1,0 +1,15 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: small, width: 296, height: 128}
+docs:
+  - {title: One entity as a tile, state: single, size: quadrant}
+  - {title: Inverted colors, state: single, size: quadrant, options: {invert: true}}
+  - {title: Without frame and background, state: single, size: quadrant, options: {showFrame: false}}
+  - {title: Several entities as a list, state: alert-list, size: quadrant}
+  - {title: Several entities as a grid, state: grid, size: half horizontal}
+  - {title: Nothing chosen yet, state: missing-sources, size: small}

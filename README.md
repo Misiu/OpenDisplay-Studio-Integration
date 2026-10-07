@@ -95,7 +95,9 @@ and a **reset** link puts it back in one step; rarely needed fields wait under
 
 Widgets decide *how* to lay out your data; you decide *what* to show. Pick the
 entities, calendars or weather source, choose the options, and resize the frame.
-The layout adapts to the size you give it.
+The layout adapts to the size you give it. Every widget can be drawn without its
+frame and background, or in white on black. [The widgets page](docs/widgets/README.md)
+lists each widget with its sources, options and pictures.
 
 <p align="center">
   <img src="docs/images/widget-properties.webp" alt="The properties of a sensor card widget" width="900">

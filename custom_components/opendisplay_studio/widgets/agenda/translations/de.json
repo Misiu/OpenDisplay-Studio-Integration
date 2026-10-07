@@ -19,5 +19,10 @@
   "runtime.no_events": "Keine anstehenden Termine",
   "runtime.today": "Heute",
   "runtime.tomorrow": "Morgen",
-  "runtime.all_day": "Ganztägig"
+  "runtime.all_day": "Ganztägig",
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.invert": "Farben umkehren",
+  "sources.calendars.icon": "Symbol",
+  "options.showIcons": "Kalendersymbole zeigen"
 }

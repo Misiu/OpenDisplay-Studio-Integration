@@ -1,0 +1,6 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: small, width: 296, height: 128}

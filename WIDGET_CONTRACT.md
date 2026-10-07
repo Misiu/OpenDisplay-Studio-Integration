@@ -13,7 +13,8 @@ Code view treat it like any primitive. How to write one: [`docs/widget-sdk.md`](
 ├── translations/
 │   ├── en.json             # labels and runtime strings (required)
 │   └── pl.json
-└── fixtures/               # optional scenarios for previews and tests
+├── states.yml              # optional simulated states, for the preview and tests
+└── preview.yml             # optional preview sizes, palette and documentation pictures
 ```
 
 ## Manifest

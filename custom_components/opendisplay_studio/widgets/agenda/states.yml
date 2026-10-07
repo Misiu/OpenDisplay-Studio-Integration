@@ -1,0 +1,87 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+empty:
+  name: A calendar with nothing coming up
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    calendars:
+      - {id: calendar.ola, label: Ola, color: red, icon: "mdi:swim"}
+  data:
+    calendars:
+      - {id: calendar.ola, missing: false, events: []}
+
+missing-sources:
+  name: No calendar chosen yet
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    calendars: []
+  data:
+    calendars: []
+
+two-children:
+  name: Two children's calendars merged
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options:
+    showLocation: true
+  sources:
+    calendars:
+      - {id: calendar.ola, label: Ola, color: red, icon: "mdi:swim"}
+      - {id: calendar.jan, label: Jan, color: black, icon: "mdi:soccer"}
+  data:
+    calendars:
+      - id: calendar.ola
+        missing: false
+        events:
+          - {summary: Swimming, start: "2026-09-30T16:00:00+02:00", end: "2026-09-30T17:00:00+02:00", all_day: false, location: City pool, description: "", source: calendar.ola}
+          - {summary: Piano lesson, start: "2026-10-01T15:30:00+02:00", end: "2026-10-01T16:15:00+02:00", all_day: false, location: "", description: "", source: calendar.ola}
+          - {summary: School trip to the science museum, start: "2026-10-02T08:00:00+02:00", end: "2026-10-02T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.ola}
+      - id: calendar.jan
+        missing: false
+        events:
+          - {summary: Football, start: "2026-09-30T17:30:00+02:00", end: "2026-09-30T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.jan}
+          - {summary: Dentist, start: "2026-10-01T09:00:00+02:00", end: "2026-10-01T09:30:00+02:00", all_day: false, location: Main street 4, description: "", source: calendar.jan}
+          - {summary: Class photo day, start: "2026-10-01T00:00:00+02:00", end: "2026-10-02T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.jan}
+
+ten-events:
+  name: Ten events on a busy week
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    calendars:
+      - {id: calendar.family, label: Family, color: black}
+  data:
+    calendars:
+      - id: calendar.family
+        missing: false
+        events:
+        - {summary: Swimming, start: "2026-09-30T09:00:00+02:00", end: "2026-09-30T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Piano lesson, start: "2026-09-30T14:00:00+02:00", end: "2026-09-30T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: School trip, start: "2026-10-01T09:00:00+02:00", end: "2026-10-01T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Football, start: "2026-10-01T14:00:00+02:00", end: "2026-10-01T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Dentist, start: "2026-10-02T09:00:00+02:00", end: "2026-10-02T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Class photo day, start: "2026-10-02T14:00:00+02:00", end: "2026-10-02T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Parents meeting, start: "2026-10-03T09:00:00+02:00", end: "2026-10-03T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Scouts, start: "2026-10-03T14:00:00+02:00", end: "2026-10-03T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Birthday party, start: "2026-10-05T09:00:00+02:00", end: "2026-10-05T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+        - {summary: Haircut, start: "2026-10-05T14:00:00+02:00", end: "2026-10-05T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.family}
+
+one-event:
+  name: A single event
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    calendars:
+      - {id: calendar.family, label: Family, color: black}
+  data:
+    calendars:
+      - id: calendar.family
+        missing: false
+        events:
+          - {summary: Swimming, start: "2026-09-30T16:00:00+02:00", end: "2026-09-30T17:00:00+02:00", all_day: false, location: City pool, description: "", source: calendar.family}

@@ -4,6 +4,8 @@
   "categories.Examples": "Examples",
   "sections.content": "Content",
   "options.who": "Who to greet",
-  "options.color": "Color",
-  "runtime.greeting": "Hello, {who}!"
+  "runtime.greeting": "Hello, {who}!",
+  "sections.appearance": "Appearance",
+  "options.showFrame": "Show frame",
+  "options.invert": "Invert colors"
 }

@@ -1,0 +1,16 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: small, width: 296, height: 128}
+docs:
+  - {title: Two calendars merged, state: two-children, size: quadrant}
+  - {title: Inverted colors, state: two-children, size: quadrant, options: {invert: true}}
+  - {title: Without frame and background, state: two-children, size: quadrant, options: {showFrame: false}}
+  - {title: Calendar icons with the place below, state: two-children, size: quadrant, options: {showIcons: true, showLocation: true}}
+  - {title: A busy week, state: ten-events, size: half vertical}
+  - {title: A single event, state: one-event, size: small}
+  - {title: Nothing planned, state: empty, size: small}
