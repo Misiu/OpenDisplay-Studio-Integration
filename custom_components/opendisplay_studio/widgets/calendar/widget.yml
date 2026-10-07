@@ -1,0 +1,184 @@
+api: 1
+id: calendar
+name: Calendar
+version: 1.0.0
+description: Events of one or more calendars as upcoming days, an agenda or a grid of weeks.
+icon: mdi:calendar-month
+category: Calendar
+author: OpenDisplay Studio
+provider: provider.py
+
+layout:
+  defaultSize: { width: 800, height: 480 }
+  minSize: { width: 240, height: 140 }
+
+sources:
+  - key: calendars
+    label: Calendars
+    selector:
+      entity: { filter: { domain: calendar }, multiple: true }
+    required: true
+    max: 10
+    data: calendar:events
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: color
+        label: Color
+        selector: { opendisplay_color: {} }
+      - key: icon
+        label: Icon
+        selector: { text: {} }
+
+options:
+  - section: view
+    fields:
+      - key: view
+        label: View
+        default: upcoming
+        selector:
+          select:
+            options: [upcoming, agenda, weeks]
+  - section: content
+    fields:
+      - key: includeTime
+        label: Show times
+        default: true
+        selector: { boolean: {} }
+      - key: use24h
+        label: 24 h clock
+        default: true
+        selector: { boolean: {} }
+      - key: includeDescription
+        label: Show descriptions
+        default: true
+        selector: { boolean: {} }
+      - key: showLocation
+        label: Show places
+        default: false
+        selector: { boolean: {} }
+      - key: dateFormat
+        label: Date format
+        default: short
+        selector:
+          select:
+            options: [short, full, numeric]
+      - key: hidePast
+        label: Hide events that have ended
+        default: true
+        selector: { boolean: {} }
+      - key: highlightToday
+        label: Highlight today
+        default: true
+        selector: { boolean: {} }
+  - section: lists
+    fields:
+      - key: days
+        label: Days to show (upcoming)
+        default: 3
+        selector: { number: { min: 1, max: 7, mode: box } }
+      - key: todayOnly
+        label: Today only (upcoming)
+        default: false
+        selector: { boolean: {} }
+      - key: lookahead
+        label: Days to look ahead
+        default: 14
+        selector: { number: { min: 1, max: 60, mode: box } }
+      - key: columns
+        label: Columns (upcoming)
+        default: auto
+        selector:
+          select:
+            options: [auto, "1", "2", "3"]
+      - key: showIndex
+        label: Number the events (upcoming)
+        default: true
+        selector: { boolean: {} }
+      - key: showTitleBar
+        label: Show the title bar (upcoming)
+        default: true
+        selector: { boolean: {} }
+      - key: titleBarText
+        label: Title bar text (empty for the default)
+        default: ""
+        selector: { text: {} }
+      - key: alignment
+        label: Vertical alignment (upcoming)
+        default: top
+        selector:
+          select:
+            options: [top, center, bottom]
+      - key: zoom
+        label: Larger text
+        default: false
+        selector: { boolean: {} }
+  - section: weeks
+    fields:
+      - key: weeks
+        label: Weeks to show
+        default: auto
+        selector:
+          select:
+            options: [auto, "1", "2", "3", "4", "5", "6"]
+      - key: monthMode
+        label: Weeks start from
+        default: rolling
+        selector:
+          select:
+            options: [rolling, month]
+      - key: firstDay
+        label: First day of the week
+        default: monday
+        selector:
+          select:
+            options:
+              [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+      - key: weekNumbers
+        label: Show week numbers
+        default: false
+        selector: { boolean: {} }
+      - key: monthHeader
+        label: Show the month
+        default: false
+        selector: { boolean: {} }
+      - key: shadeWeekends
+        label: Shade weekends
+        default: true
+        selector: { boolean: {} }
+  - section: filters
+    fields:
+      - key: ignore
+        label: Hide events containing (one per line)
+        default: ""
+        selector: { text: { multiline: true } }
+      - key: ignoreExact
+        label: Hide events named exactly (one per line)
+        default: ""
+        selector: { text: { multiline: true } }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }
+
+data:
+  calendar:events:
+    view: "@options.view"
+    lookahead: "@options.lookahead"
+    firstDay: "@options.firstDay"
+    monthMode: "@options.monthMode"

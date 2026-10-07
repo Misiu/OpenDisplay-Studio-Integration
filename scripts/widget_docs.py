@@ -32,6 +32,7 @@ from scripts.widget_devkit.scenario import (
 DOCS = Path("docs/widgets")
 IMAGES = DOCS / "images"
 README = DOCS / "README.md"
+ABOUT_FILE = "about.md"
 INTRO = """\
 # Widgets
 
@@ -124,6 +125,8 @@ def _widget_section(registry: WidgetRegistry, widget_id: str, root: Path) -> str
     size = definition["layout"]["defaultSize"]
     minimum = definition["layout"]["minSize"]
     showcases = load_preview(_folder(root, widget_id)).showcases
+    about = _folder(root, widget_id) / ABOUT_FILE
+    about_text = about.read_text(encoding="utf-8").strip() if about.is_file() else ""
     lines = [
         f"## {definition['name']}",
         "",
@@ -135,6 +138,7 @@ def _widget_section(registry: WidgetRegistry, widget_id: str, root: Path) -> str
             f"Id: `{widget_id}`."
         ),
         "",
+        *([about_text, ""] if about_text else []),
         "### Sources",
         "",
         *_sources_table(definition),

@@ -83,6 +83,147 @@ Default size 360 x 240 px, smallest 180 x 90 px. Id: `agenda`.
 ![Nothing planned](images/agenda-8.png)
 *Nothing planned*
 
+## Calendar
+
+Events of one or more calendars as upcoming days, an agenda or a grid of weeks.
+
+Default size 800 x 480 px, smallest 240 x 140 px. Id: `calendar`.
+
+One widget with three views of the same calendars, chosen with **View**. Pick one or
+more calendars; give each a label, a color and an icon of its own. Events of several
+calendars are merged, identical ones are shown once, and the color of the calendar
+marks its events.
+
+* **Upcoming events** lists the next days (3 by default) in as many columns as fit the
+  frame, each day under a heading that is filled for today. Events are numbered, all-day
+  events carry a hash, and times, descriptions and places can be turned on or off.
+  A bar at the bottom names the view and the calendars. What does not fit is counted
+  as `+N more`.
+* **Agenda** gives every day with events a bar and every event a line: when it starts,
+  its title and description, when it ends. It shows as many days as the frame holds.
+* **Weeks** is a grid of up to six weeks, starting from this week or from the first of
+  the month, on the weekday you choose. All-day and multi-day events are bars over
+  their days (across rows too), events of a day are listed in its cell, weekends are
+  dotted and today is marked. Week numbers and the month can be added.
+
+Events that have ended are hidden in the two lists (turn that off with *Hide events
+that have ended*), and events can be left out by a word they contain or by their exact
+name. An event without a title is shown as "Busy".
+
+Home Assistant gives a calendar no guests and no color per event, so there is no filter
+for declined invitations, and the color is that of the calendar.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Calendars | one or more calendar entity | Label, Color, Icon |
+
+### Options
+
+**View**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| View | `view` | one of `upcoming`, `agenda`, `weeks` | `upcoming` |
+
+**Content**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show times | `includeTime` | on / off | on |
+| 24 h clock | `use24h` | on / off | on |
+| Show descriptions | `includeDescription` | on / off | on |
+| Show places | `showLocation` | on / off | off |
+| Date format | `dateFormat` | one of `short`, `full`, `numeric` | `short` |
+| Hide events that have ended | `hidePast` | on / off | on |
+| Highlight today | `highlightToday` | on / off | on |
+
+**Upcoming and agenda**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Days to show (upcoming) | `days` | number 1 to 7 | `3` |
+| Today only (upcoming) | `todayOnly` | on / off | off |
+| Days to look ahead | `lookahead` | number 1 to 60 | `14` |
+| Columns (upcoming) | `columns` | one of `auto`, `1`, `2`, `3` | `auto` |
+| Number the events (upcoming) | `showIndex` | on / off | on |
+| Show the title bar (upcoming) | `showTitleBar` | on / off | on |
+| Title bar text (empty for the default) | `titleBarText` | text | empty |
+| Vertical alignment (upcoming) | `alignment` | one of `top`, `center`, `bottom` | `top` |
+| Larger text | `zoom` | on / off | off |
+
+**Weeks**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Weeks to show | `weeks` | one of `auto`, `1`, `2`, `3`, `4`, `5`, `6` | `auto` |
+| Weeks start from | `monthMode` | one of `rolling`, `month` | `rolling` |
+| First day of the week | `firstDay` | one of `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday` | `monday` |
+| Show week numbers | `weekNumbers` | on / off | off |
+| Show the month | `monthHeader` | on / off | off |
+| Shade weekends | `shadeWeekends` | on / off | on |
+
+**Filters**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Hide events containing (one per line) | `ignore` | text | empty |
+| Hide events named exactly (one per line) | `ignoreExact` | text | empty |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![Upcoming events: the next days in columns, with a bar naming the calendars](images/calendar-1.png)
+*Upcoming events: the next days in columns, with a bar naming the calendars*
+
+![Upcoming events on half of a display](images/calendar-2.png)
+*Upcoming events on half of a display*
+
+![Upcoming events in a narrow frame, with a counter for what does not fit](images/calendar-3.png)
+*Upcoming events in a narrow frame, with a counter for what does not fit*
+
+![Upcoming events in a quadrant](images/calendar-4.png)
+*Upcoming events in a quadrant*
+
+![Agenda: a bar for each day and a line for each event](images/calendar-5.png)
+*Agenda: a bar for each day and a line for each event*
+
+![Agenda in a narrow frame](images/calendar-6.png)
+*Agenda in a narrow frame*
+
+![Weeks: a grid with bars over days, shaded weekends and today marked](images/calendar-7.png)
+*Weeks: a grid with bars over days, shaded weekends and today marked*
+
+![Weeks with the month and the number of each week](images/calendar-8.png)
+*Weeks with the month and the number of each week*
+
+![Weeks in a narrow frame](images/calendar-9.png)
+*Weeks in a narrow frame*
+
+![Three calendars with their colors on a BWRY display](images/calendar-10.png)
+*Three calendars with their colors on a BWRY display*
+
+![The agenda with colored calendars](images/calendar-11.png)
+*The agenda with colored calendars*
+
+![Dates and words in the language of the dashboard](images/calendar-12.png)
+*Dates and words in the language of the dashboard*
+
+![White on black](images/calendar-13.png)
+*White on black*
+
+![Nothing planned](images/calendar-14.png)
+*Nothing planned*
+
 ## School timetable
 
 A school week of one calendar as a table of days and lesson slots.

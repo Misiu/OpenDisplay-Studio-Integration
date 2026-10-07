@@ -114,6 +114,7 @@ class TestBuiltInCatalog:
     def test_every_built_in_package_loads(self) -> None:
         assert DEFAULT_REGISTRY.errors == []
         assert DEFAULT_REGISTRY.widget_types == {
+            "calendar",
             "sensor-card",
             "sensor-chart",
             "sensor-list",

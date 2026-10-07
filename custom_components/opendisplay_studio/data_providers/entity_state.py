@@ -7,56 +7,17 @@ from typing import TYPE_CHECKING, Any, override
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
 
 from custom_components.opendisplay_studio.sdk.formatting import entity_icon
+from custom_components.opendisplay_studio.sdk.locale import state_word
 
 from . import DataProvider
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-_STATE_WORDS = {
-    "en": {
-        STATE_UNAVAILABLE: "Unavailable",
-        STATE_UNKNOWN: "Unknown",
-        "on": "On",
-        "off": "Off",
-        "open": "Open",
-        "closed": "Closed",
-        "locked": "Locked",
-        "unlocked": "Unlocked",
-        "home": "Home",
-        "not_home": "Away",
-    },
-    "de": {
-        STATE_UNAVAILABLE: "Nicht verfügbar",
-        STATE_UNKNOWN: "Unbekannt",
-        "on": "An",
-        "off": "Aus",
-        "open": "Offen",
-        "closed": "Geschlossen",
-        "locked": "Verriegelt",
-        "unlocked": "Entriegelt",
-        "home": "Zuhause",
-        "not_home": "Unterwegs",
-    },
-    "pl": {
-        STATE_UNAVAILABLE: "Niedostępny",
-        STATE_UNKNOWN: "Nieznany",
-        "on": "Włączony",
-        "off": "Wyłączony",
-        "open": "Otwarte",
-        "closed": "Zamknięte",
-        "locked": "Zamknięty",
-        "unlocked": "Otwarty",
-        "home": "W domu",
-        "not_home": "Poza domem",
-    },
-}
-
 
 def display_state(raw_state: str, language: str) -> str:
     """Return a state in the dashboard's language, or unchanged when unknown."""
-    words = _STATE_WORDS.get(language.split("-", maxsplit=1)[0], _STATE_WORDS["en"])
-    return words.get(raw_state, raw_state)
+    return state_word(raw_state, language) or raw_state
 
 
 class EntityStateProvider(DataProvider):

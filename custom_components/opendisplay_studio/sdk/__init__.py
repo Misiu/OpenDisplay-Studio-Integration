@@ -27,6 +27,14 @@ from .formatting import (
     weekday_name,
 )
 from .layout import columns, grid, inset, rows
+from .locale import (
+    day_heading,
+    long_date,
+    month_name,
+    month_year,
+    short_date,
+    state_word,
+)
 from .look import Look
 
 __all__ = [
@@ -38,6 +46,7 @@ __all__ = [
     "columns",
     "compose",
     "condition_icon",
+    "day_heading",
     "entity_icon",
     "fit_text",
     "format_date",
@@ -49,9 +58,14 @@ __all__ = [
     "inset",
     "line",
     "line_height",
+    "long_date",
+    "month_name",
+    "month_year",
     "progress_bar",
     "rectangle",
     "rows",
+    "short_date",
+    "state_word",
     "text",
     "text_width",
     "truncate",

@@ -1,0 +1,23 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: small, width: 296, height: 128}
+docs:
+  - {title: "Upcoming events: the next days in columns, with a bar naming the calendars", state: upcoming, size: full}
+  - {title: "Upcoming events on half of a display", state: upcoming, size: half horizontal}
+  - {title: "Upcoming events in a narrow frame, with a counter for what does not fit", state: upcoming, size: half vertical}
+  - {title: "Upcoming events in a quadrant", state: upcoming, size: quadrant}
+  - {title: "Agenda: a bar for each day and a line for each event", state: agenda, size: full}
+  - {title: "Agenda in a narrow frame", state: agenda, size: half vertical}
+  - {title: "Weeks: a grid with bars over days, shaded weekends and today marked", state: weeks, size: full}
+  - {title: "Weeks with the month and the number of each week", state: weeks, size: full, options: {monthHeader: true, weekNumbers: true}}
+  - {title: "Weeks in a narrow frame", state: weeks, size: half vertical}
+  - {title: "Three calendars with their colors on a BWRY display", state: three-calendars, size: half horizontal, palette: bwry}
+  - {title: "The agenda with colored calendars", state: three-calendars, size: half horizontal, options: {view: agenda}, palette: bwry}
+  - {title: "Dates and words in the language of the dashboard", state: polish, size: quadrant}
+  - {title: "White on black", state: upcoming, size: quadrant, options: {color: white, background: black}}
+  - {title: "Nothing planned", state: empty, size: small}

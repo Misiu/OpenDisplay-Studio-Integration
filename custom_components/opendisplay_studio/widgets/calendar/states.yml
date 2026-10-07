@@ -1,0 +1,300 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+upcoming:
+  name: A busy week, the upcoming view
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Morning Run", start: "2026-08-12T06:30:00+02:00", end: "2026-08-12T07:15:00+02:00", all_day: false, location: "", description: "Quick jog to start the day", source: calendar.work}
+          - {summary: "Email Triage", start: "2026-08-12T08:00:00+02:00", end: "2026-08-12T08:30:00+02:00", all_day: false, location: "", description: "Process inbox and prioritize tasks", source: calendar.work}
+          - {summary: "Team Standup", start: "2026-08-12T09:30:00+02:00", end: "2026-08-12T09:45:00+02:00", all_day: false, location: "", description: "Daily sync with the team", source: calendar.work}
+          - {summary: "Monthly Catchup with Dev Team", start: "2026-08-12T10:00:00+02:00", end: "2026-08-12T11:00:00+02:00", all_day: false, location: "", description: "Discuss progress and obstacles with the development team", source: calendar.work}
+          - {summary: "Lunch Break", start: "2026-08-12T12:30:00+02:00", end: "2026-08-12T13:00:00+02:00", all_day: false, location: "", description: "Quick bite and recharge", source: calendar.work}
+          - {summary: "Deep Work Block", start: "2026-08-12T14:00:00+02:00", end: "2026-08-12T16:00:00+02:00", all_day: false, location: "", description: "Heads-down focus on priority task", source: calendar.work}
+          - {summary: "Bath", start: "2026-08-12T19:45:00+02:00", end: "2026-08-12T20:15:00+02:00", all_day: false, location: "", description: "Clean!", source: calendar.work}
+          - {summary: "Security Audit", start: "2026-08-12T00:00:00+02:00", end: "2026-08-13T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Michael OOO", start: "2026-08-13T00:00:00+02:00", end: "2026-08-16T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Product Roadmap Review", start: "2026-08-13T11:00:00+02:00", end: "2026-08-13T13:00:00+02:00", all_day: false, location: "", description: "Quarterly review of product roadmap and feature prioritization", source: calendar.work}
+          - {summary: "Coffee with Investors", start: "2026-08-13T12:30:00+02:00", end: "2026-08-13T13:30:00+02:00", all_day: false, location: "", description: "Quarterly meeting to review financials and forecasts with key investors", source: calendar.work}
+          - {summary: "Quarterly Strategy Meeting", start: "2026-08-14T08:15:00+02:00", end: "2026-08-14T11:00:00+02:00", all_day: false, location: "", description: "Extended meeting to review and plan company strategy for the next quarter.", source: calendar.work}
+          - {summary: "Performance Review Session", start: "2026-08-14T10:00:00+02:00", end: "2026-08-14T12:00:00+02:00", all_day: false, location: "", description: "Annual performance review and goal setting for team members", source: calendar.work}
+          - {summary: "UX Research Presentation", start: "2026-08-14T15:30:00+02:00", end: "2026-08-14T17:00:00+02:00", all_day: false, location: "", description: "Presentation of user research findings and design recommendations", source: calendar.work}
+          - {summary: "Budget Planning Workshop", start: "2026-08-15T14:00:00+02:00", end: "2026-08-15T16:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Kickoff Workshop", start: "2026-08-15T14:30:00+02:00", end: "2026-08-15T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Tech Talk: AI in Development", start: "2026-08-16T11:30:00+02:00", end: "2026-08-16T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Gratitude Standup", start: "2026-08-16T15:00:00+02:00", end: "2026-08-16T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Planning Session", start: "2026-08-03T09:00:00+02:00", end: "2026-08-03T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Client Demo - ACME Corp", start: "2026-08-04T14:00:00+02:00", end: "2026-08-04T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Weekend Team Retreat", start: "2026-08-06T00:00:00+02:00", end: "2026-08-08T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Sync with Design Team", start: "2026-08-09T10:00:00+02:00", end: "2026-08-09T10:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Architecture Review", start: "2026-08-09T10:30:00+02:00", end: "2026-08-09T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Play hooky", start: "2026-08-10T09:00:00+02:00", end: "2026-08-10T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Marketing Campaign Launch", start: "2026-08-10T13:00:00+02:00", end: "2026-08-10T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Investor Relations Call", start: "2026-08-11T16:00:00+02:00", end: "2026-08-11T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Sarah's birthday party", start: "2026-08-11T17:00:00+02:00", end: "2026-08-11T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Summer Offsite", start: "2026-08-18T00:00:00+02:00", end: "2026-08-22T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Onboarding Session", start: "2026-08-17T09:00:00+02:00", end: "2026-08-17T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Quarterly Planning", start: "2026-08-19T13:00:00+02:00", end: "2026-08-19T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+
+agenda:
+  name: A busy week, the agenda view
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: agenda}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Morning Run", start: "2026-08-12T06:30:00+02:00", end: "2026-08-12T07:15:00+02:00", all_day: false, location: "", description: "Quick jog to start the day", source: calendar.work}
+          - {summary: "Email Triage", start: "2026-08-12T08:00:00+02:00", end: "2026-08-12T08:30:00+02:00", all_day: false, location: "", description: "Process inbox and prioritize tasks", source: calendar.work}
+          - {summary: "Team Standup", start: "2026-08-12T09:30:00+02:00", end: "2026-08-12T09:45:00+02:00", all_day: false, location: "", description: "Daily sync with the team", source: calendar.work}
+          - {summary: "Monthly Catchup with Dev Team", start: "2026-08-12T10:00:00+02:00", end: "2026-08-12T11:00:00+02:00", all_day: false, location: "", description: "Discuss progress and obstacles with the development team", source: calendar.work}
+          - {summary: "Lunch Break", start: "2026-08-12T12:30:00+02:00", end: "2026-08-12T13:00:00+02:00", all_day: false, location: "", description: "Quick bite and recharge", source: calendar.work}
+          - {summary: "Deep Work Block", start: "2026-08-12T14:00:00+02:00", end: "2026-08-12T16:00:00+02:00", all_day: false, location: "", description: "Heads-down focus on priority task", source: calendar.work}
+          - {summary: "Bath", start: "2026-08-12T19:45:00+02:00", end: "2026-08-12T20:15:00+02:00", all_day: false, location: "", description: "Clean!", source: calendar.work}
+          - {summary: "Security Audit", start: "2026-08-12T00:00:00+02:00", end: "2026-08-13T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Michael OOO", start: "2026-08-13T00:00:00+02:00", end: "2026-08-16T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Product Roadmap Review", start: "2026-08-13T11:00:00+02:00", end: "2026-08-13T13:00:00+02:00", all_day: false, location: "", description: "Quarterly review of product roadmap and feature prioritization", source: calendar.work}
+          - {summary: "Coffee with Investors", start: "2026-08-13T12:30:00+02:00", end: "2026-08-13T13:30:00+02:00", all_day: false, location: "", description: "Quarterly meeting to review financials and forecasts with key investors", source: calendar.work}
+          - {summary: "Quarterly Strategy Meeting", start: "2026-08-14T08:15:00+02:00", end: "2026-08-14T11:00:00+02:00", all_day: false, location: "", description: "Extended meeting to review and plan company strategy for the next quarter.", source: calendar.work}
+          - {summary: "Performance Review Session", start: "2026-08-14T10:00:00+02:00", end: "2026-08-14T12:00:00+02:00", all_day: false, location: "", description: "Annual performance review and goal setting for team members", source: calendar.work}
+          - {summary: "UX Research Presentation", start: "2026-08-14T15:30:00+02:00", end: "2026-08-14T17:00:00+02:00", all_day: false, location: "", description: "Presentation of user research findings and design recommendations", source: calendar.work}
+          - {summary: "Budget Planning Workshop", start: "2026-08-15T14:00:00+02:00", end: "2026-08-15T16:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Kickoff Workshop", start: "2026-08-15T14:30:00+02:00", end: "2026-08-15T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Tech Talk: AI in Development", start: "2026-08-16T11:30:00+02:00", end: "2026-08-16T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Gratitude Standup", start: "2026-08-16T15:00:00+02:00", end: "2026-08-16T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Planning Session", start: "2026-08-03T09:00:00+02:00", end: "2026-08-03T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Client Demo - ACME Corp", start: "2026-08-04T14:00:00+02:00", end: "2026-08-04T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Weekend Team Retreat", start: "2026-08-06T00:00:00+02:00", end: "2026-08-08T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Sync with Design Team", start: "2026-08-09T10:00:00+02:00", end: "2026-08-09T10:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Architecture Review", start: "2026-08-09T10:30:00+02:00", end: "2026-08-09T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Play hooky", start: "2026-08-10T09:00:00+02:00", end: "2026-08-10T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Marketing Campaign Launch", start: "2026-08-10T13:00:00+02:00", end: "2026-08-10T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Investor Relations Call", start: "2026-08-11T16:00:00+02:00", end: "2026-08-11T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Sarah's birthday party", start: "2026-08-11T17:00:00+02:00", end: "2026-08-11T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Summer Offsite", start: "2026-08-18T00:00:00+02:00", end: "2026-08-22T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Onboarding Session", start: "2026-08-17T09:00:00+02:00", end: "2026-08-17T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Quarterly Planning", start: "2026-08-19T13:00:00+02:00", end: "2026-08-19T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+
+weeks:
+  name: A busy week, the weeks view
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: weeks, monthMode: month, weeks: "4"}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Morning Run", start: "2026-08-12T06:30:00+02:00", end: "2026-08-12T07:15:00+02:00", all_day: false, location: "", description: "Quick jog to start the day", source: calendar.work}
+          - {summary: "Email Triage", start: "2026-08-12T08:00:00+02:00", end: "2026-08-12T08:30:00+02:00", all_day: false, location: "", description: "Process inbox and prioritize tasks", source: calendar.work}
+          - {summary: "Team Standup", start: "2026-08-12T09:30:00+02:00", end: "2026-08-12T09:45:00+02:00", all_day: false, location: "", description: "Daily sync with the team", source: calendar.work}
+          - {summary: "Monthly Catchup with Dev Team", start: "2026-08-12T10:00:00+02:00", end: "2026-08-12T11:00:00+02:00", all_day: false, location: "", description: "Discuss progress and obstacles with the development team", source: calendar.work}
+          - {summary: "Lunch Break", start: "2026-08-12T12:30:00+02:00", end: "2026-08-12T13:00:00+02:00", all_day: false, location: "", description: "Quick bite and recharge", source: calendar.work}
+          - {summary: "Deep Work Block", start: "2026-08-12T14:00:00+02:00", end: "2026-08-12T16:00:00+02:00", all_day: false, location: "", description: "Heads-down focus on priority task", source: calendar.work}
+          - {summary: "Bath", start: "2026-08-12T19:45:00+02:00", end: "2026-08-12T20:15:00+02:00", all_day: false, location: "", description: "Clean!", source: calendar.work}
+          - {summary: "Security Audit", start: "2026-08-12T00:00:00+02:00", end: "2026-08-13T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Michael OOO", start: "2026-08-13T00:00:00+02:00", end: "2026-08-16T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Product Roadmap Review", start: "2026-08-13T11:00:00+02:00", end: "2026-08-13T13:00:00+02:00", all_day: false, location: "", description: "Quarterly review of product roadmap and feature prioritization", source: calendar.work}
+          - {summary: "Coffee with Investors", start: "2026-08-13T12:30:00+02:00", end: "2026-08-13T13:30:00+02:00", all_day: false, location: "", description: "Quarterly meeting to review financials and forecasts with key investors", source: calendar.work}
+          - {summary: "Quarterly Strategy Meeting", start: "2026-08-14T08:15:00+02:00", end: "2026-08-14T11:00:00+02:00", all_day: false, location: "", description: "Extended meeting to review and plan company strategy for the next quarter.", source: calendar.work}
+          - {summary: "Performance Review Session", start: "2026-08-14T10:00:00+02:00", end: "2026-08-14T12:00:00+02:00", all_day: false, location: "", description: "Annual performance review and goal setting for team members", source: calendar.work}
+          - {summary: "UX Research Presentation", start: "2026-08-14T15:30:00+02:00", end: "2026-08-14T17:00:00+02:00", all_day: false, location: "", description: "Presentation of user research findings and design recommendations", source: calendar.work}
+          - {summary: "Budget Planning Workshop", start: "2026-08-15T14:00:00+02:00", end: "2026-08-15T16:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Kickoff Workshop", start: "2026-08-15T14:30:00+02:00", end: "2026-08-15T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Tech Talk: AI in Development", start: "2026-08-16T11:30:00+02:00", end: "2026-08-16T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Gratitude Standup", start: "2026-08-16T15:00:00+02:00", end: "2026-08-16T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Planning Session", start: "2026-08-03T09:00:00+02:00", end: "2026-08-03T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Client Demo - ACME Corp", start: "2026-08-04T14:00:00+02:00", end: "2026-08-04T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Weekend Team Retreat", start: "2026-08-06T00:00:00+02:00", end: "2026-08-08T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Sync with Design Team", start: "2026-08-09T10:00:00+02:00", end: "2026-08-09T10:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Architecture Review", start: "2026-08-09T10:30:00+02:00", end: "2026-08-09T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Play hooky", start: "2026-08-10T09:00:00+02:00", end: "2026-08-10T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Marketing Campaign Launch", start: "2026-08-10T13:00:00+02:00", end: "2026-08-10T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Investor Relations Call", start: "2026-08-11T16:00:00+02:00", end: "2026-08-11T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Sarah's birthday party", start: "2026-08-11T17:00:00+02:00", end: "2026-08-11T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Summer Offsite", start: "2026-08-18T00:00:00+02:00", end: "2026-08-22T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Onboarding Session", start: "2026-08-17T09:00:00+02:00", end: "2026-08-17T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Quarterly Planning", start: "2026-08-19T13:00:00+02:00", end: "2026-08-19T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+
+polish:
+  name: A busy week in Polish
+  language: pl
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Morning Run", start: "2026-08-12T06:30:00+02:00", end: "2026-08-12T07:15:00+02:00", all_day: false, location: "", description: "Quick jog to start the day", source: calendar.work}
+          - {summary: "Email Triage", start: "2026-08-12T08:00:00+02:00", end: "2026-08-12T08:30:00+02:00", all_day: false, location: "", description: "Process inbox and prioritize tasks", source: calendar.work}
+          - {summary: "Team Standup", start: "2026-08-12T09:30:00+02:00", end: "2026-08-12T09:45:00+02:00", all_day: false, location: "", description: "Daily sync with the team", source: calendar.work}
+          - {summary: "Monthly Catchup with Dev Team", start: "2026-08-12T10:00:00+02:00", end: "2026-08-12T11:00:00+02:00", all_day: false, location: "", description: "Discuss progress and obstacles with the development team", source: calendar.work}
+          - {summary: "Lunch Break", start: "2026-08-12T12:30:00+02:00", end: "2026-08-12T13:00:00+02:00", all_day: false, location: "", description: "Quick bite and recharge", source: calendar.work}
+          - {summary: "Deep Work Block", start: "2026-08-12T14:00:00+02:00", end: "2026-08-12T16:00:00+02:00", all_day: false, location: "", description: "Heads-down focus on priority task", source: calendar.work}
+          - {summary: "Bath", start: "2026-08-12T19:45:00+02:00", end: "2026-08-12T20:15:00+02:00", all_day: false, location: "", description: "Clean!", source: calendar.work}
+          - {summary: "Security Audit", start: "2026-08-12T00:00:00+02:00", end: "2026-08-13T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Michael OOO", start: "2026-08-13T00:00:00+02:00", end: "2026-08-16T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Product Roadmap Review", start: "2026-08-13T11:00:00+02:00", end: "2026-08-13T13:00:00+02:00", all_day: false, location: "", description: "Quarterly review of product roadmap and feature prioritization", source: calendar.work}
+          - {summary: "Coffee with Investors", start: "2026-08-13T12:30:00+02:00", end: "2026-08-13T13:30:00+02:00", all_day: false, location: "", description: "Quarterly meeting to review financials and forecasts with key investors", source: calendar.work}
+          - {summary: "Quarterly Strategy Meeting", start: "2026-08-14T08:15:00+02:00", end: "2026-08-14T11:00:00+02:00", all_day: false, location: "", description: "Extended meeting to review and plan company strategy for the next quarter.", source: calendar.work}
+          - {summary: "Performance Review Session", start: "2026-08-14T10:00:00+02:00", end: "2026-08-14T12:00:00+02:00", all_day: false, location: "", description: "Annual performance review and goal setting for team members", source: calendar.work}
+          - {summary: "UX Research Presentation", start: "2026-08-14T15:30:00+02:00", end: "2026-08-14T17:00:00+02:00", all_day: false, location: "", description: "Presentation of user research findings and design recommendations", source: calendar.work}
+          - {summary: "Budget Planning Workshop", start: "2026-08-15T14:00:00+02:00", end: "2026-08-15T16:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Kickoff Workshop", start: "2026-08-15T14:30:00+02:00", end: "2026-08-15T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Tech Talk: AI in Development", start: "2026-08-16T11:30:00+02:00", end: "2026-08-16T12:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Gratitude Standup", start: "2026-08-16T15:00:00+02:00", end: "2026-08-16T15:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Planning Session", start: "2026-08-03T09:00:00+02:00", end: "2026-08-03T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Client Demo - ACME Corp", start: "2026-08-04T14:00:00+02:00", end: "2026-08-04T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Weekend Team Retreat", start: "2026-08-06T00:00:00+02:00", end: "2026-08-08T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Sync with Design Team", start: "2026-08-09T10:00:00+02:00", end: "2026-08-09T10:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Architecture Review", start: "2026-08-09T10:30:00+02:00", end: "2026-08-09T11:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Play hooky", start: "2026-08-10T09:00:00+02:00", end: "2026-08-10T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Marketing Campaign Launch", start: "2026-08-10T13:00:00+02:00", end: "2026-08-10T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Investor Relations Call", start: "2026-08-11T16:00:00+02:00", end: "2026-08-11T17:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Sarah's birthday party", start: "2026-08-11T17:00:00+02:00", end: "2026-08-11T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Summer Offsite", start: "2026-08-18T00:00:00+02:00", end: "2026-08-22T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Onboarding Session", start: "2026-08-17T09:00:00+02:00", end: "2026-08-17T10:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Quarterly Planning", start: "2026-08-19T13:00:00+02:00", end: "2026-08-19T15:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+
+three-calendars:
+  name: Three calendars with colors
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Work, color: black}
+      - {id: calendar.kids, label: Kids, color: red}
+      - {id: calendar.home, label: Home, color: yellow}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Work
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Standup", start: "2026-08-12T09:30:00+02:00", end: "2026-08-12T09:45:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Board meeting", start: "2026-08-14T10:00:00+02:00", end: "2026-08-14T12:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+      - id: calendar.kids
+        missing: false
+        name: Kids
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Football", start: "2026-08-12T17:30:00+02:00", end: "2026-08-12T19:00:00+02:00", all_day: false, location: "", description: "", source: calendar.kids}
+          - {summary: "Dentist", start: "2026-08-13T09:00:00+02:00", end: "2026-08-13T09:30:00+02:00", all_day: false, location: "", description: "", source: calendar.kids}
+          - {summary: "School trip", start: "2026-08-13T00:00:00+02:00", end: "2026-08-15T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.kids}
+      - id: calendar.home
+        missing: false
+        name: Home
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Holiday", start: "2026-08-17T00:00:00+02:00", end: "2026-08-18T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.home}
+
+sparse:
+  name: Two events
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Dentist", start: "2026-08-13T09:00:00+02:00", end: "2026-08-13T09:30:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+          - {summary: "Lunch with Ola", start: "2026-08-14T12:30:00+02:00", end: "2026-08-14T13:30:00+02:00", all_day: false, location: "City pool", description: "", source: calendar.work}
+
+all-day-only:
+  name: Only all-day events
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Holiday", start: "2026-08-12T00:00:00+02:00", end: "2026-08-13T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+          - {summary: "Conference", start: "2026-08-13T00:00:00+02:00", end: "2026-08-15T00:00:00+02:00", all_day: true, location: "", description: "", source: calendar.work}
+
+long-titles:
+  name: Very long titles
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          - {summary: "Extraordinary General Assembly of the International Association of Calendar Enthusiasts", start: "2026-08-12T11:00:00+02:00", end: "2026-08-12T12:00:00+02:00", all_day: false, location: "", description: "A description that is also much longer than any column could ever show in full", source: calendar.work}
+          - {summary: "Supercalifragilisticexpialidocious", start: "2026-08-12T13:00:00+02:00", end: "2026-08-12T14:00:00+02:00", all_day: false, location: "", description: "", source: calendar.work}
+
+empty:
+  name: Nothing planned
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {view: upcoming}
+  sources:
+    calendars:
+      - {id: calendar.work, label: Personal}
+  data:
+    calendars:
+      - id: calendar.work
+        missing: false
+        name: Personal
+        range_start: "2026-07-27"
+        events:
+          []
+
+missing-sources:
+  name: No calendar chosen yet
+  language: en
+  now: "2026-08-12T10:15:00+02:00"
+  options: {}
+  sources:
+    calendars: []
+  data:
+    calendars: []

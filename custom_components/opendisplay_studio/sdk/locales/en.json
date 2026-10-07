@@ -1,0 +1,85 @@
+{
+  "weekday": {
+    "short": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "full": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ]
+  },
+  "month": {
+    "alone": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "of": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "short": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
+  },
+  "format": {
+    "day_short": "{weekday}, {month} {day}",
+    "day_full": "{weekday}, {day} {month}",
+    "day_month": "{month} {day}",
+    "long_date": "{day} {month}",
+    "month_year": "{month} {year}"
+  },
+  "states": {
+    "unavailable": "Unavailable",
+    "unknown": "Unknown",
+    "on": "On",
+    "off": "Off",
+    "open": "Open",
+    "closed": "Closed",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "home": "Home",
+    "not_home": "Away"
+  }
+}
