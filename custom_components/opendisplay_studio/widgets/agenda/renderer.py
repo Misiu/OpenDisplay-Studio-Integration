@@ -9,7 +9,6 @@ from typing import Any, Final
 from custom_components.opendisplay_studio.sdk import (
     Look,
     WidgetContext,
-    clamp,
     compose,
     format_date,
     format_relative_day,
@@ -52,6 +51,13 @@ class Row:
     entry: Entry | None = None
 
 
+def _visible_color(color: str | None, look: Look) -> str:
+    """Return the calendar's color, or the ink when it would vanish into the paper."""
+    if color is None or (look.framed and color == look.paper):
+        return look.ink
+    return color
+
+
 def _entries(context: WidgetContext, look: Look) -> list[Entry]:
     """Merge all calendars, drop finished events, sort, keep the first N."""
     entries: list[Entry] = []
@@ -62,7 +68,7 @@ def _entries(context: WidgetContext, look: Look) -> list[Entry]:
             Entry(
                 event,
                 pick.get("label", ""),
-                pick.get("color", look.ink),
+                _visible_color(pick.get("color"), look),
                 pick.get("icon") or data.get("icon") or DEFAULT_ICON,
             )
             for event in data["events"]
@@ -134,10 +140,7 @@ def _card(look: Look, children: list[dict[str, Any]], **fields: Any) -> dict[str
 
 
 def _message(context: WidgetContext, look: Look, message: str) -> dict[str, Any]:
-    box = context.box
-    size = clamp(min(box.height // 5, box.width // 14), MIN_SIZE, 20)
-    text = look.text(message, size=size, align="center", truncate=True)
-    return _card(look, [text], justify="center")
+    return look.message(context.box, message)
 
 
 def _lead_width(context: WidgetContext, size: int) -> int:

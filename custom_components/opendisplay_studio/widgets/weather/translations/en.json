@@ -1,4 +1,9 @@
 {
+  "sections.appearance": "Appearance",
+  "options.showFrame": "Show frame",
+  "options.cornerRadius": "Corner radius",
+  "options.color": "Color",
+  "options.background": "Background",
   "name": "Weather",
   "description": "Current conditions and a daily or hourly forecast of a weather entity.",
   "categories.Weather": "Weather",
@@ -31,8 +36,5 @@
   "runtime.condition.windy": "Windy",
   "runtime.condition.windy-variant": "Windy",
   "options.forecastType.daily": "Daily",
-  "options.forecastType.hourly": "Hourly",
-  "sections.appearance": "Appearance",
-  "options.showFrame": "Show frame",
-  "options.invert": "Invert colors"
+  "options.forecastType.hourly": "Hourly"
 }

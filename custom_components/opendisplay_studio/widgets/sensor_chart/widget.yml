@@ -1,0 +1,106 @@
+api: 1
+id: sensor-chart
+name: Sensor chart
+version: 1.0.0
+description: The value of one entity with its history as a line chart.
+icon: mdi:chart-line
+category: Sensors
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 385, height: 225 }
+  minSize: { width: 200, height: 120 }
+
+sources:
+  - key: entities
+    label: Entity
+    selector:
+      entity: {}
+    required: true
+    max: 1
+    data: entity_history
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: icon
+        label: Icon
+        selector: { text: {} }
+
+options:
+  - section: content
+    fields:
+      - key: showIcon
+        label: Show icon
+        default: true
+        selector: { boolean: {} }
+      - key: showName
+        label: Show name
+        default: true
+        selector: { boolean: {} }
+      - key: showUnit
+        label: Show unit
+        default: true
+        selector: { boolean: {} }
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
+  - section: chart
+    fields:
+      - key: hours
+        label: Hours to show
+        default: 24
+        selector: { number: { min: 1, max: 168, mode: box } }
+      - key: smoothing
+        label: Smoothing
+        default: true
+        selector: { boolean: {} }
+      - key: placement
+        label: Chart placement
+        default: auto
+        selector:
+          select:
+            options: [auto, bottom, right]
+      - key: showMinMax
+        label: Show min and max
+        default: true
+        selector: { boolean: {} }
+  - section: details
+    fields:
+      - key: showChip
+        label: Show type chip
+        default: true
+        selector: { boolean: {} }
+      - key: showEntityId
+        label: Show entity id
+        default: true
+        selector: { boolean: {} }
+      - key: showUpdated
+        label: Show time of the last update
+        default: true
+        selector: { boolean: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }
+
+data:
+  entity_history:
+    hours: "@options.hours"

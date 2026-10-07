@@ -1,0 +1,86 @@
+api: 1
+id: sensor-list
+name: Sensor list
+version: 1.0.0
+description: The values of several entities, one line each.
+icon: mdi:format-list-bulleted
+category: Sensors
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 280, height: 200 }
+  minSize: { width: 160, height: 80 }
+
+sources:
+  - key: entities
+    label: Entities
+    selector:
+      entity: { multiple: true }
+    required: true
+    max: 12
+    data: entity_state
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: icon
+        label: Icon
+        selector: { text: {} }
+
+options:
+  - section: content
+    fields:
+      - key: showIcon
+        label: Show icon
+        default: true
+        selector: { boolean: {} }
+      - key: showName
+        label: Show name
+        default: true
+        selector: { boolean: {} }
+      - key: showUnit
+        label: Show unit
+        default: true
+        selector: { boolean: {} }
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
+      - key: showDividers
+        label: Show dividers
+        default: true
+        selector: { boolean: {} }
+  - section: thresholds
+    fields:
+      - key: alertBelow
+        label: Alert below
+        default: ""
+        selector: { text: {} }
+      - key: alertAbove
+        label: Alert above
+        default: ""
+        selector: { text: {} }
+      - key: alertColor
+        label: Alert color
+        default: accent
+        selector: { opendisplay_color: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }

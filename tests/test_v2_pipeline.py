@@ -250,7 +250,8 @@ async def test_compiler_and_local_renderer_produce_exact_size_png(
     assert any(element["type"] == "text" for element in compiled.elements)
     assert compiled.elements[0]["x_start"] == 30
     assert compiled.elements[0]["y_start"] == 30
-    assert "21.4 °C" in compiled.yaml
+    assert "21.4" in compiled.yaml
+    assert "°C" in compiled.yaml
 
     renderer = OdlRenderService(cast("Any", None), concurrency=1)
     rendered = await renderer.async_render(

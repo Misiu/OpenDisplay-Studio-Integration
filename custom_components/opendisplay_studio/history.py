@@ -102,6 +102,15 @@ async def _async_fetch(
     hass: HomeAssistant, plots: list[dict[str, Any]]
 ) -> dict[str, list[dict[str, str]]] | None:
     """Read the longest span any plot asks for, for every entity the plots use."""
+    seconds = max(plot.get("duration", DEFAULT_DURATION) for plot in plots)
+    entities = sorted({e for plot in plots for e in _series_entities(plot)})
+    return await async_fetch_records(hass, entities, seconds)
+
+
+async def async_fetch_records(
+    hass: HomeAssistant, entities: list[str], seconds: int
+) -> dict[str, list[dict[str, str]]] | None:
+    """Return the states of `entities` of the last `seconds`; None if no recorder."""
     if "recorder" not in hass.config.components:
         return None
     # Imported here: the recorder is an optional dependency of the integration.
@@ -110,9 +119,7 @@ async def _async_fetch(
         history,
     )
 
-    seconds = max(plot.get("duration", DEFAULT_DURATION) for plot in plots)
     end = dt_util.utcnow()
-    entities = sorted({e for plot in plots for e in _series_entities(plot)})
     states = await get_instance(hass).async_add_executor_job(
         history.get_significant_states,
         hass,

@@ -18,5 +18,5 @@ def test_the_widgets_page_is_up_to_date() -> None:
 def test_the_widgets_page_lists_every_option_of_the_agenda() -> None:
     page = build_markdown()
 
-    for key in ("maxEvents", "groupByDay", "showFrame", "invert"):
+    for key in ("maxEvents", "groupByDay", "showFrame", "background"):
         assert f"`{key}`" in page

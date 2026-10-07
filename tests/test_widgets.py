@@ -113,7 +113,13 @@ RENDERER = render
 class TestBuiltInCatalog:
     def test_every_built_in_package_loads(self) -> None:
         assert DEFAULT_REGISTRY.errors == []
-        assert DEFAULT_REGISTRY.widget_types == {"sensor-card", "agenda", "weather"}
+        assert DEFAULT_REGISTRY.widget_types == {
+            "sensor-card",
+            "sensor-chart",
+            "sensor-list",
+            "agenda",
+            "weather",
+        }
 
     def test_labels_come_in_the_dashboard_language(self) -> None:
         english = {w["id"]: w for w in DEFAULT_REGISTRY.definitions("en")}
@@ -135,7 +141,9 @@ class TestBuiltInCatalog:
         assert names["sensor-card"] == "Sensor card"
 
     @pytest.mark.parametrize("language", ["pl", "de"])
-    @pytest.mark.parametrize("widget_id", ["sensor-card", "agenda", "weather"])
+    @pytest.mark.parametrize(
+        "widget_id", ["sensor-card", "sensor-chart", "sensor-list", "agenda", "weather"]
+    )
     def test_every_language_translates_everything_english_does(
         self, widget_id: str, language: str
     ) -> None:
@@ -143,7 +151,9 @@ class TestBuiltInCatalog:
 
         assert set(translations["en"]) <= set(translations[language])
 
-    @pytest.mark.parametrize("widget_id", ["sensor-card", "agenda", "weather"])
+    @pytest.mark.parametrize(
+        "widget_id", ["sensor-card", "sensor-chart", "sensor-list", "agenda", "weather"]
+    )
     def test_every_label_the_panel_shows_is_translated(self, widget_id: str) -> None:
         manifest = DEFAULT_REGISTRY.definition(widget_id)
         translations = DEFAULT_REGISTRY.package(widget_id).translations["en"]
@@ -416,7 +426,7 @@ class TestSensorCard:
 
         compiled = await compile_widget(hass, item)
 
-        assert texts(compiled) == ["Kitchen", "21.456 °C"]
+        assert texts(compiled) == ["Kitchen", "21.456", "°C"]
         assert compiled.warnings == []
 
     async def test_decimals_and_unit_options_change_what_is_shown(
@@ -460,31 +470,12 @@ class TestSensorCard:
         )
         assert value["color"] == "red"
 
-    async def test_a_list_has_one_row_per_entity(self, hass: HomeAssistant) -> None:
-        self.states(hass)
+    async def test_a_card_takes_one_entity_only(self, hass: HomeAssistant) -> None:
         picks = [{"id": "sensor.kitchen"}, {"id": "sensor.hall"}]
-        item = widget_item(
-            "sensor-card",
-            sources={"entities": picks},
-            options={"layout": "list"},
-        )
+        item = widget_item("sensor-card", sources={"entities": picks})
 
-        compiled = await compile_widget(hass, item)
-
-        assert texts(compiled) == ["Kitchen", "21.456 °C", "Hall", "48 %"]
-
-    async def test_a_grid_has_one_tile_per_entity(self, hass: HomeAssistant) -> None:
-        self.states(hass)
-        picks = [{"id": "sensor.kitchen"}, {"id": "sensor.hall"}]
-        item = widget_item(
-            "sensor-card",
-            sources={"entities": picks},
-            options={"layout": "grid"},
-        )
-
-        compiled = await compile_widget(hass, item)
-
-        assert sum(e["type"] == "rectangle" for e in compiled.elements) == 2
+        with pytest.raises(DashboardValidationError, match="at most 1"):
+            await compile_widget(hass, item)
 
     async def test_an_unknown_entity_shows_as_unavailable(
         self, hass: HomeAssistant
@@ -501,8 +492,8 @@ class TestSensorCard:
         compiled = await compile_widget(hass, widget_item("sensor-card"))
         polish = await compile_widget(hass, widget_item("sensor-card"), "pl")
 
-        assert texts(compiled) == ["Choose entities"]
-        assert texts(polish) == ["Wybierz encje"]
+        assert texts(compiled) == ["Choose an entity"]
+        assert texts(polish) == ["Wybierz encję"]
 
     async def test_the_entities_are_reported_for_live_refresh(
         self, hass: HomeAssistant
@@ -513,6 +504,50 @@ class TestSensorCard:
         compiled = await compile_widget(hass, item)
 
         assert compiled.dependencies.entities == {"sensor.hall"}
+
+
+class TestSensorList:
+    def states(self, hass: HomeAssistant) -> None:
+        hass.states.async_set(
+            "sensor.kitchen",
+            "21.456",
+            {"friendly_name": "Kitchen", "unit_of_measurement": "°C"},
+        )
+        hass.states.async_set(
+            "sensor.hall",
+            "48",
+            {"friendly_name": "Hall", "unit_of_measurement": "%"},
+        )
+
+    async def test_a_list_has_one_row_per_entity(self, hass: HomeAssistant) -> None:
+        self.states(hass)
+        picks = [{"id": "sensor.kitchen"}, {"id": "sensor.hall"}]
+        item = widget_item("sensor-list", sources={"entities": picks})
+
+        compiled = await compile_widget(hass, item)
+
+        assert texts(compiled) == ["Kitchen", "21.456 °C", "Hall", "48 %"]
+
+    async def test_dividers_can_be_turned_off(self, hass: HomeAssistant) -> None:
+        self.states(hass)
+        picks = [{"id": "sensor.kitchen"}, {"id": "sensor.hall"}]
+        with_lines = widget_item("sensor-list", sources={"entities": picks})
+        without = widget_item(
+            "sensor-list", sources={"entities": picks}, options={"showDividers": False}
+        )
+
+        lines = (await compile_widget(hass, with_lines)).elements
+        plain = (await compile_widget(hass, without)).elements
+
+        assert sum(e["type"] == "line" for e in lines) == 1
+        assert sum(e["type"] == "line" for e in plain) == 0
+
+    async def test_without_entities_it_says_what_to_do(
+        self, hass: HomeAssistant
+    ) -> None:
+        compiled = await compile_widget(hass, widget_item("sensor-list"))
+
+        assert texts(compiled) == ["Choose entities"]
 
 
 def calendar_event(

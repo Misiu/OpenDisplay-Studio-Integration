@@ -232,15 +232,7 @@ def _forecast_rows(
 
 
 def _message(context: WidgetContext, look: Look, message: str) -> dict[str, Any]:
-    box = context.box
-    size = clamp(min(box.height // 5, box.width // 14), MIN_TEXT, 20)
-    return {
-        "type": "column",
-        "justify": "center",
-        "padding": 4,
-        **look.frame(),
-        "children": [look.text(message, size=size, align="center", truncate=True)],
-    }
+    return look.message(context.box, message)
 
 
 def _card(

@@ -1,8 +1,8 @@
 api: 1
 id: sensor-card
 name: Sensor card
-version: 1.0.0
-description: The value of one or more entities, as a big tile, a list or a grid.
+version: 2.0.0
+description: The value of one entity as a tile that follows the shape of its frame.
 icon: mdi:gauge
 category: Sensors
 author: OpenDisplay Studio
@@ -13,11 +13,11 @@ layout:
 
 sources:
   - key: entities
-    label: Entities
+    label: Entity
     selector:
-      entity: { multiple: true }
+      entity: {}
     required: true
-    max: 12
+    max: 1
     data: entity_state
     perSource:
       - key: label
@@ -28,14 +28,6 @@ sources:
         selector: { text: {} }
 
 options:
-  - section: layout
-    fields:
-      - key: layout
-        label: Layout
-        default: single
-        selector:
-          select:
-            options: [single, list, grid]
   - section: content
     fields:
       - key: showIcon
@@ -56,6 +48,16 @@ options:
         selector:
           select:
             options: [auto, "0", "1", "2", "3"]
+      - key: showSeparator
+        label: Show separator
+        default: true
+        selector: { boolean: {} }
+      - key: align
+        label: Alignment
+        default: auto
+        selector:
+          select:
+            options: [auto, left, center, right]
       - key: valueSize
         label: Value size
         default: auto
@@ -82,7 +84,15 @@ options:
         label: Show frame
         default: true
         selector: { boolean: {} }
-      - key: invert
-        label: Invert colors
-        default: false
-        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }

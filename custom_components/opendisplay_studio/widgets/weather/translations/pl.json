@@ -1,4 +1,9 @@
 {
+  "sections.appearance": "Wygląd",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.cornerRadius": "Zaokrąglenie rogów",
+  "options.color": "Kolor",
+  "options.background": "Tło",
   "name": "Pogoda",
   "description": "Aktualne warunki oraz prognoza dzienna lub godzinowa z encji pogody.",
   "categories.Weather": "Pogoda",
@@ -31,8 +36,5 @@
   "runtime.condition.windy": "Wietrznie",
   "runtime.condition.windy-variant": "Wietrznie",
   "options.forecastType.daily": "Dzienna",
-  "options.forecastType.hourly": "Godzinowa",
-  "sections.appearance": "Wygląd",
-  "options.showFrame": "Pokaż ramkę i tło",
-  "options.invert": "Odwróć kolory"
+  "options.forecastType.hourly": "Godzinowa"
 }

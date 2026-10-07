@@ -1,0 +1,17 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bw
+sizes:
+  - {name: full, width: 780, height: 450}
+  - {name: half vertical, width: 385, height: 460}
+  - {name: half horizontal, width: 780, height: 225}
+  - {name: quadrant, width: 385, height: 225}
+  - {name: small, width: 296, height: 128}
+docs:
+  - {title: "Full size: the chart below the value", state: temperature, size: full}
+  - {title: "Half horizontal: the chart beside the value", state: temperature, size: half horizontal}
+  - {title: "Half vertical", state: temperature, size: half vertical}
+  - {title: "Quadrant", state: temperature, size: quadrant}
+  - {title: "White on black", state: temperature, size: quadrant, options: {color: white, background: black}}
+  - {title: "A week, without the details", state: week, size: half vertical, options: {showChip: false, showEntityId: false}}
+  - {title: "An entity without history", state: no-history, size: quadrant}
+  - {title: "Nothing chosen yet", state: missing-sources, size: small}

@@ -57,6 +57,7 @@ class Showcase:
     state: str
     size: str
     options: dict[str, Any] = field(default_factory=dict)
+    palette: str = ""
 
 
 @dataclass(frozen=True, slots=True)

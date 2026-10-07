@@ -1,4 +1,9 @@
 {
+  "sections.appearance": "Wygląd",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.cornerRadius": "Zaokrąglenie rogów",
+  "options.color": "Kolor",
+  "options.background": "Tło",
   "name": "Agenda",
   "description": "Nadchodzące wydarzenia z jednego lub kilku kalendarzy na jednej liście.",
   "categories.Calendar": "Kalendarz",
@@ -20,9 +25,6 @@
   "runtime.today": "Dzisiaj",
   "runtime.tomorrow": "Jutro",
   "runtime.all_day": "Cały dzień",
-  "sections.appearance": "Wygląd",
-  "options.showFrame": "Pokaż ramkę i tło",
-  "options.invert": "Odwróć kolory",
   "sources.calendars.icon": "Ikona",
   "options.showIcons": "Pokaż ikony kalendarzy"
 }

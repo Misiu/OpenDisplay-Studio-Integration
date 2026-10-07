@@ -1,4 +1,9 @@
 {
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.cornerRadius": "Eckenradius",
+  "options.color": "Farbe",
+  "options.background": "Hintergrund",
   "name": "Agenda",
   "description": "Anstehende Termine aus einem oder mehreren Kalendern in einer Liste.",
   "categories.Calendar": "Kalender",
@@ -20,9 +25,6 @@
   "runtime.today": "Heute",
   "runtime.tomorrow": "Morgen",
   "runtime.all_day": "Ganztägig",
-  "sections.appearance": "Darstellung",
-  "options.showFrame": "Rahmen und Hintergrund zeigen",
-  "options.invert": "Farben umkehren",
   "sources.calendars.icon": "Symbol",
   "options.showIcons": "Kalendersymbole zeigen"
 }

@@ -221,7 +221,8 @@ phase 8 and `WIDGET_CONTRACT.md`; the rules:
   option changes ship a migration in `migrations.py`.
 - **Renderers describe, `odl-layout` places.** A renderer builds a row/column/grid
   description and passes it to `sdk.compose`; it does not compute coordinates by
-  hand. Every widget has an `appearance` section with `showFrame` and `invert`,
+  hand. Every widget has an `appearance` section with `showFrame`, `cornerRadius`, `color` and
+  `background`,
   read through `sdk.Look`; black on white inside a frame is the default.
 - **Every built-in widget** has a `states.yml` (simulated states, one of them
   `missing-sources`) and a `preview.yml` (sizes, palette, documentation pictures)

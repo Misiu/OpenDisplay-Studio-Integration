@@ -7,9 +7,10 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: small, width: 296, height: 128}
 docs:
-  - {title: Daily forecast, state: daily, size: half horizontal}
-  - {title: Inverted colors, state: daily, size: half horizontal, options: {invert: true}}
-  - {title: Without frame and background, state: daily, size: half horizontal, options: {showFrame: false}}
-  - {title: Hourly forecast with details, state: hourly-details, size: half vertical}
-  - {title: Small frame, state: daily, size: small}
-  - {title: Nothing chosen yet, state: missing-sources, size: small}
+  - {title: "Daily forecast", state: daily, size: half horizontal}
+  - {title: "White on black", state: daily, size: half horizontal, options: {color: white, background: black}}
+  - {title: "Square corners", state: daily, size: half horizontal, options: {cornerRadius: 0}}
+  - {title: "Without frame and background", state: daily, size: half horizontal, options: {showFrame: false}}
+  - {title: "Hourly forecast with details", state: hourly-details, size: half vertical}
+  - {title: "Small frame", state: daily, size: small}
+  - {title: "Nothing chosen yet", state: missing-sources, size: small}

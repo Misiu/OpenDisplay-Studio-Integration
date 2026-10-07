@@ -6,10 +6,14 @@ sizes:
   - {name: half vertical, width: 400, height: 480}
   - {name: quadrant, width: 400, height: 240}
   - {name: small, width: 296, height: 128}
+  - {name: square, width: 240, height: 240}
+  - {name: tall, width: 160, height: 400}
+  - {name: strip, width: 400, height: 120}
 docs:
-  - {title: One entity as a tile, state: single, size: quadrant}
-  - {title: Inverted colors, state: single, size: quadrant, options: {invert: true}}
-  - {title: Without frame and background, state: single, size: quadrant, options: {showFrame: false}}
-  - {title: Several entities as a list, state: alert-list, size: quadrant}
-  - {title: Several entities as a grid, state: grid, size: half horizontal}
-  - {title: Nothing chosen yet, state: missing-sources, size: small}
+  - {title: "A wide tile puts the icon on the left and the unit beside the value", state: single, size: quadrant}
+  - {title: "A square tile stacks icon, name, value and unit", state: single, size: square}
+  - {title: "A tall tile is separated by a line", state: single, size: tall}
+  - {title: "White on black", state: single, size: quadrant, options: {color: white, background: black}}
+  - {title: "Red with yellow elements on a BWRY display", state: single, size: quadrant, options: {color: yellow, background: red}, palette: bwry}
+  - {title: "Without frame and background", state: single, size: quadrant, options: {showFrame: false}}
+  - {title: "Nothing chosen yet", state: missing-sources, size: small}

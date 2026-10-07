@@ -7,6 +7,7 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
+import yaml  # type: ignore[import-untyped]
 from aiohttp import web
 
 from scripts.widget_devkit.scenario import (
@@ -34,9 +35,12 @@ def _parse(arguments: list[str] | None) -> argparse.Namespace:
     render = commands.add_parser("render", help="write every state at every size")
     render.add_argument("--out", type=Path, required=True)
     render.add_argument("--widget", help="draw only this widget id")
-    render.add_argument("--invert", action="store_true", help="white on black")
     render.add_argument(
-        "--no-frame", action="store_true", help="no frame or background"
+        "--option",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="set an option of the widget, e.g. --option showFrame=false",
     )
 
     for command in (serve, render):
@@ -51,10 +55,9 @@ def _parse(arguments: list[str] | None) -> argparse.Namespace:
 
 def _option_overrides(arguments: argparse.Namespace) -> dict[str, Any]:
     overrides: dict[str, Any] = {}
-    if arguments.invert:
-        overrides["invert"] = True
-    if arguments.no_frame:
-        overrides["showFrame"] = False
+    for assignment in arguments.option:
+        key, _, value = assignment.partition("=")
+        overrides[key] = yaml.safe_load(value)
     return overrides
 
 

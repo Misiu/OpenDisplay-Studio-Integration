@@ -1,0 +1,306 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+temperature:
+  name: A day of temperatures
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities:
+      - id: sensor.living_room_temperature
+  data:
+    entities:
+      - id: sensor.living_room_temperature
+        missing: false
+        name: Living room temperature
+        state: "21.7"
+        display_state: "21.7"
+        unit: "°C"
+        icon: thermometer
+        device_class: temperature
+        available: true
+        last_changed: "2026-09-30T08:25:00+02:00"
+        points:
+        - {datetime: "2026-09-29T08:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T08:45:00+02:00", value: 21.56}
+        - {datetime: "2026-09-29T09:00:00+02:00", value: 21.33}
+        - {datetime: "2026-09-29T09:15:00+02:00", value: 21.30}
+        - {datetime: "2026-09-29T09:30:00+02:00", value: 22.00}
+        - {datetime: "2026-09-29T09:45:00+02:00", value: 22.30}
+        - {datetime: "2026-09-29T10:00:00+02:00", value: 21.96}
+        - {datetime: "2026-09-29T10:15:00+02:00", value: 22.16}
+        - {datetime: "2026-09-29T10:30:00+02:00", value: 22.84}
+        - {datetime: "2026-09-29T10:45:00+02:00", value: 22.83}
+        - {datetime: "2026-09-29T11:00:00+02:00", value: 22.49}
+        - {datetime: "2026-09-29T11:15:00+02:00", value: 22.89}
+        - {datetime: "2026-09-29T11:30:00+02:00", value: 23.40}
+        - {datetime: "2026-09-29T11:45:00+02:00", value: 23.10}
+        - {datetime: "2026-09-29T12:00:00+02:00", value: 22.87}
+        - {datetime: "2026-09-29T12:15:00+02:00", value: 23.38}
+        - {datetime: "2026-09-29T12:30:00+02:00", value: 23.60}
+        - {datetime: "2026-09-29T12:45:00+02:00", value: 23.09}
+        - {datetime: "2026-09-29T13:00:00+02:00", value: 23.04}
+        - {datetime: "2026-09-29T13:15:00+02:00", value: 23.54}
+        - {datetime: "2026-09-29T13:30:00+02:00", value: 23.41}
+        - {datetime: "2026-09-29T13:45:00+02:00", value: 22.84}
+        - {datetime: "2026-09-29T14:00:00+02:00", value: 22.97}
+        - {datetime: "2026-09-29T14:15:00+02:00", value: 23.32}
+        - {datetime: "2026-09-29T14:30:00+02:00", value: 22.87}
+        - {datetime: "2026-09-29T14:45:00+02:00", value: 22.38}
+        - {datetime: "2026-09-29T15:00:00+02:00", value: 22.66}
+        - {datetime: "2026-09-29T15:15:00+02:00", value: 22.75}
+        - {datetime: "2026-09-29T15:30:00+02:00", value: 22.09}
+        - {datetime: "2026-09-29T15:45:00+02:00", value: 21.78}
+        - {datetime: "2026-09-29T16:00:00+02:00", value: 22.11}
+        - {datetime: "2026-09-29T16:15:00+02:00", value: 21.91}
+        - {datetime: "2026-09-29T16:30:00+02:00", value: 21.19}
+        - {datetime: "2026-09-29T16:45:00+02:00", value: 21.12}
+        - {datetime: "2026-09-29T17:00:00+02:00", value: 21.39}
+        - {datetime: "2026-09-29T17:15:00+02:00", value: 20.92}
+        - {datetime: "2026-09-29T17:30:00+02:00", value: 20.29}
+        - {datetime: "2026-09-29T17:45:00+02:00", value: 20.46}
+        - {datetime: "2026-09-29T18:00:00+02:00", value: 20.58}
+        - {datetime: "2026-09-29T18:15:00+02:00", value: 19.92}
+        - {datetime: "2026-09-29T18:30:00+02:00", value: 19.54}
+        - {datetime: "2026-09-29T18:45:00+02:00", value: 19.87}
+        - {datetime: "2026-09-29T19:00:00+02:00", value: 19.77}
+        - {datetime: "2026-09-29T19:15:00+02:00", value: 19.09}
+        - {datetime: "2026-09-29T19:30:00+02:00", value: 19.02}
+        - {datetime: "2026-09-29T19:45:00+02:00", value: 19.40}
+        - {datetime: "2026-09-29T20:00:00+02:00", value: 19.10}
+        - {datetime: "2026-09-29T20:15:00+02:00", value: 18.54}
+        - {datetime: "2026-09-29T20:30:00+02:00", value: 18.78}
+        - {datetime: "2026-09-29T20:45:00+02:00", value: 19.11}
+        - {datetime: "2026-09-29T21:00:00+02:00", value: 18.66}
+        - {datetime: "2026-09-29T21:15:00+02:00", value: 18.37}
+        - {datetime: "2026-09-29T21:30:00+02:00", value: 18.85}
+        - {datetime: "2026-09-29T21:45:00+02:00", value: 19.02}
+        - {datetime: "2026-09-29T22:00:00+02:00", value: 18.54}
+        - {datetime: "2026-09-29T22:15:00+02:00", value: 18.58}
+        - {datetime: "2026-09-29T22:30:00+02:00", value: 19.18}
+        - {datetime: "2026-09-29T22:45:00+02:00", value: 19.16}
+        - {datetime: "2026-09-29T23:00:00+02:00", value: 18.78}
+        - {datetime: "2026-09-29T23:15:00+02:00", value: 19.15}
+        - {datetime: "2026-09-29T23:30:00+02:00", value: 19.72}
+        - {datetime: "2026-09-29T23:45:00+02:00", value: 19.52}
+        - {datetime: "2026-09-30T00:00:00+02:00", value: 19.35}
+        - {datetime: "2026-09-30T00:15:00+02:00", value: 19.97}
+        - {datetime: "2026-09-30T00:30:00+02:00", value: 20.38}
+        - {datetime: "2026-09-30T00:45:00+02:00", value: 20.08}
+        - {datetime: "2026-09-30T01:00:00+02:00", value: 20.19}
+        - {datetime: "2026-09-30T01:15:00+02:00", value: 20.92}
+        - {datetime: "2026-09-30T01:30:00+02:00", value: 21.09}
+        - {datetime: "2026-09-30T01:45:00+02:00", value: 20.78}
+        - {datetime: "2026-09-30T02:00:00+02:00", value: 21.17}
+        - {datetime: "2026-09-30T02:15:00+02:00", value: 21.85}
+        - {datetime: "2026-09-30T02:30:00+02:00", value: 21.75}
+        - {datetime: "2026-09-30T02:45:00+02:00", value: 21.56}
+        - {datetime: "2026-09-30T03:00:00+02:00", value: 22.15}
+        - {datetime: "2026-09-30T03:15:00+02:00", value: 22.62}
+        - {datetime: "2026-09-30T03:30:00+02:00", value: 22.31}
+        - {datetime: "2026-09-30T03:45:00+02:00", value: 22.30}
+        - {datetime: "2026-09-30T04:00:00+02:00", value: 22.96}
+        - {datetime: "2026-09-30T04:15:00+02:00", value: 23.13}
+        - {datetime: "2026-09-30T04:30:00+02:00", value: 22.72}
+        - {datetime: "2026-09-30T04:45:00+02:00", value: 22.91}
+        - {datetime: "2026-09-30T05:00:00+02:00", value: 23.49}
+        - {datetime: "2026-09-30T05:15:00+02:00", value: 23.32}
+        - {datetime: "2026-09-30T05:30:00+02:00", value: 22.93}
+        - {datetime: "2026-09-30T05:45:00+02:00", value: 23.29}
+        - {datetime: "2026-09-30T06:00:00+02:00", value: 23.65}
+        - {datetime: "2026-09-30T06:15:00+02:00", value: 23.20}
+        - {datetime: "2026-09-30T06:30:00+02:00", value: 22.92}
+        - {datetime: "2026-09-30T06:45:00+02:00", value: 23.37}
+        - {datetime: "2026-09-30T07:00:00+02:00", value: 23.41}
+        - {datetime: "2026-09-30T07:15:00+02:00", value: 22.79}
+        - {datetime: "2026-09-30T07:30:00+02:00", value: 22.71}
+        - {datetime: "2026-09-30T07:45:00+02:00", value: 23.10}
+        - {datetime: "2026-09-30T08:00:00+02:00", value: 22.81}
+        - {datetime: "2026-09-30T08:15:00+02:00", value: 22.18}
+        - {datetime: "2026-09-30T08:30:00+02:00", value: 22.30}
+
+week:
+  name: A week of temperatures, in Polish
+  language: pl
+  now: "2026-09-30T08:30:00+02:00"
+  options: {hours: 168}
+  sources:
+    entities:
+      - id: sensor.living_room_temperature
+  data:
+    entities:
+      - id: sensor.living_room_temperature
+        missing: false
+        name: Living room temperature
+        state: "19.4"
+        display_state: "19.4"
+        unit: "°C"
+        icon: thermometer
+        device_class: temperature
+        available: true
+        last_changed: "2026-09-30T08:25:00+02:00"
+        points:
+        - {datetime: "2026-09-23T08:30:00+02:00", value: 19.00}
+        - {datetime: "2026-09-23T10:30:00+02:00", value: 19.86}
+        - {datetime: "2026-09-23T12:30:00+02:00", value: 19.60}
+        - {datetime: "2026-09-23T14:30:00+02:00", value: 19.62}
+        - {datetime: "2026-09-23T16:30:00+02:00", value: 20.67}
+        - {datetime: "2026-09-23T18:30:00+02:00", value: 21.15}
+        - {datetime: "2026-09-23T20:30:00+02:00", value: 20.71}
+        - {datetime: "2026-09-23T22:30:00+02:00", value: 21.03}
+        - {datetime: "2026-09-24T00:30:00+02:00", value: 22.03}
+        - {datetime: "2026-09-24T02:30:00+02:00", value: 22.03}
+        - {datetime: "2026-09-24T04:30:00+02:00", value: 21.55}
+        - {datetime: "2026-09-24T06:30:00+02:00", value: 22.12}
+        - {datetime: "2026-09-24T08:30:00+02:00", value: 22.83}
+        - {datetime: "2026-09-24T10:30:00+02:00", value: 22.37}
+        - {datetime: "2026-09-24T12:30:00+02:00", value: 21.99}
+        - {datetime: "2026-09-24T14:30:00+02:00", value: 22.68}
+        - {datetime: "2026-09-24T16:30:00+02:00", value: 22.92}
+        - {datetime: "2026-09-24T18:30:00+02:00", value: 22.13}
+        - {datetime: "2026-09-24T20:30:00+02:00", value: 21.96}
+        - {datetime: "2026-09-24T22:30:00+02:00", value: 22.58}
+        - {datetime: "2026-09-25T00:30:00+02:00", value: 22.30}
+        - {datetime: "2026-09-25T02:30:00+02:00", value: 21.38}
+        - {datetime: "2026-09-25T04:30:00+02:00", value: 21.45}
+        - {datetime: "2026-09-25T06:30:00+02:00", value: 21.83}
+        - {datetime: "2026-09-25T08:30:00+02:00", value: 21.08}
+        - {datetime: "2026-09-25T10:30:00+02:00", value: 20.25}
+        - {datetime: "2026-09-25T12:30:00+02:00", value: 20.53}
+        - {datetime: "2026-09-25T14:30:00+02:00", value: 20.55}
+        - {datetime: "2026-09-25T16:30:00+02:00", value: 19.50}
+        - {datetime: "2026-09-25T18:30:00+02:00", value: 18.95}
+        - {datetime: "2026-09-25T20:30:00+02:00", value: 19.34}
+        - {datetime: "2026-09-25T22:30:00+02:00", value: 18.96}
+        - {datetime: "2026-09-26T00:30:00+02:00", value: 17.85}
+        - {datetime: "2026-09-26T02:30:00+02:00", value: 17.70}
+        - {datetime: "2026-09-26T04:30:00+02:00", value: 18.05}
+        - {datetime: "2026-09-26T06:30:00+02:00", value: 17.34}
+        - {datetime: "2026-09-26T08:30:00+02:00", value: 16.44}
+        - {datetime: "2026-09-26T10:30:00+02:00", value: 16.69}
+        - {datetime: "2026-09-26T12:30:00+02:00", value: 16.89}
+        - {datetime: "2026-09-26T14:30:00+02:00", value: 16.01}
+        - {datetime: "2026-09-26T16:30:00+02:00", value: 15.52}
+        - {datetime: "2026-09-26T18:30:00+02:00", value: 16.08}
+        - {datetime: "2026-09-26T20:30:00+02:00", value: 16.05}
+        - {datetime: "2026-09-26T22:30:00+02:00", value: 15.20}
+        - {datetime: "2026-09-27T00:30:00+02:00", value: 15.24}
+        - {datetime: "2026-09-27T02:30:00+02:00", value: 15.95}
+        - {datetime: "2026-09-27T04:30:00+02:00", value: 15.69}
+        - {datetime: "2026-09-27T06:30:00+02:00", value: 15.09}
+        - {datetime: "2026-09-27T08:30:00+02:00", value: 15.63}
+        - {datetime: "2026-09-27T10:30:00+02:00", value: 16.30}
+        - {datetime: "2026-09-27T12:30:00+02:00", value: 15.88}
+        - {datetime: "2026-09-27T14:30:00+02:00", value: 15.69}
+        - {datetime: "2026-09-27T16:30:00+02:00", value: 16.61}
+        - {datetime: "2026-09-27T18:30:00+02:00", value: 17.08}
+        - {datetime: "2026-09-27T20:30:00+02:00", value: 16.62}
+        - {datetime: "2026-09-27T22:30:00+02:00", value: 16.91}
+        - {datetime: "2026-09-28T00:30:00+02:00", value: 17.98}
+        - {datetime: "2026-09-28T02:30:00+02:00", value: 18.15}
+        - {datetime: "2026-09-28T04:30:00+02:00", value: 17.80}
+        - {datetime: "2026-09-28T06:30:00+02:00", value: 18.52}
+        - {datetime: "2026-09-28T08:30:00+02:00", value: 19.50}
+        - {datetime: "2026-09-28T10:30:00+02:00", value: 19.35}
+        - {datetime: "2026-09-28T12:30:00+02:00", value: 19.23}
+        - {datetime: "2026-09-28T14:30:00+02:00", value: 20.22}
+        - {datetime: "2026-09-28T16:30:00+02:00", value: 20.88}
+        - {datetime: "2026-09-28T18:30:00+02:00", value: 20.49}
+        - {datetime: "2026-09-28T20:30:00+02:00", value: 20.67}
+        - {datetime: "2026-09-28T22:30:00+02:00", value: 21.70}
+        - {datetime: "2026-09-29T00:30:00+02:00", value: 21.90}
+        - {datetime: "2026-09-29T02:30:00+02:00", value: 21.40}
+        - {datetime: "2026-09-29T04:30:00+02:00", value: 21.85}
+        - {datetime: "2026-09-29T06:30:00+02:00", value: 22.68}
+        - {datetime: "2026-09-29T08:30:00+02:00", value: 22.39}
+        - {datetime: "2026-09-29T10:30:00+02:00", value: 21.92}
+        - {datetime: "2026-09-29T12:30:00+02:00", value: 22.55}
+        - {datetime: "2026-09-29T14:30:00+02:00", value: 22.98}
+        - {datetime: "2026-09-29T16:30:00+02:00", value: 22.29}
+        - {datetime: "2026-09-29T18:30:00+02:00", value: 21.99}
+        - {datetime: "2026-09-29T20:30:00+02:00", value: 22.63}
+        - {datetime: "2026-09-29T22:30:00+02:00", value: 22.55}
+        - {datetime: "2026-09-30T00:30:00+02:00", value: 21.64}
+        - {datetime: "2026-09-30T02:30:00+02:00", value: 21.58}
+        - {datetime: "2026-09-30T04:30:00+02:00", value: 22.06}
+        - {datetime: "2026-09-30T06:30:00+02:00", value: 21.48}
+        - {datetime: "2026-09-30T08:30:00+02:00", value: 20.56}
+
+flat:
+  name: A value that did not change
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities:
+      - id: sensor.living_room_temperature
+  data:
+    entities:
+      - id: sensor.living_room_temperature
+        missing: false
+        name: Living room temperature
+        state: "21.0"
+        display_state: "21.0"
+        unit: "°C"
+        icon: thermometer
+        device_class: temperature
+        available: true
+        last_changed: "2026-09-30T08:25:00+02:00"
+        points:
+        - {datetime: "2026-09-29T08:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T09:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T10:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T11:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T12:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T13:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T14:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T15:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T16:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T17:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T18:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T19:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T20:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T21:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T22:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-29T23:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T00:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T01:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T02:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T03:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T04:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T05:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T06:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T07:30:00+02:00", value: 21.00}
+        - {datetime: "2026-09-30T08:30:00+02:00", value: 21.00}
+
+no-history:
+  name: An entity without recorded history
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities:
+      - id: sensor.living_room_temperature
+  data:
+    entities:
+      - id: sensor.living_room_temperature
+        missing: false
+        name: Living room temperature
+        state: "21.7"
+        display_state: "21.7"
+        unit: "°C"
+        icon: thermometer
+        device_class: temperature
+        available: true
+        last_changed: "2026-09-30T08:25:00+02:00"
+        points: []
+
+missing-sources:
+  name: No entity chosen yet
+  language: en
+  now: "2026-09-30T08:30:00+02:00"
+  options: {}
+  sources:
+    entities: []
+  data:
+    entities: []

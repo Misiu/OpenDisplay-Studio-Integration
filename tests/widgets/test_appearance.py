@@ -1,4 +1,4 @@
-"""The appearance options every built-in widget offers: frame and inverted colors."""
+"""The appearance options every built-in widget offers: frame, colors and corners."""
 
 from __future__ import annotations
 
@@ -13,6 +13,8 @@ from tests.widgets.test_catalog import widget_folder
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
 SIZE = (400, 240)
 CORNER = 4
 STATE = "missing-sources"
@@ -61,8 +63,25 @@ async def test_a_widget_without_a_frame_draws_nothing_at_its_edge(
 
 
 @pytest.mark.parametrize("widget_id", sorted(DEFAULT_REGISTRY.widget_types))
-async def test_inverted_colors_are_white_on_black(widget_id: str) -> None:
-    image = await _picture(widget_id, invert=True)
+async def test_color_and_background_are_the_ones_picked(widget_id: str) -> None:
+    image = await _picture(widget_id, color="yellow", background="red")
+
+    assert image.getpixel((SIZE[0] // 2, 4)) == RED
+    assert _edge_colors(image) == {YELLOW}
+
+
+@pytest.mark.parametrize("widget_id", sorted(DEFAULT_REGISTRY.widget_types))
+async def test_white_on_black_is_just_a_pair_of_colors(widget_id: str) -> None:
+    image = await _picture(widget_id, color="white", background="black")
 
     assert image.getpixel((SIZE[0] // 2, 4)) == BLACK
     assert WHITE in _colors(image)
+
+
+@pytest.mark.parametrize("widget_id", sorted(DEFAULT_REGISTRY.widget_types))
+async def test_the_corner_radius_rounds_the_frame(widget_id: str) -> None:
+    square = await _picture(widget_id, cornerRadius=0)
+    round_ = await _picture(widget_id, cornerRadius=16)
+
+    assert square.getpixel((0, 0)) == BLACK
+    assert round_.getpixel((0, 0)) == WHITE

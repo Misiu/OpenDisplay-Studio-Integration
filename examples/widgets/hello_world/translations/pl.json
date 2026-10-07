@@ -1,11 +1,13 @@
 {
+  "sections.appearance": "Wygląd",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.cornerRadius": "Zaokrąglenie rogów",
+  "options.color": "Kolor",
+  "options.background": "Tło",
   "name": "Witaj świecie",
   "description": "Wita wybraną osobę. Najmniejszy użyteczny pakiet widżetu.",
   "categories.Examples": "Przykłady",
   "sections.content": "Zawartość",
   "options.who": "Kogo powitać",
-  "runtime.greeting": "Witaj, {who}!",
-  "sections.appearance": "Wygląd",
-  "options.showFrame": "Pokaż ramkę i tło",
-  "options.invert": "Odwróć kolory"
+  "runtime.greeting": "Witaj, {who}!"
 }

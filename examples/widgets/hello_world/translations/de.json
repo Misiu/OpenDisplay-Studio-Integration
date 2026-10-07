@@ -1,11 +1,13 @@
 {
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.cornerRadius": "Eckenradius",
+  "options.color": "Farbe",
+  "options.background": "Hintergrund",
   "name": "Hallo Welt",
   "description": "Begrüßt jemanden. Das kleinste nützliche Widget-Paket.",
   "categories.Examples": "Beispiele",
   "sections.content": "Inhalt",
   "options.who": "Wen begrüßen",
-  "runtime.greeting": "Hallo, {who}!",
-  "sections.appearance": "Darstellung",
-  "options.showFrame": "Rahmen und Hintergrund zeigen",
-  "options.invert": "Farben umkehren"
+  "runtime.greeting": "Hallo, {who}!"
 }

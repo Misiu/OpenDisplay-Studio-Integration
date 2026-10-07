@@ -58,10 +58,12 @@ A renderer does not place elements by hand. It describes a **layout** — rows, 
 grids and stacks of text, icons and shapes — and `compose` lets
 [`odl-layout`](https://github.com/OpenDisplay/odl-layout) turn it into ODL elements
 inside the widget's box. `Look` carries the two options every widget offers,
-**Show frame** and **Invert colors** (`showFrame` and `invert` in the
+**Show frame**, **Corner radius**, **Color** and **Background** (`showFrame`,
+`cornerRadius`, `color` and `background` in the
 `appearance` section): `look.frame()` is the frame and white background (or nothing),
 `look.text()`, `look.icon()` and `look.divider()` draw in black, or in white when the
-colors are inverted. Declare the two options in `widget.yml` like the example does.
+color and background are picked. Declare the four options in `widget.yml` like the
+example does.
 
 `translations/en.json` holds the labels the panel shows (`name`, `description`,
 `options.<key>`, `sections.<section>`, `sources.<key>`) and the strings the renderer
@@ -112,7 +114,7 @@ calendar's label and colour. Use the SDK instead of measuring by hand:
 | Helper | Use |
 |---|---|
 | `compose(context, layout)` | Lay a row/column/grid/stack description out inside the box with `odl-layout`. |
-| `Look.of(context)` | The ink and paper colors, and the frame, from the `invert` and `showFrame` options. |
+| `Look.of(context)` | The ink and paper colors, the frame and its corner radius, from the appearance options. |
 | `text`, `icon`, `rectangle`, `line`, `progress_bar` | Build single ODL elements. |
 | `fit_text(value, width, maximum)` | Largest font size at which `value` fits, measured with the renderer's own fonts. |
 | `truncate(value, width, size)` | Cut with an ellipsis. |
@@ -191,7 +193,7 @@ try another situation; a mistake in the renderer is shown as the error it raised
 Leave out `--root` to preview the built-in widgets.
 
 `python -m scripts.widget_devkit render --out pictures` writes a PNG per state and
-size instead (`--invert` and `--no-frame` set the two appearance options).
+size instead (`--option showFrame=false` sets an option; repeat it for more).
 
 ## 6. Test it
 

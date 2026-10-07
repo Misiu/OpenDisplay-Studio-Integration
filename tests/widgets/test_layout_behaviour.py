@@ -77,3 +77,110 @@ def test_the_place_of_an_event_is_drawn_below_its_title() -> None:
     title = next(e for e in elements if e.get("value") == "Swimming")
     place = next(e for e in elements if e.get("value") == "City pool")
     assert place["y"] > title["y"]
+
+
+SQUARE_TILE = (240, 240)
+STRIP_TILE = (400, 120)
+TALL_TILE = (160, 400)
+
+
+def _text(elements: list[dict[str, Any]], value: str) -> dict[str, Any]:
+    return next(e for e in elements if e["type"] == "text" and e["value"] == value)
+
+
+def _separators(elements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        e
+        for e in elements
+        if e["type"] == "line"
+        or (e["type"] == "rectangle" and e["x_start"] == e["x_end"])
+    ]
+
+
+@pytest.mark.parametrize("size", [SQUARE_TILE, TALL_TILE])
+def test_the_unit_is_below_the_value_in_a_square_or_tall_tile(
+    size: tuple[int, int],
+) -> None:
+    elements = _elements("sensor-card", "single", size)
+
+    value, unit = _text(elements, "21.4"), _text(elements, "°C")
+
+    assert unit["y"] > value["y"] + value["size"]
+    assert unit["size"] < value["size"]
+
+
+def test_the_unit_is_beside_the_value_in_a_strip() -> None:
+    elements = _elements("sensor-card", "single", STRIP_TILE)
+
+    value, unit = _text(elements, "21.4"), _text(elements, "°C")
+
+    assert unit["x"] >= value["x"] + text_width("21.4", value["size"])
+    assert unit["size"] < value["size"]
+
+
+def test_a_strip_has_a_vertical_line_and_a_tall_tile_a_horizontal_one() -> None:
+    strip = _separators(_elements("sensor-card", "single", STRIP_TILE))
+    tall = _separators(_elements("sensor-card", "single", TALL_TILE))
+    square = _separators(_elements("sensor-card", "single", SQUARE_TILE))
+
+    assert [e["type"] for e in strip] == ["rectangle"]
+    assert [e["type"] for e in tall] == ["line"]
+    assert square == []
+
+
+@pytest.mark.parametrize("size", [STRIP_TILE, TALL_TILE])
+def test_the_separator_can_be_turned_off(size: tuple[int, int]) -> None:
+    elements = _elements("sensor-card", "single", size, showSeparator=False)
+
+    assert _separators(elements) == []
+
+
+def test_the_icon_is_larger_than_the_name_beside_it_in_a_strip() -> None:
+    elements = _elements("sensor-card", "single", STRIP_TILE)
+
+    icon = next(e for e in elements if e["type"] == "icon")
+    name = _text(elements, "Kitchen temperature")
+
+    assert icon["size"] > 2 * name["size"]
+
+
+def test_the_separator_lies_between_the_icon_and_the_text_of_a_strip() -> None:
+    elements = _elements("sensor-card", "single", STRIP_TILE)
+
+    icon = next(e for e in elements if e["type"] == "icon")
+    separator = _separators(elements)[0]
+    name = _text(elements, "Kitchen temperature")
+    height = separator["y_end"] - separator["y_start"]
+
+    assert height < STRIP_TILE[1] * 0.7
+    assert icon["x"] < separator["x_start"] < name["x"]
+
+
+def test_the_name_and_value_of_a_strip_are_centered_beside_the_line() -> None:
+    elements = _elements("sensor-card", "single", STRIP_TILE)
+
+    name = _text(elements, "Kitchen temperature")
+    value = _text(elements, "21.4")
+    unit = _text(elements, "°C")
+    name_middle = name["x"] + text_width(name["value"], name["size"]) / 2
+    shown = value["x"] + (unit["x"] + text_width("°C", unit["size"]) - value["x"]) / 2
+
+    assert abs(name_middle - shown) <= 4
+    assert unit["x"] - (value["x"] + text_width("21.4", value["size"])) >= 8
+
+
+def test_alignment_moves_the_text_of_a_square_tile() -> None:
+    left = _elements("sensor-card", "single", SQUARE_TILE, align="left")
+    right = _elements("sensor-card", "single", SQUARE_TILE, align="right")
+
+    assert _text(right, "21.4")["x"] > _text(left, "21.4")["x"]
+
+
+def test_a_calendar_color_equal_to_the_background_is_drawn_in_the_ink() -> None:
+    elements = _elements(
+        "agenda", "two-children", (400, 240), color="yellow", background="red"
+    )
+
+    swimming = _text(elements, "Ola")
+
+    assert swimming["color"] == "yellow"

@@ -56,11 +56,13 @@ class DataProvider(ABC):
 def built_in_providers() -> dict[str, DataProvider]:
     """Return the shared providers by name."""
     from .calendar_events import CalendarEventsProvider  # noqa: PLC0415
+    from .entity_history import EntityHistoryProvider  # noqa: PLC0415
     from .entity_state import EntityStateProvider  # noqa: PLC0415
     from .weather_forecast import WeatherForecastProvider  # noqa: PLC0415
 
     providers: list[DataProvider] = [
         EntityStateProvider(),
+        EntityHistoryProvider(),
         CalendarEventsProvider(),
         WeatherForecastProvider(),
     ]

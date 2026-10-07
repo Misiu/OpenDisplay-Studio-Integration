@@ -1,4 +1,9 @@
 {
+  "sections.appearance": "Darstellung",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.cornerRadius": "Eckenradius",
+  "options.color": "Farbe",
+  "options.background": "Hintergrund",
   "name": "Wetter",
   "description": "Aktuelle Bedingungen und eine Tages- oder Stundenvorhersage einer Wetter-Entität.",
   "categories.Weather": "Wetter",
@@ -31,8 +36,5 @@
   "runtime.condition.snowy-rainy": "Schneeregen",
   "runtime.condition.sunny": "Sonnig",
   "runtime.condition.windy": "Windig",
-  "runtime.condition.windy-variant": "Windig",
-  "sections.appearance": "Darstellung",
-  "options.showFrame": "Rahmen und Hintergrund zeigen",
-  "options.invert": "Farben umkehren"
+  "runtime.condition.windy-variant": "Windig"
 }
