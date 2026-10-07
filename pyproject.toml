@@ -15,6 +15,9 @@ branch = true
 target-version = "py314"
 line-length = 88
 
+[tool.ruff.format]
+line-ending = "lf"
+
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [

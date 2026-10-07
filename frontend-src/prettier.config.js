@@ -3,5 +3,6 @@
 // templates stay readable instead of hugging tags (`</button\n>`).
 export default {
   trailingComma: "es5",
+  endOfLine: "lf",
   htmlWhitespaceSensitivity: "ignore",
 };
