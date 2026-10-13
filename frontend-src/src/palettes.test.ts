@@ -20,7 +20,6 @@ describe("the palettes", () => {
       "BWY",
       "GRAYSCALE_16",
       "GRAYSCALE_4",
-      "GRAYSCALE_8",
       "MONO",
       "SEVEN_COLOR",
     ]);
@@ -39,7 +38,6 @@ describe("the palettes", () => {
       spectra6: 6,
       seven_color: 7,
       grayscale4: 4,
-      grayscale8: 8,
       grayscale16: 16,
     });
   });

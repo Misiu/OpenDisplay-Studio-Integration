@@ -5,6 +5,7 @@ import {
   createWidgetItem,
   moveLayer,
   removeItem,
+  setDisplayBackground,
   setDisplayNumber,
   setItemExpression,
   setItemNumber,
@@ -36,10 +37,24 @@ describe("setItemNumber", () => {
     });
   });
 
-  it("resizes widgets within the remaining working area", () => {
+  it("sizes a widget beyond the canvas, up to twice the display", () => {
     const dashboard = dashboardWith([widgetItem("w")]);
+
+    setItemNumber(dashboard, "w", "width", 600, primitiveDefinitions);
+    expect(itemBounds(dashboard.items[0]).width).toBe(600);
+
     setItemNumber(dashboard, "w", "width", 5000, primitiveDefinitions);
-    expect(itemBounds(dashboard.items[0]).width).toBe(390);
+    expect(itemBounds(dashboard.items[0]).width).toBe(800);
+  });
+
+  it("sizes a rectangle beyond the canvas, up to twice the display", () => {
+    const dashboard = dashboardWith([rectangleItem("r")]);
+
+    setItemNumber(dashboard, "r", "height", 500, primitiveDefinitions);
+    expect(itemBounds(dashboard.items[0]).height).toBe(500);
+
+    setItemNumber(dashboard, "r", "height", 5000, primitiveDefinitions);
+    expect(itemBounds(dashboard.items[0]).height).toBe(600);
   });
 
   it("changes the circle radius and the QR module size", () => {
@@ -62,6 +77,22 @@ describe("display settings", () => {
     const dashboard = dashboardWith();
     setDisplayNumber(dashboard, "padding", 9999);
     expect(dashboard.display.padding).toBe(149);
+  });
+
+  it("sets the background to a color of the palette", () => {
+    const dashboard = dashboardWith([], { palette: "bwr" });
+
+    setDisplayBackground(dashboard, "red");
+
+    expect(dashboard.display.background).toBe("red");
+  });
+
+  it("ignores a background the palette does not have", () => {
+    const dashboard = dashboardWith([], { palette: "bw" });
+
+    setDisplayBackground(dashboard, "red");
+
+    expect(dashboard.display.background).toBe("white");
   });
 
   it("keeps the device when only the padding changes", () => {
@@ -117,9 +148,9 @@ describe("creating items from the catalog", () => {
       kind: "widget",
       widget: {
         type: "sensor-card",
-        version: "1.0.0",
+        version: "2.0.0",
         sources: { entities: [] },
-        options: { layout: "single", showIcon: true, decimals: "auto" },
+        options: { showIcon: true, decimals: "auto" },
       },
     });
     expect(item.frame).toEqual({ x: 60, y: 70, width: 280, height: 160 });

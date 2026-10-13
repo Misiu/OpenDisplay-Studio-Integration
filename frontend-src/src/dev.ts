@@ -85,12 +85,39 @@ const primitiveOf = (
   return Object.assign(primitive, values);
 };
 
+/** `?icons` draws the real Material Design icons, for the pictures of the README. */
+const REAL_ICONS = new URLSearchParams(location.search).has("icons");
+
+/** The SVG path of an icon name such as `mdi:align-left`, from the `@mdi/js` package. */
+const materialIconPath = async (name: string): Promise<string | undefined> => {
+  const icons: Record<string, unknown> = { ...(await import("@mdi/js")) };
+  const exportName = name
+    .replace(/^mdi:/, "mdi-")
+    .replace(/-(\w)/g, (_match, letter: string) => letter.toUpperCase());
+  const path = icons[exportName];
+  return typeof path === "string" ? path : undefined;
+};
+
+const drawMaterialIcon = async (element: HTMLElement): Promise<void> => {
+  const path = await materialIconPath(element.getAttribute("icon") ?? "");
+  if (!path) return;
+  element.innerHTML = [
+    '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor">',
+    `<path d="${path}"></path>`,
+    "</svg>",
+  ].join("");
+};
+
 if (!customElements.get("ha-icon")) {
   customElements.define(
     "ha-icon",
     class extends HTMLElement {
       connectedCallback(): void {
         this.setAttribute("aria-hidden", "true");
+        if (REAL_ICONS) {
+          void drawMaterialIcon(this);
+          return;
+        }
         this.textContent =
           (
             {
@@ -979,7 +1006,7 @@ const hass: HomeAssistant = {
     if (message.type === "opendisplay_studio/bootstrap") {
       await new Promise((resolve) => window.setTimeout(resolve, 60));
       return {
-        version: "3.0.6",
+        version: "0.1.0",
         dashboards,
         widgets: installedWidgets(hass.language),
         widgetErrors: widgetErrors(),

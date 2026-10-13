@@ -21,7 +21,12 @@ interface ResizeBoundsOptions {
   deltaY: number;
   minimumWidth: number;
   minimumHeight: number;
+  /** Where the edges may go. */
   area: ItemBounds;
+  /** The grid snapping counts from here; the corner of `area` unless given. */
+  snapOrigin?: { x: number; y: number };
+  /** The most the item may measure; unlimited unless given. */
+  maximumSize?: { width: number; height: number };
   preserveAspect: boolean;
   snapSize: number;
   snapEnabled: boolean;
@@ -98,10 +103,14 @@ export const resizeBounds = ({
   minimumWidth,
   minimumHeight,
   area,
+  snapOrigin = area,
+  maximumSize,
   preserveAspect,
   snapSize,
   snapEnabled,
 }: ResizeBoundsOptions): ItemBounds => {
+  const widest = maximumSize?.width ?? Infinity;
+  const tallest = maximumSize?.height ?? Infinity;
   const areaRight = area.x + area.width;
   const areaBottom = area.y + area.height;
   const originalLeft = bounds.x;
@@ -117,29 +126,55 @@ export const resizeBounds = ({
   let bottom = originalBottom;
 
   if (handle.includes("w")) {
-    left = snapped(originalLeft + deltaX, snapSize, area.x, snapEnabled);
+    left = snapped(originalLeft + deltaX, snapSize, snapOrigin.x, snapEnabled);
   }
   if (handle.includes("e")) {
-    right = snapped(originalRight + deltaX, snapSize, area.x, snapEnabled);
+    right = snapped(
+      originalRight + deltaX,
+      snapSize,
+      snapOrigin.x,
+      snapEnabled
+    );
   }
   if (handle.includes("n")) {
-    top = snapped(originalTop + deltaY, snapSize, area.y, snapEnabled);
+    top = snapped(originalTop + deltaY, snapSize, snapOrigin.y, snapEnabled);
   }
   if (handle.includes("s")) {
-    bottom = snapped(originalBottom + deltaY, snapSize, area.y, snapEnabled);
+    bottom = snapped(
+      originalBottom + deltaY,
+      snapSize,
+      snapOrigin.y,
+      snapEnabled
+    );
   }
 
   if (handle.includes("w")) {
-    left = clamp(left, area.x, originalRight - minimumWidth);
+    left = clamp(
+      left,
+      Math.max(area.x, originalRight - widest),
+      originalRight - minimumWidth
+    );
   }
   if (handle.includes("e")) {
-    right = clamp(right, originalLeft + minimumWidth, areaRight);
+    right = clamp(
+      right,
+      originalLeft + minimumWidth,
+      Math.min(areaRight, originalLeft + widest)
+    );
   }
   if (handle.includes("n")) {
-    top = clamp(top, area.y, originalBottom - minimumHeight);
+    top = clamp(
+      top,
+      Math.max(area.y, originalBottom - tallest),
+      originalBottom - minimumHeight
+    );
   }
   if (handle.includes("s")) {
-    bottom = clamp(bottom, originalTop + minimumHeight, areaBottom);
+    bottom = clamp(
+      bottom,
+      originalTop + minimumHeight,
+      Math.min(areaBottom, originalTop + tallest)
+    );
   }
 
   if (!preserveAspect) {
@@ -172,24 +207,30 @@ export const resizeBounds = ({
     width = height * aspect;
   }
 
-  const maximumWidth = maximumExtent({
-    startHandle: handle.includes("w"),
-    endHandle: handle.includes("e"),
-    originalStart: originalLeft,
-    originalEnd: originalRight,
-    originalCenter: originalCenterX,
-    areaStart: area.x,
-    areaEnd: areaRight,
-  });
-  const maximumHeight = maximumExtent({
-    startHandle: handle.includes("n"),
-    endHandle: handle.includes("s"),
-    originalStart: originalTop,
-    originalEnd: originalBottom,
-    originalCenter: originalCenterY,
-    areaStart: area.y,
-    areaEnd: areaBottom,
-  });
+  const maximumWidth = Math.min(
+    widest,
+    maximumExtent({
+      startHandle: handle.includes("w"),
+      endHandle: handle.includes("e"),
+      originalStart: originalLeft,
+      originalEnd: originalRight,
+      originalCenter: originalCenterX,
+      areaStart: area.x,
+      areaEnd: areaRight,
+    })
+  );
+  const maximumHeight = Math.min(
+    tallest,
+    maximumExtent({
+      startHandle: handle.includes("n"),
+      endHandle: handle.includes("s"),
+      originalStart: originalTop,
+      originalEnd: originalBottom,
+      originalCenter: originalCenterY,
+      areaStart: area.y,
+      areaEnd: areaBottom,
+    })
+  );
   const minimumScale = Math.max(
     minimumWidth / Math.max(1, bounds.width),
     minimumHeight / Math.max(1, bounds.height)

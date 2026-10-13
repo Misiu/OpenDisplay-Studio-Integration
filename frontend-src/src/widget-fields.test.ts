@@ -21,18 +21,35 @@ if (!calendars || !weather) {
 }
 
 describe("the built-in widget definitions", () => {
-  it("are the three catalog widgets, with the labels of their language", () => {
+  it("are the catalog widgets, with the labels of their language", () => {
     const english = loadWidgetDefinitions("en").map((widget) => widget.name);
     const polish = loadWidgetDefinitions("pl").map((widget) => widget.name);
 
-    expect(english).toEqual(["Agenda", "Sensor card", "Weather"]);
-    expect(polish).toEqual(["Agenda", "Karta czujnika", "Pogoda"]);
+    expect(english).toEqual([
+      "Agenda",
+      "Calendar",
+      "School timetable",
+      "Sensor card",
+      "Sensor chart",
+      "Sensor list",
+      "Weather",
+    ]);
+    expect(polish).toEqual([
+      "Agenda",
+      "Kalendarz",
+      "Plan lekcji",
+      "Karta czujnika",
+      "Wykres czujnika",
+      "Lista czujników",
+      "Pogoda",
+    ]);
   });
 
   it("group their options in sections a person can read", () => {
     expect(agenda.options.map((section) => section.section)).toEqual([
       "Content",
       "Presentation",
+      "Appearance",
     ]);
   });
 });

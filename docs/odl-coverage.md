@@ -114,9 +114,11 @@ arrives, and to move an element smoothly during a drag.
 
 The palettes are the color schemes of the `opendisplay` library (`epaper_dithering.ColorScheme`),
 in `palettes.json`: `MONO` (`bw`), `BWR`, `BWY`, `BWRY`, `BWGBRY` and `BWGBRY_SPLIT`
-(`spectra6`), `SEVEN_COLOR`, `GRAYSCALE_4`, `GRAYSCALE_8` and `GRAYSCALE_16`. The renderer
+(`spectra6`), `SEVEN_COLOR`, `GRAYSCALE_4` and `GRAYSCALE_16`: every scheme a device can be configured with (firmware values
+0-8). The library's `GRAYSCALE_8` is not offered, because no firmware has it. The renderer
 names black, white, red, yellow, blue and green; the gray levels (`#555555`, ...) and orange
 (`#ff8000`) are stored as hex, because the renderer would draw an unknown name white.
 `tests/test_palettes.py` renders every color through the real renderer and compares it with
-the hex the panel draws. The accent follows the palette: yellow for `BWY` and `BWRY`, black for
-the grays, red otherwise.
+the hex the panel draws. The accent is the one the `opendisplay` integration passes to the renderer for the scheme
+(`ColorScheme.accent_color`): yellow for `BWY`, black for `MONO` and the grays, red otherwise;
+the renderer draws any accent but yellow as red.

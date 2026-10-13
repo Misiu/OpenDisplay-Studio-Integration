@@ -6,7 +6,6 @@ export type PaletteId =
   | "spectra6"
   | "seven_color"
   | "grayscale4"
-  | "grayscale8"
   | "grayscale16";
 export type DashboardStatus = "draft" | "ready";
 

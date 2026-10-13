@@ -11,6 +11,7 @@ import {
   primitiveBounds,
   translatePrimitive,
 } from "./primitive-shape";
+import { sizeLimit } from "./primitives";
 import { scaleChildren } from "./scale";
 import type {
   Dashboard,
@@ -121,15 +122,18 @@ export const outwardRange = (
 ): [number, number] => [start - size, start + length];
 
 /**
- * Where an item may be resized: the working area, widened to hold an item that already
- * hangs out of it. Text hangs out when its anchor is changed, and resizing or moving it
- * must not snap it back in at the first touch.
+ * Where an edge may go when an item is resized: as far as an element may reach beyond the
+ * display, which is a whole side's length before it and after it, and never less than
+ * where the item already is. Moving is as free, so resizing must not stop at the canvas.
  */
-const reachableArea = (area: ItemBounds, bounds: ItemBounds): ItemBounds => {
-  const left = Math.min(area.x, bounds.x);
-  const top = Math.min(area.y, bounds.y);
-  const right = Math.max(area.x + area.width, bounds.x + bounds.width);
-  const bottom = Math.max(area.y + area.height, bounds.y + bounds.height);
+const reachableArea = (
+  display: Dashboard["display"],
+  bounds: ItemBounds
+): ItemBounds => {
+  const left = Math.min(-display.width, bounds.x);
+  const top = Math.min(-display.height, bounds.y);
+  const right = Math.max(2 * display.width, bounds.x + bounds.width);
+  const bottom = Math.max(2 * display.height, bounds.y + bounds.height);
   return { x: left, y: top, width: right - left, height: bottom - top };
 };
 
@@ -204,7 +208,12 @@ export const resizeItem = (
     deltaY: dy,
     minimumWidth,
     minimumHeight,
-    area: reachableArea(workingArea(dashboard), before),
+    area: reachableArea(dashboard.display, before),
+    snapOrigin: workingArea(dashboard),
+    maximumSize: {
+      width: sizeLimit(dashboard.display.width),
+      height: sizeLimit(dashboard.display.height),
+    },
     preserveAspect: shiftKey || intrinsicAspect,
     snapSize: dashboard.display.snapSize,
     snapEnabled: options.snapEnabled,

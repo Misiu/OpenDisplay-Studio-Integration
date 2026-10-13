@@ -96,7 +96,10 @@ def _current(
     icon_size = clamp(min(head.height, head.width // 3), 20, 96)
     temperature = _degrees(data["temperature"], data["temperature_unit"])
     temperature_size = fit_text(
-        temperature, head.width - icon_size - 8, clamp(head.height, 12, 96)
+        temperature,
+        head.width - icon_size - 8,
+        clamp(head.height, 12, 96),
+        steady_digits=True,
     )
     children: list[dict[str, Any]] = [
         {
@@ -139,7 +142,10 @@ def _shared_size(values: list[str], slots: list[Box], line: Box) -> int:
     """Return one size at which every value fits its column, and the line's height."""
     ceiling = clamp(line.height - 2, MIN_TEXT, 28)
     width = min(slot.width for slot in slots) - 4
-    return min(fit_text(value, width, ceiling, MIN_TEXT) for value in values)
+    return min(
+        fit_text(value, width, ceiling, MIN_TEXT, steady_digits=True)
+        for value in values
+    )
 
 
 def _forecast_columns(

@@ -156,6 +156,105 @@ describe("resizeItem", () => {
     expect(bounds.width).toBeGreaterThan(41);
   });
 
+  describe("beyond the canvas", () => {
+    // The display is 400 x 300: an element may reach one side's length beyond each edge.
+    const resizeFrom = (
+      item: ReturnType<typeof rectangleItem>,
+      handle: string
+    ) => {
+      resizeItem(
+        item,
+        handle as never,
+        handle.includes("w") || handle.includes("n") ? -2000 : 2000,
+        handle.includes("n") ? -2000 : 2000,
+        false,
+        dashboardWith(),
+        {
+          snapEnabled: false,
+        }
+      );
+      return itemBounds(item);
+    };
+
+    it("lets a rectangle grow past the right and bottom edge of the canvas", () => {
+      const bounds = resize(rectangleItem(), "se", 600, 500);
+
+      expect(bounds.x + bounds.width).toBeGreaterThan(400);
+      expect(bounds.y + bounds.height).toBeGreaterThan(300);
+    });
+
+    it("lets it grow as far as the display can reach and no farther", () => {
+      const bounds = resizeFrom(rectangleItem(), "se");
+
+      expect(bounds.x + bounds.width).toBe(800);
+      expect(bounds.y + bounds.height).toBe(600);
+    });
+
+    it("lets it grow past the left and top edge, up to one length before it", () => {
+      const bounds = resizeFrom(rectangleItem(), "nw");
+
+      expect(bounds.x).toBe(-400);
+      expect(bounds.y).toBe(-300);
+    });
+
+    it("never makes an element larger than twice the display", () => {
+      const wide = rectangleItem("wide", {
+        x_start: -400,
+        y_start: -300,
+        x_end: -380,
+        y_end: -280,
+      });
+      resizeItem(wide, "se", 5000, 5000, false, dashboardWith(), {
+        snapEnabled: false,
+      });
+
+      expect(itemBounds(wide)).toMatchObject({ width: 800, height: 600 });
+    });
+
+    it("works the same for a widget", () => {
+      const widget = widgetItem();
+      widget.frame = { x: 10, y: 10, width: 200, height: 100 };
+      resizeItem(widget, "se", 900, 900, false, dashboardWith(), {
+        snapEnabled: false,
+      });
+
+      expect(widget.frame.x + widget.frame.width).toBe(800);
+      expect(widget.frame.y + widget.frame.height).toBe(600);
+    });
+
+    it("works the same for an image", () => {
+      const image = primitiveItem("dlimg", "image", {
+        x: 0,
+        y: 0,
+        xsize: 100,
+        ysize: 80,
+      });
+      resizeItem(image, "se", 900, 900, false, dashboardWith(), {
+        snapEnabled: false,
+      });
+
+      expect(itemBounds(image).width).toBeGreaterThan(400);
+      expect(itemBounds(image).height).toBeGreaterThan(300);
+    });
+
+    it("snaps to the grid of the working area while resizing beyond the canvas", () => {
+      const dashboard = dashboardWith([], { padding: 20, snapSize: 10 });
+      const rectangle = rectangleItem("r", {
+        x_start: 30,
+        y_start: 30,
+        x_end: 129,
+        y_end: 79,
+      });
+      resizeItem(rectangle, "se", 523, 0, false, dashboard, {
+        snapEnabled: true,
+      });
+
+      expect(
+        (itemBounds(rectangle).x + itemBounds(rectangle).width - 20) % 10
+      ).toBe(0);
+    });
+  });
+
   it("never shrinks a widget below its minimum size", () => {
     const widget = widgetItem();
     resizeItem(widget, "se", -500, -500, false, dashboardWith(), {

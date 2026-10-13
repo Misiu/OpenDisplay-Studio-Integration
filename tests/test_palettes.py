@@ -27,7 +27,10 @@ PALETTES = json.loads(
     ).read_text(encoding="utf-8")
 )
 
-# The color schemes of the `opendisplay` library (`epaper_dithering.ColorScheme`).
+# The color schemes a device can be configured with (`ColorScheme` of
+# opendisplay_structs.h, values 0-8) and their number of colors. `GRAYSCALE_8` is not
+# among them: the library keeps it for panels outside OpenDisplay and says never to send
+# it to a device.
 OPENDISPLAY_SCHEMES = {
     "MONO": 2,
     "BWR": 3,
@@ -37,7 +40,6 @@ OPENDISPLAY_SCHEMES = {
     "BWGBRY_SPLIT": 6,
     "SEVEN_COLOR": 7,
     "GRAYSCALE_4": 4,
-    "GRAYSCALE_8": 8,
     "GRAYSCALE_16": 16,
 }
 
@@ -47,6 +49,27 @@ def test_every_color_scheme_of_opendisplay_has_a_palette_of_its_size() -> None:
     for scheme, size in OPENDISPLAY_SCHEMES.items():
         palette = PALETTE_BY_COLOR_SCHEME[scheme]
         assert len(PALETTE_COLORS[palette]) == size, scheme
+
+
+# The accent `ColorScheme.accent_color` gives the renderer, as the opendisplay
+# integration passes it.
+OPENDISPLAY_ACCENTS = {
+    "MONO": "black",
+    "BWR": "red",
+    "BWY": "yellow",
+    "BWRY": "red",
+    "BWGBRY": "red",
+    "BWGBRY_SPLIT": "red",
+    "SEVEN_COLOR": "red",
+    "GRAYSCALE_4": "black",
+    "GRAYSCALE_16": "black",
+}
+
+
+def test_every_palette_has_the_accent_the_opendisplay_integration_uses() -> None:
+    for scheme, accent in OPENDISPLAY_ACCENTS.items():
+        palette = PALETTE_BY_COLOR_SCHEME[scheme]
+        assert accent_color_for_palette(palette) == accent, scheme
 
 
 @pytest.mark.parametrize("palette", sorted(PALETTES))

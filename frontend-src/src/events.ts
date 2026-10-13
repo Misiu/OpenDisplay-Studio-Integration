@@ -1,3 +1,4 @@
+import type { AlignTarget } from "./align-selection";
 import type { CommandId } from "./commands";
 import type { DashboardFormData, DashboardSource } from "./dashboards";
 import type { Dashboard, StudioItem, WidgetPick } from "./types";
@@ -82,6 +83,7 @@ export interface OdsEventMap {
   "help-open": undefined;
   "shortcuts-close": undefined;
   "snap-toggle": undefined;
+  "align-target-change": { target: AlignTarget };
   /** Run a registered command; `itemId` when it is about a particular item. */
   command: { id: CommandId; itemId?: string };
   "viewport-change": Viewport;
@@ -102,6 +104,7 @@ export interface OdsEventMap {
     key: "padding" | "snapSize";
     value: number;
   };
+  "display-background-change": { color: string };
   "widget-options-change": { value: Record<string, unknown> };
   "widget-picks-change": { sourceKey: string; picks: WidgetPick[] };
   "widgets-reload": undefined;

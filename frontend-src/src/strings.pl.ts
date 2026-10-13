@@ -35,6 +35,22 @@ export const polish: StringsOverride = {
     show: "Pokaż",
     lock: "Zablokuj",
     unlock: "Odblokuj",
+    bringToFront: "Przenieś na wierzch",
+    sendToBack: "Przenieś pod spód",
+    moveUp: "Przenieś wyżej",
+    moveDown: "Przenieś niżej",
+    align: {
+      left: "Wyrównaj do lewej",
+      center: "Wyśrodkuj w poziomie",
+      right: "Wyrównaj do prawej",
+      top: "Wyrównaj do góry",
+      middle: "Wyśrodkuj w pionie",
+      bottom: "Wyrównaj do dołu",
+    },
+    distribute: {
+      horizontal: "Rozmieść równo w poziomie",
+      vertical: "Rozmieść równo w pionie",
+    },
   },
 
   app: {
@@ -196,7 +212,6 @@ export const polish: StringsOverride = {
     resize: "Zmień szerokość inspektora",
     dashboard: "Dashboard",
     dashboardHint: "Ustawienia obszaru roboczego",
-    workingArea: "Obszar roboczy",
     workingAreaHelp:
       "Margines wyznacza bezpieczny obszar edycji. Przyciąganie wyrównuje ruch i zmianę rozmiaru do pełnych pikseli.",
     layout: "Układ",
@@ -244,6 +259,9 @@ export const polish: StringsOverride = {
       `${count} ${plural(count, "warstwa", "warstwy", "warstw")}`,
     padding: (pixels: number): string => `Margines ${pixels}px`,
     snap: (pixels: number): string => `Przyciąganie ${pixels}px`,
+    arrangeLabel: "Układ zaznaczenia",
+    alignToSelection: "Wyrównuj do zaznaczenia",
+    alignToParent: "Wyrównuj do kontenera lub obszaru roboczego",
     grid: "Siatka",
     gridTitle: "Pokaż punkty siatki przyciągania",
     pan: "Przesuwanie",
@@ -395,7 +413,6 @@ export const polish: StringsOverride = {
       "Spectra 6 · czarny / biały / czerwony / żółty / niebieski / zielony",
     seven_color: "Siedem kolorów · Spectra 6 i pomarańczowy",
     grayscale4: "Skala szarości · 4 poziomy",
-    grayscale8: "Skala szarości · 8 poziomów",
     grayscale16: "Skala szarości · 16 poziomów",
   },
 };

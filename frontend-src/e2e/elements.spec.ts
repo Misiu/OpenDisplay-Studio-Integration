@@ -340,24 +340,21 @@ test.describe("ods-inspector", () => {
     }
   });
 
-  test("offers only the working area; the display is edited in the gallery", async ({
+  test("offers the appearance of the dashboard; the display is edited in the gallery", async ({
     page,
   }) => {
     await openKitchen(page);
 
     await expect(
-      page.getByRole("spinbutton", { name: "Padding" })
+      page.getByRole("button", { name: "Background", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("spinbutton", { name: "Outer padding" })
     ).toBeVisible();
     await expect(
       page.getByRole("spinbutton", { name: "Snap size" })
     ).toBeVisible();
-    for (const name of [
-      "Width",
-      "Height",
-      "Palette",
-      "Background",
-      "Rotation",
-    ]) {
+    for (const name of ["Width", "Height", "Palette", "Rotation"]) {
       await expect(page.getByLabel(name, { exact: true })).toHaveCount(0);
     }
     await expect(

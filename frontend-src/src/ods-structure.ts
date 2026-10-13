@@ -15,7 +15,7 @@ import {
   itemContext,
   type CommandId,
 } from "./commands";
-import { inputValue, isMacPlatform } from "./dom";
+import { inputValue, isAdditiveClick, isMacPlatform } from "./dom";
 import { emit } from "./events";
 import { itemIcon } from "./item-labels";
 import { trackPointerGesture } from "./pointer-gesture";
@@ -522,7 +522,10 @@ export class OdsStructure extends LitElement {
 
   private selectRow(event: MouseEvent, item: StudioItem): void {
     if (this.suppressClick) return;
-    emit(this, "item-select", { itemId: item.id, additive: event.shiftKey });
+    emit(this, "item-select", {
+      itemId: item.id,
+      additive: isAdditiveClick(event),
+    });
   }
 
   private selectRoot(): void {

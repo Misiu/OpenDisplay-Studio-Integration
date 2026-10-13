@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from .compiler import CompiledDashboard, async_compile_dashboard
 from .const import DOMAIN, LOGGER
+from .debug_grid import expand_debug_grids
 from .flatten import translate_elements
 from .palette import accent_color_for_palette
 from .rendering import OdlRenderResult
@@ -61,11 +62,10 @@ async def async_render_dashboard(
     compiled = await async_compile_dashboard(hass, dashboard, data.widgets)
     display = dashboard["display"]
     margin = preview_margin(display) if with_margin else 0
-    elements = (
-        translate_elements(compiled.elements, margin, margin)
-        if margin
-        else compiled.elements
-    )
+    elements = compiled.elements
+    if margin:
+        explicit = expand_debug_grids(elements, display["width"], display["height"])
+        elements = translate_elements(explicit, margin, margin)
     picture = await data.renderer.async_render(
         width=display["width"] + 2 * margin,
         height=display["height"] + 2 * margin,

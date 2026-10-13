@@ -19,6 +19,7 @@ import {
   workingArea,
 } from "./geometry";
 import { createId } from "./ids";
+import { PALETTE_COLORS } from "./palettes";
 import { clamp } from "./math";
 import { definitionFor, primitiveValuesFromForm } from "./item-fields";
 import {
@@ -26,7 +27,7 @@ import {
   reanchored,
   type CornerPrimitive,
 } from "./primitive-shape";
-import { createPrimitive, resolveLimit } from "./primitives";
+import { createPrimitive, resolveLimit, sizeLimit } from "./primitives";
 import type {
   Dashboard,
   ItemBounds,
@@ -81,7 +82,8 @@ const setBoxField = (
   box: { x: number; y: number; width: number; height: number },
   key: string,
   value: number,
-  area: ItemBounds
+  area: ItemBounds,
+  display: Dashboard["display"]
 ): void => {
   if (key === "x") {
     box.x = clamp(value, ...outwardRange(area.x, area.width, box.width));
@@ -89,19 +91,16 @@ const setBoxField = (
   if (key === "y") {
     box.y = clamp(value, ...outwardRange(area.y, area.height, box.height));
   }
-  if (key === "width") {
-    box.width = clamp(value, 1, Math.max(1, area.x + area.width - box.x));
-  }
-  if (key === "height") {
-    box.height = clamp(value, 1, Math.max(1, area.y + area.height - box.y));
-  }
+  if (key === "width") box.width = clamp(value, 1, sizeLimit(display.width));
+  if (key === "height") box.height = clamp(value, 1, sizeLimit(display.height));
 };
 
 const setBoxPrimitiveField = (
   primitive: CornerPrimitive,
   key: string,
   value: number,
-  area: ItemBounds
+  area: ItemBounds,
+  display: Dashboard["display"]
 ): void => {
   if (key === "x") {
     const width = primitive.x_end - primitive.x_start;
@@ -123,14 +122,14 @@ const setBoxPrimitiveField = (
     primitive.x_end = clamp(
       primitive.x_start + Math.max(1, value) - 1,
       primitive.x_start + 1,
-      Math.max(primitive.x_start + 1, area.x + area.width - 1)
+      primitive.x_start + sizeLimit(display.width) - 1
     );
   }
   if (key === "height") {
     primitive.y_end = clamp(
       primitive.y_start + Math.max(1, value) - 1,
       primitive.y_start + 1,
-      Math.max(primitive.y_start + 1, area.y + area.height - 1)
+      primitive.y_start + sizeLimit(display.height) - 1
     );
   }
 };
@@ -146,12 +145,12 @@ const applyNumber = (
   const area = workingArea(dashboard);
   if (item.kind === "widget") {
     if (key === "padding") item.layout.padding = clamp(value, 0, 128);
-    setBoxField(item.frame, key, value, area);
+    setBoxField(item.frame, key, value, area, dashboard.display);
     return;
   }
   if (item.kind === "container") {
     const before = { width: item.width, height: item.height };
-    setBoxField(item, key, value, area);
+    setBoxField(item, key, value, area, dashboard.display);
     if (item.grouped) {
       scaleChildren(
         item,
@@ -165,7 +164,7 @@ const applyNumber = (
   }
   const primitive = item.primitive;
   if (isBoxPrimitive(primitive)) {
-    setBoxPrimitiveField(primitive, key, value, area);
+    setBoxPrimitiveField(primitive, key, value, area, dashboard.display);
   } else {
     setStoredField(
       item,
@@ -234,6 +233,16 @@ export const setDisplayNumber = (
   }
   if (key === "snapSize") dashboard.display.snapSize = clamp(value, 1, 256);
   constrainAll(dashboard);
+};
+
+/** Sets the background to a color of the display's palette; any other value is ignored. */
+export const setDisplayBackground = (
+  dashboard: Dashboard,
+  color: string
+): void => {
+  if (PALETTE_COLORS[dashboard.display.palette].includes(color)) {
+    dashboard.display.background = color;
+  }
 };
 
 export const toggleItemState = (

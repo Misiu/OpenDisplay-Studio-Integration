@@ -2,8 +2,14 @@ import { css, html, LitElement, nothing, type TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import { styleMap } from "lit/directives/style-map.js";
-import { commandById, commandView, type CommandId } from "./commands";
-import { isMacPlatform, isTypingTarget } from "./dom";
+import type { AlignTarget } from "./align-selection";
+import {
+  commandById,
+  commandView,
+  type CommandContext,
+  type CommandId,
+} from "./commands";
+import { isAdditiveClick, isMacPlatform, isTypingTarget } from "./dom";
 import { emit, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import {
@@ -83,6 +89,26 @@ const percentBox = (
   height: `${(box.height / display.height) * 100}%`,
 });
 
+/** The commands of the arrange bar, in the order the bar shows them. */
+const ALIGN_COMMANDS: CommandId[] = [
+  "align-left",
+  "align-center",
+  "align-right",
+  "align-top",
+  "align-middle",
+  "align-bottom",
+];
+const DISTRIBUTE_COMMANDS: CommandId[] = [
+  "distribute-horizontal",
+  "distribute-vertical",
+];
+const ORDER_COMMANDS: CommandId[] = [
+  "bring-to-front",
+  "move-up",
+  "move-down",
+  "send-to-back",
+];
+
 /**
  * The canvas: the rendered PNG, an interaction overlay drawn from the backend's
  * bounds, and the viewport.
@@ -99,7 +125,7 @@ export class OdsCanvas extends LitElement {
         min-width: 0;
         min-height: 0;
         display: grid;
-        grid-template-rows: 42px minmax(0, 1fr);
+        grid-template-rows: 42px 40px minmax(0, 1fr);
         background: var(--primary-background-color, #f4f6f8);
         color: var(--studio-text);
         overflow: hidden;
@@ -111,7 +137,8 @@ export class OdsCanvas extends LitElement {
         gap: 2px;
         margin-inline-start: auto;
       }
-      .history-controls button {
+      .history-controls button,
+      .arrange-bar button {
         width: 30px;
         height: 30px;
         display: grid;
@@ -122,15 +149,18 @@ export class OdsCanvas extends LitElement {
         background: transparent;
         color: var(--studio-muted);
       }
-      .history-controls button:hover:not(:disabled) {
+      .history-controls button:hover:not(:disabled),
+      .arrange-bar button:hover:not(:disabled) {
         color: var(--studio-text);
         background: var(--secondary-background-color, #eef1f4);
       }
-      .history-controls button:disabled {
+      .history-controls button:disabled,
+      .arrange-bar button:disabled {
         cursor: default;
         opacity: 0.32;
       }
-      .history-controls ha-icon {
+      .history-controls ha-icon,
+      .arrange-bar ha-icon {
         width: 16px;
         height: 16px;
         --mdc-icon-size: 16px;
@@ -159,6 +189,26 @@ export class OdsCanvas extends LitElement {
         font-size: 10px;
         line-height: 1;
         white-space: nowrap;
+      }
+      .arrange-bar {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 0 16px;
+        overflow-x: auto;
+        border-bottom: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+      }
+      .arrange-bar .separator {
+        flex: none;
+        width: 1px;
+        height: 18px;
+        margin: 0 8px;
+        background: var(--studio-border);
+      }
+      .arrange-bar button[aria-pressed="true"] {
+        color: var(--studio-accent);
+        background: var(--studio-accent-soft);
       }
       .tool-toggle ha-icon {
         width: 14px;
@@ -553,6 +603,8 @@ export class OdsCanvas extends LitElement {
   /** The group whose children can be selected one by one. */
   @property() public enteredGroupId = "";
   @property({ type: Boolean }) public snapEnabled = true;
+  /** What aligning and spacing out measure against. */
+  @property() public alignTo: AlignTarget = "selection";
   /** True while a catalog drag is in progress, so the stage shows it accepts a drop. */
   @property({ type: Boolean }) public acceptingDrop = false;
   @property({ type: Boolean }) public canUndo = false;
@@ -793,7 +845,7 @@ export class OdsCanvas extends LitElement {
     event.stopPropagation();
     event.preventDefault();
     const target = this.targetOf(pressed);
-    if (event.shiftKey) {
+    if (isAdditiveClick(event)) {
       emit(this, "item-select", { itemId: target.id, additive: true });
       return;
     }
@@ -1535,12 +1587,12 @@ export class OdsCanvas extends LitElement {
 
   // --- the canvas ------------------------------------------------------------
 
-  private renderHistoryButton(id: "undo" | "redo"): TemplateResult {
-    const view = commandView(
-      commandById(id),
-      { canUndo: this.canUndo, canRedo: this.canRedo },
-      isMacPlatform()
-    );
+  /** An icon button for a command, dimmed when the context says it cannot run. */
+  private renderCommandButton(
+    id: CommandId,
+    context: CommandContext
+  ): TemplateResult {
+    const view = commandView(commandById(id), context, isMacPlatform());
     return html`
       <button
         aria-label=${view.label}
@@ -1550,6 +1602,75 @@ export class OdsCanvas extends LitElement {
       >
         <ha-icon icon=${view.icon}></ha-icon>
       </button>
+    `;
+  }
+
+  private get historyContext(): CommandContext {
+    return { canUndo: this.canUndo, canRedo: this.canRedo };
+  }
+
+  /** What the commands of the arrange bar decide on: the selection and what it aligns to. */
+  private get arrangeContext(): CommandContext {
+    const targets = this.selectedItemIds.flatMap(
+      (id) => findItem(this.dashboard.items, id) ?? []
+    );
+    return {
+      canUndo: false,
+      canRedo: false,
+      targets,
+      alignTo: this.alignTo,
+    };
+  }
+
+  private renderAlignTargetButton(
+    target: AlignTarget,
+    icon: string,
+    label: string
+  ): TemplateResult {
+    return html`
+      <button
+        aria-label=${label}
+        title=${label}
+        aria-pressed=${this.alignTo === target}
+        @click=${() => emit(this, "align-target-change", { target })}
+      >
+        <ha-icon icon=${icon}></ha-icon>
+      </button>
+    `;
+  }
+
+  private renderArrangeGroup(ids: CommandId[]): TemplateResult {
+    const context = this.arrangeContext;
+    return html`
+      ${ids.map((id) => this.renderCommandButton(id, context))}
+    `;
+  }
+
+  /** Align, space out and stack the selection; each button lights up when enough is selected. */
+  private renderArrangeBar(): TemplateResult {
+    return html`
+      <div
+        class="arrange-bar"
+        role="toolbar"
+        aria-label=${strings.canvas.arrangeLabel}
+      >
+        ${this.renderArrangeGroup(ALIGN_COMMANDS)}
+        <span class="separator"></span>
+        ${this.renderArrangeGroup(DISTRIBUTE_COMMANDS)}
+        <span class="separator"></span>
+        ${this.renderAlignTargetButton(
+          "selection",
+          "mdi:selection",
+          strings.canvas.alignToSelection
+        )}
+        ${this.renderAlignTargetButton(
+          "parent",
+          "mdi:crop-free",
+          strings.canvas.alignToParent
+        )}
+        <span class="separator"></span>
+        ${this.renderArrangeGroup(ORDER_COMMANDS)}
+      </div>
     `;
   }
 
@@ -1574,8 +1695,8 @@ export class OdsCanvas extends LitElement {
         <span>${strings.canvas.layers(countItems(dashboard.items))}</span>
         <span>${strings.canvas.padding(padding)}</span>
         <div class="history-controls">
-          ${this.renderHistoryButton("undo")}
-          ${this.renderHistoryButton("redo")}
+          ${this.renderCommandButton("undo", this.historyContext)}
+          ${this.renderCommandButton("redo", this.historyContext)}
         </div>
         <button
           class=${panClasses}
@@ -1714,7 +1835,7 @@ export class OdsCanvas extends LitElement {
   protected render(): TemplateResult {
     return html`
       <main class="workspace">
-        ${this.renderToolbar()} ${this.renderStage()}
+        ${this.renderToolbar()} ${this.renderArrangeBar()} ${this.renderStage()}
       </main>
     `;
   }

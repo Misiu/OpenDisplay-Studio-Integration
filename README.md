@@ -141,11 +141,77 @@ one undo step and is not saved until you save.
 | Mouse wheel | Pan |
 | <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + wheel | Zoom toward the pointer |
 | Middle button, or <kbd>Space</kbd> + drag | Move the view |
-| <kbd>Shift</kbd> + click | Add to the selection |
+| <kbd>Shift</kbd> or <kbd>Ctrl</kbd> / <kbd>⌘</kbd> + click | Add to the selection; click an element again to take it out |
 | Arrow keys, <kbd>Shift</kbd> + arrow | Nudge by 1 px, or by the grid size |
 | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Group the selection |
 | <kbd>Ctrl</kbd> + <kbd>D</kbd>, <kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>V</kbd> | Duplicate, copy and paste |
 | <kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd> | Undo and redo |
+
+## Commands
+
+Every action is one command, and the toolbar buttons, the keyboard, the two context menus
+and the shortcut list (<kbd>?</kbd>) all use the same ones.
+
+| Command | Shortcut | What it does |
+|---|---|---|
+| Undo, Redo | <kbd>Ctrl</kbd> + <kbd>Z</kbd>, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> or <kbd>Ctrl</kbd> + <kbd>Y</kbd> | Step through the history; every change is one step |
+| Copy, Cut, Paste | <kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>X</kbd> / <kbd>V</kbd> | Use the clipboard of the panel |
+| Paste here | context menu of the empty canvas | Paste at the place that was clicked |
+| Duplicate | <kbd>Ctrl</kbd> + <kbd>D</kbd> | Copy the selection 8 px to the side |
+| Delete | <kbd>Del</kbd> | Remove the selection, after asking |
+| Rename | <kbd>F2</kbd> | Rename a layer |
+| Hide, Lock | tree buttons, context menu of the tree | Hide an element from the picture, or keep it from being moved |
+| Make group, Ungroup | <kbd>Ctrl</kbd> + <kbd>G</kbd>, <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> | Turn the selection into a group, or dissolve one |
+| Enter group, Exit group | <kbd>Enter</kbd> or double-click, <kbd>Esc</kbd> | Select the members of a group one by one |
+| Bring to front, Move up, Move down, Send to back | arrange bar, context menus | Change the drawing order; the last element is on top |
+| Align | arrange bar | Put the edges or the middles of the selection on one line |
+| Space out evenly | arrange bar | Make the gaps between the elements equal |
+| Nudge | arrow keys, <kbd>Shift</kbd> + arrow keys | Move by 1 px, or by the snap size |
+| Save | <kbd>Ctrl</kbd> + <kbd>S</kbd> | Save the dashboard |
+| Design / Code | <kbd>Ctrl</kbd> + <kbd>E</kbd> | Switch between the canvas and the generated YAML |
+| Zoom in, out, reset | <kbd>Ctrl</kbd> + <kbd>=</kbd> / <kbd>-</kbd> / <kbd>0</kbd> | Change the view |
+| Keyboard shortcuts | <kbd>?</kbd> | List every shortcut |
+
+### Context menus
+
+Right-click an element on the canvas or a layer in the tree. The two menus offer what
+suits where you are: the canvas menu has Duplicate and the drawing order, the tree menu
+has Move up and down, Hide, Lock and Rename. Commands that cannot run now are dimmed.
+
+<p align="center">
+  <img src="docs/images/context-menu-canvas.webp" alt="The context menu of an element on the canvas" width="260">
+  &nbsp;&nbsp;
+  <img src="docs/images/context-menu-tree.webp" alt="The context menu of a layer in the tree" width="260">
+</p>
+
+### Align and space out
+
+The bar under the canvas toolbar is always there, and a button is dimmed until enough is
+selected. Select elements with <kbd>Shift</kbd> or <kbd>Ctrl</kbd> / <kbd>⌘</kbd> and a
+click (the second click takes an element out again), or drag a box around them.
+
+<p align="center">
+  <img src="docs/images/arrange-bar.webp" alt="The arrange bar with three elements selected" width="900">
+</p>
+
+| Buttons | Need | Result |
+|---|---|---|
+| Align left edges, centers horizontally, right edges | 2 elements | The edges or the middles sit on one vertical line, that of the selection's box |
+| Align top edges, centers vertically, bottom edges | 2 elements | The same on a horizontal line |
+| Space out evenly, left to right / top to bottom | 3 elements | The outer two stay; the ones between are moved so that every gap is equal |
+| Bring to front, Move up, Move down, Send to back | 1 element | Change the drawing order |
+
+Two buttons beside them choose what the others measure against. **Align to the selection**
+is the default. **Align to the container or the working area** puts each element against the
+box it lives in, so one element is enough to align, and two are enough to space out: the first
+goes to one edge of the box, the last to the other.
+
+For three entity widgets of one size: select them, centre them vertically, then space them
+out left to right. For a grid of nine, do that for each row, then align and space out each
+column. Locked elements and elements whose position comes from an expression are left where
+they are, and an element inside a selected container moves with it. Gaps that cannot be
+equal in whole pixels differ by at most one. Every press is one undo step, and a press that
+would change nothing does not add one.
 
 Press <kbd>?</kbd> in the editor for the complete list. Elements may hang out of
 the canvas; the renderer simply draws what is in view.

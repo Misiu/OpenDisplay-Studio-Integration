@@ -19,6 +19,14 @@ export const isTypingTarget = (event: Event): boolean =>
 export const isMacPlatform = (): boolean =>
   /Mac|iPhone|iPad/.test(navigator.platform);
 
+/**
+ * Whether a click adds to the selection, or takes away what it already holds: Shift, or
+ * Ctrl (⌘ on a Mac). The first click selects an item, the second one deselects it.
+ */
+export const isAdditiveClick = (
+  event: Pick<MouseEvent, "shiftKey" | "ctrlKey" | "metaKey">
+): boolean => event.shiftKey || event.ctrlKey || event.metaKey;
+
 /** Saves `text` as a file the browser downloads. */
 export const downloadFile = (
   fileName: string,

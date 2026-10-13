@@ -20,6 +20,22 @@ export const german: StringsOverride = {
     show: "Einblenden",
     lock: "Sperren",
     unlock: "Entsperren",
+    bringToFront: "In den Vordergrund",
+    sendToBack: "In den Hintergrund",
+    moveUp: "Eine Ebene nach vorn",
+    moveDown: "Eine Ebene nach hinten",
+    align: {
+      left: "Linksbündig ausrichten",
+      center: "Horizontal zentrieren",
+      right: "Rechtsbündig ausrichten",
+      top: "Oben ausrichten",
+      middle: "Vertikal zentrieren",
+      bottom: "Unten ausrichten",
+    },
+    distribute: {
+      horizontal: "Gleichmäßig verteilen, von links nach rechts",
+      vertical: "Gleichmäßig verteilen, von oben nach unten",
+    },
   },
 
   app: {
@@ -183,7 +199,6 @@ export const german: StringsOverride = {
     resize: "Breite des Inspektors ändern",
     dashboard: "Dashboard",
     dashboardHint: "Einstellungen des Arbeitsbereichs",
-    workingArea: "Arbeitsbereich",
     workingAreaHelp:
       "Der Rand legt den sicheren Bearbeitungsbereich fest. Das Einrasten richtet Bewegen und Skalieren an ganzen Pixeln aus.",
     layout: "Layout",
@@ -231,6 +246,9 @@ export const german: StringsOverride = {
       `${count} ${count === 1 ? "Ebene" : "Ebenen"}`,
     padding: (pixels: number): string => `Rand ${pixels}px`,
     snap: (pixels: number): string => `Einrasten ${pixels}px`,
+    arrangeLabel: "Auswahl anordnen",
+    alignToSelection: "An der Auswahl ausrichten",
+    alignToParent: "Am Container oder Arbeitsbereich ausrichten",
     grid: "Raster",
     gridTitle: "Punkte des Einrastrasters zeigen",
     pan: "Verschieben",
@@ -382,7 +400,6 @@ export const german: StringsOverride = {
     spectra6: "Spectra 6 · Schwarz / Weiß / Rot / Gelb / Blau / Grün",
     seven_color: "Sieben Farben · Spectra 6 und Orange",
     grayscale4: "Graustufen · 4 Stufen",
-    grayscale8: "Graustufen · 8 Stufen",
     grayscale16: "Graustufen · 16 Stufen",
   },
 };

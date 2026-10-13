@@ -3,7 +3,7 @@
     "schemes": [
       "MONO"
     ],
-    "accent": "red",
+    "accent": "black",
     "colors": [
       {
         "id": "black",
@@ -67,7 +67,7 @@
     "schemes": [
       "BWRY"
     ],
-    "accent": "yellow",
+    "accent": "red",
     "colors": [
       {
         "id": "black",
@@ -193,54 +193,6 @@
         "id": "gray2",
         "value": "#aaaaaa",
         "hex": "#aaaaaa"
-      },
-      {
-        "id": "white",
-        "value": "white",
-        "hex": "#ffffff"
-      }
-    ]
-  },
-  "grayscale8": {
-    "schemes": [
-      "GRAYSCALE_8"
-    ],
-    "accent": "black",
-    "colors": [
-      {
-        "id": "black",
-        "value": "black",
-        "hex": "#000000"
-      },
-      {
-        "id": "gray1",
-        "value": "#242424",
-        "hex": "#242424"
-      },
-      {
-        "id": "gray2",
-        "value": "#494949",
-        "hex": "#494949"
-      },
-      {
-        "id": "gray3",
-        "value": "#6d6d6d",
-        "hex": "#6d6d6d"
-      },
-      {
-        "id": "gray4",
-        "value": "#929292",
-        "hex": "#929292"
-      },
-      {
-        "id": "gray5",
-        "value": "#b6b6b6",
-        "hex": "#b6b6b6"
-      },
-      {
-        "id": "gray6",
-        "value": "#dbdbdb",
-        "hex": "#dbdbdb"
       },
       {
         "id": "white",

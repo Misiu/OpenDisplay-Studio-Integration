@@ -36,7 +36,7 @@ from .widgets.options import option_defaults
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
 
-RENDER_BUDGET_SECONDS: Final = 0.1
+RENDER_BUDGET_SECONDS: Final = 0.2
 PLACEHOLDER_SIZE: Final = 14
 
 
@@ -182,7 +182,8 @@ def _render_widget(
     started = monotonic()
     rendered = job.package.renderer(context)
     if monotonic() - started > RENDER_BUDGET_SECONDS:
-        warnings.append(f"{item['name']}: rendering took longer than 100 ms")
+        budget_ms = round(RENDER_BUDGET_SECONDS * 1000)
+        warnings.append(f"{item['name']}: rendering took longer than {budget_ms} ms")
     kept = [element for element in rendered if _inside(box, element)]
     if len(kept) != len(rendered):
         warnings.append(f"{item['name']}: elements outside the frame were dropped")

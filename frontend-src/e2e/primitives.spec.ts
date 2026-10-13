@@ -242,7 +242,7 @@ test("offers every primitive in the library, in the backend's order", async ({
   ]);
   await expect(
     page.locator("ods-library .catalog-section .catalog-item")
-  ).toHaveCount(16 + 1 + 3);
+  ).toHaveCount(16 + 1 + 7);
 });
 
 for (const primitive of PRIMITIVES) {

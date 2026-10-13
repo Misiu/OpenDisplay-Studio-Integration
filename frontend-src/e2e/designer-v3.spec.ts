@@ -1039,3 +1039,29 @@ declare global {
     };
   }
 }
+
+test("sets the dashboard background from the colors of the display", async ({
+  page,
+}) => {
+  await expect(
+    page.getByText("Appearance", { exact: true }).first()
+  ).toBeVisible();
+  const background = page.getByRole("button", {
+    name: "Background",
+    exact: true,
+  });
+  await expect(background).toContainText("White");
+
+  await background.click();
+  const picker = page.locator("ods-color-picker");
+  // The Kitchen display shows black, white and red, so nothing else can be chosen.
+  await expect(picker.getByRole("button")).toHaveText([
+    "Black",
+    "White",
+    "Red",
+  ]);
+  await picker.getByRole("button", { name: "Red", exact: true }).click();
+
+  await expect(picker).toHaveCount(0);
+  await expect(background).toContainText("Red");
+});

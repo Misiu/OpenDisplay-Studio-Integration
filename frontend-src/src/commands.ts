@@ -1,3 +1,9 @@
+import {
+  MINIMUM_ITEMS,
+  type AlignEdge,
+  type AlignTarget,
+  type DistributeAxis,
+} from "./align-selection";
 import { strings } from "./strings";
 import type { StudioItem } from "./types";
 
@@ -29,6 +35,8 @@ export type CommandId =
   | "send-to-back"
   | "move-up"
   | "move-down"
+  | `align-${AlignEdge}`
+  | `distribute-${DistributeAxis}`
   | "rename"
   | "save"
   | "toggle-code"
@@ -55,6 +63,8 @@ export interface CommandContext {
   /** Whether the item is a group that can be entered, and whether one is entered now. */
   canEnter?: boolean;
   entered?: boolean;
+  /** What aligning and spacing out measure against: the selection, or the parent. */
+  alignTo?: AlignTarget;
   /** Whether something is on the clipboard. */
   canPaste?: boolean;
   /** Whether the dashboard has unsaved changes. */
@@ -78,6 +88,8 @@ export interface CommandActions {
   pasteHere(): void;
   duplicate(itemIds: string[]): void;
   arrange(itemIds: string[], how: "front" | "back" | "up" | "down"): void;
+  align(itemIds: string[], edge: AlignEdge): void;
+  distribute(itemIds: string[], direction: DistributeAxis): void;
   rename(itemId: string): void;
   save(): void;
   toggleCode(): void;
@@ -139,6 +151,17 @@ const targetsOf = (context: CommandContext): StudioItem[] =>
 const hasTargets = (context: CommandContext): boolean =>
   targetsOf(context).length > 0;
 
+/** The items an alignment can move: a locked item stays where it is and is not counted. */
+const movableCount = (context: CommandContext): number =>
+  targetsOf(context).filter((item) => !item.locked).length;
+
+const canAlign = (context: CommandContext): boolean =>
+  movableCount(context) >= MINIMUM_ITEMS.align[context.alignTo ?? "selection"];
+
+const canDistribute = (context: CommandContext): boolean =>
+  movableCount(context) >=
+  MINIMUM_ITEMS.distribute[context.alignTo ?? "selection"];
+
 /** Runs `run` with the ids of the targets, unless there are none. */
 const withTargets = (
   context: CommandContext,
@@ -169,6 +192,48 @@ const nudgeCommands = (): Command[] =>
       run: (context, actions) =>
         withTargets(context, (ids) => actions.nudge(ids, direction, snapped)),
     }))
+  );
+
+const ALIGN_ICONS: Record<AlignEdge, string> = {
+  left: "mdi:align-horizontal-left",
+  center: "mdi:align-horizontal-center",
+  right: "mdi:align-horizontal-right",
+  top: "mdi:align-vertical-top",
+  middle: "mdi:align-vertical-center",
+  bottom: "mdi:align-vertical-bottom",
+};
+
+const DISTRIBUTE_ICONS: Record<DistributeAxis, string> = {
+  horizontal: "mdi:arrow-expand-horizontal",
+  vertical: "mdi:arrow-expand-vertical",
+};
+
+/** Put the edges or middles of the selection on one line. */
+const alignCommands = (): Command[] =>
+  (Object.keys(ALIGN_ICONS) as AlignEdge[]).map((edge): Command => ({
+    id: `align-${edge}`,
+    group: "arrange",
+    label: () => strings.commands.align[edge],
+    icon: () => ALIGN_ICONS[edge],
+    shortcuts: [],
+    isEnabled: canAlign,
+    run: (context, actions) =>
+      withTargets(context, (ids) => actions.align(ids, edge)),
+  }));
+
+/** Make the gaps between the items of the selection equal. */
+const distributeCommands = (): Command[] =>
+  (Object.keys(DISTRIBUTE_ICONS) as DistributeAxis[]).map(
+    (direction): Command => ({
+      id: `distribute-${direction}`,
+      group: "arrange",
+      label: () => strings.commands.distribute[direction],
+      icon: () => DISTRIBUTE_ICONS[direction],
+      shortcuts: [],
+      isEnabled: canDistribute,
+      run: (context, actions) =>
+        withTargets(context, (ids) => actions.distribute(ids, direction)),
+    })
   );
 
 export const COMMANDS: Command[] = [
@@ -324,6 +389,8 @@ export const COMMANDS: Command[] = [
     run: (context, actions) =>
       withTargets(context, (ids) => actions.arrange(ids, "down")),
   },
+  ...alignCommands(),
+  ...distributeCommands(),
   ...nudgeCommands(),
   {
     id: "group",

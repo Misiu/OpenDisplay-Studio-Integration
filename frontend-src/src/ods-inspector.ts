@@ -57,6 +57,14 @@ import "./ods-structure";
 
 const MIN_WIDTH = 340;
 const MAX_WIDTH = 560;
+/** The dashboard's background, edited like any other color of a primitive. */
+const BACKGROUND_FIELD: PrimitiveField = {
+  key: "background",
+  label: strings.fields.background,
+  shape: "color",
+  section: "appearance",
+};
+
 const DISPLAY_KEYS = ["padding", "snapSize"] as const;
 type DisplayKey = (typeof DISPLAY_KEYS)[number];
 
@@ -577,6 +585,28 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  private onDashboardBackgroundChange(
+    event: OdsEvent<"primitive-field-change">
+  ): void {
+    event.stopPropagation();
+    const color = event.detail.value;
+    if (typeof color === "string") {
+      emit(this, "display-background-change", { color });
+    }
+  }
+
+  private renderDashboardBackground(): TemplateResult {
+    return html`
+      <ods-value-field
+        .field=${BACKGROUND_FIELD}
+        .value=${this.dashboard.display.background}
+        .palette=${this.dashboard.display.palette}
+        .display=${this.dashboard.display}
+        @primitive-field-change=${this.onDashboardBackgroundChange}
+      ></ods-value-field>
+    `;
+  }
+
   private renderDashboardInspector(): TemplateResult {
     return html`
       ${this.renderHeader(
@@ -585,8 +615,9 @@ export class OdsInspector extends LitElement {
         "mdi:monitor"
       )}
       <details class="inspector-section" open>
-        <summary>${strings.inspector.workingArea}</summary>
+        <summary>${strings.inspector.appearance}</summary>
         <div class="section-body">
+          ${this.renderDashboardBackground()}
           <div class="field-grid">
             ${this.renderDisplayField(strings.fields.padding, "padding", 0, 1024)}
             ${this.renderDisplayField(strings.fields.snapSize, "snapSize", 1, 256)}

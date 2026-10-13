@@ -29,6 +29,8 @@ const actions = (): CommandActions => ({
   pasteHere: vi.fn(),
   duplicate: vi.fn(),
   arrange: vi.fn(),
+  align: vi.fn(),
+  distribute: vi.fn(),
   rename: vi.fn(),
   save: vi.fn(),
   toggleCode: vi.fn(),
@@ -308,5 +310,79 @@ describe("commandView", () => {
     expect(
       commandView(commandById("undo"), { ...idle, canUndo: true }).enabled
     ).toBe(true);
+  });
+});
+
+describe("the align and distribute commands", () => {
+  const items = (count: number, locked = 0) =>
+    Array.from({ length: count }, (_, index) => ({
+      ...rectangleItem(`r${index}`),
+      locked: index < locked,
+    }));
+
+  const enabled = (id: string, context: CommandContext) =>
+    commandView(commandById(id as never), context).enabled;
+
+  it("align needs two items against the selection and one against the parent", () => {
+    const one = { ...idle, targets: items(1), alignTo: "selection" as const };
+    const two = { ...idle, targets: items(2), alignTo: "selection" as const };
+
+    expect(enabled("align-left", one)).toBe(false);
+    expect(enabled("align-left", two)).toBe(true);
+    expect(enabled("align-left", { ...one, alignTo: "parent" })).toBe(true);
+    expect(
+      enabled("align-left", { ...idle, targets: [], alignTo: "parent" })
+    ).toBe(false);
+  });
+
+  it("distribute needs three items against the selection and two against the parent", () => {
+    const two = { ...idle, targets: items(2), alignTo: "selection" as const };
+    const three = { ...idle, targets: items(3), alignTo: "selection" as const };
+
+    expect(enabled("distribute-horizontal", two)).toBe(false);
+    expect(enabled("distribute-vertical", three)).toBe(true);
+    expect(
+      enabled("distribute-horizontal", { ...two, alignTo: "parent" })
+    ).toBe(true);
+    expect(
+      enabled("distribute-horizontal", {
+        ...idle,
+        targets: items(1),
+        alignTo: "parent",
+      })
+    ).toBe(false);
+  });
+
+  it("do not count a locked item", () => {
+    const context = {
+      ...idle,
+      targets: items(3, 1),
+      alignTo: "selection" as const,
+    };
+
+    expect(enabled("align-top", context)).toBe(true);
+    expect(enabled("distribute-horizontal", context)).toBe(false);
+  });
+
+  it("run the action with the ids of the selection", () => {
+    const calls = actions();
+    const targets = items(3);
+    const context = { ...idle, targets, alignTo: "selection" as const };
+
+    commandById("align-middle").run(context, calls);
+    commandById("distribute-vertical").run(context, calls);
+
+    expect(calls.align).toHaveBeenCalledWith(["r0", "r1", "r2"], "middle");
+    expect(calls.distribute).toHaveBeenCalledWith(
+      ["r0", "r1", "r2"],
+      "vertical"
+    );
+  });
+
+  it("is named in words, with an icon, in the tooltip", () => {
+    const view = commandView(commandById("align-left"), idle);
+
+    expect(view.label).toBe("Align left edges");
+    expect(view.icon).toBe("mdi:align-horizontal-left");
   });
 });

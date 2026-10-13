@@ -55,6 +55,7 @@ import {
   createWidgetItem,
   moveLayer,
   removeItem,
+  setDisplayBackground,
   setDisplayNumber,
   setItemExpression,
   setItemNumber,
@@ -97,6 +98,16 @@ import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
 import { strings } from "./strings";
 import { alignInParent } from "./align";
+import {
+  applyMoves,
+  planAlign,
+  planDistribute,
+  type AlignEdge,
+  type AlignTarget,
+  type ArrangeOptions,
+  type DistributeAxis,
+  type Move,
+} from "./align-selection";
 import * as api from "./studio-api";
 import { clamp } from "./math";
 import { baseStyles, chromeStyles } from "./studio-styles";
@@ -306,6 +317,7 @@ export class OdsApp extends LitElement {
   @state() private rightCollapsed = false;
   @state() private inspectorWidth = 350;
   @state() private snapEnabled = true;
+  @state() private alignTo: AlignTarget = "selection";
   @state() private viewport: Viewport = DEFAULT_VIEWPORT;
   @state() private newDashboardOpen = false;
   @state() private newDashboard = freshDashboard("en");
@@ -756,6 +768,8 @@ export class OdsApp extends LitElement {
     pasteHere: () => this.pasteHere(),
     duplicate: (itemIds) => this.duplicate(itemIds),
     arrange: (itemIds, how) => this.arrange(itemIds, how),
+    align: (itemIds, edge) => this.align(itemIds, edge),
+    distribute: (itemIds, direction) => this.distribute(itemIds, direction),
     rename: (itemId) => {
       this.renameRequestId = itemId;
     },
@@ -783,6 +797,7 @@ export class OdsApp extends LitElement {
       canRedo: this.redoCount > 0,
       item: primary,
       targets: chosen,
+      alignTo: this.alignTo,
       canGroup: dashboard ? canGroup(dashboard, ids) : false,
       canUngroup:
         dashboard && primary ? canUngroup(dashboard, primary.id) : false,
@@ -910,6 +925,38 @@ export class OdsApp extends LitElement {
       if (how === "back") sendToBack(next, itemIds);
       if (how === "up" || how === "down") stepItems(next, itemIds, how);
     });
+  }
+
+  private get arrangeOptions(): ArrangeOptions {
+    return {
+      target: this.alignTo,
+      measure: (item) => this.preview?.itemBounds[item.id],
+      movable: (item) => itemLocks(item, this.primitives).position.length === 0,
+    };
+  }
+
+  /** One undo step for the moves, unless there is nothing to move. */
+  private applyArrangement(moves: Move[]): void {
+    if (moves.length === 0) return;
+    this.mutate((next) => applyMoves(next, moves));
+  }
+
+  private align(itemIds: string[], edge: AlignEdge): void {
+    if (!this.current) return;
+    this.applyArrangement(
+      planAlign(this.current, itemIds, edge, this.arrangeOptions)
+    );
+  }
+
+  private distribute(itemIds: string[], direction: DistributeAxis): void {
+    if (!this.current) return;
+    this.applyArrangement(
+      planDistribute(this.current, itemIds, direction, this.arrangeOptions)
+    );
+  }
+
+  private onAlignTargetChange(event: OdsEvent<"align-target-change">): void {
+    this.alignTo = event.detail.target;
   }
 
   private lastNudgeAt = 0;
@@ -1503,6 +1550,12 @@ export class OdsApp extends LitElement {
     this.mutate((next) => setDisplayNumber(next, key, value));
   }
 
+  private onDisplayBackgroundChange(
+    event: OdsEvent<"display-background-change">
+  ): void {
+    this.mutate((next) => setDisplayBackground(next, event.detail.color));
+  }
+
   private onWidgetOptionsChange(
     event: OdsEvent<"widget-options-change">
   ): void {
@@ -1727,6 +1780,7 @@ export class OdsApp extends LitElement {
           .selectedItemIds=${this.selection}
           .enteredGroupId=${this.enteredGroupId}
           .snapEnabled=${this.snapEnabled}
+          .alignTo=${this.alignTo}
           .acceptingDrop=${this.draggingCatalog}
           .canUndo=${this.undoCount > 0}
           .canRedo=${this.redoCount > 0}
@@ -1737,6 +1791,7 @@ export class OdsApp extends LitElement {
           @gesture-cancel=${this.onGestureCancel}
           @primitive-field-change=${this.onPrimitiveFieldChange}
           @snap-toggle=${this.toggleSnap}
+          @align-target-change=${this.onAlignTargetChange}
         ></ods-canvas>
         <ods-inspector
           .hass=${this.hass}
@@ -1755,6 +1810,7 @@ export class OdsApp extends LitElement {
           @layers-reorder=${this.onLayersReorder}
           @item-number-change=${this.onItemNumberChange}
           @display-number-change=${this.onDisplayNumberChange}
+          @display-background-change=${this.onDisplayBackgroundChange}
           @widget-options-change=${this.onWidgetOptionsChange}
           @widget-picks-change=${this.onWidgetPicksChange}
           @widgets-reload=${this.reloadWidgets}
