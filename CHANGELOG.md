@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## 0.1.0
+
+The first release for testers. The editor, the widget platform and the renderer
+pipeline are in place; expect fixes and changes from here on.
+
+- Design dashboards on a canvas of the display's exact pixel size from every
+  ODL primitive, containers, groups and widgets, rendered by `odl-renderer`
+  and offered as Media Sources.
+- Widgets: sensor card, sensor list, sensor chart, agenda, calendar (month,
+  week and upcoming views), school timetable and weather.
+- Arrange bar under the canvas toolbar: align the edges or middles of a
+  selection, space elements out evenly, and stack them. Ctrl / ⌘ + click adds
+  an element to the selection and a second click takes it out.
+- Dashboard Appearance section with the background, outer padding and snap size;
+  the background is picked from the colors of the display's palette.
+- Elements can be resized past the edge of the canvas as freely as they can be
+  moved, up to twice the display.
+- Palettes match the schemes an OpenDisplay device can be configured with
+  (`GRAYSCALE_8` is not offered); BWRY uses the red accent the integration uses.
+- The debug grid starts at the corner of the display in the editor.
+- Sensor cards of one size lay out identically whatever digits they show.
+- The render time warning of a widget is 200 ms.
+
+## Development history
+
+These entries are from before the first release and used an internal numbering.
+
 ## 3.0.6
 
 - Match the Studio top bar to Home Assistant's `--header-height` and safe-area

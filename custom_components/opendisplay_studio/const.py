@@ -6,7 +6,7 @@ import logging
 
 DOMAIN = "opendisplay_studio"
 NAME = "OpenDisplay Studio"
-INTEGRATION_VERSION = "3.0.6"
+INTEGRATION_VERSION = "0.1.0"
 
 DEFAULT_WIDTH = 800
 DEFAULT_HEIGHT = 480
