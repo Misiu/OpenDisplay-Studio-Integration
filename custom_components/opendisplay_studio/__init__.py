@@ -11,6 +11,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.typing import ConfigType
 
 from .cache import RenderCache
+from .compat import renderer_problem  # noqa: F401
 from .const import (
     DOMAIN,
     RENDER_CACHE_MAX_ITEMS,

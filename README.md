@@ -257,6 +257,16 @@ font lists of the editor.
 
 It works on Home Assistant OS, Supervised, Container and Core.
 
+### Troubleshooting: `cannot import name 'TextMetrics' from 'odl_renderer'`
+
+Studio and the OpenDisplay integration from HACS both use the `odl-renderer` package, and
+Home Assistant keeps only one copy of it. Studio needs 0.5.13 or newer, while the released
+OpenDisplay 3.1.0 and older pin 0.5.12. (The OpenDisplay integration that ships with Home
+Assistant does not use `odl-renderer`.) Until the HACS OpenDisplay is released with
+`odl-renderer` 0.5.13 or newer, which its development branch already has, the two cannot
+be installed together, and the log says so. Update OpenDisplay to such a version, then
+restart Home Assistant. A restart is always needed after a package changes.
+
 ## Development
 
 ```bash
