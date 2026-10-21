@@ -45,6 +45,7 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,7 +58,8 @@ jobs:
             echo "Release $TAG_NAME already exists; nothing to do."
             exit 0
           fi
-          args=(release create "$TAG_NAME" --repo "$REPOSITORY" --verify-tag --generate-notes --title "OpenDisplay Studio $VERSION")
+          python scripts/release_notes.py "$TAG_NAME" > "$RUNNER_TEMP/notes.md"
+          args=(release create "$TAG_NAME" --repo "$REPOSITORY" --verify-tag --notes-file "$RUNNER_TEMP/notes.md" --title "OpenDisplay Studio $VERSION")
           if [[ "$PRERELEASE" == "true" ]]; then
             args+=(--prerelease)
           else
