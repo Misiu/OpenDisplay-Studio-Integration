@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.1
+
+- Explain in the log when another integration has loaded an `odl-renderer` older than
+  0.5.13, and accept any newer one so the OpenDisplay integration can use its own.
+
 ## 0.1.0
 
 The first release for testers. The editor, the widget platform and the renderer
