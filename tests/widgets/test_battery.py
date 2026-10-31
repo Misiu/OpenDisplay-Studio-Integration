@@ -46,11 +46,11 @@ def captions(elements: list[dict[str, Any]]) -> list[str]:
 
 
 def has_red(image: Image.Image) -> bool:
-    return any(pixel[:3] == RED for pixel in image.getdata())
+    return any(pixel[:3] == RED for pixel in image.get_flattened_data())
 
 
 def ink(image: Image.Image) -> int:
-    return sum(1 for pixel in image.getdata() if pixel[:3] == BLACK)
+    return sum(1 for pixel in image.get_flattened_data() if pixel[:3] == BLACK)
 
 
 def body_of(elements: list[dict[str, Any]]) -> tuple[int, int]:

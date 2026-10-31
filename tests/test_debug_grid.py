@@ -79,6 +79,6 @@ class TestDebugGridInTheEditor:
         )
 
         label_area = picture.crop((margin + 102, margin + 2, margin + 140, margin + 16))
-        assert BLACK in set(label_area.getdata())
+        assert BLACK in set(label_area.get_flattened_data())
         margin_area = picture.crop((margin - 40, margin - 20, margin - 2, margin - 2))
-        assert {pixel[3] for pixel in margin_area.getdata()} == {0}
+        assert {pixel[3] for pixel in margin_area.get_flattened_data()} == {0}
