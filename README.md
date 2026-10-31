@@ -10,7 +10,7 @@ display can fetch.
 [![Add OpenDisplay Studio to Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=opendisplay_studio)
 
 <p align="center">
-  <img src="docs/images/editor-widgets.webp" alt="The OpenDisplay Studio editor with a weather widget selected" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/editor-widgets.webp" alt="The OpenDisplay Studio editor with a weather widget selected" width="900">
 </p>
 
 ## What you get
@@ -24,8 +24,8 @@ display can fetch.
 - **Live widgets**: Sensor card, Sensor list, Sensor chart, Calendar, Agenda,
   School timetable and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see
-  [`docs/widget-sdk.md`](docs/widget-sdk.md)). Every widget is described, with its
-  options and pictures, in [`docs/widgets`](docs/widgets/README.md).
+  [`docs/widget-sdk.md`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widget-sdk.md)). Every widget is described, with its
+  options and pictures, in [`docs/widgets`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md).
 - **Your data in any property.** Switch the `{}` toggle next to a field and
   type a Home Assistant template. The panel re-renders when the entities it
   reads change.
@@ -40,7 +40,7 @@ common panels, or at any custom size. Rotation is part of the dashboard, so a
 portrait display just works.
 
 <p align="center">
-  <img src="docs/images/new-dashboard.webp" alt="The new dashboard dialog, starting from a device" width="760">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/new-dashboard.webp" alt="The new dashboard dialog, starting from a device" width="760">
 </p>
 
 All your dashboards live in one list, with their size, colours and state
@@ -48,7 +48,7 @@ All your dashboards live in one list, with their size, colours and state
 device with one click.
 
 <p align="center">
-  <img src="docs/images/gallery.webp" alt="The list of dashboards" width="760">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/gallery.webp" alt="The list of dashboards" width="760">
 </p>
 
 ## Shapes you can shape
@@ -60,7 +60,7 @@ with equal-gap badges show you when things line up. Hold <kbd>Ctrl</kbd> to
 turn snapping off, press <kbd>Esc</kbd> to cancel a drag.
 
 <p align="center">
-  <img src="docs/images/polygon-editor.webp" alt="Editing the points of a polygon" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/polygon-editor.webp" alt="Editing the points of a polygon" width="900">
 </p>
 
 ## Charts, gauges, codes and patterns
@@ -73,11 +73,11 @@ Assistant entity picker. Progress bars, arcs, QR codes, repeating patterns,
 rows of icons and multiline text sit next to them in the library.
 
 <p align="center">
-  <img src="docs/images/plot-editor.webp" alt="Editing a history plot with two series" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/plot-editor.webp" alt="Editing a history plot with two series" width="900">
 </p>
 
 <p align="center">
-  <img src="docs/images/primitives.webp" alt="Progress bars, an arc, a pattern, a QR code and multiline text" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/primitives.webp" alt="Progress bars, an arc, a pattern, a QR code and multiline text" width="900">
 </p>
 
 ## One panel for every element
@@ -90,7 +90,7 @@ and a **reset** link puts it back in one step; rarely needed fields wait under
 **Advanced**.
 
 <p align="center">
-  <img src="docs/images/properties.webp" alt="The property panel of a rounded rectangle" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/properties.webp" alt="The property panel of a rounded rectangle" width="900">
 </p>
 
 ## Widgets
@@ -98,11 +98,11 @@ and a **reset** link puts it back in one step; rarely needed fields wait under
 Widgets decide *how* to lay out your data; you decide *what* to show. Pick the
 entities, calendars or weather source, choose the options, and resize the frame.
 The layout adapts to the size you give it. Every widget can be drawn without its
-frame and background, or in white on black. [The widgets page](docs/widgets/README.md)
+frame and background, or in white on black. [The widgets page](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md)
 lists each widget with its sources, options and pictures.
 
 <p align="center">
-  <img src="docs/images/widget-properties.webp" alt="The properties of a sensor card widget" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/widget-properties.webp" alt="The properties of a sensor card widget" width="900">
 </p>
 
 ## Undo, redo and a safety net
@@ -112,7 +112,7 @@ grouping, pasting. Drag and nudge bursts are grouped sensibly, and
 <kbd>Esc</kbd> abandons a gesture without leaving a trace.
 
 <p align="center">
-  <img src="docs/images/undo-redo.webp" alt="Undo and redo in the toolbar after moving an element" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/undo-redo.webp" alt="Undo and redo in the toolbar after moving an element" width="900">
 </p>
 
 ## See the code
@@ -122,7 +122,7 @@ dashboard: absolute coordinates, only valid fields, nothing else. Copy it into
 an automation if you prefer to drive a display yourself.
 
 <p align="center">
-  <img src="docs/images/code-view.webp" alt="The generated ODL YAML" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/code-view.webp" alt="The generated ODL YAML" width="900">
 </p>
 
 ## Move a design between dashboards
@@ -179,9 +179,9 @@ suits where you are: the canvas menu has Duplicate and the drawing order, the tr
 has Move up and down, Hide, Lock and Rename. Commands that cannot run now are dimmed.
 
 <p align="center">
-  <img src="docs/images/context-menu-canvas.webp" alt="The context menu of an element on the canvas" width="260">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/context-menu-canvas.webp" alt="The context menu of an element on the canvas" width="260">
   &nbsp;&nbsp;
-  <img src="docs/images/context-menu-tree.webp" alt="The context menu of a layer in the tree" width="260">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/context-menu-tree.webp" alt="The context menu of a layer in the tree" width="260">
 </p>
 
 ### Align and space out
@@ -191,7 +191,7 @@ selected. Select elements with <kbd>Shift</kbd> or <kbd>Ctrl</kbd> / <kbd>⌘</k
 click (the second click takes an element out again), or drag a box around them.
 
 <p align="center">
-  <img src="docs/images/arrange-bar.webp" alt="The arrange bar with three elements selected" width="900">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/arrange-bar.webp" alt="The arrange bar with three elements selected" width="900">
 </p>
 
 | Buttons | Need | Result |
@@ -283,9 +283,9 @@ npm run build
 npm run test:e2e
 ```
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the render boundary,
-[WIDGET_CONTRACT.md](WIDGET_CONTRACT.md) for the widget contract and
-[ROADMAP.md](ROADMAP.md) for what is done and what is next.
+See [ARCHITECTURE.md](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/ARCHITECTURE.md) for the render boundary,
+[WIDGET_CONTRACT.md](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/WIDGET_CONTRACT.md) for the widget contract and
+[ROADMAP.md](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/ROADMAP.md) for what is done and what is next.
 
 ## License
 
