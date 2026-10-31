@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import dataclass
 from io import BytesIO
 from time import monotonic
@@ -12,6 +13,11 @@ from aiohttp import ClientSession
 from odl_renderer import generate_image  # type: ignore[import-untyped]
 from odl_renderer.types import DataProvider  # type: ignore[import-untyped]
 from PIL import Image, ImageChops, ImageDraw
+
+# Left, top, right and bottom (exclusive) of what an element draws.
+type InkBox = tuple[int, int, int, int]
+
+INK_BOX_CACHE_LIMIT = 256
 
 
 class OdlRenderError(RuntimeError):
@@ -74,6 +80,7 @@ class OdlRenderService:
         self._session = session
         self._font_dirs = font_dirs or []
         self._semaphore = asyncio.Semaphore(concurrency)
+        self._ink_boxes: dict[str, InkBox | None] = {}
 
     async def async_render(  # noqa: PLR0913
         self,
@@ -122,3 +129,68 @@ class OdlRenderService:
                 "total": round((completed_at - requested_at) * 1000, 2),
             },
         )
+
+    async def async_ink_box(
+        self,
+        *,
+        width: int,
+        height: int,
+        element: dict[str, Any],
+        accent_color: str,
+    ) -> InkBox | None:
+        """
+        Return where one element leaves ink, or None when it draws nothing.
+
+        The renderer turns an element about the middle of what it drew, so the editor
+        needs that very box. It is drawn on white and on black, because ink of the
+        color of one background is plain on the other. Results are kept, because turning
+        an element changes neither its ink nor this box.
+        """
+        key = json.dumps([width, height, accent_color, element], sort_keys=True)
+        if key in self._ink_boxes:
+            return self._ink_boxes[key]
+        boxes = [
+            await self._ink_box_on(background, width, height, element, accent_color)
+            for background in ("white", "black")
+        ]
+        found = [box for box in boxes if box is not None]
+        ink = (
+            (
+                min(box[0] for box in found),
+                min(box[1] for box in found),
+                max(box[2] for box in found),
+                max(box[3] for box in found),
+            )
+            if found
+            else None
+        )
+        if len(self._ink_boxes) >= INK_BOX_CACHE_LIMIT:
+            self._ink_boxes.clear()
+        self._ink_boxes[key] = ink
+        return ink
+
+    async def _ink_box_on(
+        self,
+        background: str,
+        width: int,
+        height: int,
+        element: dict[str, Any],
+        accent_color: str,
+    ) -> InkBox | None:
+        async with self._semaphore:
+            try:
+                image = await generate_image(
+                    width,
+                    height,
+                    [element],
+                    background=background,
+                    accent_color=accent_color,
+                    session=self._session,
+                    font_dirs=self._font_dirs,
+                )
+            except TypeError, ValueError, OSError:
+                return None
+            rgb = image.convert("RGB")
+            return ImageChops.difference(
+                rgb, Image.new("RGB", rgb.size, background)
+            ).getbbox()

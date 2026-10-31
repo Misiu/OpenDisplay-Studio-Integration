@@ -96,3 +96,11 @@ fields:
     options: [top_left, top_right, bottom_right, bottom_left]
     optional: true
     section: appearance
+  - key: rotation
+    label: Rotation
+    shape: number
+    min: -360
+    max: 360
+    optional: true
+    unit: "°"
+    section: layout

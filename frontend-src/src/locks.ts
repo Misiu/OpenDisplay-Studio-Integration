@@ -2,6 +2,7 @@ import { VISIBLE_KEY } from "./expressions";
 import { isBoxPrimitive } from "./primitive-shape";
 import { definitionFor } from "./item-fields";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
+import { ROTATION_KEY } from "./rotation";
 import { allItems, isContainer } from "./tree";
 import type {
   ContainerItem,
@@ -56,8 +57,13 @@ const primitiveLocks = (
 ): ItemLocks => {
   const expressed = new Set(Object.keys(item.expressions ?? {}));
   expressed.delete(VISIBLE_KEY);
+  // A turn is not part of the geometry the handles write, so an expression for it
+  // locks neither moving nor resizing.
   const layout = definition.fields.filter(
-    (field) => field.section === "layout" && expressed.has(field.key)
+    (field) =>
+      field.section === "layout" &&
+      field.key !== ROTATION_KEY &&
+      expressed.has(field.key)
   );
   // The points of a polygon are its position: a template for them pins it.
   const pinned = definition.fields.filter(

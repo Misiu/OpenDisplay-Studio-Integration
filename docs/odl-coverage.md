@@ -31,9 +31,28 @@ the backend validates from the same data.
 | `plot` | box | x_start, y_start, x_end, y_end | data (1-4 series), duration, low, high, round_values, font, debug, ylegend, yaxis, xlegend, xaxis |
 | `debug_grid` | canvas | none | spacing, line_color, dashed, dash_length, space_length, show_labels, label_step, label_color, label_font_size, font |
 
+### Rotation
+
+Every type but `debug_grid` has an optional `rotation` (degrees clockwise, -360 to 360,
+in the Layout section). Left empty, it is not sent to the renderer, so a dashboard made
+before the field existed is drawn exactly as it was.
+
+The renderer draws the element upright on a transparent layer the size of the canvas and
+turns that layer about the middle of what was drawn, so the pivot is the middle of the ink,
+not of the box the editor measures: a line of text has room above and below its letters,
+and an arc has empty room in the quarter it does not cover. The backend therefore draws
+each turned primitive upright, finds its ink, and reports that point as `itemPivots` in
+`compose_preview` for the editor's frame to turn about. `dlimg` and `plot` are not measured
+this way (their ink depends on a download or on recorded history), so their frame turns
+about the middle of the box. `dlimg` also keeps its own `rotate`, which turns the picture
+inside its frame, not the element.
+
+A turned element is drawn clipped by the display like any other, so one that is turned
+partly out of the picture shows only what is in view.
+
 ### Not in the editor (yet)
 
-- `diagram`, `rotation`, `mirror` and `pivot`: out of scope (ROADMAP phase 4).
+- `diagram`, `mirror` and `pivot`: out of scope (ROADMAP phase 4).
 - Percentage coordinates (`"50%"`): every element is created with pixel
   coordinates, and the validator rejects percentages.
 - Expressions inside a plot's series and axes: they are edited as literals. A

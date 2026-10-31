@@ -306,8 +306,9 @@ pixel sampling, e2e add-and-edit test, row in `docs/odl-coverage.md`.
   (`<config>/opendisplay_studio/fonts`) to the renderer and to text measuring, and
   `bootstrap` lists the bundled and installed fonts as the options of every font field.
 
-Out of scope (decided): `diagram`, `rotation`/`mirror`/`pivot`, the flow
-cursor (omitted `y`). Every created element has explicit coordinates.
+Out of scope (decided): `diagram`, `mirror`/`pivot`, the flow
+cursor (omitted `y`). Every created element has explicit coordinates. `rotation` was
+added afterwards.
 
 **Accepted when:** all 16 types can be added from the Library, every documented
 field is editable and expression-capable, and each renders in preview and Media Source

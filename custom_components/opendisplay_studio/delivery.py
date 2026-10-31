@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from time import monotonic
 from typing import TYPE_CHECKING, Any, Final
 
@@ -11,6 +11,7 @@ from .const import DOMAIN, LOGGER
 from .debug_grid import expand_debug_grids
 from .flatten import translate_elements
 from .palette import accent_color_for_palette
+from .pivots import async_find_pivots
 from .rendering import OdlRenderResult
 
 if TYPE_CHECKING:
@@ -28,6 +29,8 @@ class RenderedDashboard:
     pipeline_ms: float
     # Pixels of the picture beyond each edge of the display; 0 for one of its size.
     margin: int = 0
+    # Where the renderer turns each rotated primitive about; only the preview needs it.
+    item_pivots: dict[str, dict[str, float]] = field(default_factory=dict)
 
 
 def preview_margin(display: dict[str, Any]) -> int:
@@ -66,13 +69,26 @@ async def async_render_dashboard(
     if margin:
         explicit = expand_debug_grids(elements, display["width"], display["height"])
         elements = translate_elements(explicit, margin, margin)
+    accent_color = accent_color_for_palette(display["palette"])
+    pivots = (
+        await async_find_pivots(
+            data.renderer,
+            compiled.turned,
+            width=display["width"],
+            height=display["height"],
+            margin=margin,
+            accent_color=accent_color,
+        )
+        if margin
+        else {}
+    )
     picture = await data.renderer.async_render(
         width=display["width"] + 2 * margin,
         height=display["height"] + 2 * margin,
         elements=elements,
         history=compiled.history,
         background=display["background"],
-        accent_color=accent_color_for_palette(display["palette"]),
+        accent_color=accent_color,
         rotation=display["rotation"] if for_device else 0,
         margin=margin,
     )
@@ -92,4 +108,4 @@ async def async_render_dashboard(
         pipeline_ms,
         len(picture.png),
     )
-    return RenderedDashboard(compiled, picture, pipeline_ms, margin)
+    return RenderedDashboard(compiled, picture, pipeline_ms, margin, pivots)

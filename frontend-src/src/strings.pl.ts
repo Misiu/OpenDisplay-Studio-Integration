@@ -271,6 +271,7 @@ export const polish: StringsOverride = {
       `Dodaj punkt: ${name}, po punkcie ${number}`,
     pointHandle: (name: string, number: number): string =>
       `Przesuń punkt ${number}: ${name}`,
+    rotateHandle: (name: string): string => `Obróć: ${name}`,
     resizeHandle: (name: string, side: string): string =>
       `Zmień rozmiar: ${name}, od strony ${side}`,
     sides: {

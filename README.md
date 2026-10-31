@@ -21,6 +21,8 @@ display can fetch.
 - **Every OpenDisplay drawing type**: text, multiline text, lines, rectangles,
   patterns, polygons, circles, ellipses, arcs, icons, icon rows, images, QR
   codes, progress bars, history plots and a debug grid.
+- **Turn anything.** Drag the round handle above any element to rotate it, or type an
+  angle; the preview follows at once.
 - **Live widgets**: Sensor card, Sensor list, Sensor chart, Calendar, Agenda,
   School timetable, Waste collection, Battery and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see
@@ -61,6 +63,20 @@ turn snapping off, press <kbd>Esc</kbd> to cancel a drag.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/polygon-editor.webp" alt="Editing the points of a polygon" width="900">
+</p>
+
+## Turn anything
+
+Every element except the debug grid can be turned. Select one and drag the round handle
+above its frame, or type an angle under **Layout → Rotation**. The frame turns with the
+element, about the point the renderer turns it about, so what you see is what the display
+shows. Hold <kbd>Shift</kbd> to turn in steps of 15°, <kbd>Esc</kbd> to cancel; the whole
+turn is one step of the history. Text, icons, lines, shapes, QR codes and charts all turn,
+and a design made before keeps its look until you turn something. While an element is
+turned its frame has no resize handles; set the rotation back to 0 to resize it.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/rotation.webp" alt="A text, a rectangle, an icon, a QR code, a gauge, an arc and a line, each turned, with the text selected and its rotate handle above it" width="900">
 </p>
 
 ## Charts, gauges, codes and patterns
@@ -206,6 +222,7 @@ one undo step and is not saved until you save.
 | <kbd>Ctrl</kbd> + <kbd>G</kbd> | Group the selection |
 | <kbd>Ctrl</kbd> + <kbd>D</kbd>, <kbd>Ctrl</kbd> + <kbd>C</kbd> / <kbd>V</kbd> | Duplicate, copy and paste |
 | <kbd>Ctrl</kbd> + <kbd>Z</kbd> / <kbd>Y</kbd> | Undo and redo |
+| Drag the round handle above a selection, with <kbd>Shift</kbd> | Turn it, in steps of 15° |
 
 ## Commands
 

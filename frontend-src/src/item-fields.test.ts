@@ -149,12 +149,30 @@ describe("primitiveFields", () => {
   });
 
   it("lists what is not a number in the layout section with the layout, the anchor first", () => {
-    expect(names(textItem(), "layout")).toEqual(["anchor"]);
-    expect(names(circleItem(), "layout")).toEqual([]);
+    expect(names(textItem(), "layout")).toEqual(["anchor", "rotation"]);
+    expect(names(circleItem(), "layout")).toEqual(["rotation"]);
     expect(names(primitiveItem("icon_sequence", "s"), "layout")).toEqual([
       "direction",
       "anchor",
+      "rotation",
     ]);
+  });
+
+  it("offers a turn to every primitive but the debug grid, as a value that can be left unset", () => {
+    for (const definition of primitiveDefinitions) {
+      const turn = definition.fields.find((field) => field.key === "rotation");
+
+      expect(Boolean(turn), definition.type).toBe(
+        definition.type !== "debug_grid"
+      );
+      expect(turn?.optional ?? true, definition.type).toBe(true);
+    }
+  });
+
+  it("does not put a turn among the pixel inputs of the layout grid", () => {
+    const { grid } = layoutFields(textItem(), dashboard, primitiveDefinitions);
+
+    expect(keys(grid)).not.toContain("rotation");
   });
 
   it("does not list fields the backend fixes", () => {

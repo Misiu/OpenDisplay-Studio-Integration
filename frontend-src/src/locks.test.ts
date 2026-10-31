@@ -27,6 +27,16 @@ describe("itemLocks", () => {
     });
   });
 
+  it("locks nothing for a turn that is an expression", () => {
+    const item = withExpressions(textItem(), { rotation: "{{ 30 }}" });
+
+    expect(locks(item)).toEqual({
+      position: [],
+      handles: [],
+      scalingBlockedBy: [],
+    });
+  });
+
   it("locks moving a point whose position is an expression", () => {
     const item = withExpressions(textItem(), { x: "{{ 5 }}" });
 

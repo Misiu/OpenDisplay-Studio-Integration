@@ -181,6 +181,7 @@ async def websocket_compose_preview(
             "margin": rendered.margin,
             "yaml": compiled.yaml,
             "itemBounds": compiled.item_bounds,
+            "itemPivots": rendered.item_pivots,
             "warnings": compiled.warnings,
             "dependencies": {
                 "entities": sorted(compiled.dependencies.entities),

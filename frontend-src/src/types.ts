@@ -49,8 +49,14 @@ export interface WidgetItem extends ItemState {
   layout: { padding: number };
 }
 
+/** What every primitive but the debug grid can be: turned clockwise about its middle. */
+interface Turnable {
+  /** Degrees, -360 … 360; `null` or absent leaves the renderer's own upright drawing. */
+  rotation?: number | null;
+}
+
 /** How a text-like element is drawn: font, alignment and outline of the glyphs. */
-interface TextStyle {
+interface TextStyle extends Turnable {
   font: string;
   align: "left" | "center" | "right";
   spacing: number;
@@ -99,10 +105,12 @@ interface Outlined {
   outline: string;
   width: number;
 }
-export interface RectanglePrimitive extends CornerBox, Outlined, Rounding {
+export interface RectanglePrimitive
+  extends CornerBox, Outlined, Rounding, Turnable {
   type: "rectangle";
 }
-export interface RectanglePatternPrimitive extends Outlined, Rounding {
+export interface RectanglePatternPrimitive
+  extends Outlined, Rounding, Turnable {
   type: "rectangle_pattern";
   x_start: number;
   y_start: number;
@@ -113,7 +121,7 @@ export interface RectanglePatternPrimitive extends Outlined, Rounding {
   x_repeat: number;
   y_repeat: number;
 }
-export interface LinePrimitive extends CornerBox {
+export interface LinePrimitive extends CornerBox, Turnable {
   type: "line";
   fill: string;
   width: number;
@@ -121,19 +129,19 @@ export interface LinePrimitive extends CornerBox {
   dash_length: number;
   space_length: number;
 }
-export interface PolygonPrimitive {
+export interface PolygonPrimitive extends Turnable {
   type: "polygon";
   points: [number, number][];
   fill: string | null;
   outline: string;
 }
-export interface CirclePrimitive extends Outlined {
+export interface CirclePrimitive extends Outlined, Turnable {
   type: "circle";
   x: number;
   y: number;
   radius: number;
 }
-export interface ArcPrimitive extends Outlined {
+export interface ArcPrimitive extends Outlined, Turnable {
   type: "arc";
   x: number;
   y: number;
@@ -141,7 +149,7 @@ export interface ArcPrimitive extends Outlined {
   start_angle: number;
   end_angle: number;
 }
-export interface EllipsePrimitive extends CornerBox, Outlined {
+export interface EllipsePrimitive extends CornerBox, Outlined, Turnable {
   type: "ellipse";
 }
 interface IconStyle {
@@ -151,13 +159,13 @@ interface IconStyle {
   stroke_width: number;
   stroke_fill: string;
 }
-export interface IconPrimitive extends IconStyle {
+export interface IconPrimitive extends IconStyle, Turnable {
   type: "icon";
   value: string;
   x: number;
   y: number;
 }
-export interface IconSequencePrimitive extends IconStyle {
+export interface IconSequencePrimitive extends IconStyle, Turnable {
   type: "icon_sequence";
   icons: string[];
   x: number;
@@ -166,7 +174,7 @@ export interface IconSequencePrimitive extends IconStyle {
   /** `null` leaves the gap to the renderer: a quarter of the icon size. */
   spacing: number | null;
 }
-export interface QrCodePrimitive {
+export interface QrCodePrimitive extends Turnable {
   type: "qrcode";
   data: string;
   x: number;
@@ -176,7 +184,7 @@ export interface QrCodePrimitive {
   color: string;
   bgcolor: string;
 }
-export interface DlimgPrimitive {
+export interface DlimgPrimitive extends Turnable {
   type: "dlimg";
   url: string;
   x: number;
@@ -186,7 +194,7 @@ export interface DlimgPrimitive {
   resize_method: "stretch" | "cover" | "contain" | "crop";
   rotate: number;
 }
-export interface ProgressBarPrimitive extends CornerBox {
+export interface ProgressBarPrimitive extends CornerBox, Turnable {
   type: "progress_bar";
   progress: number;
   direction: "right" | "left" | "up" | "down";
@@ -199,7 +207,7 @@ export interface ProgressBarPrimitive extends CornerBox {
 }
 /** A nested object of a plot (a series, an axis or a legend): plain values by key. */
 export type PlotObject = Record<string, string | number | boolean | null>;
-export interface PlotPrimitive extends CornerBox {
+export interface PlotPrimitive extends CornerBox, Turnable {
   type: "plot";
   data: PlotObject[];
   duration: number;
@@ -484,6 +492,8 @@ export interface ComposePreviewResponse {
   margin?: number;
   yaml: string;
   itemBounds: Record<string, ItemBounds>;
+  /** Where the renderer turns each rotated primitive; one not listed turns about its middle. */
+  itemPivots?: Record<string, { x: number; y: number }>;
   warnings: string[];
   /** What the preview's expressions read; a change in any of it makes the preview stale. */
   dependencies: PreviewDependencies;

@@ -287,3 +287,11 @@ fields:
         options: [dotted, dashed, solid]
         default: dotted
     section: appearance
+  - key: rotation
+    label: Rotation
+    shape: number
+    min: -360
+    max: 360
+    optional: true
+    unit: "°"
+    section: layout

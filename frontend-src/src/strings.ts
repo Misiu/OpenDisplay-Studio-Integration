@@ -336,6 +336,7 @@ export const strings = {
       `Add a point to ${name} after point ${number}`,
     pointHandle: (name: string, number: number): string =>
       `Move point ${number} of ${name}`,
+    rotateHandle: (name: string): string => `Rotate ${name}`,
     resizeHandle: (name: string, side: string): string =>
       `Resize ${name} from ${side}`,
     sides: {

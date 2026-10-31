@@ -134,6 +134,13 @@ const storedLayoutField = (
 const isNumeric = (field: PrimitiveField): boolean =>
   field.shape === "coordinate" || field.shape === "number";
 
+/**
+ * Whether a number sits in the grid of pixel inputs. One that may be left unset (a turn)
+ * has to show that it is, which the grid cannot, so it is a value field instead.
+ */
+const isGridField = (field: PrimitiveField): boolean =>
+  isNumeric(field) && !field.optional;
+
 /** The layout fields a primitive stores itself, straight from its definition. */
 const storedLayoutFields = (
   item: PrimitiveItem,
@@ -142,7 +149,7 @@ const storedLayoutFields = (
 ): LayoutFields => {
   const values: Record<string, unknown> = { ...item.primitive };
   const grid = definition.fields
-    .filter((field) => field.section === "layout" && isNumeric(field))
+    .filter((field) => field.section === "layout" && isGridField(field))
     .map((field) => storedLayoutField(field, values, dashboard));
   return { grid, extra: [] };
 };
@@ -269,7 +276,7 @@ export const primitiveFields = (
     (field) =>
       field.visible !== false &&
       field.section === section &&
-      (section === "appearance" || !isNumeric(field))
+      (section === "appearance" || !isGridField(field))
   );
 
 /** Turn what the appearance form reports back into primitive values. */

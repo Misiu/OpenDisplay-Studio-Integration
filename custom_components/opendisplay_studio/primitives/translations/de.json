@@ -182,5 +182,20 @@
   "text.spacing": "Zeilenabstand",
   "text.stroke_width": "Konturbreite",
   "text.stroke_fill": "Konturfarbe",
-  "text.parse_colors": "Farbmarkierung"
+  "text.parse_colors": "Farbmarkierung",
+  "arc.rotation": "Drehung",
+  "circle.rotation": "Drehung",
+  "dlimg.rotation": "Drehung",
+  "ellipse.rotation": "Drehung",
+  "icon.rotation": "Drehung",
+  "icon_sequence.rotation": "Drehung",
+  "line.rotation": "Drehung",
+  "multiline.rotation": "Drehung",
+  "plot.rotation": "Drehung",
+  "polygon.rotation": "Drehung",
+  "progress_bar.rotation": "Drehung",
+  "qrcode.rotation": "Drehung",
+  "rectangle.rotation": "Drehung",
+  "rectangle_pattern.rotation": "Drehung",
+  "text.rotation": "Drehung"
 }

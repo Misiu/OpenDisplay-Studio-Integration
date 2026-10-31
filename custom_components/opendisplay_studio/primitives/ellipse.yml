@@ -51,3 +51,11 @@ fields:
     default: 2
     unit: px
     section: appearance
+  - key: rotation
+    label: Rotation
+    shape: number
+    min: -360
+    max: 360
+    optional: true
+    unit: "°"
+    section: layout

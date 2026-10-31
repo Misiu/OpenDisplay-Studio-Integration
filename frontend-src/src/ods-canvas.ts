@@ -52,6 +52,16 @@ import { itemLocks } from "./locks";
 import { clamp } from "./math";
 import { isResizable } from "./primitive-resize";
 import { RESIZE_HANDLES, type ResizeHandle } from "./resize";
+import {
+  isTurnable,
+  originPercent,
+  pivotOf,
+  ROTATION_KEY,
+  rotationOf,
+  turnByPointer,
+  withRotation,
+  type Position,
+} from "./rotation";
 import { baseStyles } from "./studio-styles";
 import { strings } from "./strings";
 import type {
@@ -474,6 +484,37 @@ export class OdsCanvas extends LitElement {
         position: absolute;
         inset: calc(-6px * var(--ui, 1));
       }
+      .rotate-handle {
+        position: absolute;
+        z-index: 7;
+        left: 50%;
+        top: calc(-22px * var(--ui, 1));
+        width: calc(10px * var(--ui, 1));
+        height: calc(10px * var(--ui, 1));
+        padding: 0;
+        border: var(--line) solid #00aef0;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+        transform: translate(-50%, -50%);
+        cursor: grab;
+        touch-action: none;
+      }
+      /* The stem that joins the handle to the frame. */
+      .rotate-handle::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 100%;
+        height: calc(17px * var(--ui, 1));
+        border-left: var(--line) solid #00aef0;
+        transform: translateX(-50%);
+      }
+      .rotate-handle::after {
+        content: "";
+        position: absolute;
+        inset: calc(-6px * var(--ui, 1));
+      }
       .edge-add {
         position: absolute;
         z-index: 7;
@@ -579,6 +620,11 @@ export class OdsCanvas extends LitElement {
         font: 700 10px/1.2 var(--code-font-family, monospace);
         white-space: nowrap;
         pointer-events: none;
+      }
+      /* The frame of a turned item is turned too; its label stays upright. */
+      .selection.turned .selection-size {
+        transform: translateX(-50%) scale(var(--ui, 1))
+          rotate(calc(-1 * var(--turn)));
       }
       @media (max-width: 900px) {
         .workspace-meta {
@@ -1031,6 +1077,72 @@ export class OdsCanvas extends LitElement {
     };
   }
 
+  private onRotateHandlePointerDown(
+    event: PointerEvent,
+    item: PrimitiveItem
+  ): void {
+    if (this.startsViewDrag(event)) return;
+    event.stopPropagation();
+    event.preventDefault();
+    emit(this, "item-select", { itemId: item.id });
+    const box = this.measure(item);
+    if (item.locked || !box) return;
+    const pivot = this.screenPositionOf(this.pivotFor(item, box));
+    this.beginRotate(event, item, pivot);
+  }
+
+  /** The screen position of a display pixel. */
+  private screenPositionOf(pixel: Position): Position {
+    const rect = this.canvas?.getBoundingClientRect();
+    if (!rect) return pixel;
+    const { width, height } = this.dashboard.display;
+    return {
+      x: rect.left + (pixel.x / width) * rect.width,
+      y: rect.top + (pixel.y / height) * rect.height,
+    };
+  }
+
+  /**
+   * Turn an item by dragging the rotate handle: the item follows the pointer's angle
+   * about the pivot. Shift snaps to steps, Escape cancels, and the whole turn is one
+   * step of the history.
+   */
+  private beginRotate(
+    event: PointerEvent,
+    item: PrimitiveItem,
+    pivot: Position
+  ): void {
+    this.stopGesture?.();
+    const before = structuredClone(this.dashboard);
+    const stopWatching = this.watchEscape(before, () => undefined);
+    const grabbed = { x: event.clientX, y: event.clientY };
+    const startRotation = rotationOf(item);
+    const stopTracking = trackPointerGesture({
+      origin: event,
+      threshold: GESTURE_THRESHOLD,
+      onMove: (move) => {
+        const pointer = { x: move.clientX, y: move.clientY };
+        const degrees = turnByPointer(
+          startRotation,
+          pivot,
+          grabbed,
+          pointer,
+          move.shiftKey
+        );
+        emit(this, "items-transform", { items: [withRotation(item, degrees)] });
+      },
+      onEnd: (_end, activated) => {
+        stopWatching();
+        if (activated) emit(this, "item-transform-end", { before });
+      },
+      onCancel: stopWatching,
+    });
+    this.stopGesture = () => {
+      stopTracking();
+      stopWatching();
+    };
+  }
+
   /** How far the pointer moved since the gesture began, in display pixels. */
   private displayDelta(
     origin: PointerEvent,
@@ -1229,17 +1341,20 @@ export class OdsCanvas extends LitElement {
     return "";
   }
 
-  private renderSelectionSize(box: ItemBounds): TemplateResult {
+  private renderSelectionSize(box: ItemBounds, degrees = 0): TemplateResult {
     const width = Math.round(box.width);
     const height = Math.round(box.height);
+    const turn = degrees === 0 ? "" : ` · ${degrees}°`;
     return html`
       <output class="selection-size" aria-live="off">
-        ${strings.common.size(width, height)}
+        ${strings.common.size(width, height)}${turn}
       </output>
     `;
   }
 
   private renderHandles(item: StudioItem): TemplateResult[] {
+    // The handles are those of an upright box; a turned item is moved and turned.
+    if (rotationOf(item) !== 0) return [];
     if (item.kind === "primitive" && !isResizable(item.primitive)) return [];
     // A line is shaped by its two ends, which have handles of their own.
     if (item.kind === "primitive" && item.primitive.type === "line") return [];
@@ -1256,6 +1371,54 @@ export class OdsCanvas extends LitElement {
         ></button>
       `
     );
+  }
+
+  /** A primitive the renderer turns, whose turn no expression drives. */
+  private isTurnableByHand(item: StudioItem): item is PrimitiveItem {
+    return (
+      item.kind === "primitive" &&
+      isTurnable(item.primitive) &&
+      item.expressions?.[ROTATION_KEY] === undefined
+    );
+  }
+
+  private renderRotateHandle(
+    item: StudioItem
+  ): TemplateResult | typeof nothing {
+    if (!this.isTurnableByHand(item)) return nothing;
+    return html`
+      <button
+        data-rotate-handle
+        class="rotate-handle"
+        tabindex="-1"
+        aria-label=${strings.canvas.rotateHandle(item.name)}
+        title=${strings.canvas.rotateHandle(item.name)}
+        @pointerdown=${(event: PointerEvent) =>
+          this.onRotateHandlePointerDown(event, item)}
+      ></button>
+    `;
+  }
+
+  /** Where an item turns about, in display pixels. */
+  private pivotFor(item: StudioItem, box: ItemBounds): Position {
+    const pivot = this.preview?.itemPivots?.[item.id];
+    const composed = this.preview?.itemBounds[item.id];
+    return pivotOf(
+      box,
+      pivot && composed ? { pivot, box: composed } : undefined
+    );
+  }
+
+  /** The inline style that turns an item's frame about its pivot; none while upright. */
+  private turnStyle(item: StudioItem, box: ItemBounds): Record<string, string> {
+    const degrees = rotationOf(item);
+    if (degrees === 0) return {};
+    const origin = originPercent(box, this.pivotFor(item, box));
+    return {
+      transform: `rotate(${degrees}deg)`,
+      "transform-origin": `${origin.x}% ${origin.y}%`,
+      "--turn": `${degrees}deg`,
+    };
   }
 
   /** Where a point of the item lies inside the item's selection box, in percent. */
@@ -1281,7 +1444,7 @@ export class OdsCanvas extends LitElement {
     offset: { x: number; y: number },
     box: ItemBounds
   ): TemplateResult[] {
-    if (item.kind !== "primitive") return [];
+    if (item.kind !== "primitive" || rotationOf(item) !== 0) return [];
     const points = editablePoints(item.primitive);
     if (!points || itemLocks(item, this.primitives).position.length > 0) {
       return [];
@@ -1477,6 +1640,7 @@ export class OdsCanvas extends LitElement {
       "drop-target": item.id === this.dropContainerId,
       locked: item.locked,
       hidden: item.hidden,
+      turned: rotationOf(item) !== 0,
     };
   }
 
@@ -1489,7 +1653,10 @@ export class OdsCanvas extends LitElement {
       <div
         data-item-id=${item.id}
         class=${classMap(this.itemClasses(placed))}
-        style=${styleMap(percentBox(box, this.dashboard.display))}
+        style=${styleMap({
+          ...percentBox(box, this.dashboard.display),
+          ...this.turnStyle(item, box),
+        })}
         @pointerdown=${(event: PointerEvent) =>
           this.onItemPointerDown(event, item)}
         @dblclick=${(event: MouseEvent) => this.onItemDoubleClick(event, item)}
@@ -1497,9 +1664,10 @@ export class OdsCanvas extends LitElement {
           this.onItemContextMenu(event, item)}
       >
         ${this.renderBadges(item)}
-        ${selected && single ? this.renderSelectionSize(box) : nothing}
+        ${selected && single ? this.renderSelectionSize(box, rotationOf(item)) : nothing}
         ${this.showsGroupHint(item, selected) ? this.renderGroupHint() : nothing}
         ${this.showsHandles(item, selected) ? this.renderHandles(item) : nothing}
+        ${this.showsHandles(item, selected) ? this.renderRotateHandle(item) : nothing}
         ${
           this.showsHandles(item, selected)
             ? this.renderPointHandles(item, placed.offset, box)

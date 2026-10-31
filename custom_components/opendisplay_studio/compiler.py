@@ -22,6 +22,7 @@ from .flatten import (
     background_element,
     flatten_items,
     shift_primitive,
+    without_turn,
 )
 from .fonts import font_directories
 from .history import RecordedHistory, async_prefetch_history
@@ -56,6 +57,8 @@ class CompiledDashboard:
     data_ms: float
     compile_ms: float
     history: RecordedHistory | None = None
+    # Turned primitives as drawn upright, by item id, to find what they turn about.
+    turned: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
@@ -80,6 +83,19 @@ def _measure_primitives(
     return {
         item_id: primitive_box(primitive, display).as_dict()
         for item_id, primitive in primitives.items()
+    }
+
+
+def _turned_primitives(placed_items: list[Placed]) -> dict[str, dict[str, Any]]:
+    """Return the shown primitives that are turned, as they are drawn upright."""
+    return {
+        placed.item["id"]: without_turn(
+            shift_primitive(placed.item["primitive"], placed.x, placed.y)
+        )
+        for placed in placed_items
+        if placed.item["kind"] == "primitive"
+        and not placed.hidden
+        and placed.item["primitive"].get("rotation")
     }
 
 
@@ -296,4 +312,5 @@ async def async_compile_dashboard(
         data_ms=round((data_done - started) * 1000, 2),
         compile_ms=round((compiled_done - data_done) * 1000, 2),
         history=history,
+        turned=_turned_primitives(placed_items),
     )

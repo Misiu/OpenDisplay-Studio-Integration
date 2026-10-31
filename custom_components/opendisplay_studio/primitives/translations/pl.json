@@ -182,5 +182,20 @@
   "text.spacing": "Odstęp między wierszami",
   "text.stroke_width": "Grubość konturu",
   "text.stroke_fill": "Kolor konturu",
-  "text.parse_colors": "Znaczniki kolorów"
+  "text.parse_colors": "Znaczniki kolorów",
+  "arc.rotation": "Obrót",
+  "circle.rotation": "Obrót",
+  "dlimg.rotation": "Obrót",
+  "ellipse.rotation": "Obrót",
+  "icon.rotation": "Obrót",
+  "icon_sequence.rotation": "Obrót",
+  "line.rotation": "Obrót",
+  "multiline.rotation": "Obrót",
+  "plot.rotation": "Obrót",
+  "polygon.rotation": "Obrót",
+  "progress_bar.rotation": "Obrót",
+  "qrcode.rotation": "Obrót",
+  "rectangle.rotation": "Obrót",
+  "rectangle_pattern.rotation": "Obrót",
+  "text.rotation": "Obrót"
 }

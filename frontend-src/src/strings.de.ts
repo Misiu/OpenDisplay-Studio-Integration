@@ -258,6 +258,7 @@ export const german: StringsOverride = {
       `Punkt zu ${name} nach Punkt ${number} hinzufügen`,
     pointHandle: (name: string, number: number): string =>
       `Punkt ${number} von ${name} verschieben`,
+    rotateHandle: (name: string): string => `${name} drehen`,
     resizeHandle: (name: string, side: string): string =>
       `${name} von ${side} skalieren`,
     sides: {

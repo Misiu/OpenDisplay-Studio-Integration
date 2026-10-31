@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Turn any primitive: every element but the debug grid has a Rotation in the Layout
+  section, from -360° to 360° clockwise. Select an element and drag the round handle above
+  its frame to turn it, with <kbd>Shift</kbd> for steps of 15° and <kbd>Esc</kbd> to cancel,
+  or type the angle. The frame turns with the element, about the point the renderer turns
+  it about, and the preview shows the result. Dashboards made before keep their look: an
+  element with no rotation is drawn exactly as it was.
+
 ## 0.1.2
 
 - Add the Battery widget: the charge of a battery sensor, or of a binary sensor that says

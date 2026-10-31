@@ -80,8 +80,14 @@ def shift_primitive(
     return shifted
 
 
+TURN_KEYS = ("rotation", "pivot")
 X_KEYS = ("x", "x_start", "x_end")
 Y_KEYS = ("y", "y_start", "y_end")
+
+
+def without_turn(element: dict[str, Any]) -> dict[str, Any]:
+    """Return the ODL element as it is drawn upright."""
+    return {key: value for key, value in element.items() if key not in TURN_KEYS}
 
 
 def translate_elements(

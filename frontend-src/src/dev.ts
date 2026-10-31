@@ -759,6 +759,10 @@ interface PromoHooks {
   yamls?: Record<string, string>;
   /** Pixels the picture shows beyond the display, as the backend's preview does. */
   margin?: number;
+  /** What the backend measured, where the harness's own guess would differ. */
+  bounds?: Record<string, Box>;
+  /** Where the renderer turned each rotated primitive about. */
+  pivots?: Record<string, { x: number; y: number }>;
 }
 
 const promo = window.__ODS_PROMO__;
@@ -1049,7 +1053,8 @@ const hass: HomeAssistant = {
         imageUrl: preview(dashboard),
         margin: promo?.margin ?? 0,
         yaml: promo?.yamls?.[dashboard.id] ?? yaml,
-        itemBounds: itemBounds(dashboard),
+        itemBounds: promo?.bounds ?? itemBounds(dashboard),
+        itemPivots: promo?.pivots,
         warnings: [],
         dependencies: {
           entities: expressionEntities(dashboard),
