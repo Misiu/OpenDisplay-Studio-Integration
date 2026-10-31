@@ -9,7 +9,7 @@ author: OpenDisplay Studio
 
 layout:
   defaultSize: { width: 200, height: 100 }
-  minSize: { width: 80, height: 48 }
+  minSize: { width: 24, height: 24 }
 
 sources:
   - key: entities

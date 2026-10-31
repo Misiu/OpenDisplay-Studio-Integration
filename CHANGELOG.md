@@ -8,6 +8,9 @@
   or type the angle. The frame turns with the element, about the point the renderer turns
   it about, and the preview shows the result. Dashboards made before keep their look: an
   element with no rotation is drawn exactly as it was.
+- Let the Battery widget be made much smaller: its smallest size is now 24 × 24, and a
+  frame too small for the name and the percentage draws less of them, down to the
+  battery alone, instead of failing to render.
 
 ## 0.1.2
 

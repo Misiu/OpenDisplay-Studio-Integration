@@ -6,6 +6,7 @@ from dataclasses import dataclass, replace
 from typing import Any, Final
 
 from custom_components.opendisplay_studio.sdk import (
+    Box,
     Look,
     WidgetContext,
     clamp,
@@ -310,12 +311,10 @@ def _name(look: Look, name: str, size: int) -> dict[str, Any]:
     )
 
 
-def render(context: WidgetContext) -> list[dict[str, Any]]:
-    """Draw the battery of the picked entity, or say that none is picked."""
-    look = Look.of(context)
-    if not context.sources["entities"]:
-        return compose(context, look.message(context.box, context.t("choose_entity")))
-    options = context.options
+def _draw(
+    context: WidgetContext, look: Look, options: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Draw the battery with the options given, which may be fewer than the user's."""
     pick = context.sources["entities"][0]
     data = context.data["entities"][0]
     charge = _charge(context, data)
@@ -388,6 +387,43 @@ def render(context: WidgetContext) -> list[dict[str, Any]]:
             "children": children,
         },
     )
+
+
+def _is_unfit(element: dict[str, Any], box: Box) -> bool:
+    """Return whether a rectangle has no room, or reaches beyond the frame."""
+    x_start = element.get("x_start", box.x)
+    y_start = element.get("y_start", box.y)
+    x_end = element.get("x_end", x_start)
+    y_end = element.get("y_end", y_start)
+    return bool(
+        x_end < x_start or y_end < y_start or x_end > box.right or y_end > box.bottom
+    )
+
+
+def render(context: WidgetContext) -> list[dict[str, Any]]:
+    """
+    Draw the battery of the picked entity, or say that none is picked.
+
+    A frame too small for the name and the percentage as well is drawn with less: first
+    without the name, then as the battery alone, then lying down however it was told to
+    stand. The last fits any frame the editor allows.
+    """
+    look = Look.of(context)
+    if not context.sources["entities"]:
+        return compose(context, look.message(context.box, context.t("choose_entity")))
+    attempts: tuple[dict[str, Any], ...] = (
+        {},
+        {"showName": False},
+        {"showName": False, "showPercentage": False},
+        {"showName": False, "showPercentage": False, "orientation": "auto"},
+    )
+    for fewer in attempts:
+        elements = _draw(context, look, {**context.options, **fewer})
+        if not any(_is_unfit(element, context.box) for element in elements):
+            return elements
+    # What is left over is a part too small to see, such as the fill of a nearly empty
+    # battery in a very small frame.
+    return [element for element in elements if not _is_unfit(element, context.box)]
 
 
 RENDERER = render

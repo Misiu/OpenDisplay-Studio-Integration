@@ -191,7 +191,19 @@ async def test_batteries_of_one_frame_have_the_same_layout() -> None:
     "state_id", ["charged", "low", "half-polish", "binary-low", "empty", "unavailable"]
 )
 @pytest.mark.parametrize(
-    "size", [(80, 48), WIDE, TALL, (296, 128), (400, 240), (800, 480), (60, 400)]
+    "size",
+    [
+        (24, 24),
+        (48, 24),
+        (24, 48),
+        (80, 48),
+        WIDE,
+        TALL,
+        (296, 128),
+        (400, 240),
+        (800, 480),
+        (60, 400),
+    ],
 )
 async def test_nothing_leaves_the_frame_at_any_size(
     state_id: str, size: tuple[int, int]
@@ -260,3 +272,26 @@ async def test_inside_the_size_of_the_text_does_not_depend_on_the_level() -> Non
         sizes |= {g["size"] for g in await inside(level)}
 
     assert len(sizes) == 1
+
+
+@pytest.mark.parametrize("size", [(24, 24), (30, 24), (40, 30), (52, 40), (128, 36)])
+@pytest.mark.parametrize("orientation", ["auto", "horizontal", "vertical"])
+@pytest.mark.parametrize("style", ["solid", "segments"])
+async def test_a_frame_too_small_for_the_captions_draws_the_battery_alone(
+    size: tuple[int, int], orientation: str, style: str
+) -> None:
+    state = with_options(with_level("60"), {"orientation": orientation, "style": style})
+
+    image, elements = await drawn_state(state, size)
+
+    assert image.size == size
+    assert ink(image) > 0
+    for element in elements:
+        assert element.get("x_end", 0) >= element.get("x_start", 0)
+        assert element.get("y_end", 0) >= element.get("y_start", 0)
+
+
+async def test_a_roomy_frame_still_shows_the_name_and_the_percentage() -> None:
+    _, elements = await drawn("charged", (296, 128))
+
+    assert len(captions(elements)) == 2

@@ -87,7 +87,7 @@ Default size 360 x 240 px, smallest 180 x 90 px. Id: `agenda`.
 
 The charge of a battery as a battery that fills up, with its percentage.
 
-Default size 200 x 100 px, smallest 80 x 48 px. Id: `battery`.
+Default size 200 x 100 px, smallest 24 x 24 px. Id: `battery`.
 
 Shows one battery entity as a battery that fills up in proportion to its charge, with
 the percentage beside it (or under it in a tall frame). Pick a battery sensor (a
