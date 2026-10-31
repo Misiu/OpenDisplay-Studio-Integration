@@ -168,10 +168,7 @@ def _value_row(
     unit_room = text_width(sensor.unit, unit_size) + GAP if sensor.unit else 0
     room = area.width - (icon_size + GAP if icon_size else 0) - unit_room
     value_size = fit_text(
-        sensor.value,
-        room,
-        max(MIN_TEXT, _tallest_size(area.height, area.height)),
-        steady_digits=True,
+        sensor.value, room, max(MIN_TEXT, _tallest_size(area.height, area.height))
     )
     figures = [look.text(sensor.value, size=value_size)]
     if sensor.unit:

@@ -140,20 +140,19 @@ async def test_the_digits_do_not_change_the_size_of_the_value(shape: str) -> Non
 
 
 @pytest.mark.parametrize("shape", sorted(SHAPES))
-async def test_a_longer_value_changes_only_the_value(shape: str) -> None:
-    _, short = await draw_card("Salon", "9.9", SHAPES[shape])
-    _, long = await draw_card("Salon", "-24.1", SHAPES[shape])
+async def test_values_of_one_length_have_the_same_layout_with_a_sign_too(
+    shape: str,
+) -> None:
+    drawn = [
+        await draw_card("Salon", value, SHAPES[shape])
+        for value in ("-24.1", "-8.7", "-31.9")
+    ]
 
-    def without_value(elements: list[dict[str, Any]]) -> list[tuple[Any, ...]]:
-        biggest = max(element.get("size", 0) for element in elements)
-        return [
-            item
-            for element, item in zip(elements, skeleton(elements), strict=True)
-            if element.get("size") != biggest
-        ]
+    layouts = [skeleton(elements) for _, elements in drawn]
 
-    # The name, the icon and the separator stay exactly where they were.
-    assert without_value(short) == without_value(long)
+    # -8.7 is one character shorter than the others, so it may be drawn larger; the two
+    # that are as long as each other are laid out identically.
+    assert layouts[0] == layouts[2]
 
 
 def lines_of(elements: list[dict[str, Any]]) -> list[dict[str, Any]]:

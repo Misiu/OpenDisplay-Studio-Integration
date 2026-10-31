@@ -151,22 +151,6 @@ def _icon_row(
     }
 
 
-def _centered_in(height: int, justify: str, child: dict[str, Any]) -> dict[str, Any]:
-    """
-    Return a row of a fixed height that holds `child` in its middle.
-
-    The height comes from the frame and not from what is drawn, so a card shows its
-    parts on the same rows whatever the size of its value turns out to be.
-    """
-    return {
-        "type": "row",
-        "h": height,
-        "justify": justify,
-        "align": "center",
-        "children": [child],
-    }
-
-
 def _stacked(
     context: WidgetContext,
     look: Look,
@@ -199,8 +183,14 @@ def _stacked(
         children.append(name)
     if separated:
         children.append(look.divider())
-    value = look.text(reading.value, size=value_size, color=reading.color)
-    children.append(_centered_in(value_height, ALIGN_JUSTIFY[align], value))
+    value = look.text(
+        reading.value,
+        size=value_size,
+        color=reading.color,
+        align=align,
+        h=line_height(value_size),
+    )
+    children.append(value)
     if reading.unit:
         unit = look.text(
             reading.unit,
@@ -248,14 +238,16 @@ def _strip(
             reading.name, size=name_size, align=align, truncate=True, h=name_height
         )
         texts.append(name)
-    value_row = {
-        "type": "row",
-        "gap": UNIT_GAP,
-        "align": "end",
-        "h": line_height(value_size),
-        "children": value_row_children,
-    }
-    texts.append(_centered_in(value_height, ALIGN_JUSTIFY[align], value_row))
+    texts.append(
+        {
+            "type": "row",
+            "gap": UNIT_GAP,
+            "align": "end",
+            "justify": ALIGN_JUSTIFY[align],
+            "h": line_height(value_size),
+            "children": value_row_children,
+        }
+    )
     children: list[dict[str, Any]] = []
     if show_icon:
         icon = look.icon(reading.icon, size=icon_side, color=reading.color)
