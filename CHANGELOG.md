@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.3
+
 - Turn any primitive: every element but the debug grid has a Rotation in the Layout
   section, from -360° to 360° clockwise. Select an element and drag the round handle above
   its frame to turn it, with <kbd>Shift</kbd> for steps of 15° and <kbd>Esc</kbd> to cancel,
