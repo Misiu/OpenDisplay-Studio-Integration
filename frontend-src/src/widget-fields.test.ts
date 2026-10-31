@@ -27,6 +27,7 @@ describe("the built-in widget definitions", () => {
 
     expect(english).toEqual([
       "Agenda",
+      "Battery",
       "Calendar",
       "School timetable",
       "Sensor card",
@@ -37,6 +38,7 @@ describe("the built-in widget definitions", () => {
     ]);
     expect(polish).toEqual([
       "Agenda",
+      "Bateria",
       "Kalendarz",
       "Plan lekcji",
       "Karta czujnika",

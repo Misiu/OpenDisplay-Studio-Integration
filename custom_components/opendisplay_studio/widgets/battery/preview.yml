@@ -1,0 +1,24 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bwr
+sizes:
+  - {name: corner, width: 96, height: 40}
+  - {name: wide, width: 200, height: 100}
+  - {name: tall, width: 100, height: 200}
+  - {name: tag, width: 296, height: 128}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: full, width: 800, height: 480}
+docs:
+  - {title: "A charged battery in a wide frame", state: charged, size: wide}
+  - {title: "A low battery is drawn in the highlight color", state: low, size: wide}
+  - {title: "A tall frame stands the battery up", state: low, size: tall}
+  - {title: "Half full, in Polish, on a small tag", state: half-polish, size: tag}
+  - {title: "The percentage inside the battery, readable on the fill and off it", state: half-polish, size: tag, options: {percentagePlacement: inside}}
+  - {title: "Standing, with the percentage inside", state: charged, size: tall, options: {percentagePlacement: inside}}
+  - {title: "Rounded segments: ten on a long battery", state: charged, size: tag, options: {style: segments}}
+  - {title: "Fewer segments on a short one, standing", state: low, size: tall, options: {style: segments}}
+  - {title: "Segments with the percentage inside", state: half-polish, size: tag, options: {style: segments, percentagePlacement: inside}}
+  - {title: "Only the battery, for the corner of a display: it fills the whole widget", state: charged, size: corner, options: {showName: false, showPercentage: false, showFrame: false, style: segments}}
+  - {title: "The same in solid, with the percentage inside", state: half-polish, size: corner, options: {showName: false, percentagePlacement: inside, showFrame: false}}
+  - {title: "A sensor that only says low or fine", state: binary-low, size: wide}
+  - {title: "White on black, without the name", state: charged, size: wide, options: {color: white, background: black, showName: false}}
+  - {title: "Nothing chosen yet", state: missing-sources, size: wide}

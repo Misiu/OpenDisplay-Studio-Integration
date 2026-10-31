@@ -83,6 +83,110 @@ Default size 360 x 240 px, smallest 180 x 90 px. Id: `agenda`.
 ![Nothing planned](images/agenda-8.png)
 *Nothing planned*
 
+## Battery
+
+The charge of a battery as a battery that fills up, with its percentage.
+
+Default size 200 x 100 px, smallest 80 x 48 px. Id: `battery`.
+
+Shows one battery entity as a battery that fills up in proportion to its charge, with
+the percentage beside it (or under it in a tall frame). Pick a battery sensor (a
+percentage) or a binary sensor that says whether its battery is low; the second is drawn
+nearly empty and marked "Low", or full and marked "OK".
+
+At or below **Low battery at or below** the battery and its text are drawn in the
+highlight color of the display. The battery lies down in a wide frame and stands up in a
+tall one, or as you choose with **Orientation**. The size of the text comes from the
+frame and not from the number, so batteries of one size are laid out alike.
+
+With **Percentage: inside the battery** the number is drawn in the middle of the
+battery, which takes less room. It is outlined in the color of the background, whatever
+the charge, so it reads on the fill and off it and looks the same at every level.
+
+Turn off the name and the percentage (or put the percentage inside) and the battery fills the
+whole widget: make the widget small and put it in a corner of the display to show the
+charge of the e-paper display itself. **Style: segments** draws the charge as up to ten
+rounded segments of one size, fewer when the battery is short; the segments that are full
+follow the charge, rounded to the nearest, and at least one while there is any charge.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Entity | one sensor or binary_sensor entity | Label |
+
+### Options
+
+**Content**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show name | `showName` | on / off | on |
+| Show percentage | `showPercentage` | on / off | on |
+| Style | `style` | one of `solid`, `segments` | `solid` |
+| Percentage | `percentagePlacement` | one of `beside`, `inside` | `beside` |
+| Orientation | `orientation` | one of `auto`, `horizontal`, `vertical` | `auto` |
+
+**Thresholds**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Low battery at or below | `lowLevel` | number 0 to 100 | `20` |
+| Low battery color | `alertColor` | color | `accent` |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![A charged battery in a wide frame](images/battery-1.png)
+*A charged battery in a wide frame*
+
+![A low battery is drawn in the highlight color](images/battery-2.png)
+*A low battery is drawn in the highlight color*
+
+![A tall frame stands the battery up](images/battery-3.png)
+*A tall frame stands the battery up*
+
+![Half full, in Polish, on a small tag](images/battery-4.png)
+*Half full, in Polish, on a small tag*
+
+![The percentage inside the battery, readable on the fill and off it](images/battery-5.png)
+*The percentage inside the battery, readable on the fill and off it*
+
+![Standing, with the percentage inside](images/battery-6.png)
+*Standing, with the percentage inside*
+
+![Rounded segments: ten on a long battery](images/battery-7.png)
+*Rounded segments: ten on a long battery*
+
+![Fewer segments on a short one, standing](images/battery-8.png)
+*Fewer segments on a short one, standing*
+
+![Segments with the percentage inside](images/battery-9.png)
+*Segments with the percentage inside*
+
+![Only the battery, for the corner of a display: it fills the whole widget](images/battery-10.png)
+*Only the battery, for the corner of a display: it fills the whole widget*
+
+![The same in solid, with the percentage inside](images/battery-11.png)
+*The same in solid, with the percentage inside*
+
+![A sensor that only says low or fine](images/battery-12.png)
+*A sensor that only says low or fine*
+
+![White on black, without the name](images/battery-13.png)
+*White on black, without the name*
+
+![Nothing chosen yet](images/battery-14.png)
+*Nothing chosen yet*
+
 ## Calendar
 
 Events of one or more calendars as upcoming days, an agenda or a grid of weeks.

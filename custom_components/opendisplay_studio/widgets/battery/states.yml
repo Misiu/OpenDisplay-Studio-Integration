@@ -1,0 +1,95 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+charged:
+  name: A battery that is mostly full
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.door_battery, label: Front door}
+  data:
+    entities:
+      - {id: sensor.door_battery, missing: false, name: Front door battery, state: "87", display_state: "87", unit: "%", icon: battery, device_class: battery, available: true, last_changed: ""}
+
+low:
+  name: A battery that is nearly empty
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {lowLevel: 20}
+  sources:
+    entities:
+      - {id: sensor.window_battery, label: Bedroom window}
+  data:
+    entities:
+      - {id: sensor.window_battery, missing: false, name: Window battery, state: "12", display_state: "12", unit: "%", icon: battery, device_class: battery, available: true, last_changed: ""}
+
+half-polish:
+  name: Half full, in Polish
+  language: pl
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.pilot, label: Pilot do telewizora}
+  data:
+    entities:
+      - {id: sensor.pilot, missing: false, name: Pilot, state: "50", display_state: "50", unit: "%", icon: battery, device_class: battery, available: true, last_changed: ""}
+
+binary-low:
+  name: A sensor that only says its battery is low
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: binary_sensor.smoke_battery, label: Smoke detector}
+  data:
+    entities:
+      - {id: binary_sensor.smoke_battery, missing: false, name: Smoke battery, state: "on", display_state: "On", unit: "", icon: battery-alert, device_class: battery, available: true, last_changed: ""}
+
+binary-ok:
+  name: A sensor that says its battery is fine
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: binary_sensor.smoke_battery, label: Smoke detector}
+  data:
+    entities:
+      - {id: binary_sensor.smoke_battery, missing: false, name: Smoke battery, state: "off", display_state: "Off", unit: "", icon: battery, device_class: battery, available: true, last_changed: ""}
+
+unavailable:
+  name: A battery that cannot be read
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.gone, label: Gone}
+  data:
+    entities:
+      - {id: sensor.gone, missing: false, name: Gone, state: unavailable, display_state: unavailable, unit: "", icon: battery, device_class: battery, available: false, last_changed: ""}
+
+empty:
+  name: A battery at 0 %
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.flat, label: Flat}
+  data:
+    entities:
+      - {id: sensor.flat, missing: false, name: Flat, state: "0", display_state: "0", unit: "%", icon: battery, device_class: battery, available: true, last_changed: ""}
+
+missing-sources:
+  name: No entity chosen yet
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities: []
+  data:
+    entities: []

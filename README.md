@@ -22,7 +22,7 @@ display can fetch.
   patterns, polygons, circles, ellipses, arcs, icons, icon rows, images, QR
   codes, progress bars, history plots and a debug grid.
 - **Live widgets**: Sensor card, Sensor list, Sensor chart, Calendar, Agenda,
-  School timetable, Waste collection and Weather read your entities, calendars and forecasts. Write
+  School timetable, Waste collection, Battery and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see
   [`docs/widget-sdk.md`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widget-sdk.md)). Every widget is described, with its
   options and pictures, in [`docs/widgets`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md).
@@ -150,6 +150,13 @@ The widgets that come with Studio:
       <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/weather-1.png" alt="Weather" width="360"><br>
       <b>Weather</b><br>
       Current conditions and a daily or hourly forecast of a weather entity.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/battery-1.png" alt="Battery" width="360"><br>
+      <b>Battery</b><br>
+      The charge of a battery as a battery that fills up, with its percentage beside it or inside, and a color for a low charge.
     </td>
   </tr>
 </table>

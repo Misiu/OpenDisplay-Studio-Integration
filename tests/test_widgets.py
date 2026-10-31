@@ -122,6 +122,7 @@ class TestBuiltInCatalog:
             "weather",
             "school-timetable",
             "waste-collection",
+            "battery",
         }
 
     def test_labels_come_in_the_dashboard_language(self) -> None:
@@ -154,6 +155,7 @@ class TestBuiltInCatalog:
             "weather",
             "school-timetable",
             "waste-collection",
+            "battery",
         ],
     )
     def test_every_language_translates_everything_english_does(
@@ -173,6 +175,7 @@ class TestBuiltInCatalog:
             "weather",
             "school-timetable",
             "waste-collection",
+            "battery",
         ],
     )
     def test_every_label_the_panel_shows_is_translated(self, widget_id: str) -> None:

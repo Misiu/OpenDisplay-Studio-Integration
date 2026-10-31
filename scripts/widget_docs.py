@@ -77,7 +77,8 @@ def _default_of(value: Any) -> str:
 
 def _source_type(selector: dict[str, Any]) -> str:
     kind, config = next(iter(selector.items()))
-    domain = config.get("filter", {}).get("domain", "")
+    domains = config.get("filter", {}).get("domain", "")
+    domain = " or ".join(domains) if isinstance(domains, list) else domains
     count = "one or more" if config.get("multiple") else "one"
     return " ".join(part for part in (count, domain, kind) if part)
 
