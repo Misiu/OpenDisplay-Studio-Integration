@@ -488,6 +488,79 @@ Default size 280 x 200 px, smallest 160 x 80 px. Id: `sensor-list`.
 ![Nothing chosen yet](images/sensor-list-5.png)
 *Nothing chosen yet*
 
+## Waste collection
+
+When each bin is collected, from up to four calendars, with the nearest dates highlighted.
+
+Default size 296 x 128 px, smallest 160 x 96 px. Id: `waste-collection`.
+
+Shows when each of up to four bins is collected, one cell for each. Pick the calendars
+of your waste collection (one per bin) and give each a label; the date comes from the
+next event of the calendar, in words ("Today", "Tomorrow", "in 12 days") in the language
+of the dashboard.
+
+A bin that is due within **Highlight this many days before** is filled with the
+highlight color and its text turns to the color of the background. The highlight color is
+one for all bins and can be set for each bin as well. The cells follow the shape of the
+frame: two by two, or in one row or one column for a very wide or tall frame, and the
+bin in the middle appears where four cells meet. The sizes of the texts come from the
+frame, not from the dates, so the cells line up whatever the dates are.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Bins | one or more calendar entity | Label, Highlight color |
+
+### Options
+
+**Content**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Highlight this many days before | `highlightDays` | number 0 to 30 | `1` |
+| Highlight color | `alertColor` | color | `accent` |
+| Show the bin in the middle | `showIcon` | on / off | on |
+| Show dividers | `showDividers` | on / off | on |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![Four bins on a small tag, the one due tomorrow highlighted](images/waste-collection-1.png)
+*Four bins on a small tag, the one due tomorrow highlighted*
+
+![The same on a full display](images/waste-collection-2.png)
+*The same on a full display*
+
+![A narrow frame puts the bins in a column](images/waste-collection-3.png)
+*A narrow frame puts the bins in a column*
+
+![A wide frame puts them in a row](images/waste-collection-4.png)
+*A wide frame puts them in a row*
+
+![Three bins](images/waste-collection-5.png)
+*Three bins*
+
+![Two bins in German](images/waste-collection-6.png)
+*Two bins in German*
+
+![A highlight color for each bin on a BWRY display](images/waste-collection-7.png)
+*A highlight color for each bin on a BWRY display*
+
+![White on black, without the bin in the middle](images/waste-collection-8.png)
+*White on black, without the bin in the middle*
+
+![Nothing chosen yet](images/waste-collection-9.png)
+*Nothing chosen yet*
+
 ## Weather
 
 Current conditions and a daily or hourly forecast of a weather entity.

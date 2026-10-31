@@ -32,6 +32,7 @@ describe("the built-in widget definitions", () => {
       "Sensor card",
       "Sensor chart",
       "Sensor list",
+      "Waste collection",
       "Weather",
     ]);
     expect(polish).toEqual([
@@ -41,6 +42,7 @@ describe("the built-in widget definitions", () => {
       "Karta czujnika",
       "Wykres czujnika",
       "Lista czujników",
+      "Wywóz śmieci",
       "Pogoda",
     ]);
   });

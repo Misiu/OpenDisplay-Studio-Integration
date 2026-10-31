@@ -1,0 +1,18 @@
+# Sizes and palette the preview tool draws every state at.
+palette: bwr
+sizes:
+  - {name: tag, width: 296, height: 128}
+  - {name: full, width: 800, height: 480}
+  - {name: half horizontal, width: 800, height: 240}
+  - {name: half vertical, width: 400, height: 480}
+  - {name: quadrant, width: 400, height: 240}
+docs:
+  - {title: "Four bins on a small tag, the one due tomorrow highlighted", state: four-bins, size: tag, options: {showFrame: false}}
+  - {title: "The same on a full display", state: due-soon, size: full}
+  - {title: "A narrow frame puts the bins in a column", state: due-soon, size: half vertical}
+  - {title: "A wide frame puts them in a row", state: due-soon, size: half horizontal}
+  - {title: "Three bins", state: three-bins, size: quadrant}
+  - {title: "Two bins in German", state: two-bins, size: quadrant}
+  - {title: "A highlight color for each bin on a BWRY display", state: due-soon, size: quadrant, palette: bwry}
+  - {title: "White on black, without the bin in the middle", state: four-bins, size: tag, options: {color: white, background: black, showIcon: false}}
+  - {title: "Nothing chosen yet", state: missing-sources, size: tag}

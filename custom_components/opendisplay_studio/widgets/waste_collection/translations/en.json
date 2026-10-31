@@ -1,0 +1,22 @@
+{
+  "name": "Waste collection",
+  "description": "When each bin is collected, from up to four calendars, with the nearest dates highlighted.",
+  "categories.Calendar": "Calendar",
+  "sources.bins": "Bins",
+  "sources.bins.label": "Label",
+  "sources.bins.color": "Highlight color",
+  "sections.content": "Content",
+  "sections.appearance": "Appearance",
+  "options.highlightDays": "Highlight this many days before",
+  "options.alertColor": "Highlight color",
+  "options.showIcon": "Show the bin in the middle",
+  "options.showDividers": "Show dividers",
+  "options.showFrame": "Show frame",
+  "options.cornerRadius": "Corner radius",
+  "options.color": "Color",
+  "options.background": "Background",
+  "runtime.choose_calendars": "Choose calendars",
+  "runtime.today": "Today",
+  "runtime.tomorrow": "Tomorrow",
+  "runtime.in_days": "in {count} days"
+}

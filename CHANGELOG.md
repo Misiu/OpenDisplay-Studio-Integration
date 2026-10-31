@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add the Waste collection widget: when up to four bins are collected, from their calendars,
+  with the dates nearest in time highlighted in a color of the display.
+
 ## 0.1.1
 
 - Explain in the log when another integration has loaded an `odl-renderer` older than

@@ -1,0 +1,67 @@
+api: 1
+id: waste-collection
+name: Waste collection
+version: 1.0.0
+description: When each bin is collected, from up to four calendars, with the nearest dates highlighted.
+icon: mdi:trash-can-outline
+category: Calendar
+author: OpenDisplay Studio
+provider: provider.py
+
+layout:
+  defaultSize: { width: 296, height: 128 }
+  minSize: { width: 160, height: 96 }
+
+sources:
+  - key: bins
+    label: Bins
+    selector:
+      entity: { filter: { domain: calendar }, multiple: true }
+    required: true
+    max: 4
+    data: waste-collection:next
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+      - key: color
+        label: Highlight color
+        selector: { opendisplay_color: {} }
+
+options:
+  - section: content
+    fields:
+      - key: highlightDays
+        label: Highlight this many days before
+        default: 1
+        selector: { number: { min: 0, max: 30, mode: slider } }
+      - key: alertColor
+        label: Highlight color
+        default: accent
+        selector: { opendisplay_color: {} }
+      - key: showIcon
+        label: Show the bin in the middle
+        default: true
+        selector: { boolean: {} }
+      - key: showDividers
+        label: Show dividers
+        default: true
+        selector: { boolean: {} }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }

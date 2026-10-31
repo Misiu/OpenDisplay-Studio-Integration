@@ -22,7 +22,7 @@ display can fetch.
   patterns, polygons, circles, ellipses, arcs, icons, icon rows, images, QR
   codes, progress bars, history plots and a debug grid.
 - **Live widgets**: Sensor card, Sensor list, Sensor chart, Calendar, Agenda,
-  School timetable and Weather read your entities, calendars and forecasts. Write
+  School timetable, Waste collection and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see
   [`docs/widget-sdk.md`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widget-sdk.md)). Every widget is described, with its
   options and pictures, in [`docs/widgets`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md).
@@ -100,6 +100,59 @@ entities, calendars or weather source, choose the options, and resize the frame.
 The layout adapts to the size you give it. Every widget can be drawn without its
 frame and background, or in white on black. [The widgets page](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md)
 lists each widget with its sources, options and pictures.
+
+The widgets that come with Studio:
+
+<table>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/sensor-card-1.png" alt="Sensor card" width="360"><br>
+      <b>Sensor card</b><br>
+      The value of one entity as a tile whose layout follows the shape of its frame: wide, square or tall.
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/sensor-list-1.png" alt="Sensor list" width="360"><br>
+      <b>Sensor list</b><br>
+      The values of several entities, one line each, with alerts above or below a threshold.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/sensor-chart-1.png" alt="Sensor chart" width="360"><br>
+      <b>Sensor chart</b><br>
+      The value of one entity with its history as a line chart.
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/calendar-1.png" alt="Calendar" width="360"><br>
+      <b>Calendar</b><br>
+      Events of one or more calendars as upcoming days, an agenda or a grid of weeks.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/agenda-1.png" alt="Agenda" width="360"><br>
+      <b>Agenda</b><br>
+      Upcoming events from several calendars on one list.
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/school-timetable-1.png" alt="School timetable" width="360"><br>
+      <b>School timetable</b><br>
+      A school week of one calendar as a table of days and lesson slots, with the lesson in progress marked.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/waste-collection-1.png" alt="Waste collection" width="360"><br>
+      <b>Waste collection</b><br>
+      When each of up to four bins is collected, with the nearest dates highlighted in a color of the display.
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/weather-1.png" alt="Weather" width="360"><br>
+      <b>Weather</b><br>
+      Current conditions and a daily or hourly forecast of a weather entity.
+    </td>
+  </tr>
+</table>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/widget-properties.webp" alt="The properties of a sensor card widget" width="900">

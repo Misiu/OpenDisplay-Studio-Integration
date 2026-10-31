@@ -1,0 +1,103 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+four-bins:
+  name: Four bins, one of them due tomorrow
+  language: pl
+  now: "2026-10-31T11:31:00+01:00"
+  options: {highlightDays: 1}
+  sources:
+    bins:
+      - {id: calendar.mixed, label: Zmieszane}
+      - {id: calendar.plastic, label: Plastik}
+      - {id: calendar.glass, label: Szkło}
+      - {id: calendar.paper, label: Papier}
+  data:
+    bins:
+      - {id: calendar.mixed, missing: false, name: Zmieszane, start: "2026-11-03T00:00:00+01:00"}
+      - {id: calendar.plastic, missing: false, name: Plastik, start: "2026-11-24T00:00:00+01:00"}
+      - {id: calendar.glass, missing: false, name: Szkło, start: "2026-11-19T00:00:00+01:00"}
+      - {id: calendar.paper, missing: false, name: Papier, start: null}
+
+due-soon:
+  name: Two bins past the highlight threshold
+  language: en
+  now: "2026-10-31T08:00:00+01:00"
+  options: {highlightDays: 2}
+  sources:
+    bins:
+      - {id: calendar.general, label: General}
+      - {id: calendar.recycling, label: Recycling, color: yellow}
+      - {id: calendar.garden, label: Garden}
+      - {id: calendar.glass, label: Glass}
+  data:
+    bins:
+      - {id: calendar.general, missing: false, name: General, start: "2026-10-31T00:00:00+01:00"}
+      - {id: calendar.recycling, missing: false, name: Recycling, start: "2026-11-02T00:00:00+01:00"}
+      - {id: calendar.garden, missing: false, name: Garden, start: "2026-11-05T00:00:00+01:00"}
+      - {id: calendar.glass, missing: false, name: Glass, start: "2026-11-20T00:00:00+01:00"}
+
+three-bins:
+  name: Three bins
+  language: en
+  now: "2026-10-31T08:00:00+01:00"
+  options: {}
+  sources:
+    bins:
+      - {id: calendar.general, label: General}
+      - {id: calendar.recycling, label: Recycling}
+      - {id: calendar.garden, label: Garden}
+  data:
+    bins:
+      - {id: calendar.general, missing: false, name: General, start: "2026-11-01T00:00:00+01:00"}
+      - {id: calendar.recycling, missing: false, name: Recycling, start: "2026-11-09T00:00:00+01:00"}
+      - {id: calendar.garden, missing: false, name: Garden, start: "2026-11-12T00:00:00+01:00"}
+
+two-bins:
+  name: Two bins
+  language: de
+  now: "2026-10-31T08:00:00+01:00"
+  options: {}
+  sources:
+    bins:
+      - {id: calendar.rest, label: Restmüll}
+      - {id: calendar.papier, label: Papier}
+  data:
+    bins:
+      - {id: calendar.rest, missing: false, name: Restmüll, start: "2026-11-04T00:00:00+01:00"}
+      - {id: calendar.papier, missing: false, name: Papier, start: "2026-11-21T00:00:00+01:00"}
+
+one-bin:
+  name: One bin
+  language: en
+  now: "2026-10-31T08:00:00+01:00"
+  options: {}
+  sources:
+    bins:
+      - {id: calendar.general, label: General waste}
+  data:
+    bins:
+      - {id: calendar.general, missing: false, name: General waste, start: "2026-11-02T00:00:00+01:00"}
+
+calendar-gone:
+  name: A calendar that cannot be read
+  language: en
+  now: "2026-10-31T08:00:00+01:00"
+  options: {}
+  sources:
+    bins:
+      - {id: calendar.general, label: General}
+      - {id: calendar.gone, label: Gone}
+  data:
+    bins:
+      - {id: calendar.general, missing: false, name: General, start: "2026-11-06T00:00:00+01:00"}
+      - {id: calendar.gone, missing: true, name: calendar.gone, start: null}
+
+missing-sources:
+  name: No calendar chosen yet
+  language: en
+  now: "2026-10-31T08:00:00+01:00"
+  options: {}
+  sources:
+    bins: []
+  data:
+    bins: []

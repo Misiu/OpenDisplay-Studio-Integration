@@ -163,7 +163,7 @@ test.describe("reloading widgets", () => {
     await expect(libraryItem(page, "Hello world")).toBeVisible();
     await expect(libraryItem(page, "Hello world")).toContainText("user");
     await expect(page.locator(".catalog-category")).toContainText(["Examples"]);
-    await expect(page.getByText("Widgets reloaded — 8 loaded")).toBeVisible();
+    await expect(page.getByText("Widgets reloaded — 9 loaded")).toBeVisible();
   });
 
   test("a broken package is reported and the other widgets keep working", async ({
@@ -180,7 +180,7 @@ test.describe("reloading widgets", () => {
     await expect(page.getByText("unsupported widget API 2")).toBeVisible();
     await expect(libraryItem(page, "Agenda")).toBeVisible();
     await expect(
-      page.getByText("Widgets reloaded — 7 loaded, 1 failed")
+      page.getByText("Widgets reloaded — 8 loaded, 1 failed")
     ).toBeVisible();
   });
 
