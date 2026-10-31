@@ -1006,7 +1006,7 @@ const hass: HomeAssistant = {
     if (message.type === "opendisplay_studio/bootstrap") {
       await new Promise((resolve) => window.setTimeout(resolve, 60));
       return {
-        version: "0.1.1",
+        version: "0.1.2",
         dashboards,
         widgets: installedWidgets(hass.language),
         widgetErrors: widgetErrors(),

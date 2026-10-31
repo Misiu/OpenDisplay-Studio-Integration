@@ -2,12 +2,13 @@
 
 ## Unreleased
 
+## 0.1.2
+
 - Add the Battery widget: the charge of a battery sensor, or of a binary sensor that says
   low or ok, as a battery that fills up, with the percentage beside it or inside, and the
   color of the display for a low charge. It can show the charge as up to ten rounded segments
   of one size, and without a name and a percentage it fills the whole widget, for the
   corner of a display.
-
 - Add the Waste collection widget: when up to four bins are collected, from their calendars,
   with the dates nearest in time highlighted in a color of the display.
 
