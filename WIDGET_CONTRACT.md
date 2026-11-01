@@ -27,7 +27,7 @@ sources[0].selector: …`). Required: `api` (must be `1`), `id` (kebab-case), `n
 |---|---|
 | `category` | Section of the Library the tile appears under. |
 | `sources[]` | What the user picks: `key`, `label`, a Home Assistant `selector` (entity, device, area), `required`, `max`, `data` (the data provider that resolves the picks) and `perSource[]` fields stored per pick (`label`, `color`, …). |
-| `options[]` | How it looks: sections of fields, each with `key`, `label`, `selector` and `default`. The colour selector is `opendisplay_color`. |
+| `options[]` | How it looks: sections of fields, each with `key`, `label`, `selector` and `default`. The colour selector is `opendisplay_color`; `opendisplay_ranges` is a list of colored ranges of a scale, each `{from, color}`, which `sdk.spans_of` turns into stretches of the scale. |
 | `data` | Parameters for a provider; `"@options.days"` reads an option. |
 
 ## Stored item

@@ -9,7 +9,10 @@ export type PaletteId =
   | "grayscale16";
 export type DashboardStatus = "draft" | "ready";
 
-export type WidgetValue = string | number | boolean | string[];
+/** One colored range of a scale: where it starts (`null` for the lowest value) and its color. */
+export type WidgetRange = { from: number | null; color: string };
+
+export type WidgetValue = string | number | boolean | string[] | WidgetRange[];
 export type WidgetOptions = Record<string, WidgetValue>;
 
 /** One thing the user picked for a source (an entity, a calendar), with its per-source fields. */
@@ -392,7 +395,8 @@ export type FieldShape =
   | "points"
   | "icons"
   | "object"
-  | "objects";
+  | "objects"
+  | "ranges";
 
 /** A number limit: a fixed value, or one taken from the display size. */
 export type FieldLimit =

@@ -347,6 +347,14 @@ export const german: StringsOverride = {
     remove: (number: number): string => `Punkt ${number} entfernen`,
   },
 
+  rangesField: {
+    from: "Ab",
+    color: "Farbe",
+    add: "Bereich hinzufügen",
+    remove: (number: number): string => `Bereich ${number} entfernen`,
+    hint: "Jeder Bereich dauert bis zum Beginn des nächsten. Der erste beginnt beim niedrigsten Wert.",
+  },
+
   seriesField: {
     entity: "Entität",
     settings: "Linieneinstellungen",

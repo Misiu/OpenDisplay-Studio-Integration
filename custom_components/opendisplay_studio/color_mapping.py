@@ -22,6 +22,7 @@ from custom_components.opendisplay_studio.widgets import WidgetRegistry
 # Names the renderer resolves against the display itself: they exist in every palette.
 EVERY_PALETTE: Final = frozenset({"accent", "transparent"})
 COLOR_SELECTOR: Final = "opendisplay_color"
+RANGES_SELECTOR: Final = "opendisplay_ranges"
 
 type Recolor = Callable[[str], str]
 
@@ -60,10 +61,12 @@ def _walk_color_selectors(
 ) -> None:
     """Recolor the values of widget fields that are edited as a palette color."""
     for field in fields:
-        if COLOR_SELECTOR not in field["selector"]:
-            continue
         value = values.get(field["key"])
-        if _is_color(value):
+        if RANGES_SELECTOR in field["selector"] and isinstance(value, list):
+            for entry in value:
+                if isinstance(entry, dict) and _is_color(entry.get("color")):
+                    entry["color"] = recolor(entry["color"])
+        if COLOR_SELECTOR in field["selector"] and _is_color(value):
             values[field["key"]] = recolor(value)
 
 

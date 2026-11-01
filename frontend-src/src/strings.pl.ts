@@ -359,6 +359,14 @@ export const polish: StringsOverride = {
     remove: (number: number): string => `Usuń punkt ${number}`,
   },
 
+  rangesField: {
+    from: "Od",
+    color: "Kolor",
+    add: "Dodaj zakres",
+    remove: (number: number): string => `Usuń zakres ${number}`,
+    hint: "Każdy zakres trwa do początku następnego. Pierwszy zaczyna się od najniższej wartości.",
+  },
+
   seriesField: {
     entity: "Encja",
     settings: "Ustawienia linii",

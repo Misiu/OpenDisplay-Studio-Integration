@@ -11,6 +11,7 @@ import type {
 } from "./types";
 
 const COLOR_SELECTOR = "opendisplay_color";
+const RANGES_SELECTOR = "opendisplay_ranges";
 const ACCENT = "accent";
 
 /**
@@ -63,6 +64,10 @@ export const widgetFieldAsPrimitive = (
   const { selector } = field;
   if ("boolean" in selector) return { ...base, shape: "boolean" };
   if (COLOR_SELECTOR in selector) return { ...base, shape: "color" };
+  const ranges = selector[RANGES_SELECTOR];
+  if (isRecord(ranges)) {
+    return { ...base, shape: "ranges", max: numberLimit(ranges.max) };
+  }
   const number = selector.number;
   if (isRecord(number)) {
     return {
@@ -70,6 +75,8 @@ export const widgetFieldAsPrimitive = (
       shape: "number",
       min: numberLimit(number.min),
       max: numberLimit(number.max),
+      // `step: any` is how a selector asks for a fraction.
+      decimal: number.step === "any" ? true : undefined,
       unit:
         typeof number.unit_of_measurement === "string"
           ? number.unit_of_measurement
@@ -92,7 +99,8 @@ const isWidgetValue = (value: unknown): value is WidgetValue =>
   typeof value === "string" ||
   typeof value === "number" ||
   typeof value === "boolean" ||
-  (Array.isArray(value) && value.every((entry) => typeof entry === "string"));
+  // A list of ids, or a list of colored ranges.
+  Array.isArray(value);
 
 /** The value a new widget starts with for a field: its default, else a neutral one. */
 export const fieldDefault = (field: WidgetFieldDefinition): WidgetValue => {

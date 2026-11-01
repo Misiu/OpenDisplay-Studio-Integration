@@ -429,6 +429,14 @@ export const strings = {
     remove: (number: number): string => `Remove point ${number}`,
   },
 
+  rangesField: {
+    from: "From",
+    color: "Color",
+    add: "Add range",
+    remove: (number: number): string => `Remove range ${number}`,
+    hint: "Each range lasts until the next one starts. The first starts at the lowest value.",
+  },
+
   seriesField: {
     entity: "Entity",
     settings: "Line settings",

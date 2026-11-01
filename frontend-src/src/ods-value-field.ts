@@ -15,6 +15,7 @@ import "./ods-color-picker";
 import "./ods-icon-field";
 import "./ods-points-field";
 import "./ods-series-field";
+import "./ods-ranges-field";
 import "./ods-image-field";
 import "./ods-popover";
 
@@ -50,6 +51,10 @@ export class OdsValueField extends LitElement {
       }
       .picker-trigger.color {
         height: 30px;
+      }
+      /* Beside a 28 px number box, as in a row of ranges, the color is as tall. */
+      :host([compact]) .picker-trigger.color {
+        height: 28px;
       }
       .picker-trigger .value {
         flex: 1;
@@ -138,6 +143,8 @@ export class OdsValueField extends LitElement {
   @property() public palette: PaletteId = "bw";
   @property({ attribute: false }) public display = { width: 800, height: 480 };
   @property({ type: Boolean }) public disabled = false;
+  /** Draw no label above the control; its name is still read out by assistive technology. */
+  @property({ type: Boolean }) public compact = false;
 
   @state() private picker?: { kind: Picker; anchor: DOMRect };
   private closedAt = 0;
@@ -195,7 +202,9 @@ export class OdsValueField extends LitElement {
     }
     const minimum = resolveLimit(this.field.min, this.display, -Infinity);
     const maximum = resolveLimit(this.field.max, this.display, Infinity);
-    this.change(Math.min(maximum, Math.max(minimum, Math.round(Number(text)))));
+    const typed = Number(text);
+    const value = this.field.decimal ? typed : Math.round(typed);
+    this.change(Math.min(maximum, Math.max(minimum, value)));
   }
 
   private onTextChange(event: Event): void {
@@ -506,6 +515,19 @@ export class OdsValueField extends LitElement {
     `;
   }
 
+  /** The colored ranges of a scale: rows of a start and a color, as many as wanted. */
+  private renderRanges(): TemplateResult {
+    return html`
+      <ods-ranges-field
+        .hass=${this.hass}
+        .field=${this.field}
+        .value=${this.value}
+        .palette=${this.palette}
+        .disabled=${this.disabled}
+      ></ods-ranges-field>
+    `;
+  }
+
   /** Nested settings keep Home Assistant's own editor: they are rare and structured. */
   private renderNested(): TemplateResult {
     if (isSeriesField(this.field)) return this.renderSeries();
@@ -523,6 +545,7 @@ export class OdsValueField extends LitElement {
   /** Short controls carry their label inside; the rest have it above. */
   private isLabelledInside(): boolean {
     return (
+      this.compact ||
       this.field.shape === "icon" ||
       this.field.shape === "icons" ||
       this.field.shape === "image" ||
@@ -556,6 +579,8 @@ export class OdsValueField extends LitElement {
         return this.renderImage();
       case "points":
         return this.renderPoints();
+      case "ranges":
+        return this.renderRanges();
       case "object":
       case "objects":
         return this.renderNested();

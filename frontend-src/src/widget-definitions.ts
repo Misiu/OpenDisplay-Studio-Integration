@@ -18,7 +18,11 @@ const manifests = import.meta.glob(
   { query: "?raw", import: "default", eager: true }
 );
 const translationFiles = import.meta.glob(
-  "../../custom_components/opendisplay_studio/widgets/*/translations/*.json",
+  [
+    "../../custom_components/opendisplay_studio/widgets/*/translations/*.json",
+    // The words every widget shares; a package says its own over them.
+    "../../custom_components/opendisplay_studio/widgets/translations/*.json",
+  ],
   { query: "?raw", import: "default", eager: true }
 );
 
@@ -47,13 +51,18 @@ interface RawManifest {
 const folderOf = (path: string): string =>
   path.split("/widgets/")[1]?.split("/")[0] ?? "";
 
+const readTranslations = (location: string, code: string): Translations => {
+  const entry = Object.entries(translationFiles).find(([path]) =>
+    path.endsWith(`/${location}/${code}.json`)
+  );
+  return entry ? JSON.parse(String(entry[1])) : {};
+};
+
 const translationsFor = (folder: string, language: string): Translations => {
-  const read = (code: string): Translations => {
-    const entry = Object.entries(translationFiles).find(([path]) =>
-      path.endsWith(`/${folder}/translations/${code}.json`)
-    );
-    return entry ? JSON.parse(String(entry[1])) : {};
-  };
+  const read = (code: string): Translations => ({
+    ...readTranslations("widgets/translations", code),
+    ...readTranslations(`${folder}/translations`, code),
+  });
   return { ...read("en"), ...read(language) };
 };
 
@@ -78,6 +87,7 @@ const defaultFor = (field: RawField): WidgetValue => {
   }
   if ("select" in field.selector) return selectOptions(field.selector)[0] ?? "";
   if ("opendisplay_color" in field.selector) return "black";
+  if ("opendisplay_ranges" in field.selector) return [];
   return "";
 };
 

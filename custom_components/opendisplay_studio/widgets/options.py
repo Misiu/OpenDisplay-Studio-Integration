@@ -12,6 +12,8 @@ from custom_components.opendisplay_studio.validation import (
 
 MAX_TEXT_OPTION: Final = 256
 MAX_LIST_ITEMS: Final = 100
+RANGES_SELECTOR: Final = "opendisplay_ranges"
+MAX_RANGES: Final = 12
 
 
 def _selector_kind(selector: dict[str, Any]) -> tuple[str, dict[str, Any]]:
@@ -26,21 +28,25 @@ def _select_values(config: dict[str, Any]) -> list[str]:
     ]
 
 
+# What an option has when it declares nothing and no choice or limit tells otherwise.
+_NEUTRAL: Final[dict[str, Any]] = {
+    "boolean": False,
+    RANGES_SELECTOR: [],
+    "opendisplay_color": "black",
+}
+
+
 def default_for(selector: dict[str, Any], declared: object = None) -> Any:
     """Return an option's default: the declared one, else a neutral value."""
     if declared is not None:
         return declared
     kind, config = _selector_kind(selector)
-    if kind == "boolean":
-        return False
     if kind == "number":
         return config.get("min", 0)
     if kind == "select":
         values = _select_values(config)
         return values[0] if values else ""
-    if kind == "opendisplay_color":
-        return "black"
-    return ""
+    return _NEUTRAL.get(kind, "")
 
 
 def _number(value: object, config: dict[str, Any], name: str) -> int | float:
@@ -61,6 +67,26 @@ def _text(value: object, name: str, maximum: int = MAX_TEXT_OPTION) -> str:
     return value
 
 
+def _ranges(value: object, config: dict[str, Any], name: str) -> list[dict[str, Any]]:
+    """Check a list of colored ranges: where each starts, or None for the start."""
+    most = int(config.get("max", MAX_RANGES))
+    if not isinstance(value, list) or len(value) > most:
+        fail(f"{name} must be a list of at most {most} ranges")
+    ranges = []
+    for index, entry in enumerate(value):
+        where = f"{name}[{index}]"
+        if not isinstance(entry, dict) or set(entry) - {"from", "color"}:
+            fail(f"{where} must have a start (from) and a color")
+        start = entry.get("from")
+        if start is not None:
+            start = _number(start, {}, f"{where}.from")
+        color = entry.get("color")
+        if color not in COLORS:
+            fail(f"{where}.color is not a supported palette color")
+        ranges.append({"from": start, "color": color})
+    return ranges
+
+
 def _id_or_ids(value: object, name: str) -> str | list[str]:
     if isinstance(value, list):
         if len(value) > MAX_LIST_ITEMS:
@@ -69,25 +95,27 @@ def _id_or_ids(value: object, name: str) -> str | list[str]:
     return _text(value, name)
 
 
+# Kinds whose value is checked above and kept as it is.
+_CHECKED: Final = frozenset({"boolean", "select", "opendisplay_color"})
+
+
 def normalize_value(selector: dict[str, Any], value: object, name: str) -> Any:
     """Check one stored value against the selector that edits it."""
     kind, config = _selector_kind(selector)
-    if kind == "boolean":
-        if not isinstance(value, bool):
-            fail(f"{name} must be true or false")
-        return value
+    if kind == "boolean" and not isinstance(value, bool):
+        fail(f"{name} must be true or false")
+    if kind == "select" and value not in _select_values(config):
+        fail(f"{name} is not one of the allowed values")
+    if kind == "opendisplay_color" and value not in COLORS:
+        fail(f"{name} is not a supported palette color")
     if kind == "number":
         return _number(value, config, name)
-    if kind == "select":
-        if value not in _select_values(config):
-            fail(f"{name} is not one of the allowed values")
-        return value
-    if kind == "opendisplay_color":
-        if value not in COLORS:
-            fail(f"{name} is not a supported palette color")
-        return value
+    if kind == RANGES_SELECTOR:
+        return _ranges(value, config, name)
     if kind == "text":
         return _text(value, name, MAX_TEXT_LENGTH)
+    if kind in _CHECKED:
+        return value
     return _id_or_ids(value, name)
 
 
