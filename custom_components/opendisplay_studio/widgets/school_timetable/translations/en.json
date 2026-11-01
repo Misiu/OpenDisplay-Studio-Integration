@@ -1,11 +1,4 @@
 {
-  "sections.appearance": "Appearance",
-  "options.showFrame": "Show frame",
-  "options.cornerRadius": "Corner radius",
-  "options.color": "Color",
-  "options.background": "Background",
-  "options.use24h": "24 h clock",
-  "categories.Calendar": "Calendar",
   "name": "School timetable",
   "description": "A school week of one calendar as a table of days and lesson slots.",
   "sources.calendars": "Calendar",

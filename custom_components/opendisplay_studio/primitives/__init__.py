@@ -32,6 +32,8 @@ from custom_components.opendisplay_studio.validation import (
 )
 
 BUILTIN_PRIMITIVE_DIRECTORY: Final = Path(__file__).parent
+# The prefix of the labels that every primitive with that field shares.
+COMMON: Final = "common"
 
 SHAPES: Final = frozenset(
     {
@@ -189,7 +191,10 @@ class PrimitiveRegistry:
                 f"{prefix}.description", definition["description"]
             )
             for field in definition["fields"]:
-                field["label"] = texts.get(f"{prefix}.{field['key']}", field["label"])
+                key = field["key"]
+                field["label"] = texts.get(
+                    f"{prefix}.{key}", texts.get(f"{COMMON}.{key}", field["label"])
+                )
         return result
 
     @property

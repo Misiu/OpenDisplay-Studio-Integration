@@ -1,0 +1,23 @@
+{
+  "categories.Calendar": "Kalender",
+  "categories.Sensors": "Sensoren",
+  "options.background": "Hintergrund",
+  "options.color": "Farbe",
+  "options.cornerRadius": "Eckenradius",
+  "options.decimals": "Nachkommastellen",
+  "options.decimals.auto": "Wie gemeldet",
+  "options.showFrame": "Rahmen und Hintergrund zeigen",
+  "options.showIcon": "Symbol anzeigen",
+  "options.showName": "Namen anzeigen",
+  "options.showUnit": "Einheit anzeigen",
+  "options.use24h": "24-Stunden-Uhr",
+  "runtime.choose_calendars": "Kalender wählen",
+  "runtime.choose_entity": "Entität wählen",
+  "sections.appearance": "Darstellung",
+  "sections.content": "Inhalt",
+  "sections.thresholds": "Schwellenwerte",
+  "sources.calendars": "Kalender",
+  "sources.entities": "Entität",
+  "sources.entities.icon": "Symbol",
+  "sources.entities.label": "Bezeichnung"
+}

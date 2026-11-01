@@ -1,0 +1,22 @@
+{
+  "categories.Calendar": "Kalendarz",
+  "categories.Sensors": "Czujniki",
+  "options.background": "Tło",
+  "options.color": "Kolor",
+  "options.cornerRadius": "Zaokrąglenie rogów",
+  "options.decimals": "Miejsca po przecinku",
+  "options.decimals.auto": "Jak zgłasza encja",
+  "options.showFrame": "Pokaż ramkę i tło",
+  "options.showIcon": "Pokaż ikonę",
+  "options.showName": "Pokaż nazwę",
+  "options.showUnit": "Pokaż jednostkę",
+  "options.use24h": "Zegar 24 h",
+  "runtime.choose_calendars": "Wybierz kalendarze",
+  "runtime.choose_entity": "Wybierz encję",
+  "sections.appearance": "Wygląd",
+  "sections.content": "Zawartość",
+  "sections.thresholds": "Progi",
+  "sources.entities": "Encja",
+  "sources.entities.icon": "Ikona",
+  "sources.entities.label": "Etykieta"
+}

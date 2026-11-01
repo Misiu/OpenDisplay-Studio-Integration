@@ -25,6 +25,8 @@ from .manifest import ManifestError, parse_manifest
 from .options import option_defaults
 
 BUILTIN_WIDGET_DIRECTORY: Final = Path(__file__).parent
+# Words every widget shares (Appearance, Show frame ...); a package may override them.
+COMMON_TRANSLATIONS: Final = BUILTIN_WIDGET_DIRECTORY / "translations"
 DEFAULT_LANGUAGE: Final = "en"
 SDK_ALIAS: Final = "opendisplay_studio"
 
@@ -100,15 +102,24 @@ def _load_module(directory: Path, file_name: str, *, builtin: bool) -> Any:
     return module
 
 
-def _load_translations(directory: Path) -> dict[str, dict[str, str]]:
-    folder = directory / "translations"
+def _read_translations(folder: Path) -> dict[str, dict[str, str]]:
     translations: dict[str, dict[str, str]] = {}
     for path in sorted(folder.glob("*.json")) if folder.is_dir() else []:
         translations[path.stem] = json.loads(path.read_text(encoding="utf-8"))
-    if DEFAULT_LANGUAGE not in translations:
+    return translations
+
+
+def _load_translations(directory: Path) -> dict[str, dict[str, str]]:
+    """Read a package's translations over the ones every widget shares."""
+    own = _read_translations(directory / "translations")
+    if DEFAULT_LANGUAGE not in own:
         message = f"Missing translations/{DEFAULT_LANGUAGE}.json"
         raise WidgetPackageError(message)
-    return translations
+    common = _read_translations(COMMON_TRANSLATIONS)
+    return {
+        language: {**common.get(language, {}), **own.get(language, {})}
+        for language in common.keys() | own.keys()
+    }
 
 
 def _load_provider(

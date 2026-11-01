@@ -1,25 +1,9 @@
 {
-  "sections.appearance": "Appearance",
-  "options.showFrame": "Show frame",
-  "options.cornerRadius": "Corner radius",
-  "options.color": "Color",
-  "options.background": "Background",
-  "sections.thresholds": "Thresholds",
   "options.alertBelow": "Alert below",
   "options.alertAbove": "Alert above",
   "options.alertColor": "Alert color",
-  "sections.content": "Content",
-  "options.showIcon": "Show icon",
-  "options.showName": "Show name",
-  "options.showUnit": "Show unit",
-  "options.decimals": "Decimals",
-  "options.decimals.auto": "As reported",
   "name": "Sensor card",
   "description": "The value of one entity as a tile that follows the shape of its frame.",
-  "categories.Sensors": "Sensors",
-  "sources.entities": "Entity",
-  "sources.entities.label": "Label",
-  "sources.entities.icon": "Icon",
   "options.valueSize": "Value size",
   "options.valueSize.auto": "Automatic",
   "options.valueSize.small": "Small",
@@ -30,6 +14,5 @@
   "options.align.auto": "Automatic",
   "options.align.left": "Left",
   "options.align.center": "Center",
-  "options.align.right": "Right",
-  "runtime.choose_entity": "Choose an entity"
+  "options.align.right": "Right"
 }

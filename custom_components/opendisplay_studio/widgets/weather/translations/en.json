@@ -1,9 +1,4 @@
 {
-  "sections.appearance": "Appearance",
-  "options.showFrame": "Show frame",
-  "options.cornerRadius": "Corner radius",
-  "options.color": "Color",
-  "options.background": "Background",
   "name": "Weather",
   "description": "Current conditions and a daily or hourly forecast of a weather entity.",
   "categories.Weather": "Weather",

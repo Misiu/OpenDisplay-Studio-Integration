@@ -307,18 +307,69 @@ def test_primitives_are_labelled_in_the_language_asked_for() -> None:
     assert english["rectangle"]["fields"][0]["label"] == "Left"
 
 
-@pytest.mark.parametrize("language", ["pl", "de"])
-def test_every_translated_primitive_label_matches_a_real_field(language: str) -> None:
+def translations_of(language: str) -> dict[str, str]:
     path = Path(__file__).parent.parent / "custom_components/opendisplay_studio"
-    translations = json.loads(
+    texts: dict[str, str] = json.loads(
         (path / f"primitives/translations/{language}.json").read_text(encoding="utf-8")
     )
-    expected = set()
+    return texts
+
+
+def visible_fields() -> dict[str, set[str]]:
+    """The visible fields of every type, by the key of the field."""
+    types_with: dict[str, set[str]] = {}
+    for definition in DEFAULT_PRIMITIVES.definitions:
+        for field in definition["fields"]:
+            if field.get("visible", True):
+                types_with.setdefault(field["key"], set()).add(definition["type"])
+    return types_with
+
+
+@pytest.mark.parametrize("language", ["pl", "de"])
+def test_every_primitive_and_field_is_translated(language: str) -> None:
+    texts = translations_of(language)
+
     for definition in DEFAULT_PRIMITIVES.definitions:
         kind = definition["type"]
-        expected |= {f"{kind}.name", f"{kind}.description"}
-        expected |= {
-            f"{kind}.{f['key']}" for f in definition["fields"] if f.get("visible", True)
-        }
+        assert f"{kind}.name" in texts
+        assert f"{kind}.description" in texts
+        for field in definition["fields"]:
+            if field.get("visible", True):
+                key = field["key"]
+                assert f"{kind}.{key}" in texts or f"common.{key}" in texts, (
+                    f"{kind}.{key} has no {language} label"
+                )
 
-    assert set(translations) == expected
+
+@pytest.mark.parametrize("language", ["pl", "de"])
+def test_no_translation_is_left_over_or_said_twice(language: str) -> None:
+    texts = translations_of(language)
+    types_with = visible_fields()
+
+    for key, value in texts.items():
+        kind, field = key.split(".", 1)
+        if kind == "common":
+            assert len(types_with[field]) > 1, f"{key} is used by one type only"
+            continue
+        if field in ("name", "description"):
+            assert any(d["type"] == kind for d in DEFAULT_PRIMITIVES.definitions), key
+            continue
+        assert kind in types_with[field], f"{key} is not a field of {kind}"
+        assert value != texts.get(f"common.{field}"), f"{key} repeats common.{field}"
+
+
+def test_a_label_of_one_type_beats_the_one_every_type_shares() -> None:
+    polish = {d["type"]: d for d in DEFAULT_PRIMITIVES.localized("pl")}
+
+    def label(kind: str, key: str) -> str:
+        return next(f["label"] for f in polish[kind]["fields"] if f["key"] == key)
+
+    assert label("arc", "x") == "Środek X"
+    assert label("text", "x") == "X"
+    assert label("rectangle", "rotation") == label("circle", "rotation") == "Obrót"
+
+
+def test_a_language_with_no_translation_keeps_the_english_labels() -> None:
+    english = {d["type"]: d for d in DEFAULT_PRIMITIVES.localized("xx")}
+
+    assert english["arc"]["fields"][0]["label"] == "Center X"

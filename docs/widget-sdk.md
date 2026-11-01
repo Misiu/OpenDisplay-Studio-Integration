@@ -70,6 +70,12 @@ example does.
 uses, prefixed `runtime.` (`t("greeting")` reads `runtime.greeting`). Add `pl.json`
 (or any language) for the rest; English fills what is missing.
 
+The words every widget uses (the Appearance section, Show frame, Corner radius, Color,
+Background, the Sensors category and a few more) are translated once, in
+`custom_components/opendisplay_studio/widgets/translations/<language>.json`, and every
+package gets them. A package that says one of them differently gives the same key in its
+own file, which wins.
+
 ## 2. Say what the user picks: sources
 
 Agenda picks calendars. A **source** names the selector, the data provider that

@@ -1,11 +1,4 @@
 {
-  "sections.appearance": "Wygląd",
-  "options.showFrame": "Pokaż ramkę i tło",
-  "options.cornerRadius": "Zaokrąglenie rogów",
-  "options.color": "Kolor",
-  "options.background": "Tło",
-  "options.use24h": "Zegar 24 h",
-  "categories.Calendar": "Kalendarz",
   "name": "Plan lekcji",
   "description": "Tydzień szkolny z jednego kalendarza jako tabela dni i godzin lekcyjnych.",
   "sources.calendars": "Kalendarz",

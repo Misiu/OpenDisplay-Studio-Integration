@@ -1,25 +1,9 @@
 {
-  "sections.appearance": "Darstellung",
-  "options.showFrame": "Rahmen und Hintergrund zeigen",
-  "options.cornerRadius": "Eckenradius",
-  "options.color": "Farbe",
-  "options.background": "Hintergrund",
-  "sections.thresholds": "Schwellenwerte",
   "options.alertBelow": "Alarm unter",
   "options.alertAbove": "Alarm über",
   "options.alertColor": "Alarmfarbe",
-  "sections.content": "Inhalt",
-  "options.showIcon": "Symbol anzeigen",
-  "options.showName": "Namen anzeigen",
-  "options.showUnit": "Einheit anzeigen",
-  "options.decimals": "Nachkommastellen",
-  "options.decimals.auto": "Wie gemeldet",
   "name": "Sensorkarte",
   "description": "Der Wert einer Entität als Kachel, die sich der Form des Rahmens anpasst.",
-  "categories.Sensors": "Sensoren",
-  "sources.entities": "Entität",
-  "sources.entities.label": "Bezeichnung",
-  "sources.entities.icon": "Symbol",
   "options.valueSize": "Wertgröße",
   "options.valueSize.auto": "Automatisch",
   "options.valueSize.small": "Klein",
@@ -30,6 +14,5 @@
   "options.align.auto": "Automatisch",
   "options.align.left": "Links",
   "options.align.center": "Mitte",
-  "options.align.right": "Rechts",
-  "runtime.choose_entity": "Entität wählen"
+  "options.align.right": "Rechts"
 }
