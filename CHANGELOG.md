@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.4
+
 - Add the Gauge widget: the value of a sensor on a half dial, with a marker across the
   arc or the arc filled up to the value, a scale you set (a fraction works too, from 0 to
   1), ticks and the lowest and highest value under the ends. Color the arc in as many
@@ -18,6 +20,7 @@
   and a few more) once for all of them, and the labels every primitive with the same field
   shares once as well; a widget package or one primitive can still say it its own way.
   The German word for a threshold is the same in every widget now.
+
 ## 0.1.3
 
 - Turn any primitive: every element but the debug grid has a Rotation in the Layout
