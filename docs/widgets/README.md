@@ -367,7 +367,7 @@ are left out, so the dial itself is as big as it can be.
 | Show name | `showName` | on / off | on |
 | Show value | `showValue` | on / off | on |
 | Show unit | `showUnit` | on / off | on |
-| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `auto` |
+| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `1` |
 | Style | `style` | one of `needle`, `arc` | `needle` |
 | Show ticks | `showTicks` | on / off | on |
 | Show minimum and maximum | `showLimits` | on / off | on |
@@ -737,7 +737,7 @@ the dial stays as big as it can be.
 | Show name | `showName` | on / off | on |
 | Show value | `showValue` | on / off | on |
 | Show unit | `showUnit` | on / off | on |
-| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `auto` |
+| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `1` |
 | Show the numbers of the scale | `showLabels` | on / off | on |
 
 **Scale**
@@ -897,6 +897,7 @@ Default size 360 x 200 px, smallest 160 x 100 px. Id: `weather`.
 
 | Option | Key | Values | Default |
 |---|---|---|---|
+| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `auto` |
 | Show humidity | `showHumidity` | on / off | on |
 | Show feels like | `showFeelsLike` | on / off | off |
 | Show wind | `showWind` | on / off | off |

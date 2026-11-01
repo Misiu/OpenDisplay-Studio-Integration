@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.1.5
+
+- Let every widget that shows a reading set its decimals. The Weather widget was the last
+  one without the Decimals option: it rounded to whole degrees, and now writes
+  temperatures as the entity reports them, or to 0 to 3 places. The Gauge and Thermometer
+  show one decimal by default.
+
 ## 0.1.4
 
 - Add the Gauge widget: the value of a sensor on a half dial, with a marker across the

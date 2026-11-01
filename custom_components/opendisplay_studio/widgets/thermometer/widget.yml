@@ -41,7 +41,7 @@ options:
         selector: { boolean: {} }
       - key: decimals
         label: Decimals
-        default: auto
+        default: "1"
         selector:
           select:
             options: [auto, "0", "1", "2", "3"]

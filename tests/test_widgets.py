@@ -905,7 +905,7 @@ class TestWeather:
             hass, widget_item("weather", sources={"weather": [{"id": "weather.home"}]})
         )
 
-        assert "18°C" in texts(compiled)
+        assert "18.4°C" in texts(compiled)
         assert "Partly cloudy" in texts(compiled)
         assert "Humidity 62%" in texts(compiled)
 
@@ -973,7 +973,7 @@ class TestWeather:
 
         compiled = await compile_widget(hass, item)
 
-        assert "Feels like 16°C" in texts(compiled)
+        assert "Feels like 16.0°C" in texts(compiled)
         assert "Wind 12 km/h" in texts(compiled)
 
     async def test_polish_words_are_used_for_a_polish_dashboard(

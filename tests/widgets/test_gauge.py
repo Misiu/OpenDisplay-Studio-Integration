@@ -100,7 +100,7 @@ async def test_the_limits_of_the_scale_are_written_under_the_ends_of_the_arc() -
 async def test_the_value_is_written_with_its_unit() -> None:
     _, elements = await drawn_state(with_value("64"))
 
-    assert "64 %" in [e["value"] for e in elements if e["type"] == "text"]
+    assert "64.0 %" in [e["value"] for e in elements if e["type"] == "text"]
 
 
 def band_colors(elements: list[dict[str, Any]]) -> list[str]:

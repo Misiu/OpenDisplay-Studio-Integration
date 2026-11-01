@@ -35,6 +35,12 @@ options:
         selector: { number: { min: 1, max: 8, mode: box } }
   - section: details
     fields:
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
       - key: showHumidity
         label: Show humidity
         default: true

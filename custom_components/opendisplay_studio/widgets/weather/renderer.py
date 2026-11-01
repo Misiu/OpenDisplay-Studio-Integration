@@ -14,6 +14,7 @@ from custom_components.opendisplay_studio.sdk import (
     condition_icon,
     fit_text,
     format_time,
+    format_value,
     inset,
     rows,
     text_width,
@@ -27,10 +28,10 @@ ROW_HEIGHT: Final = 26
 SECTION_GAP: Final = 8
 
 
-def _degrees(value: object, unit: str = "") -> str:
+def _degrees(value: object, unit: str, decimals: str) -> str:
     if not isinstance(value, int | float):
         return "—"
-    return f"{round(value)}{unit or '°'}"
+    return f"{format_value(str(value), '', decimals)}{unit or '°'}"
 
 
 def _condition_label(context: WidgetContext, condition: str) -> str:
@@ -61,10 +62,11 @@ def _label(context: WidgetContext, item: dict[str, Any]) -> str:
     return weekday_name(moment.date(), context.language)
 
 
-def _temperatures(item: dict[str, Any]) -> str:
+def _temperatures(item: dict[str, Any], decimals: str) -> str:
+    high = _degrees(item["temperature"], "°", decimals)
     if isinstance(item["templow"], int | float):
-        return f"{_degrees(item['temperature'], '°')}/{_degrees(item['templow'], '°')}"
-    return _degrees(item["temperature"], "°")
+        return f"{high}/{_degrees(item['templow'], '°', decimals)}"
+    return high
 
 
 def _details(context: WidgetContext, data: dict[str, Any]) -> list[str]:
@@ -73,7 +75,11 @@ def _details(context: WidgetContext, data: dict[str, Any]) -> list[str]:
     if options["showHumidity"] and data["humidity"] is not None:
         details.append(context.t("humidity", value=round(data["humidity"])))
     if options["showFeelsLike"] and data["apparent_temperature"] is not None:
-        feels = _degrees(data["apparent_temperature"], data["temperature_unit"])
+        feels = _degrees(
+            data["apparent_temperature"],
+            data["temperature_unit"],
+            context.options["decimals"],
+        )
         details.append(context.t("feels_like", value=feels))
     if options["showWind"] and data["wind_speed"] is not None:
         speed = f"{round(data['wind_speed'])} {data['wind_speed_unit']}".strip()
@@ -94,7 +100,9 @@ def _current(
     parts = rows(area, [3, 1, *[1] * len(details)], gap=2)
     head, condition_row, *detail_rows = parts
     icon_size = clamp(min(head.height, head.width // 3), 20, 96)
-    temperature = _degrees(data["temperature"], data["temperature_unit"])
+    temperature = _degrees(
+        data["temperature"], data["temperature_unit"], context.options["decimals"]
+    )
     temperature_size = fit_text(
         temperature, head.width - icon_size - 8, clamp(head.height, 12, 96)
     )
@@ -148,12 +156,13 @@ def _forecast_columns(
     """Forecast as columns: label on top, icon, temperatures below."""
     count = max(1, min(len(items), area.width // COLUMN_WIDTH))
     shown = items[:count]
+    decimals = context.options["decimals"]
     slots = columns(area, count)
     label_size = _shared_size(
         [_label(context, item) for item in shown], slots, rows(slots[0], [1, 2, 1])[0]
     )
     temperature_size = _shared_size(
-        [_temperatures(item) for item in shown],
+        [_temperatures(item, decimals) for item in shown],
         slots,
         rows(slots[0], [1, 2, 1])[2],
     )
@@ -161,7 +170,7 @@ def _forecast_columns(
     for cell, item in zip(slots, shown, strict=True):
         parts = rows(cell, [1, 2, 1])
         icon_size = clamp(min(parts[1].height, cell.width - 6), 16, 72)
-        temperatures = _temperatures(item)
+        temperatures = _temperatures(item, decimals)
         cells.append(
             {
                 "type": "column",
@@ -220,7 +229,10 @@ def _forecast_rows(
                                 size=clamp(row.height - 4, 16, 40),
                             ),
                             look.text(
-                                _temperatures(item), size=size, grow=1, align="right"
+                                _temperatures(item, context.options["decimals"]),
+                                size=size,
+                                grow=1,
+                                align="right",
                             ),
                         ],
                     },
