@@ -1,0 +1,16 @@
+{
+  "name": "Gauge",
+  "description": "The value of a sensor on a half dial, with a marker or a filled arc.",
+  "sources.entities.label": "Label",
+  "sections.scale": "Scale",
+  "options.showValue": "Show value",
+  "options.style": "Style",
+  "options.style.needle": "Marker",
+  "options.style.arc": "Filled arc",
+  "options.showTicks": "Show ticks",
+  "options.showLimits": "Show minimum and maximum",
+  "options.min": "Minimum",
+  "options.max": "Maximum",
+  "sections.ranges": "Ranges",
+  "options.ranges": "Ranges"
+}

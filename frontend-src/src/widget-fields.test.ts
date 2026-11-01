@@ -29,10 +29,12 @@ describe("the built-in widget definitions", () => {
       "Agenda",
       "Battery",
       "Calendar",
+      "Gauge",
       "School timetable",
       "Sensor card",
       "Sensor chart",
       "Sensor list",
+      "Thermometer",
       "Waste collection",
       "Weather",
     ]);
@@ -40,10 +42,12 @@ describe("the built-in widget definitions", () => {
       "Agenda",
       "Bateria",
       "Kalendarz",
+      "Wskaźnik",
       "Plan lekcji",
       "Karta czujnika",
       "Wykres czujnika",
       "Lista czujników",
+      "Termometr",
       "Wywóz śmieci",
       "Pogoda",
     ]);
@@ -209,6 +213,21 @@ describe("widgetFieldAsPrimitive", () => {
         field({ number: { min: 1, max: 9, unit_of_measurement: "°C" } })
       )
     ).toMatchObject({ shape: "number", min: 1, max: 9, unit: "°C" });
+  });
+
+  it("describes the colored ranges of a scale as a list of ranges", () => {
+    expect(
+      widgetFieldAsPrimitive(field({ opendisplay_ranges: { max: 8 } }))
+    ).toMatchObject({ shape: "ranges", max: 8 });
+  });
+
+  it("lets a number that asks for any step be a fraction", () => {
+    expect(
+      widgetFieldAsPrimitive(field({ number: { step: "any", mode: "box" } }))
+    ).toMatchObject({ shape: "number", decimal: true });
+    expect(
+      widgetFieldAsPrimitive(field({ number: { min: 0, max: 9 } }))?.decimal
+    ).toBeUndefined();
   });
 
   it("keeps the labels of the options of a select", () => {

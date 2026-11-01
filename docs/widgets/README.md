@@ -328,6 +328,113 @@ for declined invitations, and the color is that of the calendar.
 ![Nothing planned](images/calendar-14.png)
 *Nothing planned*
 
+## Gauge
+
+The value of a sensor on a half dial, with a marker or a filled arc.
+
+Default size 240 x 160 px, smallest 96 x 64 px. Id: `gauge`.
+
+Shows the value of one numeric sensor on a half dial. A marker across the arc points
+at the value (or, with **Style: arc**, the arc is filled up to it), and the value is
+written in the middle, with its unit.
+
+**Scale** sets the lowest and the highest value the dial shows. A value beyond either end
+is drawn at that end.
+
+**Ranges** color the arc, as many as you want. Add one for each color and say where it
+starts; it lasts until the next one starts. The first one has no start to give: it begins
+at the lowest value. Green, then yellow from 40 and red from 80 is the usual load of a
+processor; on a scale from 0 to 1 the same ranges start at 0.4 and 0.8. Leave out the
+first range and the arc has no color before the second one starts. The colors are those
+of your display. A filled arc takes the color of each range it passes.
+
+The ticks are one for every tenth of the scale, and under the ends of the arc are the
+lowest and the highest value. In a small frame the ticks and then the limits and the name
+are left out, so the dial itself is as big as it can be.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Entity | one sensor or input_number or number entity | Label |
+
+### Options
+
+**Content**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show name | `showName` | on / off | on |
+| Show value | `showValue` | on / off | on |
+| Show unit | `showUnit` | on / off | on |
+| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `auto` |
+| Style | `style` | one of `needle`, `arc` | `needle` |
+| Show ticks | `showTicks` | on / off | on |
+| Show minimum and maximum | `showLimits` | on / off | on |
+
+**Scale**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Minimum | `min` | number | `0` |
+| Maximum | `max` | number | `100` |
+
+**Ranges**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Ranges | `ranges` | list of colored ranges | `[]` |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![A marker across the arc shows the value](images/gauge-1.png)
+*A marker across the arc shows the value*
+
+![Ranges: green, yellow from 40 and red from 80, as for the load of a processor](images/gauge-2.png)
+*Ranges: green, yellow from 40 and red from 80, as for the load of a processor*
+
+![The marker in the red range](images/gauge-3.png)
+*The marker in the red range*
+
+![A scale from 0 to 1 with the ranges from 0.4 and 0.8](images/gauge-4.png)
+*A scale from 0 to 1 with the ranges from 0.4 and 0.8*
+
+![A scale that runs below zero, red below it and green from zero](images/gauge-5.png)
+*A scale that runs below zero, red below it and green from zero*
+
+![The arc filled up to the value, in the color of each range it passes](images/gauge-6.png)
+*The arc filled up to the value, in the color of each range it passes*
+
+![Filled into the red range](images/gauge-7.png)
+*Filled into the red range*
+
+![A value beyond the scale stays at its end](images/gauge-8.png)
+*A value beyond the scale stays at its end*
+
+![Without ticks and limits](images/gauge-9.png)
+*Without ticks and limits*
+
+![In a small frame the extras give way to the dial](images/gauge-10.png)
+*In a small frame the extras give way to the dial*
+
+![On a wide tag, in Polish](images/gauge-11.png)
+*On a wide tag, in Polish*
+
+![White on black](images/gauge-12.png)
+*White on black*
+
+![Nothing chosen yet](images/gauge-13.png)
+*Nothing chosen yet*
+
 ## School timetable
 
 A school week of one calendar as a table of days and lesson slots.
@@ -590,6 +697,106 @@ Default size 280 x 200 px, smallest 160 x 80 px. Id: `sensor-list`.
 *Names only in Polish*
 
 ![Nothing chosen yet](images/sensor-list-5.png)
+*Nothing chosen yet*
+
+## Thermometer
+
+A temperature on a classic round dial with a needle.
+
+Default size 200 x 200 px, smallest 96 x 96 px. Id: `thermometer`.
+
+Shows the value of one temperature sensor on a classic round dial, the kind that hangs
+on a wall: a scale of ticks and numbers over three quarters of a circle, a needle, and
+the temperature written under its hub with the name of the sensor.
+
+**Scale** sets the lowest and the highest temperature and how far apart the numbers
+are; there is a short tick between them. A temperature beyond either end is drawn at that
+end. The needle takes the color you pick, the accent color of the display by default.
+
+**Ranges** put a band of color along the edge of the dial: add one for each color and say
+where it starts, and it lasts until the next one starts. Blue while cold, green at working
+heat and red when too hot is a boiler; the colors are those of your display.
+
+Several of them make a dashboard of temperatures: the outdoor and indoor temperature, the
+flow and the return of a boiler, the hot water tank, the processor of a computer. Give each
+its own scale. In a small frame the numbers of the scale give way first, then the name, so
+the dial stays as big as it can be.
+
+### Sources
+
+| Source | What to pick | Per pick |
+|---|---|---|
+| Entity | one sensor or input_number or number entity | Label |
+
+### Options
+
+**Content**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Show name | `showName` | on / off | on |
+| Show value | `showValue` | on / off | on |
+| Show unit | `showUnit` | on / off | on |
+| Decimals | `decimals` | one of `auto`, `0`, `1`, `2`, `3` | `auto` |
+| Show the numbers of the scale | `showLabels` | on / off | on |
+
+**Scale**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Minimum | `min` | number | `-10` |
+| Maximum | `max` | number | `40` |
+| Distance between the numbers | `majorStep` | number | `10` |
+
+**Ranges**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Ranges | `ranges` | list of colored ranges | `[]` |
+
+**Appearance**
+
+| Option | Key | Values | Default |
+|---|---|---|---|
+| Needle color | `needleColor` | color | `accent` |
+| Show frame | `showFrame` | on / off | on |
+| Corner radius | `cornerRadius` | number 0 to 24 | `6` |
+| Color | `color` | color | `black` |
+| Background | `background` | color | `white` |
+
+### Examples
+
+![The classic dial: a scale from -10 to 40 and a needle](images/thermometer-1.png)
+*The classic dial: a scale from -10 to 40 and a needle*
+
+![Below zero, with a band of color: blue below zero, green, red from 30](images/thermometer-2.png)
+*Below zero, with a band of color: blue below zero, green, red from 30*
+
+![The flow of a central heating boiler: blue while cold, green at working heat, red when too hot](images/thermometer-3.png)
+*The flow of a central heating boiler: blue while cold, green at working heat, red when too hot*
+
+![Hot water in a tank, in whole degrees, with the safe range in green](images/thermometer-4.png)
+*Hot water in a tank, in whole degrees, with the safe range in green*
+
+![A processor, green, yellow from 60 and red from 85](images/thermometer-5.png)
+*A processor, green, yellow from 60 and red from 85*
+
+![Degrees Fahrenheit](images/thermometer-6.png)
+*Degrees Fahrenheit*
+
+![Without the numbers of the scale](images/thermometer-7.png)
+*Without the numbers of the scale*
+
+![A small frame keeps the dial and the value](images/thermometer-8.png)
+*A small frame keeps the dial and the value*
+
+![On a wide tag, in Polish](images/thermometer-9.png)
+*On a wide tag, in Polish*
+
+![White on black, without the frame](images/thermometer-10.png)
+*White on black, without the frame*
+
+![Nothing chosen yet](images/thermometer-11.png)
 *Nothing chosen yet*
 
 ## Waste collection

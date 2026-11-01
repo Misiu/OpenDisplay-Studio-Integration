@@ -1,0 +1,95 @@
+api: 1
+id: gauge
+name: Gauge
+version: 1.0.0
+description: The value of a sensor on a half dial, with a marker or a filled arc.
+icon: mdi:gauge
+category: Sensors
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 240, height: 160 }
+  minSize: { width: 96, height: 64 }
+
+sources:
+  - key: entities
+    label: Entity
+    selector:
+      entity: { filter: { domain: [sensor, input_number, number] } }
+    required: true
+    max: 1
+    data: entity_state
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+
+options:
+  - section: content
+    fields:
+      - key: showName
+        label: Show name
+        default: true
+        selector: { boolean: {} }
+      - key: showValue
+        label: Show value
+        default: true
+        selector: { boolean: {} }
+      - key: showUnit
+        label: Show unit
+        default: true
+        selector: { boolean: {} }
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
+      - key: style
+        label: Style
+        default: needle
+        selector:
+          select:
+            options: [needle, arc]
+      - key: showTicks
+        label: Show ticks
+        default: true
+        selector: { boolean: {} }
+      - key: showLimits
+        label: Show minimum and maximum
+        default: true
+        selector: { boolean: {} }
+  - section: scale
+    fields:
+      - key: min
+        label: Minimum
+        default: 0
+        selector: { number: { mode: box, step: any } }
+      - key: max
+        label: Maximum
+        default: 100
+        selector: { number: { mode: box, step: any } }
+  - section: ranges
+    fields:
+      - key: ranges
+        label: Ranges
+        default: []
+        selector: { opendisplay_ranges: { max: 8 } }
+  - section: appearance
+    fields:
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }

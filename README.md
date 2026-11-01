@@ -23,8 +23,8 @@ display can fetch.
   codes, progress bars, history plots and a debug grid.
 - **Turn anything.** Drag the round handle above any element to rotate it, or type an
   angle; the preview follows at once.
-- **Live widgets**: Sensor card, Sensor list, Sensor chart, Calendar, Agenda,
-  School timetable, Waste collection, Battery and Weather read your entities, calendars and forecasts. Write
+- **Live widgets**: Sensor card, Sensor list, Sensor chart, Gauge, Thermometer,
+  Calendar, Agenda, School timetable, Waste collection, Battery and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see
   [`docs/widget-sdk.md`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widget-sdk.md)). Every widget is described, with its
   options and pictures, in [`docs/widgets`](https://github.com/Misiu/OpenDisplay-Studio-Integration/blob/main/docs/widgets/README.md).
@@ -173,6 +173,18 @@ The widgets that come with Studio:
       <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/battery-1.png" alt="Battery" width="360"><br>
       <b>Battery</b><br>
       The charge of a battery as a battery that fills up, with its percentage beside it or inside, and a color for a low charge.
+    </td>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/gauge-2.png" alt="Gauge" width="360"><br>
+      <b>Gauge</b><br>
+      The value of a sensor on a half dial, with a marker or a filled arc, and as many colored ranges as you want, as for the load of a processor.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" align="center">
+      <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/widgets/images/thermometer-3.png" alt="Thermometer" width="360"><br>
+      <b>Thermometer</b><br>
+      A temperature on a classic round dial with a scale, a needle and colored ranges: outdoor, a boiler, a hot water tank, a processor.
     </td>
   </tr>
 </table>

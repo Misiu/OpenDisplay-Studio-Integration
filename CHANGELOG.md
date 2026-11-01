@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Add the Gauge widget: the value of a sensor on a half dial, with a marker across the
+  arc or the arc filled up to the value, a scale you set (a fraction works too, from 0 to
+  1), ticks and the lowest and highest value under the ends. Color the arc in as many
+  ranges as you want, each with its own start and a color of your display: green, yellow
+  from 40 and red from 80 for the load of a processor.
+- Add the Thermometer widget: a temperature on a classic round dial that opens at the
+  bottom, with a numbered scale, a needle in the color you pick, the temperature and the
+  name of the sensor, and the same colored ranges as a band along the edge of the dial.
+  Each has its own scale, for a dashboard of outdoor and indoor temperatures, a boiler, a
+  hot water tank or the processor of a computer.
+- Widget options can be a list of colored ranges, edited with a row for each range, and a
+  number option can take a fraction (`step: any`).
+- Say the words every widget shares (Appearance, Show frame, Color, the Sensors category
+  and a few more) once for all of them, and the labels every primitive with the same field
+  shares once as well; a widget package or one primitive can still say it its own way.
+  The German word for a threshold is the same in every widget now.
 ## 0.1.3
 
 - Turn any primitive: every element but the debug grid has a Rotation in the Layout

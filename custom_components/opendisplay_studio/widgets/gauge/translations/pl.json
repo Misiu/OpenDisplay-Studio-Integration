@@ -1,0 +1,16 @@
+{
+  "name": "Wskaźnik",
+  "description": "Wartość czujnika na półokrągłej tarczy, ze znacznikiem lub wypełnionym łukiem.",
+  "sources.entities.label": "Etykieta",
+  "sections.scale": "Skala",
+  "options.showValue": "Pokaż wartość",
+  "options.style": "Styl",
+  "options.style.needle": "Znacznik",
+  "options.style.arc": "Wypełniony łuk",
+  "options.showTicks": "Pokaż kreski",
+  "options.showLimits": "Pokaż minimum i maksimum",
+  "options.min": "Minimum",
+  "options.max": "Maksimum",
+  "sections.ranges": "Zakresy",
+  "options.ranges": "Zakresy"
+}

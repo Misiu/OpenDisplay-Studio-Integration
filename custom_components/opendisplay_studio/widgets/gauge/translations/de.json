@@ -1,0 +1,16 @@
+{
+  "name": "Messuhr",
+  "description": "Der Wert eines Sensors auf einer Halbkreisskala, mit Marke oder gefülltem Bogen.",
+  "sources.entities.label": "Bezeichnung",
+  "sections.scale": "Skala",
+  "options.showValue": "Wert anzeigen",
+  "options.style": "Stil",
+  "options.style.needle": "Marke",
+  "options.style.arc": "Gefüllter Bogen",
+  "options.showTicks": "Teilstriche anzeigen",
+  "options.showLimits": "Minimum und Maximum anzeigen",
+  "options.min": "Minimum",
+  "options.max": "Maximum",
+  "sections.ranges": "Bereiche",
+  "options.ranges": "Bereiche"
+}

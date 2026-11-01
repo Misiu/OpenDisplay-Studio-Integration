@@ -1,0 +1,120 @@
+# Simulated states of this widget. The preview tool and the tests draw each one.
+
+
+outdoor:
+  name: A mild day outside
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.outdoor, label: Outdoor}
+  data:
+    entities:
+      - {id: sensor.outdoor, missing: false, name: Outdoor temperature, state: "21.4", display_state: "21.4", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+frost:
+  name: Below zero
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"ranges": [{"from": null, "color": "blue"}, {"from": 0, "color": "green"}, {"from": 30, "color": "red"}]}
+  sources:
+    entities:
+      - {id: sensor.garden, label: Garden}
+  data:
+    entities:
+      - {id: sensor.garden, missing: false, name: Garden temperature, state: "-7.2", display_state: "-7.2", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+heating:
+  name: The flow of a central heating boiler on a scale from 20 to 90
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"min": 20, "max": 90, "ranges": [{"from": null, "color": "blue"}, {"from": 55, "color": "green"}, {"from": 80, "color": "red"}]}
+  sources:
+    entities:
+      - {id: sensor.boiler_flow, label: Central heating}
+  data:
+    entities:
+      - {id: sensor.boiler_flow, missing: false, name: Boiler flow temperature, state: "68.4", display_state: "68.4", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+hot-water:
+  name: Hot water in a tank on a scale from 10 to 70
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"min": 10, "max": 70, "majorStep": 10, "decimals": "0", "ranges": [{"from": 10, "color": "blue"}, {"from": 45, "color": "green"}, {"from": 60, "color": "red"}]}
+  sources:
+    entities:
+      - {id: sensor.hot_water, label: Hot water}
+  data:
+    entities:
+      - {id: sensor.hot_water, missing: false, name: Hot water tank, state: "52.3", display_state: "52.3", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+processor:
+  name: A processor temperature from 20 to 100 degrees
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"min": 20, "max": 100, "majorStep": 20, "needleColor": "red", "ranges": [{"from": null, "color": "green"}, {"from": 60, "color": "yellow"}, {"from": 85, "color": "red"}]}
+  sources:
+    entities:
+      - {id: sensor.cpu_temperature, label: Processor}
+  data:
+    entities:
+      - {id: sensor.cpu_temperature, missing: false, name: Processor temperature, state: "63", display_state: "63", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+fahrenheit:
+  name: Degrees Fahrenheit
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"min": 0, "max": 100, "majorStep": 25}
+  sources:
+    entities:
+      - {id: sensor.garage, label: Garage}
+  data:
+    entities:
+      - {id: sensor.garage, missing: false, name: Garage temperature, state: "71.6", display_state: "71.6", unit: "°F", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+polish:
+  name: In Polish
+  language: pl
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"decimals": "1"}
+  sources:
+    entities:
+      - {id: sensor.salon, label: Salon}
+  data:
+    entities:
+      - {id: sensor.salon, missing: false, name: Temperatura w salonie, state: "22.46", display_state: "22.5", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+out-of-range:
+  name: A temperature beyond the end of the scale stays at the end
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {"min": 0, "max": 30}
+  sources:
+    entities:
+      - {id: sensor.sauna, label: Sauna}
+  data:
+    entities:
+      - {id: sensor.sauna, missing: false, name: Sauna, state: "85", display_state: "85", unit: "°C", icon: thermometer, device_class: temperature, available: true, last_changed: ""}
+
+unavailable:
+  name: A sensor that cannot be read
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities:
+      - {id: sensor.gone, label: Gone}
+  data:
+    entities:
+      - {id: sensor.gone, missing: false, name: Gone, state: unavailable, display_state: unavailable, unit: "", icon: thermometer, device_class: null, available: false, last_changed: ""}
+
+missing-sources:
+  name: No entity chosen yet
+  language: en
+  now: "2026-10-31T11:30:00+01:00"
+  options: {}
+  sources:
+    entities: []
+  data:
+    entities: []

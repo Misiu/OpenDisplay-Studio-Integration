@@ -123,6 +123,8 @@ class TestBuiltInCatalog:
             "school-timetable",
             "waste-collection",
             "battery",
+            "gauge",
+            "thermometer",
         }
 
     def test_labels_come_in_the_dashboard_language(self) -> None:
@@ -274,6 +276,37 @@ class TestLoading:
 
         assert registry.package("weather").builtin
         assert "already installed" in registry.errors[0].message
+
+    def test_a_package_gets_the_words_every_widget_shares(self, tmp_path: Path) -> None:
+        package(
+            tmp_path,
+            "plain",
+            HELLO_MANIFEST.format(widget_id="plain"),
+            HELLO_RENDERER.format(greeting="Hi"),
+        )
+
+        registry = WidgetRegistry.from_directories(BUILTIN_WIDGET_DIRECTORY, tmp_path)
+
+        translations = registry.package("plain").translations
+        assert translations["en"]["sections.appearance"] == "Appearance"
+        assert translations["pl"]["sections.appearance"] == "Wygląd"
+
+    def test_a_package_may_say_a_shared_word_its_own_way(self, tmp_path: Path) -> None:
+        directory = package(
+            tmp_path,
+            "own",
+            HELLO_MANIFEST.format(widget_id="own"),
+            HELLO_RENDERER.format(greeting="Hi"),
+        )
+        (directory / "translations" / "en.json").write_text(
+            json.dumps({"sections.appearance": "Looks"}), encoding="utf-8"
+        )
+
+        registry = WidgetRegistry.from_directories(BUILTIN_WIDGET_DIRECTORY, tmp_path)
+
+        translations = registry.package("own").translations
+        assert translations["en"]["sections.appearance"] == "Looks"
+        assert translations["pl"]["sections.appearance"] == "Wygląd"
 
     def test_a_package_needs_english_translations(self, tmp_path: Path) -> None:
         directory = package(

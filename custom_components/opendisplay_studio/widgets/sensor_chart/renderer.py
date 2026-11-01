@@ -15,6 +15,7 @@ from custom_components.opendisplay_studio.sdk import (
     clamp,
     compose,
     fit_text,
+    format_value,
     line_height,
     text_width,
 )
@@ -54,22 +55,6 @@ class Plan:
     chart: Box | None
 
 
-def _number(value: str) -> float | None:
-    try:
-        return float(value)
-    except ValueError:
-        return None
-
-
-def _format_value(state: str, display_state: str, decimals: str) -> str:
-    number = _number(state)
-    if number is None:
-        return display_state
-    if decimals == "auto":
-        return state
-    return f"{number:.{int(decimals)}f}"
-
-
 def _format_extreme(value: float, decimals: str) -> str:
     """Format a minimum or maximum; as reported means one decimal without trailing 0."""
     if decimals == "auto":
@@ -88,7 +73,7 @@ def _sensor(context: WidgetContext) -> Sensor | None:
         entity_id=data["id"],
         name=pick.get("label") or data["name"],
         icon=pick.get("icon") or data["icon"],
-        value=_format_value(data["state"], data["display_state"], options["decimals"]),
+        value=format_value(data["state"], data["display_state"], options["decimals"]),
         unit=data["unit"] if options["showUnit"] else "",
         last_changed=datetime.fromisoformat(changed) if changed else None,
         points=data["points"],

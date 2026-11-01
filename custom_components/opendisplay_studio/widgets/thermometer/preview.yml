@@ -1,0 +1,21 @@
+# Sizes and palette the preview tool draws every state at.
+palette: spectra6
+sizes:
+  - {name: small, width: 120, height: 120}
+  - {name: square, width: 200, height: 200}
+  - {name: wide, width: 296, height: 128}
+  - {name: tall, width: 160, height: 280}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: full, width: 480, height: 480}
+docs:
+  - {title: "The classic dial: a scale from -10 to 40 and a needle", state: outdoor, size: square}
+  - {title: "Below zero, with a band of color: blue below zero, green, red from 30", state: frost, size: square}
+  - {title: "The flow of a central heating boiler: blue while cold, green at working heat, red when too hot", state: heating, size: square}
+  - {title: "Hot water in a tank, in whole degrees, with the safe range in green", state: hot-water, size: square, options: {needleColor: blue}}
+  - {title: "A processor, green, yellow from 60 and red from 85", state: processor, size: square}
+  - {title: "Degrees Fahrenheit", state: fahrenheit, size: square}
+  - {title: "Without the numbers of the scale", state: outdoor, size: square, options: {showLabels: false}}
+  - {title: "A small frame keeps the dial and the value", state: outdoor, size: small}
+  - {title: "On a wide tag, in Polish", state: polish, size: wide}
+  - {title: "White on black, without the frame", state: outdoor, size: square, options: {color: white, background: black, needleColor: white}}
+  - {title: "Nothing chosen yet", state: missing-sources, size: square}

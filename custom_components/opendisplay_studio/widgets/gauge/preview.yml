@@ -1,0 +1,23 @@
+# Sizes and palette the preview tool draws every state at.
+palette: spectra6
+sizes:
+  - {name: small, width: 120, height: 80}
+  - {name: wide, width: 240, height: 160}
+  - {name: tall, width: 160, height: 240}
+  - {name: tag, width: 296, height: 128}
+  - {name: quadrant, width: 400, height: 240}
+  - {name: full, width: 800, height: 480}
+docs:
+  - {title: "A marker across the arc shows the value", state: normal, size: wide}
+  - {title: "Ranges: green, yellow from 40 and red from 80, as for the load of a processor", state: load, size: wide}
+  - {title: "The marker in the red range", state: overload, size: wide}
+  - {title: "A scale from 0 to 1 with the ranges from 0.4 and 0.8", state: unit-scale, size: wide}
+  - {title: "A scale that runs below zero, red below it and green from zero", state: negative, size: wide}
+  - {title: "The arc filled up to the value, in the color of each range it passes", state: load, size: wide, options: {style: arc}}
+  - {title: "Filled into the red range", state: overload, size: wide, options: {style: arc}}
+  - {title: "A value beyond the scale stays at its end", state: out-of-range, size: wide}
+  - {title: "Without ticks and limits", state: load, size: wide, options: {showTicks: false, showLimits: false}}
+  - {title: "In a small frame the extras give way to the dial", state: load, size: small}
+  - {title: "On a wide tag, in Polish", state: polish, size: tag}
+  - {title: "White on black", state: normal, size: wide, options: {color: white, background: black}}
+  - {title: "Nothing chosen yet", state: missing-sources, size: wide}

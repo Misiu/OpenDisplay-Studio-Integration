@@ -1,0 +1,14 @@
+{
+  "name": "Termometr",
+  "description": "Temperatura na klasycznej okrągłej tarczy ze wskazówką.",
+  "sources.entities.label": "Etykieta",
+  "sections.scale": "Skala",
+  "options.showValue": "Pokaż wartość",
+  "options.showLabels": "Pokaż liczby skali",
+  "options.min": "Minimum",
+  "options.max": "Maksimum",
+  "options.majorStep": "Odstęp między liczbami",
+  "options.needleColor": "Kolor wskazówki",
+  "sections.ranges": "Zakresy",
+  "options.ranges": "Zakresy"
+}

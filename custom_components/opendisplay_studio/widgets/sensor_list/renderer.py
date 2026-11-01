@@ -2,82 +2,19 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any, Final
 
 from custom_components.opendisplay_studio.sdk import (
     Look,
+    Reading,
     WidgetContext,
     clamp,
     compose,
+    readings_of,
 )
 
 MIN_ROW_HEIGHT: Final = 22
 ROW_GAP: Final = 8
-
-
-@dataclass(frozen=True, slots=True)
-class Reading:
-    """What one entity shows: its name, icon, value, unit and the color of the value."""
-
-    name: str
-    icon: str
-    value: str
-    unit: str
-    color: str
-
-    @property
-    def text(self) -> str:
-        """Return the value with its unit, as drawn."""
-        return f"{self.value} {self.unit}" if self.unit else self.value
-
-
-def _number(value: str) -> float | None:
-    try:
-        return float(value)
-    except ValueError:
-        return None
-
-
-def _format_value(state: str, display_state: str, decimals: str) -> str:
-    number = _number(state)
-    if number is None:
-        return display_state
-    if decimals == "auto":
-        return state
-    return f"{number:.{int(decimals)}f}"
-
-
-def _is_alert(state: str, options: dict[str, Any]) -> bool:
-    number = _number(state)
-    if number is None:
-        return False
-    below = _number(str(options["alertBelow"]))
-    above = _number(str(options["alertAbove"]))
-    return (below is not None and number < below) or (
-        above is not None and number > above
-    )
-
-
-def _readings(context: WidgetContext, look: Look) -> list[Reading]:
-    options = context.options
-    found: list[Reading] = []
-    for pick, data in zip(
-        context.sources["entities"], context.data["entities"], strict=True
-    ):
-        alert = _is_alert(data["state"], options)
-        found.append(
-            Reading(
-                name=pick.get("label") or data["name"],
-                icon=pick.get("icon") or data["icon"],
-                value=_format_value(
-                    data["state"], data["display_state"], options["decimals"]
-                ),
-                unit=data["unit"] if options["showUnit"] else "",
-                color=options["alertColor"] if alert else look.ink,
-            )
-        )
-    return found
 
 
 def _row(
@@ -119,7 +56,7 @@ def _list(context: WidgetContext, look: Look, found: list[Reading]) -> dict[str,
 def render(context: WidgetContext) -> list[dict[str, Any]]:
     """Draw the picked entities as lines, or say that none is picked."""
     look = Look.of(context)
-    found = _readings(context, look)
+    found = readings_of(context, look.ink)
     if not found:
         return compose(context, look.message(context.box, context.t("choose_entities")))
     return compose(context, _list(context, look, found))

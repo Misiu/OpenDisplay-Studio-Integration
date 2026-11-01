@@ -1,0 +1,14 @@
+{
+  "name": "Thermometer",
+  "description": "A temperature on a classic round dial with a needle.",
+  "sources.entities.label": "Label",
+  "sections.scale": "Scale",
+  "options.showValue": "Show value",
+  "options.showLabels": "Show the numbers of the scale",
+  "options.min": "Minimum",
+  "options.max": "Maximum",
+  "options.majorStep": "Distance between the numbers",
+  "options.needleColor": "Needle color",
+  "sections.ranges": "Ranges",
+  "options.ranges": "Ranges"
+}

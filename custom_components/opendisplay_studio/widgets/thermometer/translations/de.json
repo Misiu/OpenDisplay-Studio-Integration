@@ -1,0 +1,14 @@
+{
+  "name": "Thermometer",
+  "description": "Eine Temperatur auf einer klassischen runden Skala mit Zeiger.",
+  "sources.entities.label": "Bezeichnung",
+  "sections.scale": "Skala",
+  "options.showValue": "Wert anzeigen",
+  "options.showLabels": "Zahlen der Skala anzeigen",
+  "options.min": "Minimum",
+  "options.max": "Maximum",
+  "options.majorStep": "Abstand zwischen den Zahlen",
+  "options.needleColor": "Zeigerfarbe",
+  "sections.ranges": "Bereiche",
+  "options.ranges": "Bereiche"
+}

@@ -1,0 +1,93 @@
+api: 1
+id: thermometer
+name: Thermometer
+version: 1.0.0
+description: A temperature on a classic round dial with a needle.
+icon: mdi:thermometer
+category: Sensors
+author: OpenDisplay Studio
+
+layout:
+  defaultSize: { width: 200, height: 200 }
+  minSize: { width: 96, height: 96 }
+
+sources:
+  - key: entities
+    label: Entity
+    selector:
+      entity: { filter: { domain: [sensor, input_number, number] } }
+    required: true
+    max: 1
+    data: entity_state
+    perSource:
+      - key: label
+        label: Label
+        selector: { text: {} }
+
+options:
+  - section: content
+    fields:
+      - key: showName
+        label: Show name
+        default: true
+        selector: { boolean: {} }
+      - key: showValue
+        label: Show value
+        default: true
+        selector: { boolean: {} }
+      - key: showUnit
+        label: Show unit
+        default: true
+        selector: { boolean: {} }
+      - key: decimals
+        label: Decimals
+        default: auto
+        selector:
+          select:
+            options: [auto, "0", "1", "2", "3"]
+      - key: showLabels
+        label: Show the numbers of the scale
+        default: true
+        selector: { boolean: {} }
+  - section: scale
+    fields:
+      - key: min
+        label: Minimum
+        default: -10
+        selector: { number: { mode: box, step: any } }
+      - key: max
+        label: Maximum
+        default: 40
+        selector: { number: { mode: box, step: any } }
+      - key: majorStep
+        label: Distance between the numbers
+        default: 10
+        selector: { number: { min: 0.001, mode: box, step: any } }
+  - section: ranges
+    fields:
+      - key: ranges
+        label: Ranges
+        default: []
+        selector: { opendisplay_ranges: { max: 8 } }
+  - section: appearance
+    fields:
+      - key: needleColor
+        label: Needle color
+        default: accent
+        selector: { opendisplay_color: {} }
+      - key: showFrame
+        label: Show frame
+        default: true
+        selector: { boolean: {} }
+      - key: cornerRadius
+        label: Corner radius
+        default: 6
+        selector: { number: { min: 0, max: 24, mode: box } }
+      - key: color
+        label: Color
+        default: black
+        selector: { opendisplay_color: {} }
+      - key: background
+        label: Background
+        default: white
+        selector: { opendisplay_color: {} }
