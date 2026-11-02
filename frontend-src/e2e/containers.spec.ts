@@ -529,16 +529,14 @@ test.describe("selecting several elements", () => {
     expect(restored?.x).toBeCloseTo(clusterBefore?.x ?? 0, 0);
   });
 
-  test("hides and locks all of them at once, and deletes them after confirmation", async ({
-    page,
-  }) => {
+  test("deletes all of them after confirmation", async ({ page }) => {
     await item(page, "reading").click();
     await item(page, "left").click({
       modifiers: ["Shift"],
       position: { x: 6, y: 6 },
     });
 
-    await page.getByRole("button", { name: "Remove elements" }).click();
+    await page.keyboard.press("Delete");
 
     await expect(page.getByRole("dialog")).toContainText("Delete 2 elements?");
     await page.getByRole("button", { name: "Delete element" }).click();

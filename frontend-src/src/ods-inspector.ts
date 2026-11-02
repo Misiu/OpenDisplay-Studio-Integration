@@ -58,12 +58,12 @@ import "./ods-structure";
 const MIN_WIDTH = 340;
 const MAX_WIDTH = 560;
 /** The dashboard's background, edited like any other color of a primitive. */
-const BACKGROUND_FIELD: PrimitiveField = {
+const backgroundField = (): PrimitiveField => ({
   key: "background",
   label: strings.fields.background,
   shape: "color",
   section: "appearance",
-};
+});
 
 const DISPLAY_KEYS = ["padding", "snapSize"] as const;
 type DisplayKey = (typeof DISPLAY_KEYS)[number];
@@ -213,13 +213,6 @@ export class OdsInspector extends LitElement {
       .reset-link:hover {
         text-decoration: underline;
       }
-      .hidden-switch {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        color: var(--studio-muted);
-        font-size: 11px;
-      }
       .field-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -307,11 +300,6 @@ export class OdsInspector extends LitElement {
         color: var(--studio-muted);
         font-size: 10px;
         line-height: 1.45;
-      }
-      .danger-zone {
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--studio-border);
-        color: var(--error-color, #db4437);
       }
       .metrics {
         display: grid;
@@ -474,17 +462,12 @@ export class OdsInspector extends LitElement {
     emit(this, "command", { id: "toggle-locked", itemId: item.id });
   }
 
-  private requestItemDelete(item: StudioItem): void {
-    emit(this, "command", { id: "delete-item", itemId: item.id });
-  }
-
   // --- shared pieces ---------------------------------------------------------
 
   private renderHeader(
     title: string,
     subtitle: string,
-    icon: string,
-    trailing: TemplateResult | typeof nothing = nothing
+    icon: string
   ): TemplateResult {
     return html`
       <div class="inspector-title">
@@ -493,39 +476,6 @@ export class OdsInspector extends LitElement {
           <h2>${title}</h2>
           <p>${subtitle}</p>
         </div>
-        ${trailing}
-      </div>
-    `;
-  }
-
-  private toggleHidden(): void {
-    emit(this, "command", { id: "toggle-hidden" });
-  }
-
-  /** The `Hidden` switch in the header of an element. */
-  private renderHiddenSwitch(item: StudioItem): TemplateResult {
-    return html`
-      <label class="hidden-switch">
-        <span>${strings.inspector.hiddenSwitch}</span>
-        <input
-          type="checkbox"
-          role="switch"
-          aria-checked=${item.hidden ? "true" : "false"}
-          aria-label=${strings.inspector.hiddenSwitch}
-          .checked=${item.hidden}
-          @change=${this.toggleHidden}
-        />
-      </label>
-    `;
-  }
-
-  private renderDangerZone(label: string, onClick: () => void): TemplateResult {
-    return html`
-      <div class="danger-zone">
-        <ha-button appearance="plain" variant="danger" @click=${onClick}>
-          <ha-icon slot="start" icon="mdi:delete-outline"></ha-icon>
-          ${label}
-        </ha-button>
       </div>
     `;
   }
@@ -598,7 +548,7 @@ export class OdsInspector extends LitElement {
   private renderDashboardBackground(): TemplateResult {
     return html`
       <ods-value-field
-        .field=${BACKGROUND_FIELD}
+        .field=${backgroundField()}
         .value=${this.dashboard.display.background}
         .palette=${this.dashboard.display.palette}
         .display=${this.dashboard.display}
@@ -1205,15 +1155,10 @@ export class OdsInspector extends LitElement {
       ${this.renderHeader(
         item.name,
         strings.inspector.subtitle(this.kindOf(item), item.locked),
-        itemIcon(item, this.widgets, this.primitives),
-        this.renderHiddenSwitch(item)
+        itemIcon(item, this.widgets, this.primitives)
       )}
       ${this.renderGroupedChip(item)} ${this.renderLockedNotice(item)}
-      ${this.renderItemSections(item)}
-      ${this.renderDangerZone(strings.inspector.removeElement, () =>
-        this.requestItemDelete(item)
-      )}
-      ${this.renderMetrics()}
+      ${this.renderItemSections(item)} ${this.renderMetrics()}
     `;
   }
 
@@ -1248,9 +1193,6 @@ export class OdsInspector extends LitElement {
             `
           : nothing
       }
-      ${this.renderDangerZone(strings.inspector.removeElements, () =>
-        emit(this, "command", { id: "delete-item" })
-      )}
     `;
   }
 

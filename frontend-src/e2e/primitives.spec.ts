@@ -1365,21 +1365,6 @@ test.describe("the sections of the properties", () => {
     await page.getByRole("button", { name: "Undo" }).click();
     await expect(outlineWidth).toHaveValue("7");
   });
-
-  test("the Hidden switch of an element hides it and shows it again", async ({
-    page,
-  }) => {
-    await libraryItem(page, "Circle").click();
-    const hidden = page.getByRole("switch", { name: "Hidden" });
-    await expect(hidden).not.toBeChecked();
-
-    await hidden.click();
-
-    await expect(hidden).toBeChecked();
-    await expect(page.locator(".selection.selected.hidden")).toHaveCount(1);
-    await hidden.click();
-    await expect(page.locator(".selection.selected.hidden")).toHaveCount(0);
-  });
 });
 
 test.describe("the advanced fields", () => {
