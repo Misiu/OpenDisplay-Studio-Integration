@@ -133,11 +133,11 @@ test.describe("ods-header", () => {
   }) => {
     await openKitchen(page);
     const status = page.locator("ods-header .status");
-    await expect(status).toHaveText("draft");
+    await expect(status).toHaveText("Draft");
     await page.getByRole("button", { name: "Set Ready", exact: true }).click();
-    await expect(status).toHaveText("ready");
+    await expect(status).toHaveText("Ready");
     await page.getByRole("button", { name: "Set Draft", exact: true }).click();
-    await expect(status).toHaveText("draft");
+    await expect(status).toHaveText("Draft");
   });
 
   test("marks the active view and returns to the gallery from the breadcrumb", async ({

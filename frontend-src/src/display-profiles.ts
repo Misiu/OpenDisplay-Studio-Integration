@@ -98,7 +98,13 @@ export const DISPLAY_PROFILES: DisplayProfile[] = [
   solum("12-2", "12.2″", 768, 960),
   {
     id: "custom",
-    ...strings.customDisplay,
+    // Read when asked for: the language is applied after this file is loaded.
+    get manufacturer(): string {
+      return strings.customDisplay.manufacturer;
+    },
+    get name(): string {
+      return strings.customDisplay.name;
+    },
     width: 800,
     height: 480,
     palettes: PALETTE_IDS,

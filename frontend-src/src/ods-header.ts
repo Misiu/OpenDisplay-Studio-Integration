@@ -254,7 +254,9 @@ export class OdsHeader extends LitElement {
         </nav>
         <div class="editor-actions">
           ${this.renderFileButtons()} ${this.renderSendButton()}
-          <span class="status ${dashboard.status}">${dashboard.status}</span>
+          <span class="status ${dashboard.status}">
+            ${strings.dashboardStatus[dashboard.status]}
+          </span>
           <ha-button
             appearance="plain"
             @click=${() => emit(this, "toggle-ready")}

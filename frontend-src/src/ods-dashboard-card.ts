@@ -19,7 +19,8 @@ import { baseStyles, chromeStyles, tileStyles } from "./studio-styles";
 import type { Dashboard } from "./types";
 import "./ods-context-menu";
 
-const MENU: Array<ContextMenuEntry & { id: DashboardAction }> = [
+/** The actions of a card, read when it is drawn so they speak the language of the panel. */
+const menu = (): Array<ContextMenuEntry & { id: DashboardAction }> => [
   {
     id: "rename",
     label: strings.gallery.menu.rename,
@@ -296,7 +297,7 @@ export class OdsDashboardCard extends LitElement {
   }
 
   private onMenuSelect(event: OdsEvent<"menu-select">): void {
-    const entry = MENU.find((candidate) => candidate.id === event.detail.id);
+    const entry = menu().find((candidate) => candidate.id === event.detail.id);
     if (entry) {
       event.stopPropagation();
       emit(this, "dashboard-menu-action", {
@@ -367,7 +368,9 @@ export class OdsDashboardCard extends LitElement {
                 <strong>${name}</strong>
               `
         }
-        <span class=${`status ${status}`}>${status}</span>
+        <span class=${`status ${status}`}>
+          ${strings.dashboardStatus[status]}
+        </span>
       </span>
     `;
   }
@@ -401,7 +404,7 @@ export class OdsDashboardCard extends LitElement {
         class="dashboard-menu"
         id=${this.menuId}
         label=${strings.gallery.menuFor(this.dashboard.name)}
-        .entries=${MENU}
+        .entries=${menu()}
         @menu-select=${this.onMenuSelect}
       ></ods-context-menu>
     `;

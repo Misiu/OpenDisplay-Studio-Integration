@@ -96,4 +96,24 @@ describe("UI text is centralised in strings.ts", () => {
       ...findings(HELPER_ARGUMENT),
     ]).toEqual([]);
   });
+
+  it("reads the language when it draws, not when its file is loaded", () => {
+    // The language is applied after the files are loaded, so a text copied into a list or
+    // an object that is built at load time stays English. Build such lists in a function.
+    const LOAD_TIME_LITERAL =
+      /^(?:export )?const \w+(?:: [^=\n]+)? = [[{]\n([\s\S]*?)\n[\]}];$/gm;
+    // A property that is the text itself, or a spread of a group of texts.
+    const copiesText = /^\s*(?:[\w"]+:\s*|\.\.\.)strings\./;
+    const readsStrings = (line: string): boolean => copiesText.test(line);
+    const copies = sources.flatMap(({ name, text }) =>
+      [...withoutStyles(text).matchAll(LOAD_TIME_LITERAL)].flatMap((match) =>
+        match[1]
+          .split("\n")
+          .filter(readsStrings)
+          .map((line) => `${name}: ${line.trim()}`)
+      )
+    );
+
+    expect(copies).toEqual([]);
+  });
 });

@@ -9,7 +9,16 @@ describe("applyLanguage", () => {
     applyLanguage("pl");
 
     expect(strings.header.save).toBe("Zapisz");
-    expect(strings.inspector.removeElement).toBe("Usuń element");
+    expect(strings.gallery.newDashboard).toBe("Nowy dashboard");
+  });
+
+  it("translates what the editor shows around the canvas, not only the dialogs", () => {
+    applyLanguage("pl");
+
+    expect(strings.structure.searchPlaceholder).toBe("Szukaj warstw…");
+    expect(strings.dashboardStatus.ready).toBe("Gotowy");
+    expect(strings.header.help).toBe("Skróty klawiszowe");
+    expect(strings.structure.root(3)).toBe("Główny poziom (3 widgety)");
   });
 
   it("speaks German when Home Assistant does", () => {
