@@ -6,6 +6,8 @@ sizes:
   - {name: half vertical, width: 400, height: 480}
   - {name: small, width: 480, height: 280}
 docs:
+  - {title: "A school week in the colors of a Spectra 6 display", state: school-week-english, size: full, palette: spectra6, options: {highlightColor: red}}
+  - {title: "White text and grid lines on black, the lesson in progress in red", state: school-week-english, size: full, palette: spectra6, options: {color: white, background: black, gridColor: white, highlightColor: red}}
   - {title: "A school week, the lesson in progress highlighted", state: school-week, size: full, options: {highlightColor: black}}
   - {title: "Short names and removed substitution markers", state: substitution, size: full}
   - {title: "On a BWRY display the lesson in progress is red", state: school-week, size: full, options: {highlightColor: red}, palette: bwry}
@@ -13,3 +15,6 @@ docs:
   - {title: "On a weekend the next week can be shown", state: weekend, size: small}
   - {title: "White on black without grid lines", state: school-week, size: small, options: {color: white, background: black, showGrid: false}}
   - {title: "No lessons", state: empty, size: small}
+  - {title: "In Carlito, the look of Calibri", state: school-week-english, size: full, palette: spectra6, options: {font: Carlito-Regular.ttf, highlightColor: red}}
+  - {title: "In Atkinson Hyperlegible on half of a display", state: school-week-english, size: half horizontal, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf, highlightColor: yellow}}
+  - {title: "In Inter on a small frame", state: school-week-english, size: small, palette: spectra6, options: {font: Inter-SemiBold.ttf, highlightColor: red}}

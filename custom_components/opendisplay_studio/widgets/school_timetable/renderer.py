@@ -314,9 +314,9 @@ def _widest_time(context: WidgetContext, table: Table, text_size: int) -> int:
 
 
 def _grid_lines(
-    look: Look, x_edges: list[int], y_edges: list[int]
+    color: str, x_edges: list[int], y_edges: list[int]
 ) -> list[dict[str, Any]]:
-    """Draw the lines between the columns and rows of the table."""
+    """Draw the lines between the columns and rows of the table in `color`."""
     top, bottom = y_edges[0], y_edges[-1]
     left, right = x_edges[0], x_edges[-1]
     lines = [
@@ -327,7 +327,7 @@ def _grid_lines(
         {"type": "line", "x_start": left, "y_start": y, "x_end": right, "y_end": y}
         for y in y_edges[1:-1]
     ]
-    return [{**line, "fill": look.ink, "width": 1} for line in lines]
+    return [{**line, "fill": color, "width": 1} for line in lines]
 
 
 def _layout(
@@ -398,7 +398,9 @@ def _layout(
         for index in range(len(table.slots) + 1)
     ]
     y_edges.insert(0, padding)
-    return root, _grid_lines(look, x_edges, y_edges)
+    # Unless the user picked a color for them, the lines are in the color of the text.
+    grid_color = context.options["gridColor"] or look.ink
+    return root, _grid_lines(grid_color, x_edges, y_edges)
 
 
 def render(context: WidgetContext) -> list[dict[str, Any]]:

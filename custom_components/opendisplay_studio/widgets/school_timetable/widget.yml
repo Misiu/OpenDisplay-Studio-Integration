@@ -65,6 +65,10 @@ options:
         label: Show grid lines
         default: true
         selector: { boolean: {} }
+      - key: gridColor
+        label: Grid line color
+        optional: true
+        selector: { opendisplay_color: {} }
       - key: showFooter
         label: Show footer
         default: true
@@ -85,6 +89,10 @@ options:
         label: Background
         default: white
         selector: { opendisplay_color: {} }
+      - key: font
+        label: Font
+        default: ppb.ttf
+        selector: { opendisplay_font: {} }
 
 data:
   calendar_events:

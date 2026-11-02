@@ -138,6 +138,29 @@ def test_the_footer_and_the_grid_can_be_turned_off() -> None:
     assert [e for e in with_both if e["type"] == "line"] != []
 
 
+def _grid_colors(elements: list[dict[str, Any]]) -> set[str]:
+    return {e["fill"] for e in elements if e["type"] == "line"}
+
+
+def test_the_grid_lines_are_in_the_color_of_the_text_unless_another_is_picked() -> None:
+    assert _grid_colors(_elements("school-week", color="blue")) == {"blue"}
+
+
+def test_the_grid_lines_can_have_a_color_of_their_own() -> None:
+    elements = _elements(
+        "school-week", color="green", background="black", gridColor="white"
+    )
+
+    assert _grid_colors(elements) == {"white"}
+    assert _fills(elements, "green") == [] or all(
+        e["type"] != "line" for e in _fills(elements, "green")
+    )
+
+
+def test_a_grid_color_left_unset_is_the_default() -> None:
+    assert _elements("school-week", gridColor=None) == _elements("school-week")
+
+
 @pytest.mark.parametrize("size", [(400, 480), (480, 280), (800, 240), (800, 480)])
 def test_everything_stays_inside_the_frame(size: tuple[int, int]) -> None:
     for element in _elements("school-week", size):
