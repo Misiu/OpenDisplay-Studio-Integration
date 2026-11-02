@@ -1,4 +1,5 @@
 import { PALETTE_COLORS } from "./display-profiles";
+import { strings } from "./strings";
 import type {
   PaletteId,
   PrimitiveField,
@@ -12,6 +13,7 @@ import type {
 
 const COLOR_SELECTOR = "opendisplay_color";
 const RANGES_SELECTOR = "opendisplay_ranges";
+const FONT_SELECTOR = "opendisplay_font";
 const ACCENT = "accent";
 
 /**
@@ -59,11 +61,24 @@ export const widgetFieldAsPrimitive = (
     key: field.key,
     label: field.label,
     section: "appearance" as const,
-    default: field.default,
+    default: field.default ?? undefined,
+    optional: field.optional ? true : undefined,
+    placeholder: field.optional ? strings.common.auto : undefined,
   };
   const { selector } = field;
   if ("boolean" in selector) return { ...base, shape: "boolean" };
-  if (COLOR_SELECTOR in selector) return { ...base, shape: "color" };
+  if (COLOR_SELECTOR in selector) {
+    // An optional color may be left unset, which the widget reads as automatic.
+    return field.optional
+      ? {
+          ...base,
+          shape: "color",
+          nullable: true,
+          emptyLabel: strings.common.auto,
+        }
+      : { ...base, shape: "color" };
+  }
+  if (FONT_SELECTOR in selector) return { ...base, shape: "font" };
   const ranges = selector[RANGES_SELECTOR];
   if (isRecord(ranges)) {
     return { ...base, shape: "ranges", max: numberLimit(ranges.max) };
@@ -103,8 +118,11 @@ const isWidgetValue = (value: unknown): value is WidgetValue =>
   Array.isArray(value);
 
 /** The value a new widget starts with for a field: its default, else a neutral one. */
-export const fieldDefault = (field: WidgetFieldDefinition): WidgetValue => {
+export const fieldDefault = (
+  field: WidgetFieldDefinition
+): WidgetValue | null => {
   if (field.default !== undefined) return field.default;
+  if (field.optional) return null;
   if ("boolean" in field.selector) return false;
   if ("number" in field.selector) return 0;
   return "";

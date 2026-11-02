@@ -255,3 +255,29 @@ describe("widgetFieldAsPrimitive", () => {
     ).toBeUndefined();
   });
 });
+
+describe("an optional color option", () => {
+  const field = {
+    key: "gridColor",
+    label: "Grid line color",
+    selector: { opendisplay_color: {} },
+    optional: true,
+  };
+
+  it("may be left unset and is then called Auto, not None", () => {
+    const spec = widgetFieldAsPrimitive(field);
+
+    expect(spec).toMatchObject({
+      shape: "color",
+      nullable: true,
+      emptyLabel: "Auto",
+    });
+  });
+
+  it("is an ordinary color when it is not optional", () => {
+    const spec = widgetFieldAsPrimitive({ ...field, optional: false });
+
+    expect(spec?.nullable).toBeUndefined();
+    expect(spec?.emptyLabel).toBeUndefined();
+  });
+});

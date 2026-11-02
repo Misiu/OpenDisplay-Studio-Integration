@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Final
 
+from custom_components.opendisplay_studio.fonts import DEFAULT_FONT, FONT_PATTERN
 from custom_components.opendisplay_studio.validation import (
     COLORS,
     MAX_TEXT_LENGTH,
@@ -13,6 +14,7 @@ from custom_components.opendisplay_studio.validation import (
 MAX_TEXT_OPTION: Final = 256
 MAX_LIST_ITEMS: Final = 100
 RANGES_SELECTOR: Final = "opendisplay_ranges"
+FONT_SELECTOR: Final = "opendisplay_font"
 MAX_RANGES: Final = 12
 
 
@@ -33,6 +35,7 @@ _NEUTRAL: Final[dict[str, Any]] = {
     "boolean": False,
     RANGES_SELECTOR: [],
     "opendisplay_color": "black",
+    FONT_SELECTOR: DEFAULT_FONT,
 }
 
 
@@ -87,6 +90,12 @@ def _ranges(value: object, config: dict[str, Any], name: str) -> list[dict[str, 
     return ranges
 
 
+def _font(value: object, name: str) -> str:
+    if not isinstance(value, str) or FONT_PATTERN.fullmatch(value) is None:
+        fail(f"{name} must be the name of a font file")
+    return value
+
+
 def _id_or_ids(value: object, name: str) -> str | list[str]:
     if isinstance(value, list):
         if len(value) > MAX_LIST_ITEMS:
@@ -112,6 +121,8 @@ def normalize_value(selector: dict[str, Any], value: object, name: str) -> Any:
         return _number(value, config, name)
     if kind == RANGES_SELECTOR:
         return _ranges(value, config, name)
+    if kind == FONT_SELECTOR:
+        return _font(value, name)
     if kind == "text":
         return _text(value, name, MAX_TEXT_LENGTH)
     if kind in _CHECKED:
@@ -131,9 +142,20 @@ def option_fields(definition: dict[str, Any]) -> dict[str, dict[str, Any]]:
 def option_defaults(definition: dict[str, Any]) -> dict[str, Any]:
     """Return the value every option has on a new widget."""
     return {
-        key: default_for(field["selector"], field.get("default"))
+        key: (
+            None
+            if field.get("optional") and "default" not in field
+            else default_for(field["selector"], field.get("default"))
+        )
         for key, field in option_fields(definition).items()
     }
+
+
+def _normalize_option(field: dict[str, Any], value: object, name: str) -> Any:
+    """Check one option; an optional one may be unset."""
+    if value is None and field.get("optional"):
+        return None
+    return normalize_value(field["selector"], value, name)
 
 
 def normalize_options(definition: dict[str, Any], raw: object) -> dict[str, Any]:
@@ -146,7 +168,7 @@ def normalize_options(definition: dict[str, Any], raw: object) -> dict[str, Any]
             fail(f"widget.options.{key} is not an option of {definition['id']}")
     merged = {**option_defaults(definition), **raw}
     return {
-        key: normalize_value(field["selector"], merged[key], f"widget.options.{key}")
+        key: _normalize_option(field, merged[key], f"widget.options.{key}")
         for key, field in fields.items()
     }
 

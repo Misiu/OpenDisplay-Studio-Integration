@@ -105,6 +105,7 @@ export class OdsIconField extends LitElement {
 
   @state() private open?: { index: number; anchor: DOMRect };
   @state() private names: string[] = [];
+  @state() private glyphs: Record<string, string> = {};
   private closedAt = 0;
 
   private get isList(): boolean {
@@ -124,7 +125,9 @@ export class OdsIconField extends LitElement {
   private async loadNames(): Promise<void> {
     if (this.names.length > 0 || !this.hass) return;
     try {
-      this.names = await listIcons(this.hass);
+      const catalog = await listIcons(this.hass);
+      this.names = catalog.names;
+      this.glyphs = catalog.glyphs;
     } catch {
       // Without the list the picker is empty and says so; the icon can still be removed.
       this.names = [];
@@ -277,7 +280,9 @@ export class OdsIconField extends LitElement {
         @popover-close=${this.close}
       >
         <ods-icon-picker
+          .hass=${this.hass}
           .icons=${this.names}
+          .glyphs=${this.glyphs}
           .value=${current}
           @icon-change=${this.onIconChange}
         ></ods-icon-picker>

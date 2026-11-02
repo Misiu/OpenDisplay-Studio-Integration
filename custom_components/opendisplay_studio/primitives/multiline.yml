@@ -61,7 +61,6 @@ fields:
     label: Font
     shape: font
     default: ppb.ttf
-    options: [ppb.ttf, rbm.ttf]
     section: appearance
   - key: align
     label: Alignment

@@ -1,10 +1,12 @@
 import type { nothing } from "lit";
-import { css, html, LitElement, type TemplateResult } from "lit";
+import { css, html, LitElement, unsafeCSS, type TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { styleMap } from "lit/directives/style-map.js";
 import { emit } from "./events";
+import { ICON_FONT_FAMILY, loadIconFont } from "./font-faces";
 import { strings } from "./strings";
 import { baseStyles, fieldStyles } from "./studio-styles";
+import type { HomeAssistant } from "./types";
 
 const MDI = "mdi:";
 const ROW_HEIGHT = 36;
@@ -95,9 +97,18 @@ export class OdsIconPicker extends LitElement {
       }
       ha-icon {
         flex: none;
-        --mdi-icon-size: 22px;
+        --mdc-icon-size: 22px;
         width: 22px;
         height: 22px;
+      }
+      /* The icon as one character of the font the renderer draws icons with. */
+      .glyph {
+        flex: none;
+        width: 22px;
+        font-family: "${unsafeCSS(ICON_FONT_FAMILY)}";
+        font-size: 22px;
+        line-height: 22px;
+        text-align: center;
       }
       .empty {
         padding: 12px 0 4px;
@@ -107,12 +118,27 @@ export class OdsIconPicker extends LitElement {
     `,
   ];
 
+  @property({ attribute: false }) public hass?: HomeAssistant;
   /** Every icon the renderer has; empty until the list has arrived. */
   @property({ attribute: false }) public icons: string[] = [];
+  /** The character of each icon in the icon font. */
+  @property({ attribute: false }) public glyphs: Record<string, string> = {};
   @property() public value = "";
 
+  @state() private iconFontReady = false;
   @state() private search = "";
   @state() private listScroll = 0;
+
+  protected willUpdate(changed: Map<string, unknown>): void {
+    if (changed.has("hass") && this.hass && !this.iconFontReady) {
+      void this.loadGlyphs(this.hass);
+    }
+  }
+
+  /** Icons are drawn from the icon font once it is here; until then, as Home Assistant has them. */
+  private async loadGlyphs(hass: HomeAssistant): Promise<void> {
+    this.iconFontReady = (await loadIconFont(hass)) !== undefined;
+  }
 
   private onSearch(event: Event): void {
     if (event.target instanceof HTMLInputElement) {
@@ -134,6 +160,18 @@ export class OdsIconPicker extends LitElement {
     emit(this, "icon-change", { icon });
   }
 
+  private renderPicture(icon: string): TemplateResult {
+    const glyph = this.glyphs[icon];
+    if (this.iconFontReady && glyph) {
+      return html`
+        <span class="glyph" aria-hidden="true">${glyph}</span>
+      `;
+    }
+    return html`
+      <ha-icon icon=${`${MDI}${icon}`}></ha-icon>
+    `;
+  }
+
   private renderIcon(icon: string): TemplateResult {
     return html`
       <button
@@ -143,7 +181,7 @@ export class OdsIconPicker extends LitElement {
         aria-pressed=${icon === storedIconName(this.value) ? "true" : "false"}
         @click=${() => this.choose(icon)}
       >
-        <ha-icon icon=${`${MDI}${icon}`}></ha-icon>
+        ${this.renderPicture(icon)}
         <span>${icon}</span>
       </button>
     `;

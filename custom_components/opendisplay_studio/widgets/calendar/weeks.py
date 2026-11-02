@@ -16,6 +16,7 @@ from custom_components.opendisplay_studio.sdk import (
     line_height,
     month_year,
     short_date,
+    size_limit,
     text_width,
     weekday_name,
 )
@@ -462,9 +463,10 @@ def render(
 ) -> list[dict[str, Any]]:
     """Draw the grid of weeks, with the frame under everything."""
     box = context.box
-    small = clamp(
+    automatic = clamp(
         round(box.height / 40 * (1.25 if context.options["zoom"] else 1)), 9, 16
     )
+    small = size_limit(context.options, automatic)
     heading = clamp(small + 3, 11, 20)
     grid, top = _grid(context, small, heading)
     frame = compose(context, {"type": "column", **look.frame(), "children": []})

@@ -73,6 +73,8 @@ export class OdsPropertyField extends LitElement {
   @property() public label = "";
   @property() public fieldKey = "";
   @property() public unit = "";
+  /** Shown in an empty box: what the value is when none is typed. */
+  @property() public placeholder = "";
   @property({ attribute: false }) public value: number | null = 0;
   @property({ type: Number }) public min = 0;
   @property({ type: Number }) public max = 4096;
@@ -138,6 +140,7 @@ export class OdsPropertyField extends LitElement {
           data-field=${this.fieldKey}
           aria-label=${this.label}
           type="number"
+          placeholder=${this.placeholder}
           .value=${this.value === null ? "" : String(this.value)}
           min=${this.min}
           max=${this.max}

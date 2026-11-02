@@ -16,11 +16,11 @@ from .dashboard_import import prepare_import
 from .dashboards import DashboardStore, DashboardValidationError, validate_dashboard
 from .delivery import async_render_dashboard
 from .devices import async_send_to_device, list_display_devices
-from .fonts import available_fonts, font_directories, with_font_options
-from .icons import SORTED_ICON_NAMES
+from .icons import ICON_CODEPOINTS, SORTED_ICON_NAMES
 from .palette import PALETTE_COLORS
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
+from .websocket_fonts import async_describe_fonts, async_register_font_commands
 from .widget_reload import async_reload_widgets
 from .widgets import WidgetRegistry
 
@@ -60,7 +60,6 @@ async def websocket_bootstrap(
     msg: dict[str, Any],
 ) -> None:
     """Return authoritative dashboards, widgets, and primitive metadata."""
-    fonts = await hass.async_add_executor_job(available_fonts, font_directories(hass))
     connection.send_result(
         msg["id"],
         {
@@ -68,9 +67,8 @@ async def websocket_bootstrap(
             "dashboards": _store(hass).list(),
             "widgets": _widgets(hass).definitions(msg["language"]),
             "widgetErrors": [error.as_dict() for error in _widgets(hass).errors],
-            "primitives": with_font_options(
-                DEFAULT_PRIMITIVES.localized(msg["language"]), fonts
-            ),
+            "primitives": DEFAULT_PRIMITIVES.localized(msg["language"]),
+            "fonts": await async_describe_fonts(hass),
         },
     )
 
@@ -284,8 +282,10 @@ def websocket_list_icons(
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
 ) -> None:
-    """Return the names of every icon the renderer can draw, for the icon picker."""
-    connection.send_result(msg["id"], {"icons": SORTED_ICON_NAMES})
+    """Return every icon the renderer can draw and its character, for the picker."""
+    connection.send_result(
+        msg["id"], {"icons": SORTED_ICON_NAMES, "glyphs": ICON_CODEPOINTS}
+    )
 
 
 @websocket_api.websocket_command(
@@ -349,6 +349,7 @@ def websocket_prepare_import(
 
 
 def async_register_commands(hass: HomeAssistant) -> None:
+    async_register_font_commands(hass)
     websocket_api.async_register_command(hass, websocket_export_dashboard)
     websocket_api.async_register_command(hass, websocket_prepare_import)
     websocket_api.async_register_command(hass, websocket_list_icons)

@@ -13,3 +13,11 @@ export const messageFrom = (error: unknown, fallback: string): string => {
   }
   return textOf(error) ?? fallback;
 };
+
+/** The stable code the backend gave a failure, such as `font_in_use`, if it gave one. */
+export const codeFrom = (error: unknown): string | undefined => {
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return textOf(error.code);
+  }
+  return undefined;
+};

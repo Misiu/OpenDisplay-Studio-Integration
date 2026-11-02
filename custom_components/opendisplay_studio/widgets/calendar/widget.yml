@@ -114,6 +114,10 @@ options:
         label: Larger text
         default: false
         selector: { boolean: {} }
+      - key: textSize
+        label: Text size
+        optional: true
+        selector: { number: { min: 10, max: 128, mode: box } }
   - section: weeks
     fields:
       - key: weeks
@@ -175,6 +179,10 @@ options:
         label: Background
         default: white
         selector: { opendisplay_color: {} }
+      - key: font
+        label: Font
+        default: ppb.ttf
+        selector: { opendisplay_font: {} }
 
 data:
   calendar:events:

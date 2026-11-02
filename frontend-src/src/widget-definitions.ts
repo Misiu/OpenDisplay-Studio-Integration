@@ -17,6 +17,11 @@ const manifests = import.meta.glob(
   "../../custom_components/opendisplay_studio/widgets/*/widget.yml",
   { query: "?raw", import: "default", eager: true }
 );
+/** The `preview.png` in the folder of each widget, as the settings list shows it. */
+const previews = import.meta.glob(
+  "../../custom_components/opendisplay_studio/widgets/*/preview.png",
+  { query: "?url", import: "default", eager: true }
+);
 const translationFiles = import.meta.glob(
   [
     "../../custom_components/opendisplay_studio/widgets/*/translations/*.json",
@@ -27,6 +32,13 @@ const translationFiles = import.meta.glob(
 );
 
 type Translations = Record<string, string>;
+
+const previewOf = (folder: string): string | null => {
+  const found = Object.entries(previews).find(
+    ([path]) => folderOf(path) === folder
+  );
+  return found ? String(found[1]) : null;
+};
 type RawField = Omit<WidgetFieldDefinition, "label"> & { label: string };
 interface RawManifest {
   id: string;
@@ -74,8 +86,9 @@ const selectOptions = (selector: Record<string, unknown>): string[] => {
 };
 
 /** The same default the backend's `default_for` gives an option that declares none. */
-const defaultFor = (field: RawField): WidgetValue => {
+const defaultFor = (field: RawField): WidgetValue | null => {
   if (field.default !== undefined) return field.default;
+  if (field.optional) return null;
   if ("boolean" in field.selector) return false;
   if ("number" in field.selector) {
     const config = field.selector.number;
@@ -88,6 +101,7 @@ const defaultFor = (field: RawField): WidgetValue => {
   if ("select" in field.selector) return selectOptions(field.selector)[0] ?? "";
   if ("opendisplay_color" in field.selector) return "black";
   if ("opendisplay_ranges" in field.selector) return [];
+  if ("opendisplay_font" in field.selector) return "ppb.ttf";
   return "";
 };
 
@@ -134,6 +148,7 @@ const localizedSection = (
     selector: labelledSelector(field, texts),
     label: texts[`options.${field.key}`] ?? field.label,
     default: defaultFor(field),
+    optional: field.optional ? true : undefined,
   })),
 });
 
@@ -152,6 +167,7 @@ export const loadWidgetDefinitions = (language = "en"): WidgetDefinition[] =>
         category: texts[`categories.${category}`] ?? category,
         author: raw.author ?? "",
         builtin: true,
+        preview: previewOf(folderOf(path)),
         layout: raw.layout,
         sources: (raw.sources ?? []).map((source) =>
           localizedSource(source, texts)

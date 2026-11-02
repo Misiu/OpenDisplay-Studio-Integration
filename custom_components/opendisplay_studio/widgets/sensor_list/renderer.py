@@ -11,6 +11,7 @@ from custom_components.opendisplay_studio.sdk import (
     clamp,
     compose,
     readings_of,
+    size_limit,
 )
 
 MIN_ROW_HEIGHT: Final = 22
@@ -22,7 +23,7 @@ def _row(
 ) -> dict[str, Any]:
     """One reading as a line: icon, name, and the value at the right."""
     options = context.options
-    size = clamp(height * 6 // 10, 10, 28)
+    size = clamp(height * 6 // 10, 10, size_limit(options, 28))
     children: list[dict[str, Any]] = []
     if options["showIcon"]:
         children.append(look.icon(reading.icon, size=size, color=reading.color))

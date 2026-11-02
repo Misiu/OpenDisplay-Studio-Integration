@@ -918,3 +918,24 @@ def test_the_layout_never_overflows(
     _elements(state_id, size, view=view)
 
     assert "overflow" not in caplog.text
+
+
+def _text_sizes(elements: list[dict[str, Any]]) -> list[int]:
+    return [e["size"] for e in elements if e["type"] == "text"]
+
+
+@pytest.mark.parametrize("state_id", ["upcoming", "agenda", "weeks"])
+def test_a_text_size_the_user_chose_is_the_size_of_the_text_in_every_view(
+    state_id: str,
+) -> None:
+    automatic = _text_sizes(_elements(state_id))
+
+    chosen = _text_sizes(_elements(state_id, textSize=10))
+
+    assert max(chosen) < max(automatic)
+    assert max(chosen) <= 13
+
+
+@pytest.mark.parametrize("state_id", ["upcoming", "agenda", "weeks"])
+def test_the_text_size_left_automatic_changes_nothing(state_id: str) -> None:
+    assert _elements(state_id, textSize=None) == _elements(state_id)

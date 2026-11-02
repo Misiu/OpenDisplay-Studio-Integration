@@ -214,7 +214,11 @@ def _flow(
 ) -> tuple[list[Column], int]:
     """Pour the groups into columns; return them and how many events did not fit."""
     area, count = pour.area, pour.count
-    sizes = sizes_for(context.box.height, zoom=context.options["zoom"])
+    sizes = sizes_for(
+        context.box.height,
+        zoom=context.options["zoom"],
+        text_size=context.options["textSize"],
+    )
     width = (area.width - COLUMN_GAP * (count - 1)) // count
     style = ItemStyle(
         width=width,
@@ -276,7 +280,7 @@ def render(
     box = context.box
     options = context.options
     padding = clamp(min(box.width, box.height) // 40, 6, 14)
-    sizes = sizes_for(box.height, zoom=options["zoom"])
+    sizes = sizes_for(box.height, zoom=options["zoom"], text_size=options["textSize"])
     bar = None
     bar_height = 0
     if options["showTitleBar"] and box.height >= MIN_BAR_HEIGHT:

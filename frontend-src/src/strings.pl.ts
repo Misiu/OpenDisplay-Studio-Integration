@@ -25,9 +25,33 @@ export const polish: StringsOverride = {
     decrease: "Zmniejsz",
     cancel: "Anuluj",
     close: "Zamknij",
+    auto: "Auto",
   },
 
   commands: {
+    group: "Zgrupuj",
+    ungroup: "Rozgrupuj",
+    enterGroup: "Wejdź do grupy",
+    exitGroup: "Wyjdź z grupy",
+    deselect: "Odznacz",
+    copy: "Kopiuj",
+    cut: "Wytnij",
+    paste: "Wklej",
+    pasteHere: "Wklej tutaj",
+    duplicate: "Duplikuj",
+    rename: "Zmień nazwę",
+    save: "Zapisz dashboard",
+    toggleCode: "Przełącz między projektem a kodem",
+    zoomIn: "Powiększ",
+    zoomOut: "Pomniejsz",
+    zoomReset: "Resetuj powiększenie",
+    showShortcuts: "Skróty klawiszowe",
+    nudge: {
+      left: "Przesuń w lewo",
+      right: "Przesuń w prawo",
+      up: "Przesuń w górę",
+      down: "Przesuń w dół",
+    },
     undo: "Cofnij",
     redo: "Ponów",
     delete: "Usuń",
@@ -54,6 +78,10 @@ export const polish: StringsOverride = {
   },
 
   app: {
+    deleteElementsTitle: (count: number): string =>
+      `Usunąć ${count} ${plural(count, "element", "elementy", "elementów")}?`,
+    deleteContainerBody:
+      "To usuwa kontener i wszystko, co w nim jest. Możesz to cofnąć przyciskiem Cofnij.",
     exportFailed: "Nie udało się wyeksportować dashboardu",
     importFailed: "Nie udało się odczytać pliku",
     notAJsonFile: "To nie jest plik JSON",
@@ -85,6 +113,7 @@ export const polish: StringsOverride = {
     count: (count: number): string =>
       `${count} ${plural(count, "dashboard", "dashboardy", "dashboardów")}`,
     newDashboard: "Nowy dashboard",
+    settings: "Ustawienia",
     addDashboard: "Dodaj dashboard",
     filters: "Filtry dashboardów",
     search: "Szukaj dashboardów",
@@ -140,6 +169,7 @@ export const polish: StringsOverride = {
   },
 
   header: {
+    help: "Skróty klawiszowe",
     exportDashboard: "Eksportuj",
     exportTitle: "Pobierz ten dashboard jako plik",
     importDashboard: "Importuj",
@@ -158,6 +188,9 @@ export const polish: StringsOverride = {
   },
 
   library: {
+    containers: "Kontenery",
+    container: "Kontener",
+    containerHint: "Zawiera inne elementy i przesuwa je razem.",
     sections: {
       text: "Tekst",
       shapes: "Kształty",
@@ -191,6 +224,19 @@ export const polish: StringsOverride = {
   },
 
   structure: {
+    root: (count: number): string =>
+      `Główny poziom (${count} ${plural(count, "widget", "widgety", "widgetów")})`,
+    rootName: "Główny poziom",
+    breadcrumb: "Edytowana grupa",
+    exit: "Wyjdź",
+    container: "Kontener",
+    group: "Grupa",
+    groupBadge: "Grupa",
+    search: "Szukaj warstw",
+    searchPlaceholder: "Szukaj warstw…",
+    rename: "Nazwa elementu",
+    collapseRow: (name: string): string => `Zwiń ${name}`,
+    expandRow: (name: string): string => `Rozwiń ${name}`,
     title: "Struktura",
     heading: "Elementy",
     collapse: "Zwiń inspektor",
@@ -201,11 +247,24 @@ export const polish: StringsOverride = {
   },
 
   inspector: {
+    background: "Tło",
+    backgroundEnabled: "Tło",
+    backgroundFill: "Wypełnienie",
+    backgroundOutline: "Obrys",
+    backgroundWidth: "Grubość obrysu",
+    backgroundRadius: "Promień zaokrąglenia",
+    kindContainer: "Kontener",
+    kindGroup: "Grupa",
+    groupedChip: "Zgrupowany",
+    selectedElements: (count: number): string =>
+      `${count} ${plural(count, "element", "elementy", "elementów")}`,
+    selectionHint:
+      "Przesuwaj, ukrywaj, blokuj lub usuwaj je razem. Zgrupuj je, żeby zostały jednym elementem.",
+    boundingBox: "Ramka obejmująca",
     advanced: "Zaawansowane",
     reset: "przywróć",
     resetTitle: (section: string): string => `Przywróć domyślne: ${section}`,
     changed: "Zmienione względem domyślnych",
-    hiddenSwitch: "Ukryty",
     alignInParent: "Wyrównaj w rodzicu",
     expand: "Rozwiń inspektor",
     rail: "Warstwy",
@@ -222,7 +281,6 @@ export const polish: StringsOverride = {
       "Zachowuje ustawienia i zostanie narysowany, gdy pakiet wróci.",
     appearance: "Wygląd",
     diagnostics: "Diagnostyka renderowania",
-    removeElement: "Usuń element",
     locked: "Pozycja jest zablokowana",
     unlock: "Odblokuj",
     unlockElement: "Odblokuj pozycję elementu",
@@ -241,6 +299,8 @@ export const polish: StringsOverride = {
   },
 
   expression: {
+    scalingLocked: (names: string): string =>
+      `Nie można zmienić rozmiaru grupy: pozycja lub rozmiar elementu ${names} zależy od wyrażenia`,
     toggleLabel: (field: string): string => `Wyrażenie dla pola: ${field}`,
     toggleTooltip: "Wyrażenie (lub wpisz {)",
     visibleLabel: "Widoczność",
@@ -252,6 +312,8 @@ export const polish: StringsOverride = {
   },
 
   canvas: {
+    menuLabel: "Akcje płótna",
+    enterGroupHint: "Enter / dwuklik, aby edytować",
     rendering: "Renderowanie…",
     previewAlt: "Podgląd wyświetlacza wyrenderowany przez backend",
     hidden: "Ukryty",
@@ -357,6 +419,115 @@ export const polish: StringsOverride = {
     y: "Y",
     add: "Dodaj punkt",
     remove: (number: number): string => `Usuń punkt ${number}`,
+  },
+
+  fontField: {
+    choose: "Wybierz czcionkę",
+    loading: "Wczytuję czcionki…",
+    missing: (name: string): string => `${name} (nie zainstalowana)`,
+  },
+
+  settings: {
+    title: "Ustawienia",
+    subtitle: "Czcionki, widgety i przegląd Twoich dashboardów",
+    open: "Otwórz ustawienia",
+    back: "Wróć do dashboardów",
+    sections: "Sekcje ustawień",
+    tabs: {
+      overview: "Przegląd",
+      fonts: "Czcionki",
+      widgets: "Widgety",
+    },
+    soon: "Wkrótce",
+    about: {
+      overview: "Rzut oka na to, co już zbudowano.",
+      fonts:
+        "Czcionki decydują, jak rysowany jest każdy tekst. Zainstaluj czcionkę raz, a potem wybierz ją w polu Czcionka dowolnego elementu lub widgetu.",
+      widgets:
+        "Widgety czytają Twoje encje, kalendarze i prognozy i rysują je za Ciebie. Paczki z folderu widgetów pojawiają się tutaj.",
+    },
+    abilities: {
+      install: "Instalowanie",
+      preview: "Podgląd",
+      remove: "Usuwanie",
+      reload: "Przeładowanie",
+      add: "Dodawanie paczek",
+      switch: "Włączanie i wyłączanie",
+    },
+    overview: {
+      dashboards: "Dashboardy",
+      elements: "Elementy na dashboardach",
+      widgetsInstalled: "Zainstalowane widgety",
+      fontsInstalled: "Zainstalowane czcionki",
+      mostUsed: "Widgety na Twoich dashboardach",
+      noneUsed: "Żaden widget nie jest jeszcze na dashboardzie.",
+    },
+    fonts: {
+      install: "Zainstaluj czcionkę",
+      installing: "Instaluję…",
+      dropHint: "Upuść tu pliki .ttf lub .otf",
+      limit: (size: string): string => `Do ${size} każdy`,
+      bundled: "Dołączona do OpenDisplay",
+      unused: "Nieużywana",
+      usedIn: (count: number): string =>
+        `Używana w ${count} ${count === 1 ? "dashboardzie" : "dashboardach"}`,
+      noPreview: "Brak podglądu",
+      list: "Zainstalowane czcionki",
+      remove: (name: string): string => `Usuń ${name}`,
+      removeTitle: (name: string): string => `Usunąć ${name}?`,
+      removeUnusedBody:
+        "Plik czcionki zostanie usunięty. Możesz ją zainstalować ponownie w każdej chwili.",
+      removeUsedBody: (count: number, names: string): string =>
+        `Używa jej ${count} ${count === 1 ? "dashboard" : "dashboardów"}: ${names}. Ich tekst będzie rysowany czcionką domyślną, dopóki jej nie zainstalujesz ponownie.`,
+      removeAction: "Usuń czcionkę",
+      eyebrow: "Czcionki",
+      installFailed: "Nie udało się zainstalować czcionki",
+      removeFailed: "Nie udało się usunąć czcionki",
+      loadFailed: "Nie udało się wczytać czcionek",
+      notFontFile: (name: string): string =>
+        `${name} nie jest plikiem .ttf ani .otf`,
+      errors: {
+        invalid_font:
+          "Ten plik nie jest czcionką, którą renderer potrafi odczytać",
+        unsupported_type: "Można zainstalować tylko pliki .ttf i .otf",
+        invalid_size: "Plik czcionki nie może być pusty ani większy niż 2 MB",
+        invalid_name: "Ta nazwa pliku nie nadaje się na czcionkę",
+        font_exists: "Czcionka o tej nazwie jest już zainstalowana",
+        reserved_name: "Ta nazwa należy do czcionki dołączonej do OpenDisplay",
+        font_in_use: "Dashboardy nadal używają tej czcionki",
+        bundled_font: "Czcionki dołączonej do OpenDisplay nie można usunąć",
+        not_found: "Tej czcionki nie ma",
+      },
+    },
+    widgets: {
+      upload: "Dodaj paczkę",
+      noPreview: "Jeszcze bez obrazka",
+      reload: "Przeładuj widgety",
+      builtin: "Wbudowany",
+      custom: "Twój",
+      version: (version: string): string => `Wersja ${version}`,
+      defaultSize: "Domyślny rozmiar",
+      errors: "Paczki, które się nie wczytały",
+      list: "Zainstalowane widgety",
+    },
+  },
+
+  shortcuts: {
+    eyebrow: "Pomoc",
+    title: "Skróty klawiszowe",
+    open: "Skróty klawiszowe",
+    groups: {
+      edit: "Edycja",
+      arrange: "Układanie",
+      group: "Grupy",
+      view: "Widok",
+      history: "Historia",
+    },
+  },
+
+  dashboardStatus: {
+    draft: "Szkic",
+    ready: "Gotowy",
   },
 
   rangesField: {

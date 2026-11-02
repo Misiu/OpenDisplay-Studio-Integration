@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -19,8 +20,9 @@ from .const import (
     RENDER_CONCURRENCY,
 )
 from .dashboards import DashboardStore
-from .fonts import font_directories
+from .fonts import FONT_FOLDER, FontLibrary
 from .http import RenderedImageView
+from .http_fonts import FontFileView, IconFontView
 from .measure import use_font_directories
 from .panel import async_register_panel
 from .rendering import OdlRenderService
@@ -35,6 +37,7 @@ class OpenDisplayStudioData:
 
     cache: RenderCache
     dashboards: DashboardStore
+    fonts: FontLibrary
     renderer: OdlRenderService
     widgets: WidgetRegistry
 
@@ -49,22 +52,27 @@ async def async_setup(hass: HomeAssistant, _config: ConfigType) -> bool:
     widgets = await async_load_registry(hass)
     dashboards = DashboardStore(hass, widgets)
     await dashboards.async_load()
-    fonts = font_directories(hass)
-    use_font_directories(fonts)
+    fonts = FontLibrary(Path(hass.config.path(*FONT_FOLDER)))
+    await hass.async_add_executor_job(fonts.create_directory)
+    use_font_directories(fonts.directories)
+    renderer = OdlRenderService(
+        async_get_clientsession(hass),
+        concurrency=RENDER_CONCURRENCY,
+        font_dirs=fonts.directories,
+    )
     hass.data[DOMAIN] = OpenDisplayStudioData(
         cache=RenderCache(
             ttl_seconds=RENDER_CACHE_TTL_SECONDS,
             max_items=RENDER_CACHE_MAX_ITEMS,
         ),
         dashboards=dashboards,
-        renderer=OdlRenderService(
-            async_get_clientsession(hass),
-            concurrency=RENDER_CONCURRENCY,
-            font_dirs=fonts,
-        ),
+        fonts=fonts,
+        renderer=renderer,
         widgets=widgets,
     )
     hass.http.register_view(RenderedImageView(hass))
+    hass.http.register_view(FontFileView(hass))
+    hass.http.register_view(IconFontView(hass))
     async_register_commands(hass)
     async_register_reload_service(hass)
     await async_register_panel(hass)

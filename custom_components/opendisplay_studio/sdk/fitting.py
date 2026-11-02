@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from custom_components.opendisplay_studio.measure import text_size
+
+from .typeface import current_font
 
 ELLIPSIS = "…"
 DIGITS = "0123456789"
@@ -10,7 +14,13 @@ DIGITS = "0123456789"
 
 def text_width(value: str, size: int) -> int:
     """Return how many pixels wide `value` is when drawn at `size`."""
-    return text_size(value, size)[0]
+    return text_size(value, size, current_font())[0]
+
+
+def size_limit(options: dict[str, Any], default: int) -> int:
+    """Return the largest text size a widget may use: its `textSize`, else `default`."""
+    chosen = options.get("textSize")
+    return default if chosen is None else int(chosen)
 
 
 def widest_digits(value: str, size: int) -> str:
@@ -66,4 +76,4 @@ def truncate(value: str, width: int, size: int) -> str:
 
 def line_height(size: int) -> int:
     """Return the height in pixels of one line of text at `size`."""
-    return text_size("Ag", size)[1]
+    return text_size("Ag", size, current_font())[1]

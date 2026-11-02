@@ -15,6 +15,7 @@ import "./ods-color-picker";
 import "./ods-icon-field";
 import "./ods-points-field";
 import "./ods-series-field";
+import "./ods-font-field";
 import "./ods-ranges-field";
 import "./ods-image-field";
 import "./ods-popover";
@@ -254,6 +255,7 @@ export class OdsValueField extends LitElement {
         .label=${label}
         .fieldKey=${`value-${key}`}
         .unit=${unit ?? ""}
+        .placeholder=${this.field.placeholder ?? ""}
         .value=${empty ? null : Number(this.value)}
         .min=${resolveLimit(this.field.min, this.display, -Infinity)}
         .max=${resolveLimit(this.field.max, this.display, Infinity)}
@@ -395,7 +397,7 @@ export class OdsValueField extends LitElement {
           style=${hex ? `background:${hex}` : ""}
         ></span>
         <span class="value">
-          ${value ? this.colorName() : strings.colors.none}
+          ${value ? this.colorName() : (this.field.emptyLabel ?? strings.colors.none)}
         </span>
         ${
           clearable
@@ -515,6 +517,18 @@ export class OdsValueField extends LitElement {
     `;
   }
 
+  /** A font is picked from the installed fonts, each shown in its own letters. */
+  private renderFont(): TemplateResult {
+    return html`
+      <ods-font-field
+        .hass=${this.hass}
+        .field=${this.field}
+        .value=${this.value}
+        .disabled=${this.disabled}
+      ></ods-font-field>
+    `;
+  }
+
   /** The colored ranges of a scale: rows of a start and a color, as many as wanted. */
   private renderRanges(): TemplateResult {
     return html`
@@ -548,6 +562,7 @@ export class OdsValueField extends LitElement {
       this.compact ||
       this.field.shape === "icon" ||
       this.field.shape === "icons" ||
+      this.field.shape === "font" ||
       this.field.shape === "image" ||
       this.field.shape === "number" ||
       this.field.shape === "coordinate" ||
@@ -569,7 +584,7 @@ export class OdsValueField extends LitElement {
       case "color":
         return this.renderColor();
       case "font":
-        return this.renderSelect(this.field.options ?? [], true);
+        return this.renderFont();
       case "flags":
         return this.renderFlags();
       case "icon":

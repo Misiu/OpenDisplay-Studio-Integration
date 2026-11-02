@@ -12,6 +12,7 @@ from custom_components.opendisplay_studio.sdk import (
     compose,
     day_heading,
     line_height,
+    size_limit,
     text_width,
 )
 from custom_components.opendisplay_studio.widgets.calendar.events import (
@@ -140,8 +141,9 @@ def render(
     box = context.box
     options = context.options
     padding = clamp(min(box.width, box.height) // 40, 6, 14)
-    sizes = sizes_for(box.height, zoom=options["zoom"])
-    title = clamp(round(box.height / 26 * (1.25 if options["zoom"] else 1)), 11, 24)
+    sizes = sizes_for(box.height, zoom=options["zoom"], text_size=options["textSize"])
+    automatic = clamp(round(box.height / 26 * (1.25 if options["zoom"] else 1)), 11, 24)
+    title = size_limit(options, automatic)
     small = max(10, title - 4)
     width = box.width - 2 * padding
     style = Style(width, title, small, _pill_width(context, events, small))

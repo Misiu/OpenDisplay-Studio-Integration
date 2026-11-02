@@ -14,7 +14,8 @@ Code view treat it like any primitive. How to write one: [`docs/widget-sdk.md`](
 │   ├── en.json             # labels and runtime strings (required)
 │   └── pl.json
 ├── states.yml              # optional simulated states, for the preview and tests
-└── preview.yml             # optional preview sizes, palette and documentation pictures
+├── preview.yml             # optional preview sizes, palette and documentation pictures
+└── preview.png             # optional picture for the list of widgets, at most 400 × 240 px, 200 KB
 ```
 
 ## Manifest
@@ -27,7 +28,7 @@ sources[0].selector: …`). Required: `api` (must be `1`), `id` (kebab-case), `n
 |---|---|
 | `category` | Section of the Library the tile appears under. |
 | `sources[]` | What the user picks: `key`, `label`, a Home Assistant `selector` (entity, device, area), `required`, `max`, `data` (the data provider that resolves the picks) and `perSource[]` fields stored per pick (`label`, `color`, …). |
-| `options[]` | How it looks: sections of fields, each with `key`, `label`, `selector` and `default`. The colour selector is `opendisplay_color`; `opendisplay_ranges` is a list of colored ranges of a scale, each `{from, color}`, which `sdk.spans_of` turns into stretches of the scale. |
+| `options[]` | How it looks: sections of fields, each with `key`, `label`, `selector` and `default`. The colour selector is `opendisplay_color`; `opendisplay_ranges` is a list of colored ranges of a scale, each `{from, color}`, which `sdk.spans_of` turns into stretches of the scale; `opendisplay_font` is the file name of an installed font. An option with `optional: true` may be left unset (`null`), which a renderer reads as automatic. |
 | `data` | Parameters for a provider; `"@options.days"` reads an option. |
 
 ## Stored item

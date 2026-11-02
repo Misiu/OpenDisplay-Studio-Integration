@@ -17,9 +17,9 @@ import qrcode  # type: ignore[import-untyped]
 from odl_renderer import FontManager, measure_text  # type: ignore[import-untyped]
 from PIL import Image, ImageDraw, ImageFont
 
+from custom_components.opendisplay_studio.fonts import DEFAULT_FONT
 from custom_components.opendisplay_studio.odl import Box
 
-DEFAULT_FONT: Final = "ppb.ttf"
 # The fonts are looked up in the same folders the renderer searches, so a text is
 # measured with the font it is drawn with.
 _FONTS: Final[dict[str, FontManager]] = {"manager": FontManager()}

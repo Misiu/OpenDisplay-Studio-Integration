@@ -13,6 +13,29 @@ export const german: StringsOverride = {
   },
 
   commands: {
+    group: "Gruppieren",
+    ungroup: "Gruppierung aufheben",
+    enterGroup: "Gruppe betreten",
+    exitGroup: "Gruppe verlassen",
+    deselect: "Auswahl aufheben",
+    copy: "Kopieren",
+    cut: "Ausschneiden",
+    paste: "Einfügen",
+    pasteHere: "Hier einfügen",
+    duplicate: "Duplizieren",
+    rename: "Umbenennen",
+    save: "Dashboard speichern",
+    toggleCode: "Zwischen Entwurf und Code wechseln",
+    zoomIn: "Vergrößern",
+    zoomOut: "Verkleinern",
+    zoomReset: "Zoom zurücksetzen",
+    showShortcuts: "Tastenkürzel",
+    nudge: {
+      left: "Nach links schieben",
+      right: "Nach rechts schieben",
+      up: "Nach oben schieben",
+      down: "Nach unten schieben",
+    },
     undo: "Rückgängig",
     redo: "Wiederholen",
     delete: "Löschen",
@@ -39,6 +62,10 @@ export const german: StringsOverride = {
   },
 
   app: {
+    deleteElementsTitle: (count: number): string =>
+      `${count} Elemente löschen?`,
+    deleteContainerBody:
+      "Das entfernt den Container und alles darin. Mit „Rückgängig“ lässt es sich wiederherstellen.",
     exportFailed: "Das Dashboard konnte nicht exportiert werden",
     importFailed: "Die Datei konnte nicht gelesen werden",
     notAJsonFile: "Die Datei ist keine JSON-Datei",
@@ -71,6 +98,7 @@ export const german: StringsOverride = {
     count: (count: number): string =>
       `${count} ${count === 1 ? "Dashboard" : "Dashboards"}`,
     newDashboard: "Neues Dashboard",
+    settings: "Einstellungen",
     addDashboard: "Dashboard hinzufügen",
     filters: "Dashboard-Filter",
     search: "Dashboards durchsuchen",
@@ -126,6 +154,7 @@ export const german: StringsOverride = {
   },
 
   header: {
+    help: "Tastenkürzel",
     exportDashboard: "Exportieren",
     exportTitle: "Dieses Dashboard als Datei herunterladen",
     importDashboard: "Importieren",
@@ -144,6 +173,9 @@ export const german: StringsOverride = {
   },
 
   library: {
+    containers: "Container",
+    container: "Container",
+    containerHint: "Enthält andere Elemente und bewegt sie gemeinsam.",
     sections: {
       text: "Text",
       shapes: "Formen",
@@ -177,6 +209,19 @@ export const german: StringsOverride = {
   },
 
   structure: {
+    root: (count: number): string =>
+      `Stammebene (${count} ${count === 1 ? "Widget" : "Widgets"})`,
+    rootName: "Stammebene",
+    breadcrumb: "Gruppe in Bearbeitung",
+    exit: "Verlassen",
+    container: "Container",
+    group: "Gruppe",
+    groupBadge: "Gruppe",
+    search: "Ebenen suchen",
+    searchPlaceholder: "Ebenen suchen …",
+    rename: "Elementname",
+    collapseRow: (name: string): string => `${name} einklappen`,
+    expandRow: (name: string): string => `${name} ausklappen`,
     title: "Struktur",
     heading: "Elemente",
     collapse: "Inspektor einklappen",
@@ -187,12 +232,24 @@ export const german: StringsOverride = {
   },
 
   inspector: {
+    background: "Hintergrund",
+    backgroundEnabled: "Hintergrund",
+    backgroundFill: "Füllung",
+    backgroundOutline: "Umriss",
+    backgroundWidth: "Umrissbreite",
+    backgroundRadius: "Eckenradius",
+    kindContainer: "Container",
+    kindGroup: "Gruppe",
+    groupedChip: "Gruppiert",
+    selectedElements: (count: number): string => `${count} Elemente`,
+    selectionHint:
+      "Gemeinsam verschieben, ausblenden, sperren oder löschen. Gruppieren Sie sie, damit sie ein Element bleiben.",
+    boundingBox: "Begrenzungsrahmen",
     advanced: "Erweitert",
     reset: "zurücksetzen",
     resetTitle: (section: string): string =>
       `${section} auf Standard zurücksetzen`,
     changed: "Vom Standard abweichend",
-    hiddenSwitch: "Ausgeblendet",
     alignInParent: "Im Elternelement ausrichten",
     expand: "Inspektor ausklappen",
     rail: "Ebenen",
@@ -209,7 +266,6 @@ export const german: StringsOverride = {
       "Es behält seine Einstellungen und wird wieder gezeichnet, sobald das Paket zurückkehrt.",
     appearance: "Darstellung",
     diagnostics: "Render-Diagnose",
-    removeElement: "Element entfernen",
     locked: "Position ist gesperrt",
     unlock: "Entsperren",
     unlockElement: "Elementposition entsperren",
@@ -228,6 +284,9 @@ export const german: StringsOverride = {
   },
 
   expression: {
+    scalingLocked: (names: string): string =>
+      `Die Gruppe kann nicht skaliert werden: Position oder Größe von ${names} ` +
+      `wird von einem Ausdruck bestimmt`,
     toggleLabel: (field: string): string => `Ausdruck für ${field}`,
     toggleTooltip: "Ausdruck (oder { eingeben)",
     visibleLabel: "Sichtbarkeit",
@@ -239,6 +298,8 @@ export const german: StringsOverride = {
   },
 
   canvas: {
+    menuLabel: "Canvas-Aktionen",
+    enterGroupHint: "Enter / Doppelklick zum Bearbeiten",
     rendering: "Wird gerendert…",
     previewAlt: "Vom Backend gerenderte Display-Vorschau",
     hidden: "Ausgeblendet",
@@ -345,6 +406,119 @@ export const german: StringsOverride = {
     y: "Y",
     add: "Punkt hinzufügen",
     remove: (number: number): string => `Punkt ${number} entfernen`,
+  },
+
+  fontField: {
+    choose: "Schriftart wählen",
+    loading: "Schriftarten werden geladen …",
+    missing: (name: string): string => `${name} (nicht installiert)`,
+  },
+
+  settings: {
+    title: "Einstellungen",
+    subtitle: "Schriftarten, Widgets und ein Blick auf Ihre Dashboards",
+    open: "Einstellungen öffnen",
+    back: "Zurück zu den Dashboards",
+    sections: "Bereiche der Einstellungen",
+    tabs: {
+      overview: "Übersicht",
+      fonts: "Schriftarten",
+      widgets: "Widgets",
+    },
+    soon: "Demnächst",
+    about: {
+      overview: "Ein Blick auf das, was Sie bisher gebaut haben.",
+      fonts:
+        "Schriftarten bestimmen, wie jeder Text gezeichnet wird. Installieren Sie eine Schriftart einmal und wählen Sie sie dann im Feld Schriftart eines Elements oder Widgets.",
+      widgets:
+        "Widgets lesen Ihre Entitäten, Kalender und Vorhersagen und zeichnen sie für Sie. Pakete im Widget-Ordner erscheinen hier.",
+    },
+    abilities: {
+      install: "Installieren",
+      preview: "Vorschau",
+      remove: "Entfernen",
+      reload: "Neu laden",
+      add: "Pakete hinzufügen",
+      switch: "Ein- und ausschalten",
+    },
+    overview: {
+      dashboards: "Dashboards",
+      elements: "Platzierte Elemente",
+      widgetsInstalled: "Installierte Widgets",
+      fontsInstalled: "Installierte Schriftarten",
+      mostUsed: "Widgets in Ihren Dashboards",
+      noneUsed: "Noch kein Widget liegt auf einem Dashboard.",
+    },
+    fonts: {
+      install: "Schriftart installieren",
+      installing: "Wird installiert …",
+      dropHint: "Dateien .ttf oder .otf hier ablegen",
+      limit: (size: string): string => `Bis zu ${size} je Datei`,
+      bundled: "Gehört zu OpenDisplay",
+      unused: "Nicht verwendet",
+      usedIn: (count: number): string =>
+        `In ${count} ${count === 1 ? "Dashboard" : "Dashboards"} verwendet`,
+      noPreview: "Keine Vorschau",
+      list: "Installierte Schriftarten",
+      remove: (name: string): string => `${name} entfernen`,
+      removeTitle: (name: string): string => `${name} entfernen?`,
+      removeUnusedBody:
+        "Die Schriftdatei wird gelöscht. Sie können sie jederzeit erneut installieren.",
+      removeUsedBody: (count: number, names: string): string =>
+        `Sie wird in ${count} ${count === 1 ? "Dashboard" : "Dashboards"} verwendet: ${names}. Deren Text wird mit der Standardschrift gezeichnet, bis Sie sie erneut installieren.`,
+      removeAction: "Schriftart entfernen",
+      eyebrow: "Schriftarten",
+      installFailed: "Die Schriftart konnte nicht installiert werden",
+      removeFailed: "Die Schriftart konnte nicht entfernt werden",
+      loadFailed: "Die Schriftarten konnten nicht geladen werden",
+      notFontFile: (name: string): string =>
+        `${name} ist keine .ttf- oder .otf-Datei`,
+      errors: {
+        invalid_font:
+          "Diese Datei ist keine Schriftart, die der Renderer lesen kann",
+        unsupported_type:
+          "Nur .ttf- und .otf-Dateien können installiert werden",
+        invalid_size:
+          "Eine Schriftdatei darf nicht leer und nicht größer als 2 MB sein",
+        invalid_name:
+          "Dieser Dateiname kann für eine Schriftart nicht verwendet werden",
+        font_exists: "Eine Schriftart mit diesem Namen ist bereits installiert",
+        reserved_name: "Dieser Name gehört zu einer Schriftart von OpenDisplay",
+        font_in_use: "Dashboards verwenden diese Schriftart noch",
+        bundled_font:
+          "Eine Schriftart von OpenDisplay kann nicht entfernt werden",
+        not_found: "Diese Schriftart ist nicht installiert",
+      },
+    },
+    widgets: {
+      upload: "Paket hinzufügen",
+      noPreview: "Noch kein Bild",
+      reload: "Widgets neu laden",
+      builtin: "Eingebaut",
+      custom: "Eigenes",
+      version: (version: string): string => `Version ${version}`,
+      defaultSize: "Standardgröße",
+      errors: "Pakete, die nicht geladen wurden",
+      list: "Installierte Widgets",
+    },
+  },
+
+  shortcuts: {
+    eyebrow: "Hilfe",
+    title: "Tastenkürzel",
+    open: "Tastenkürzel",
+    groups: {
+      edit: "Bearbeiten",
+      arrange: "Anordnen",
+      group: "Gruppen",
+      view: "Ansicht",
+      history: "Verlauf",
+    },
+  },
+
+  dashboardStatus: {
+    draft: "Entwurf",
+    ready: "Bereit",
   },
 
   rangesField: {

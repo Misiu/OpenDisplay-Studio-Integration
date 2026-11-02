@@ -73,7 +73,14 @@ SOURCE_SCHEMA: Final = vol.Schema(
     }
 )
 
-OPTION_SCHEMA: Final = vol.Schema({**FIELD_SCHEMA, vol.Optional("default"): object})
+OPTION_SCHEMA: Final = vol.Schema(
+    {
+        **FIELD_SCHEMA,
+        vol.Optional("default"): object,
+        # An optional option may be left unset, which a renderer reads as "automatic".
+        vol.Optional("optional", default=False): bool,
+    }
+)
 
 SECTION_SCHEMA: Final = vol.Schema(
     {

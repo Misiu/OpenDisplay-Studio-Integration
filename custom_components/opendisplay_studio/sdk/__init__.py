@@ -17,7 +17,7 @@ from custom_components.opendisplay_studio.odl import (
 from . import dial
 from .compose import compose
 from .dial import Dial, Stroke
-from .fitting import fit_text, line_height, text_width, truncate
+from .fitting import fit_text, line_height, size_limit, text_width, truncate
 from .formatting import (
     condition_icon,
     entity_icon,
@@ -86,6 +86,7 @@ __all__ = [
     "rectangle",
     "rows",
     "short_date",
+    "size_limit",
     "spans_of",
     "state_word",
     "text",

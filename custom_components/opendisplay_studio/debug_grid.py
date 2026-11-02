@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Final
 
+from custom_components.opendisplay_studio.fonts import DEFAULT_FONT
+
 DEBUG_GRID: Final = "debug_grid"
 
 # The renderer's own defaults for the fields of a debug grid element.
@@ -11,7 +13,7 @@ DEFAULT_SPACING: Final = 20
 DEFAULT_DASH_LENGTH: Final = 2
 DEFAULT_SPACE_LENGTH: Final = 4
 DEFAULT_LABEL_SIZE: Final = 12
-DEFAULT_FONT: Final = "ppb.ttf"
+
 LABEL_INSET: Final = 2
 
 

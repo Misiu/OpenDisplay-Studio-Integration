@@ -124,9 +124,15 @@ calendar's label and colour. Use the SDK instead of measuring by hand:
 | `text`, `icon`, `rectangle`, `line`, `progress_bar` | Build single ODL elements. |
 | `fit_text(value, width, maximum)` | Largest font size at which `value` fits, measured with the renderer's own fonts. |
 | `truncate(value, width, size)` | Cut with an ellipsis. |
+| `size_limit(context.options, default)` | The largest text size the user allows (the `textSize` option, empty means automatic), else `default`. |
 | `rows`, `columns`, `grid`, `inset` | Split the box into numbers, to size things before they are laid out. |
 | `format_time`, `format_relative_day`, `weekday_name` | Localized times and days. |
 | `condition_icon`, `entity_icon` | Icons for weather conditions and entity kinds. |
+
+The user may pick a font for a widget (the `font` option in the appearance section, a file
+name). You do not pass it on: every `fit_text`, `text_width` and `line_height` call measures
+with it while your renderer runs, and `compose` puts it on the text it lays out. A font
+that is no longer installed is replaced by the default one before your renderer is called.
 
 Draw a readable message when a required source is missing (`context.t("choose_calendars")`)
 and design for the smallest and a large frame, not only the default.
@@ -200,6 +206,16 @@ Leave out `--root` to preview the built-in widgets.
 
 `python -m scripts.widget_devkit render --out pictures` writes a PNG per state and
 size instead (`--option showFrame=false` sets an option; repeat it for more).
+
+### The picture in the list of widgets
+
+Put a `preview.png` in the folder of your widget and the Settings view shows it on the card
+of the widget, whether the package is built in or one you installed. Every picture is shown
+in the same area, so it must be a PNG of at most 400 × 240 pixels and 200 KB; a larger
+one is left out with a warning in the log, and the widget still loads. For the built-in
+widgets `python -m scripts.widget_docs` writes it from the first entry of `docs` in
+`preview.yml`, shrunk to fit; a widget of your own can use the picture the preview page
+or `widget_devkit render` draws.
 
 ## 6. Test it
 

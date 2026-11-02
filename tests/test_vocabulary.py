@@ -20,6 +20,7 @@ SKIPPED_DIRS = {
     "test-results",
     "frontend",  # build output of frontend-src
     "licenses",  # third-party license texts
+    "bundled_fonts",  # third-party fonts, with the license text they ask to ship
     "ha-frontend",  # vendored Home Assistant frontend guidance
 }
 # Names imposed by tools, and the two policy files that must name the word to forbid it.

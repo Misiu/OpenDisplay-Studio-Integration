@@ -13,7 +13,8 @@ export type DashboardStatus = "draft" | "ready";
 export type WidgetRange = { from: number | null; color: string };
 
 export type WidgetValue = string | number | boolean | string[] | WidgetRange[];
-export type WidgetOptions = Record<string, WidgetValue>;
+/** An option left unset, as the text size is when it is automatic, is `null`. */
+export type WidgetOptions = Record<string, WidgetValue | null>;
 
 /** One thing the user picked for a source (an entity, a calendar), with its per-source fields. */
 export interface WidgetPick {
@@ -344,7 +345,9 @@ export interface WidgetFieldDefinition {
   key: string;
   label: string;
   selector: Record<string, unknown>;
-  default?: WidgetValue;
+  default?: WidgetValue | null;
+  /** An optional option may be left unset, which means automatic. */
+  optional?: boolean;
 }
 export interface WidgetSourceDefinition extends WidgetFieldDefinition {
   required: boolean;
@@ -367,6 +370,8 @@ export interface WidgetDefinition {
   author: string;
   /** False for a package an administrator installed in the config folder. */
   builtin: boolean;
+  /** The widget's `preview.png` as a data URL, for the list of widgets; null if it has none. */
+  preview: string | null;
   layout: {
     defaultSize: { width: number; height: number };
     minSize: { width: number; height: number };
@@ -420,12 +425,16 @@ export interface PrimitiveField {
   default?: PrimitiveValue;
   /** A colour that may be "no colour" (stored as null, shown as transparent). */
   nullable?: boolean;
+  /** What an unset colour is called, where "None" would be wrong, such as "Auto". */
+  emptyLabel?: string;
   /** Rarely needed: listed under `Advanced`, closed until asked for. */
   advanced?: boolean;
   /** A number that may have a fraction, such as a multiplier. */
   decimal?: boolean;
   /** Left unset (`null`) when the user has not chosen a value; the renderer decides. */
   optional?: boolean;
+  /** Shown in an unset number: what it is then, such as "Auto". */
+  placeholder?: string;
   /** The fields of an `object`, or of each entry of `objects`. */
   nested?: PrimitiveField[];
   axis?: "x" | "y";
@@ -510,20 +519,50 @@ export interface ComposePreviewResponse {
     pipeline: number;
   };
 }
+/** A dashboard that uses a font. */
+export interface FontUse {
+  id: string;
+  name: string;
+}
+
+/** A font the renderer can draw with, as the panel lists it. */
+export interface FontInfo {
+  /** The file name: what a dashboard stores. */
+  name: string;
+  family: string;
+  style: string;
+  /** Comes with the renderer: it cannot be removed. */
+  bundled: boolean;
+  /** Bytes. */
+  size: number;
+  /** Changes when the file does; part of the address the panel loads the font from. */
+  version: number;
+  usedBy: FontUse[];
+}
+
 export interface BootstrapResponse {
   version: string;
   dashboards: Dashboard[];
   widgets: WidgetDefinition[];
   widgetErrors: WidgetLoadError[];
   primitives: PrimitiveDefinition[];
+  fonts: FontInfo[];
 }
 
 export interface ReloadWidgetsResponse {
   widgets: WidgetDefinition[];
   widgetErrors: WidgetLoadError[];
 }
+/** The icons the renderer can draw and the character of each in its icon font. */
+export interface IconCatalog {
+  names: string[];
+  glyphs: Record<string, string>;
+}
+
 export interface HomeAssistant {
   callWS<T>(message: Record<string, unknown>): Promise<T>;
+  /** Fetches an address of Home Assistant as the logged-in user. */
+  fetchWithAuth?(path: string, init?: RequestInit): Promise<Response>;
   language: string;
   states?: Record<
     string,

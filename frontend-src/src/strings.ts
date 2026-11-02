@@ -11,6 +11,7 @@ export const strings = {
     decrease: "Decrease",
     cancel: "Cancel",
     close: "Close",
+    auto: "Auto",
     size,
     sizeInPixels: (width: number, height: number): string =>
       `${size(width, height)} px`,
@@ -101,6 +102,7 @@ export const strings = {
     count: (count: number): string =>
       `${count} ${count === 1 ? "dashboard" : "dashboards"}`,
     newDashboard: "New dashboard",
+    settings: "Settings",
     addDashboard: "Add dashboard",
     filters: "Dashboard filters",
     search: "Search dashboards",
@@ -252,7 +254,6 @@ export const strings = {
     reset: "reset",
     resetTitle: (section: string): string => `Reset ${section} to the defaults`,
     changed: "Changed from the default",
-    hiddenSwitch: "Hidden",
     alignInParent: "Align in Parent",
     expand: "Expand inspector",
     rail: "Layers",
@@ -276,14 +277,12 @@ export const strings = {
     selectionHint:
       "Move, hide, lock or delete them together. Group them to keep them as one.",
     boundingBox: "Bounding box",
-    removeElements: "Remove elements",
     dataSources: "Data sources",
     widgetMissing: (type: string): string =>
       `The widget ${type} is not installed. ` +
       "It keeps its settings and draws again once the package returns.",
     appearance: "Appearance",
     diagnostics: "Render diagnostics",
-    removeElement: "Remove element",
     locked: "Position is locked",
     unlock: "Unlock",
     unlockElement: "Unlock element position",
@@ -427,6 +426,104 @@ export const strings = {
     y: "Y",
     add: "Add point",
     remove: (number: number): string => `Remove point ${number}`,
+  },
+
+  fontField: {
+    choose: "Choose a font",
+    loading: "Loading fonts…",
+    missing: (name: string): string => `${name} (not installed)`,
+  },
+
+  settings: {
+    title: "Settings",
+    subtitle: "Fonts, widgets and a look at your dashboards",
+    open: "Open settings",
+    back: "Back to dashboards",
+    sections: "Settings sections",
+    tabs: {
+      overview: "Overview",
+      fonts: "Fonts",
+      widgets: "Widgets",
+    },
+    soon: "Coming soon",
+    about: {
+      overview: "A look at what you have built so far.",
+      fonts:
+        "Fonts decide how every text is drawn. Install a font once, then pick it in any Font field of an element or a widget.",
+      widgets:
+        "Widgets read your entities, calendars and forecasts and draw them for you. Packages in the widgets folder show up here.",
+    },
+    abilities: {
+      install: "Install",
+      preview: "Preview",
+      remove: "Remove",
+      reload: "Reload",
+      add: "Add a package",
+      switch: "Turn on or off",
+    },
+    overview: {
+      dashboards: "Dashboards",
+      elements: "Elements placed",
+      widgetsInstalled: "Widgets installed",
+      fontsInstalled: "Fonts installed",
+      mostUsed: "Widgets in your dashboards",
+      noneUsed: "No widget is on a dashboard yet.",
+      times: (count: number): string => `${count}×`,
+    },
+    fonts: {
+      install: "Install font",
+      installing: "Installing…",
+      dropHint: "Drop .ttf or .otf files here",
+      limit: (size: string): string => `Up to ${size} each`,
+      bundled: "Comes with OpenDisplay",
+      unused: "Not used",
+      usedIn: (count: number): string =>
+        `Used in ${count} ${count === 1 ? "dashboard" : "dashboards"}`,
+      noPreview: "No preview",
+      sample: "Aa Zażółć gęślą 0123",
+      list: "Installed fonts",
+      remove: (name: string): string => `Remove ${name}`,
+      removeTitle: (name: string): string => `Remove ${name}?`,
+      removeUnusedBody:
+        "The font file is deleted. You can install it again at any time.",
+      removeUsedBody: (count: number, names: string): string =>
+        `It is used in ${count} ${count === 1 ? "dashboard" : "dashboards"}: ${names}. Their text is drawn with the default font until you install it again.`,
+      removeAction: "Remove font",
+      eyebrow: "Fonts",
+      installFailed: "Could not install the font",
+      removeFailed: "Could not remove the font",
+      loadFailed: "Could not load the fonts",
+      notFontFile: (name: string): string =>
+        `${name} is not a .ttf or .otf file`,
+      errors: {
+        invalid_font: "That file is not a font the renderer can read",
+        unsupported_type: "Only .ttf and .otf files can be installed",
+        invalid_size: "A font file must not be empty or larger than 2 MB",
+        invalid_name: "That file name cannot be used for a font",
+        font_exists: "A font with that name is already installed",
+        reserved_name:
+          "That name belongs to a font that comes with OpenDisplay",
+        font_in_use: "Dashboards still use that font",
+        bundled_font: "A font that comes with OpenDisplay cannot be removed",
+        not_found: "That font is not installed",
+      } as Record<string, string>,
+    },
+    widgets: {
+      upload: "Add package",
+      noPreview: "No picture yet",
+      reload: "Reload widgets",
+      builtin: "Built in",
+      custom: "Yours",
+      version: (version: string): string => `Version ${version}`,
+      defaultSize: "Default size",
+      errors: "Packages that did not load",
+      list: "Installed widgets",
+    },
+  },
+
+  dashboardStatus: {
+    draft: "Draft",
+    ready: "Ready",
   },
 
   rangesField: {

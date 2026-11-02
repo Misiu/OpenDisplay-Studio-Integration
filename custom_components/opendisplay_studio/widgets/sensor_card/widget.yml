@@ -96,3 +96,7 @@ options:
         label: Background
         default: white
         selector: { opendisplay_color: {} }
+      - key: font
+        label: Font
+        default: ppb.ttf
+        selector: { opendisplay_font: {} }

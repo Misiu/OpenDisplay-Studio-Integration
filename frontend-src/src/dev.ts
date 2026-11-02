@@ -3,6 +3,13 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./ods-app";
+import robotoRegular from "@fontsource/roboto/files/roboto-latin-400-normal.woff2?url";
+import robotoBold from "@fontsource/roboto/files/roboto-latin-700-normal.woff2?url";
+import robotoItalic from "@fontsource/roboto/files/roboto-latin-400-italic.woff2?url";
+import robotoThin from "@fontsource/roboto/files/roboto-latin-100-normal.woff2?url";
+import robotoBlack from "@fontsource/roboto/files/roboto-latin-900-normal.woff2?url";
+import robotoMonoBold from "@fontsource/roboto-mono/files/roboto-mono-latin-700-normal.woff2?url";
+import robotoMono from "@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff2?url";
 import { createId } from "./ids";
 import { PALETTE_COLORS, PALETTE_IDS } from "./palettes";
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
@@ -17,6 +24,7 @@ import type {
   HomeAssistant,
   Dashboard,
   DisplayDevice,
+  FontInfo,
   PaletteId,
   LeafItem,
   Primitive,
@@ -965,6 +973,7 @@ const helloWidget = (): WidgetDefinition => ({
   icon: "mdi:hand-wave",
   category: "Examples",
   builtin: false,
+  preview: null,
   sources: [],
   options: [],
 });
@@ -994,8 +1003,165 @@ const expressionEntities = (dashboard: Dashboard): string[] => [
     )
   ),
 ];
+// --- fonts ----------------------------------------------------------------------------------
+
+/** A font the harness pretends the renderer has; `file` is a real font the browser loads. */
+interface MockFont {
+  name: string;
+  family: string;
+  style: string;
+  bundled: boolean;
+  size: number;
+  file: string;
+}
+
+const INSTALLED_FILES = [robotoItalic, robotoThin, robotoBlack, robotoMono];
+
+let mockFonts: MockFont[] = [
+  {
+    name: "ppb.ttf",
+    family: "Poppins",
+    style: "Bold",
+    bundled: true,
+    size: 158_000,
+    file: robotoBold,
+  },
+  {
+    name: "rbm.ttf",
+    family: "Roboto Mono",
+    style: "Bold",
+    bundled: true,
+    size: 114_000,
+    file: robotoMonoBold,
+  },
+  ...[
+    ["Carlito-Regular.ttf", "Carlito", "Regular", 628_032, robotoRegular],
+    ["Carlito-Bold.ttf", "Carlito", "Bold", 682_468, robotoBold],
+    [
+      "AtkinsonHyperlegible-Regular.ttf",
+      "Atkinson Hyperlegible",
+      "Regular",
+      54_348,
+      robotoRegular,
+    ],
+    [
+      "AtkinsonHyperlegible-Bold.ttf",
+      "Atkinson Hyperlegible",
+      "Bold",
+      55_256,
+      robotoBold,
+    ],
+    ["Inter-SemiBold.ttf", "Inter", "SemiBold", 419_744, robotoRegular],
+    ["IBMPlexMono-Medium.ttf", "IBM Plex Mono", "Medium", 136_704, robotoMono],
+    [
+      "BarlowCondensed-Bold.ttf",
+      "Barlow Condensed",
+      "Bold",
+      109_912,
+      robotoBold,
+    ],
+  ].map(([name, family, style, size, file]) => ({
+    name: String(name),
+    family: String(family),
+    style: String(style),
+    bundled: true,
+    size: Number(size),
+    file: String(file),
+  })),
+];
+
+const dashboardsUsing = (font: string): Array<{ id: string; name: string }> =>
+  dashboards
+    .filter((dashboard) =>
+      allItems(dashboard.items).some((item) =>
+        item.kind === "primitive"
+          ? Reflect.get(item.primitive, "font") === font
+          : item.kind === "widget" && item.widget.options.font === font
+      )
+    )
+    .map(({ id, name }) => ({ id, name }));
+
+const describeFonts = (): FontInfo[] =>
+  mockFonts.map((font) => ({
+    name: font.name,
+    family: font.family,
+    style: font.style,
+    bundled: font.bundled,
+    size: font.size,
+    version: 1,
+    usedBy: dashboardsUsing(font.name),
+  }));
+
+const refuse = (code: string, message: string): Promise<never> =>
+  Promise.reject({ code, message });
+
+const installMockFont = (
+  message: Record<string, unknown>
+): Promise<unknown> => {
+  const filename = String(message.filename);
+  if (!/\.(ttf|otf)$/i.test(filename)) {
+    return refuse(
+      "unsupported_type",
+      "Only .ttf and .otf files can be installed"
+    );
+  }
+  if (filename.startsWith("broken")) {
+    return refuse("invalid_font", `${filename} is not a font`);
+  }
+  if (mockFonts.some((font) => font.name === filename)) {
+    return refuse("font_exists", `A font ${filename} is already installed`);
+  }
+  const [family, style = "Regular"] = filename
+    .replace(/\.[^.]+$/, "")
+    .split("-");
+  mockFonts = [
+    ...mockFonts,
+    {
+      name: filename,
+      family,
+      style,
+      bundled: false,
+      size: Math.floor((String(message.data).length * 3) / 4),
+      file: INSTALLED_FILES[mockFonts.length % INSTALLED_FILES.length],
+    },
+  ];
+  return Promise.resolve({ fonts: describeFonts() });
+};
+
+const deleteMockFont = (message: Record<string, unknown>): Promise<unknown> => {
+  const name = String(message.name);
+  const font = mockFonts.find((candidate) => candidate.name === name);
+  if (!font) return refuse("not_found", `There is no installed font ${name}`);
+  if (font.bundled) return refuse("bundled_font", `${name} cannot be removed`);
+  if (dashboardsUsing(name).length > 0 && message.force !== true) {
+    return refuse("font_in_use", `${name} is used by a dashboard`);
+  }
+  mockFonts = mockFonts.filter((candidate) => candidate.name !== name);
+  return Promise.resolve({ fonts: describeFonts() });
+};
+
+/** `?lang=pl` shows the panel in another language, to look at a translation. */
+const language =
+  new URLSearchParams(window.location.search).get("lang") ?? "en";
+
+/** What `hass.fetchWithAuth` gives the panel: the file of a mock font, no icon font. */
+const fetchMockFile = async (path: string): Promise<Response> => {
+  const name = decodeURIComponent(
+    path.split("?")[0].replace("/api/opendisplay_studio/fonts/", "")
+  );
+  const font = mockFonts.find((candidate) => candidate.name === name);
+  // The icon font is asked for from the network: a test can answer it, and the dev server
+  // does not know it.
+  if (path.includes("/icon-font")) return fetch(path);
+  if (!path.includes("/fonts/") || !font) {
+    return new Response(null, { status: 404 });
+  }
+  return fetch(font.file);
+};
+
 const hass: HomeAssistant = {
-  language: "en",
+  language,
+  fetchWithAuth: fetchMockFile,
   states: {
     "sensor.kitchen_temperature": {
       state: "21.4",
@@ -1015,10 +1181,25 @@ const hass: HomeAssistant = {
         widgets: installedWidgets(hass.language),
         widgetErrors: widgetErrors(),
         primitives: primitiveDefinitions,
+        fonts: describeFonts(),
       } as T;
     }
+    if (message.type === "opendisplay_studio/list_fonts") {
+      return { fonts: describeFonts() } as T;
+    }
+    if (message.type === "opendisplay_studio/install_font") {
+      return installMockFont(message) as Promise<T>;
+    }
+    if (message.type === "opendisplay_studio/delete_font") {
+      return deleteMockFont(message) as Promise<T>;
+    }
     if (message.type === "opendisplay_studio/list_icons") {
-      return { icons: ICON_NAMES } as T;
+      return {
+        icons: ICON_NAMES,
+        glyphs: Object.fromEntries(
+          ICON_NAMES.map((name, index) => [name, 0xf0000 + index])
+        ),
+      } as T;
     }
     if (message.type === "opendisplay_studio/send_to_device") {
       return {} as T;

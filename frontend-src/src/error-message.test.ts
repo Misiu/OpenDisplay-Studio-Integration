@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { messageFrom } from "./error-message";
+import { codeFrom, messageFrom } from "./error-message";
 
 describe("messageFrom", () => {
   it("reads the message of an error", () => {
@@ -24,5 +24,19 @@ describe("messageFrom", () => {
     expect(messageFrom({ code: "x" }, "Fallback")).toBe("Fallback");
     expect(messageFrom({ message: "" }, "Fallback")).toBe("Fallback");
     expect(messageFrom(new Error(""), "Fallback")).toBe("Fallback");
+  });
+});
+
+describe("codeFrom", () => {
+  it("reads the code of a rejection from Home Assistant", () => {
+    expect(codeFrom({ code: "font_in_use", message: "In use" })).toBe(
+      "font_in_use"
+    );
+  });
+
+  it("has no code for anything else", () => {
+    expect(codeFrom(new Error("It broke"))).toBeUndefined();
+    expect(codeFrom({ code: "" })).toBeUndefined();
+    expect(codeFrom(undefined)).toBeUndefined();
   });
 });

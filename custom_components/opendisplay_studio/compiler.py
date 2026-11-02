@@ -24,6 +24,7 @@ from .flatten import (
     shift_primitive,
     without_turn,
 )
+from .font_fallback import InstalledFonts, with_installed_fonts
 from .fonts import font_directories
 from .history import RecordedHistory, async_prefetch_history
 from .images import async_load_images
@@ -31,6 +32,7 @@ from .measure import primitive_box
 from .odl import Box, DisplayContext, WidgetContext, rectangle, text
 from .palette import accent_color_for_palette
 from .raw_yaml import raw_elements
+from .sdk.typeface import render_in_font
 from .widgets import WidgetPackage, WidgetPackageError, WidgetRegistry
 from .widgets.options import option_defaults
 
@@ -103,6 +105,7 @@ def _plan_widgets(
     placed_items: list[Placed],
     registry: WidgetRegistry,
     resolver: DataResolver,
+    installed: InstalledFonts,
     warnings: list[str],
 ) -> dict[str, _WidgetJob]:
     """Register the data every visible, installed widget needs."""
@@ -119,6 +122,8 @@ def _plan_widgets(
             continue
         manifest = package.manifest
         options = {**option_defaults(manifest), **widget.get("options", {})}
+        if "font" in options:
+            options["font"] = installed.resolve(options["font"], item["name"], warnings)
         job = _WidgetJob(placed, package, options, widget.get("sources", {}))
         for source in manifest["sources"]:
             provider_name = source.get("data")
@@ -196,7 +201,7 @@ def _render_widget(
         strings=registry.strings(item["widget"]["type"], language),
     )
     started = monotonic()
-    rendered = job.package.renderer(context)
+    rendered = render_in_font(job.package.renderer, context)
     if monotonic() - started > RENDER_BUDGET_SECONDS:
         budget_ms = round(RENDER_BUDGET_SECONDS * 1000)
         warnings.append(f"{item['name']}: rendering took longer than {budget_ms} ms")
@@ -224,9 +229,12 @@ async def async_compile_dashboard(
             display_value["height"],
         )
     warnings.extend(resolution.warnings)
-    placed_items = flatten_items(resolution.items)
+    installed = await InstalledFonts.for_items(hass, resolution.items)
+    placed_items = with_installed_fonts(
+        flatten_items(resolution.items), installed, warnings
+    )
     resolver = DataResolver(registry.providers)
-    jobs = _plan_widgets(placed_items, registry, resolver, warnings)
+    jobs = _plan_widgets(placed_items, registry, resolver, installed, warnings)
     await resolver.async_resolve(hass, dashboard["language"])
     warnings.extend(resolver.warnings)
     resolution.entities |= resolver.source_ids

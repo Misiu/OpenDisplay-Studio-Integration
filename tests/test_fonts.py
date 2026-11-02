@@ -15,9 +15,7 @@ from custom_components.opendisplay_studio import measure
 from custom_components.opendisplay_studio.fonts import (
     BUNDLED_FONTS,
     available_fonts,
-    with_font_options,
 )
-from custom_components.opendisplay_studio.primitives import DEFAULT_PRIMITIVES
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -43,21 +41,6 @@ def test_installed_fonts_follow_the_bundled_ones(font_folder: Path) -> None:
 
 def test_without_a_folder_only_the_bundled_fonts_are_listed(tmp_path: Path) -> None:
     assert available_fonts([str(tmp_path / "missing")]) == list(BUNDLED_FONTS)
-
-
-def test_every_font_field_offers_the_available_fonts() -> None:
-    fonts = [*BUNDLED_FONTS, "Mono.ttf"]
-
-    definitions = with_font_options(DEFAULT_PRIMITIVES.definitions, fonts)
-
-    font_fields = [
-        field
-        for definition in definitions
-        for field in definition["fields"]
-        if field["shape"] == "font"
-    ]
-    assert font_fields
-    assert all(field["options"] == fonts for field in font_fields)
 
 
 async def test_an_installed_font_is_drawn_and_measured_like_the_one_it_copies(

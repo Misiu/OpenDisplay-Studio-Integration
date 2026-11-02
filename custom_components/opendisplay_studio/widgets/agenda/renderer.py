@@ -14,6 +14,7 @@ from custom_components.opendisplay_studio.sdk import (
     format_relative_day,
     format_time,
     line_height,
+    size_limit,
     text_width,
 )
 
@@ -104,7 +105,7 @@ def _fit(context: WidgetContext, entries: list[Entry]) -> tuple[list[Row], int]:
     room = context.box.height - 2 * FRAME_PADDING
     for count in range(len(entries), 0, -1):
         rows = _rows(context, entries[:count])
-        for size in range(MAX_SIZE, MIN_SIZE - 1, -1):
+        for size in range(size_limit(context.options, MAX_SIZE), MIN_SIZE - 1, -1):
             if len(rows) * _row_height(size) <= room:
                 return rows, size
     return _rows(context, entries[:1]), MIN_SIZE

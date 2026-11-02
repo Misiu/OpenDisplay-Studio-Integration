@@ -3,7 +3,9 @@ import type {
   ComposePreviewResponse,
   Dashboard,
   DisplayDevice,
+  FontInfo,
   HomeAssistant,
+  IconCatalog,
   ImportPlan,
   ReloadWidgetsResponse,
 } from "./types";
@@ -119,12 +121,61 @@ export const prepareImport = (
     colorMap,
   });
 
-let iconNames: Promise<string[]> | undefined;
+let iconCatalog: Promise<IconCatalog> | undefined;
 
 /** The icons the renderer can draw; asked for once, since the list is long and never changes. */
-export const listIcons = (hass: HomeAssistant): Promise<string[]> => {
-  iconNames ??= hass
-    .callWS<{ icons: string[] }>({ type: "opendisplay_studio/list_icons" })
-    .then((result) => result.icons);
-  return iconNames;
+export const listIcons = (hass: HomeAssistant): Promise<IconCatalog> => {
+  iconCatalog ??= hass
+    .callWS<{ icons: string[]; glyphs: Record<string, number> }>({
+      type: "opendisplay_studio/list_icons",
+    })
+    .then((result) => ({
+      names: result.icons,
+      glyphs: Object.fromEntries(
+        Object.entries(result.glyphs).map(([name, code]) => [
+          name,
+          String.fromCodePoint(code),
+        ])
+      ),
+    }));
+  return iconCatalog;
+};
+
+/** Every font with a picture of it and the dashboards that use it. */
+export const listFonts = async (hass: HomeAssistant): Promise<FontInfo[]> => {
+  const result = await hass.callWS<{ fonts: FontInfo[] }>({
+    type: "opendisplay_studio/list_fonts",
+  });
+  return result.fonts;
+};
+
+/** Installs a font file, given as base64, and returns the fonts there are now. */
+export const installFont = async (
+  hass: HomeAssistant,
+  filename: string,
+  data: string
+): Promise<FontInfo[]> => {
+  const result = await hass.callWS<{ fonts: FontInfo[] }>({
+    type: "opendisplay_studio/install_font",
+    filename,
+    data,
+  });
+  return result.fonts;
+};
+
+/**
+ * Removes an installed font and returns the fonts there are now. Without `force` the
+ * backend keeps a font that dashboards still use and says so.
+ */
+export const deleteFont = async (
+  hass: HomeAssistant,
+  name: string,
+  force: boolean
+): Promise<FontInfo[]> => {
+  const result = await hass.callWS<{ fonts: FontInfo[] }>({
+    type: "opendisplay_studio/delete_font",
+    name,
+    force,
+  });
+  return result.fonts;
 };

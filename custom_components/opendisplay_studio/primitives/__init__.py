@@ -18,6 +18,7 @@ from typing import Any, Final, NoReturn
 
 import yaml  # type: ignore[import-untyped]
 
+from custom_components.opendisplay_studio.fonts import FONT_PATTERN
 from custom_components.opendisplay_studio.icons import ICON_NAMES, icon_name
 from custom_components.opendisplay_studio.validation import (
     MAX_TEXT_LENGTH,
@@ -62,7 +63,6 @@ GEOMETRIES: Final = frozenset(
 BOXED_GEOMETRIES: Final = frozenset({"box", "line"})
 ENTITY_ID_PATTERN: Final = re.compile(r"^[a-z0-9_]+\.[a-z0-9_]+$")
 ENTITY_ID_LENGTH: Final = 255
-FONT_PATTERN: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 _.\-]{0,127}$")
 MAX_POINTS: Final = 256
 MAX_ICONS: Final = 64
 MAX_SERIES: Final = 4

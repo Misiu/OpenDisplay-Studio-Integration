@@ -20,6 +20,14 @@ _INDEX: Final[dict[str, str]] = json.loads(
 
 ICON_NAMES: Final[frozenset[str]] = frozenset(_INDEX)
 SORTED_ICON_NAMES: Final[list[str]] = sorted(_INDEX)
+# The character of each icon in the icon font the renderer draws with, so the panel can
+# show an icon exactly as the display does.
+ICON_CODEPOINTS: Final[dict[str, int]] = {
+    name: int(code, 16) for name, code in _INDEX.items()
+}
+ICON_FONT_FILE: Final = (
+    Path(odl_renderer.__file__).parent / "assets" / "materialdesignicons-webfont.ttf"
+)
 
 
 def icon_name(value: str) -> str:

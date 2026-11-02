@@ -125,9 +125,19 @@ arrives, and to move an element smoothly during a drag.
   instead of failing the picture.
 - **Fonts.** A font is a file name, never a path. The renderer searches
   `<config>/opendisplay_studio/fonts` (passed as `font_dirs`, and used for measuring too)
-  before its bundled `ppb.ttf` and `rbm.ttf`; `bootstrap` lists both as the options of
-  every font field, so a `.ttf` or `.otf` dropped in that folder shows up after a reload
-  of the panel.
+  before the fonts that come with it: `ppb.ttf` and `rbm.ttf` of the renderer, and Carlito,
+  Atkinson Hyperlegible, Inter, IBM Plex Mono and Barlow Condensed from `bundled_fonts/` of this integration (SIL
+  Open Font License, see the README there). `bootstrap` and `opendisplay_studio/list_fonts`
+  list both with the family and style each file says it has and the dashboards that use it.
+  The panel shows each font in its own letters by loading the file itself
+  (`/api/opendisplay_studio/fonts/<name>`, administrators only) as a browser font, so
+  samples take the colors of the theme; the icon picker does the same with the icon font
+  the renderer draws icons with (`/api/opendisplay_studio/icon-font`). `install_font` takes a `.ttf` or `.otf` of up
+  to 2 MB (checked by loading it, never over another font) and `delete_font` refuses a
+  font that dashboards use unless it is forced. A font that is gone is not an error: the
+  compiler draws that text with `ppb.ttf` and warns `<name>: font X is not installed`, and
+  the dashboard keeps its choice, so installing the font again brings it back. A font an
+  expression picks is checked when it is drawn, not when a font is removed.
 
 ### Palettes
 

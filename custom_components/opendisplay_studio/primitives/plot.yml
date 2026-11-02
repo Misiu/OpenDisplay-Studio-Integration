@@ -122,7 +122,6 @@ fields:
     label: Font
     shape: font
     default: ppb.ttf
-    options: [ppb.ttf, rbm.ttf]
     section: appearance
   - key: debug
     label: "Show the layout borders"
