@@ -323,12 +323,15 @@ describe("the align and distribute commands", () => {
   const enabled = (id: string, context: CommandContext) =>
     commandView(commandById(id as never), context).enabled;
 
-  it("align needs two items against the selection and one against the parent", () => {
+  it("align works on one item, in its parent, and on two against the selection", () => {
     const one = { ...idle, targets: items(1), alignTo: "selection" as const };
     const two = { ...idle, targets: items(2), alignTo: "selection" as const };
 
-    expect(enabled("align-left", one)).toBe(false);
+    expect(enabled("align-left", one)).toBe(true);
     expect(enabled("align-left", two)).toBe(true);
+    expect(
+      enabled("align-left", { ...idle, targets: [], alignTo: "selection" })
+    ).toBe(false);
     expect(enabled("align-left", { ...one, alignTo: "parent" })).toBe(true);
     expect(
       enabled("align-left", { ...idle, targets: [], alignTo: "parent" })

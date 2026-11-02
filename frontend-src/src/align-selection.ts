@@ -51,6 +51,16 @@ export const MINIMUM_ITEMS = {
   distribute: { selection: 3, parent: 2 },
 } as const;
 
+/**
+ * What to align to for `count` items. A lone item has no neighbour to line up with, so it
+ * is aligned in the box it lives in: a group or one element can be centered or put in a
+ * corner of its container, or of the working area, whichever target is chosen.
+ */
+export const alignTargetFor = (
+  target: AlignTarget,
+  count: number
+): AlignTarget => (count === 1 ? "parent" : target);
+
 const EDGES: Record<AlignEdge, { axis: Axis; fraction: number }> = {
   left: { axis: "x", fraction: 0 },
   center: { axis: "x", fraction: 0.5 },
@@ -139,12 +149,13 @@ export const planAlign = (
   options: ArrangeOptions
 ): Move[] => {
   const items = participants(dashboard, ids, options);
-  if (items.length < MINIMUM_ITEMS.align[options.target]) return [];
+  const target = alignTargetFor(options.target, items.length);
+  if (items.length < MINIMUM_ITEMS.align[target]) return [];
   const { axis, fraction } = EDGES[edge];
   const shared = boundingBox(items.map((item) => item.box));
   return nonZero(
     items.map((item) => {
-      const area = options.target === "parent" ? item.area : shared;
+      const area = target === "parent" ? item.area : shared;
       const free = sizeOf(area, axis) - sizeOf(item.box, axis);
       const wanted = startOf(area, axis) + free * fraction;
       return moveAlong(

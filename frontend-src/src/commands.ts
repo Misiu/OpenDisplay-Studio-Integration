@@ -1,5 +1,6 @@
 import {
   MINIMUM_ITEMS,
+  alignTargetFor,
   type AlignEdge,
   type AlignTarget,
   type DistributeAxis,
@@ -155,8 +156,11 @@ const hasTargets = (context: CommandContext): boolean =>
 const movableCount = (context: CommandContext): number =>
   targetsOf(context).filter((item) => !item.locked).length;
 
-const canAlign = (context: CommandContext): boolean =>
-  movableCount(context) >= MINIMUM_ITEMS.align[context.alignTo ?? "selection"];
+const canAlign = (context: CommandContext): boolean => {
+  const count = movableCount(context);
+  const target = alignTargetFor(context.alignTo ?? "selection", count);
+  return count >= MINIMUM_ITEMS.align[target];
+};
 
 const canDistribute = (context: CommandContext): boolean =>
   movableCount(context) >=

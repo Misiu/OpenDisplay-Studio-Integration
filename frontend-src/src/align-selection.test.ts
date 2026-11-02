@@ -180,10 +180,12 @@ describe("align to the selection", () => {
     ]);
   });
 
-  it("needs two items", () => {
+  it("has no neighbour for a lone item, so it goes to the edge of its box", () => {
     const dashboard = board([box("a", 10, 20, 40, 30)]);
 
-    expect(planAlign(dashboard, ["a"], "left", options())).toEqual([]);
+    expect(planAlign(dashboard, ["a"], "left", options())).toEqual([
+      { id: "a", dx: -10, dy: 0 },
+    ]);
   });
 
   it("plans nothing when the items are already aligned", () => {
@@ -688,5 +690,83 @@ describe("any selection", () => {
         expect(new Set(boxes.map(key)).size, `${edge} round ${round}`).toBe(1);
       }
     }
+  });
+});
+
+describe("align one item", () => {
+  it("puts a lone element in the middle of the working area, whatever it aligns to", () => {
+    for (const target of ["selection", "parent"] as const) {
+      const dashboard = board([box("a", 10, 20, 40, 30)]);
+
+      align(dashboard, "center", target);
+      align(dashboard, "middle", target);
+
+      expect(boundsOf(dashboard, "a")).toMatchObject({ x: 380, y: 225 });
+    }
+  });
+
+  it("puts it in the top left corner", () => {
+    const dashboard = board([box("a", 300, 200, 40, 30)]);
+
+    align(dashboard, "left");
+    align(dashboard, "top");
+
+    expect(boundsOf(dashboard, "a")).toMatchObject({ x: 0, y: 0 });
+  });
+
+  it("works on a group: the group moves as one and keeps its children together", () => {
+    const group = {
+      ...containerItem(
+        "g",
+        [box("a", 0, 0, 40, 30), box("b", 60, 40, 20, 20)],
+        {
+          x: 100,
+          y: 50,
+          width: 80,
+          height: 60,
+        }
+      ),
+      grouped: true,
+    };
+    const dashboard = board([group]);
+
+    align(dashboard, "right");
+    align(dashboard, "bottom");
+
+    expect(boundsOf(dashboard, "g")).toMatchObject({ x: 720, y: 420 });
+    const inside = findItem(dashboard.items, "b");
+    expect(inside && itemBounds(inside)).toMatchObject({ x: 60, y: 40 });
+  });
+
+  it("aligns a lone item inside a container to that container", () => {
+    const container = containerItem("c", [box("a", 5, 5, 40, 30)], {
+      x: 100,
+      y: 100,
+      width: 200,
+      height: 100,
+    });
+    const dashboard = board([container]);
+
+    applyMoves(dashboard, planAlign(dashboard, ["a"], "center", options()));
+
+    const moved = findItem(dashboard.items, "a");
+    expect(moved && itemBounds(moved).x).toBe(80);
+  });
+
+  it("does nothing for an item that is locked or pinned", () => {
+    const locked = { ...box("a", 10, 20, 40, 30), locked: true };
+
+    expect(planAlign(board([locked]), ["a"], "center", options())).toEqual([]);
+  });
+
+  it("still needs two items to line them up with each other", () => {
+    const moves = planAlign(
+      board([box("a", 10, 20, 40, 30), box("b", 70, 100, 60, 50)]),
+      ["a", "b"],
+      "left",
+      options("selection")
+    );
+
+    expect(moves).toEqual([{ id: "b", dx: -60, dy: 0 }]);
   });
 });

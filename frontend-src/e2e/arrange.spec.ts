@@ -118,7 +118,7 @@ test.describe("the arrange bar", () => {
     expect(arrange.y).toBeGreaterThan(history.y + history.height - 1);
   });
 
-  test("enables the stacking buttons for one item, and aligning only to the parent", async ({
+  test("enables stacking and aligning for one item, but not spacing out", async ({
     page,
   }) => {
     const names = await addRectangles(page);
@@ -126,18 +126,8 @@ test.describe("the arrange bar", () => {
 
     await expect(button(page, "Bring to front")).toBeEnabled();
     await expect(button(page, "Move down")).toBeEnabled();
-    await expect(button(page, "Align left edges")).toBeDisabled();
-    await expect(
-      button(page, "Space out evenly, left to right")
-    ).toBeDisabled();
-
-    await bar(page)
-      .getByRole("button", {
-        name: "Align to the container or the working area",
-      })
-      .click();
-
     await expect(button(page, "Align left edges")).toBeEnabled();
+    await expect(button(page, "Align centers vertically")).toBeEnabled();
     await expect(
       button(page, "Space out evenly, left to right")
     ).toBeDisabled();
@@ -186,6 +176,33 @@ test.describe("selecting with Ctrl", () => {
 });
 
 test.describe("aligning", () => {
+  test("puts one element at the edge or in the middle of the working area, in one undo step", async ({
+    page,
+  }) => {
+    const names = await addRectangles(page);
+    await row(page, names[0]).click();
+    const before = await geometryOf(page, names[0]);
+
+    await button(page, "Align left edges").click();
+    await button(page, "Align centers vertically").click();
+
+    // The left edge of the working area is the padding of the dashboard.
+    const padding = await page.evaluate(
+      () =>
+        window.__ODS_E2E__
+          .dashboards()
+          .find((dashboard) => dashboard.name === "Hallway overview")?.display
+          .padding
+    );
+    const after = await geometryOf(page, names[0]);
+    expect(after.x).toBe(padding);
+    expect(after.y).not.toBe(before.y);
+    await page.getByRole("button", { name: "Undo" }).click();
+    expect((await geometryOf(page, names[0])).x).toBe(padding);
+    await page.getByRole("button", { name: "Undo" }).click();
+    expect(await geometryOf(page, names[0])).toEqual(before);
+  });
+
   test("puts the left edges of the selection on one line, in one undo step", async ({
     page,
   }) => {
