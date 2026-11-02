@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+## 0.2.0
+
+- Add a Settings view, opened from the list of dashboards, with the fonts, the widgets and
+  an overview of your dashboards. Install any `.ttf` or `.otf` font by picking or dropping
+  the file, see each one in its own letters as the display draws it, and remove one with
+  a warning that names the dashboards that still use it. Their text is drawn with the
+  default font until the font is installed again, so a removed font never breaks a
+  dashboard.
+- Choose the font of any text, multiline text, progress bar, history plot or debug grid
+  from the installed fonts, shown in their own letters, and the font of every widget.
+  The panel loads the font files itself, so the samples are crisp and follow a light or
+  dark theme.
+- Show the icons in the icon picker as the display draws them, from the same icon font.
+- Add fonts that come with OpenDisplay Studio: Carlito (made to look like Calibri) and
+  Atkinson Hyperlegible (made to be easy to read), each in Regular and Bold, Inter
+  (SemiBold), IBM Plex Mono (Medium) for numbers that line up, and Barlow Condensed
+  (Bold) for large values in a narrow space. All have Polish and German letters and are free
+  under the SIL Open Font License; the license sits next to the files.
+- Give the Agenda, the Calendar and the Sensor list a text size: leave it on Auto to fit
+  the frame as before, or type the size you want. Other widgets will follow.
+- Show a picture of every widget in the Widgets tab of the settings, and say in each tab
+  what it is for and what you can do there. Turning widgets off, removing them and adding a
+  package are shown as coming soon.
+- Translate what was still English in Polish and German: the search box of the layers,
+  the Draft and Ready labels, the keyboard shortcuts, the groups and the containers, the
+  menus of the dashboards and the background of a dashboard. A test now fails when a
+  text is missing in a language.
+- Take the Hidden switch and the Remove button out of the properties panel: the list of
+  elements, the context menu and the keyboard already do both.
+- Give the school timetable a color for its grid lines, so white lines can run over green or
+  white text on a black background. Left on Auto they are in the color of the text, as before.
+- Align one element or one group with the buttons of the arrange bar: with a single item they
+  put it at an edge or in the middle of its container, or of the working area.
+- Show every example of a widget on the widgets page, not one, with the title under each
+  picture, a contents table at the top and the options every widget has described once.
+  More than forty new examples show the new fonts and the text size.
+
 ## 0.1.5
 
 - Let every widget that shows a reading set its decimals. The Weather widget was the last
