@@ -93,6 +93,7 @@ import {
 import { chooseFile, downloadFile, isMacPlatform, isTypingTarget } from "./dom";
 import { exportFileName, parseJson } from "./dashboard-file";
 import { messageFrom } from "./error-message";
+import { rememberFonts } from "./font-catalog";
 import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
@@ -131,6 +132,7 @@ import "./ods-import-dialog";
 import "./ods-context-menu";
 import "./ods-shortcuts-dialog";
 import "./ods-gallery";
+import "./ods-settings";
 import "./ods-header";
 import "./ods-inspector";
 import "./ods-library";
@@ -387,6 +389,7 @@ export class OdsApp extends LitElement {
       this.widgets = data.widgets;
       this.widgetErrors = data.widgetErrors;
       this.primitives = data.primitives;
+      rememberFonts(data.fonts);
       this.current = undefined;
       this.preview = undefined;
       this.view = "dashboards";
@@ -844,7 +847,13 @@ export class OdsApp extends LitElement {
       this.shortcutsOpen = false;
       return;
     }
-    if (isTypingTarget(event) || this.view === "dashboards") return;
+    if (
+      isTypingTarget(event) ||
+      this.view === "dashboards" ||
+      this.view === "settings"
+    ) {
+      return;
+    }
     const command = commandForKey(event, this.commandContext());
     if (!command || (this.view === "code" && !command.anywhere)) return;
     event.preventDefault();
@@ -1403,6 +1412,10 @@ export class OdsApp extends LitElement {
     this.view = "dashboards";
   }
 
+  private openSettings(): void {
+    this.view = "settings";
+  }
+
   private onNameChange(event: OdsEvent<"dashboard-name-change">): void {
     this.mutate((next) => {
       next.name = event.detail.name;
@@ -1725,6 +1738,7 @@ export class OdsApp extends LitElement {
         .dialog=${this.dashboardDialog}
         .draft=${this.dashboardDraft}
         @dashboard-new=${this.openNewDashboard}
+        @settings-open=${this.openSettings}
         @dashboard-open=${this.onDashboardOpen}
         @dashboard-menu-action=${this.onDashboardMenuAction}
         @dashboard-rename-input=${this.onRenameInput}
@@ -1736,6 +1750,19 @@ export class OdsApp extends LitElement {
         @dashboard-dialog-close=${this.closeAction}
       ></ods-gallery>
       ${this.renderNewDashboardDialog()}
+    `;
+  }
+
+  private renderSettings(): TemplateResult {
+    return html`
+      <ods-settings
+        .hass=${this.hass}
+        .dashboards=${this.dashboards}
+        .widgets=${this.widgets}
+        .widgetErrors=${this.widgetErrors}
+        @settings-close=${this.showGallery}
+        @widgets-reload=${this.reloadWidgets}
+      ></ods-settings>
     `;
   }
 
@@ -1886,6 +1913,7 @@ export class OdsApp extends LitElement {
         </div>
       `;
     }
+    if (this.view === "settings") return this.renderSettings();
     const dashboard = this.current;
     if (this.view === "dashboards" || !dashboard) {
       return this.renderGallery();

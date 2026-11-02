@@ -11,6 +11,7 @@ import pytest
 import yaml
 from homeassistant.core import ServiceCall, SupportsResponse
 from homeassistant.util import dt as dt_util
+from PIL import Image
 
 from custom_components.opendisplay_studio.compiler import (
     CompiledDashboard,
@@ -290,6 +291,29 @@ class TestLoading:
         translations = registry.package("plain").translations
         assert translations["en"]["sections.appearance"] == "Appearance"
         assert translations["pl"]["sections.appearance"] == "Wygląd"
+
+    def test_a_package_brings_its_own_preview_in_its_folder(
+        self, tmp_path: Path
+    ) -> None:
+        directory = package(
+            tmp_path,
+            "pictured",
+            HELLO_MANIFEST.format(widget_id="pictured"),
+            HELLO_RENDERER.format(greeting="Hi"),
+        )
+        Image.new("RGB", (120, 80), "white").save(directory / "preview.png")
+        package(
+            tmp_path,
+            "plain",
+            HELLO_MANIFEST.format(widget_id="plain"),
+            HELLO_RENDERER.format(greeting="Hi"),
+        )
+
+        registry = WidgetRegistry.from_directories(BUILTIN_WIDGET_DIRECTORY, tmp_path)
+
+        definitions = {item["id"]: item for item in registry.definitions("en")}
+        assert definitions["pictured"]["preview"].startswith("data:image/png;base64,")
+        assert definitions["plain"]["preview"] is None
 
     def test_a_package_may_say_a_shared_word_its_own_way(self, tmp_path: Path) -> None:
         directory = package(

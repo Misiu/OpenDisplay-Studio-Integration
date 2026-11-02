@@ -58,8 +58,15 @@ export class OdsGallery extends LitElement {
         color: var(--studio-muted);
         font-size: 12px;
       }
+      .dashboard-library-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      /* A block, not an inline box: an inline one sits on the bottom edge of its icon and
+         carries the text above the middle of the button. */
       .dashboard-new-button-label {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         gap: 7px;
@@ -247,6 +254,10 @@ export class OdsGallery extends LitElement {
     }
   };
 
+  private openSettings(): void {
+    emit(this, "settings-open");
+  }
+
   private onSearchInput(event: Event): void {
     this.searchText = inputValue(event);
   }
@@ -381,17 +392,30 @@ export class OdsGallery extends LitElement {
             <h1>${strings.gallery.title}</h1>
             <p>${strings.gallery.count(this.dashboards.length)}</p>
           </div>
-          <ha-button
-            class="dashboard-new-button"
-            appearance="filled"
-            aria-label=${strings.gallery.newDashboard}
-            @click=${() => emit(this, "dashboard-new")}
-          >
-            <span class="dashboard-new-button-label">
-              <ha-icon icon="mdi:plus"></ha-icon>
-              <span>${strings.gallery.newDashboard}</span>
-            </span>
-          </ha-button>
+          <div class="dashboard-library-actions">
+            <ha-button
+              class="dashboard-settings-button"
+              appearance="plain"
+              aria-label=${strings.settings.open}
+              @click=${this.openSettings}
+            >
+              <span class="dashboard-new-button-label">
+                <ha-icon icon="mdi:cog-outline"></ha-icon>
+                <span>${strings.gallery.settings}</span>
+              </span>
+            </ha-button>
+            <ha-button
+              class="dashboard-new-button"
+              appearance="filled"
+              aria-label=${strings.gallery.newDashboard}
+              @click=${() => emit(this, "dashboard-new")}
+            >
+              <span class="dashboard-new-button-label">
+                <ha-icon icon="mdi:plus"></ha-icon>
+                <span>${strings.gallery.newDashboard}</span>
+              </span>
+            </ha-button>
+          </div>
         </header>
         ${
           this.error

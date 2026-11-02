@@ -304,7 +304,9 @@ pixel sampling, e2e add-and-edit test, row in `docs/odl-coverage.md`.
   rejects a second one and adding it again from the Library selects the first.
 - [x] **4.10 Fonts.** The backend passes `font_dirs`
   (`<config>/opendisplay_studio/fonts`) to the renderer and to text measuring, and
-  `bootstrap` lists the bundled and installed fonts as the options of every font field.
+  `bootstrap` lists the bundled and installed fonts for every font field. Fonts are
+  installed and removed from the Settings view (10.4); a font that is gone is drawn
+  with `ppb.ttf` and a warning, never a failed render.
 
 Out of scope (decided): `diagram`, `mirror`/`pivot`, the flow
 cursor (omitted `y`). Every created element has explicit coordinates. `rotation` was
@@ -877,6 +879,22 @@ fixture.
     preview, a regression test and documentation.
   - A widget written this way imports into any editor install unchanged: the
     package folder is the only artefact.
+
+- [x] **10.4 Settings.** A view opened from the list of dashboards, for what belongs
+  to the whole studio and not to one dashboard.
+  - *(done)* **Fonts:** install `.ttf` / `.otf` files (picker or drop), see each in its own
+    letters as the renderer draws it, which dashboards use it, and remove it after a
+    confirmation that names those dashboards. Every font field of a primitive or a widget
+    picks from the same list.
+  - *(done)* **Widgets:** every installed widget with a picture of it (the first showcase of
+    its `preview.yml`, written to `preview.png` in the widget's own folder by
+    `scripts.widget_docs`; a package of the user's brings its own), its description,
+    size and origin, the packages that did not load, and the reload button. Turning a widget
+    on or off, removing it and adding a package are shown disabled, as coming soon.
+  - *(done)* **Overview:** dashboards, elements, widgets and fonts, and which widgets the
+    dashboards use.
+  - *(open)* Turning widgets on and off, uploading and removing a package; adding a widget
+    to a dashboard straight from the list; more statistics.
 
 Not planned without a separate decision: editable Code view / YAML import,
 several screens per dashboard.

@@ -23,6 +23,7 @@ from custom_components.opendisplay_studio.odl import WidgetContext
 
 from .manifest import ManifestError, parse_manifest
 from .options import option_defaults
+from .preview import read_preview
 
 BUILTIN_WIDGET_DIRECTORY: Final = Path(__file__).parent
 # Words every widget shares (Appearance, Show frame ...); a package may override them.
@@ -47,6 +48,8 @@ class WidgetPackage:
     translations: dict[str, dict[str, str]]
     builtin: bool
     folder: str
+    # `preview.png` of the folder as a data URL; None when it has none.
+    preview: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +162,7 @@ def _load_package(directory: Path, *, builtin: bool) -> WidgetPackage:
         translations=_load_translations(directory),
         builtin=builtin,
         folder=directory.name,
+        preview=read_preview(directory),
     )
 
 
@@ -320,6 +324,7 @@ class WidgetRegistry:
             ),
             "author": manifest["author"],
             "builtin": package.builtin,
+            "preview": package.preview,
             "layout": manifest["layout"],
             "sources": manifest["sources"],
             "options": manifest["options"],

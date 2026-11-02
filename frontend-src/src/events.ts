@@ -4,7 +4,7 @@ import type { DashboardFormData, DashboardSource } from "./dashboards";
 import type { Dashboard, StudioItem, WidgetPick } from "./types";
 import type { Viewport } from "./viewport";
 
-export type EditorView = "dashboards" | "design" | "code";
+export type EditorView = "dashboards" | "design" | "code" | "settings";
 export type DashboardAction = "rename" | "duplicate" | "settings" | "delete";
 export type DashboardDialog = Exclude<DashboardAction, "duplicate">;
 
@@ -15,6 +15,8 @@ export type DashboardDialog = Exclude<DashboardAction, "duplicate">;
 export interface OdsEventMap {
   // gallery and dialogs
   "dashboard-new": undefined;
+  "settings-open": undefined;
+  "settings-close": undefined;
   "dashboard-open": { dashboard: Dashboard };
   "dashboard-menu-toggle": { dashboardId: string };
   "dashboard-menu-action": { dashboard: Dashboard; action: DashboardAction };
