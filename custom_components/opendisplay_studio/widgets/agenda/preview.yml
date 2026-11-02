@@ -7,6 +7,7 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: small, width: 296, height: 128}
 docs:
+  - {title: "In the colors of a Spectra 6 display", state: two-children, size: quadrant, palette: spectra6, options: {color: blue}}
   - {title: "Two calendars merged", state: two-children, size: quadrant}
   - {title: "White on black", state: two-children, size: quadrant, options: {color: white, background: black}}
   - {title: "Yellow on red on a BWRY display", state: two-children, size: quadrant, options: {color: yellow, background: red}, palette: bwry}
@@ -15,3 +16,7 @@ docs:
   - {title: "A busy week", state: ten-events, size: half vertical}
   - {title: "A single event", state: one-event, size: small}
   - {title: "Nothing planned", state: empty, size: small}
+  - {title: "A smaller text size fits more events", state: ten-events, size: quadrant, palette: spectra6, options: {textSize: 12}}
+  - {title: "In Atkinson Hyperlegible, made to be easy to read", state: two-children, size: quadrant, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf}}
+  - {title: "In IBM Plex Mono, so the times line up", state: ten-events, size: half vertical, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf, textSize: 13}}
+  - {title: "In Inter on half of a display", state: two-children, size: half horizontal, palette: spectra6, options: {font: Inter-SemiBold.ttf, color: blue}}

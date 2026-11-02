@@ -7,6 +7,7 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: small, width: 296, height: 128}
 docs:
+  - {title: "Upcoming events in the colors of a Spectra 6 display", state: upcoming, size: full, palette: spectra6}
   - {title: "Upcoming events: the next days in columns, with a bar naming the calendars", state: upcoming, size: full}
   - {title: "Upcoming events on half of a display", state: upcoming, size: half horizontal}
   - {title: "Upcoming events in a narrow frame, with a counter for what does not fit", state: upcoming, size: half vertical}
@@ -21,3 +22,7 @@ docs:
   - {title: "Dates and words in the language of the dashboard", state: polish, size: quadrant}
   - {title: "White on black", state: upcoming, size: quadrant, options: {color: white, background: black}}
   - {title: "Nothing planned", state: empty, size: small}
+  - {title: "Upcoming events in Inter", state: upcoming, size: quadrant, palette: spectra6, options: {font: Inter-SemiBold.ttf}}
+  - {title: "A smaller text size fits more of the agenda", state: agenda, size: half horizontal, palette: spectra6, options: {textSize: 11}}
+  - {title: "Weeks in Carlito, the look of Calibri", state: weeks, size: full, palette: spectra6, options: {font: Carlito-Regular.ttf}}
+  - {title: "Upcoming events in IBM Plex Mono", state: upcoming, size: half horizontal, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf, textSize: 12}}

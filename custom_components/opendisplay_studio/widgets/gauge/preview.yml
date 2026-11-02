@@ -8,8 +8,8 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: full, width: 800, height: 480}
 docs:
-  - {title: "A marker across the arc shows the value", state: normal, size: wide}
   - {title: "Ranges: green, yellow from 40 and red from 80, as for the load of a processor", state: load, size: wide}
+  - {title: "A marker across the arc shows the value", state: normal, size: wide}
   - {title: "The marker in the red range", state: overload, size: wide}
   - {title: "A scale from 0 to 1 with the ranges from 0.4 and 0.8", state: unit-scale, size: wide}
   - {title: "A scale that runs below zero, red below it and green from zero", state: negative, size: wide}
@@ -21,3 +21,7 @@ docs:
   - {title: "On a wide tag, in Polish", state: polish, size: tag}
   - {title: "White on black", state: normal, size: wide, options: {color: white, background: black}}
   - {title: "Nothing chosen yet", state: missing-sources, size: wide}
+  - {title: "In IBM Plex Mono", state: load, size: wide, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf}}
+  - {title: "The filled arc in Barlow Condensed", state: overload, size: wide, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf, style: arc}}
+  - {title: "In Inter on a tall frame", state: negative, size: tall, palette: spectra6, options: {font: Inter-SemiBold.ttf}}
+  - {title: "In Atkinson Hyperlegible on a tag", state: normal, size: tag, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf}}

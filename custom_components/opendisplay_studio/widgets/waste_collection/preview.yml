@@ -7,6 +7,7 @@ sizes:
   - {name: half vertical, width: 400, height: 480}
   - {name: quadrant, width: 400, height: 240}
 docs:
+  - {title: "Four bins in the colors of a Spectra 6 display", state: due-soon, size: tag, palette: spectra6, options: {showFrame: false}}
   - {title: "Four bins on a small tag, the one due tomorrow highlighted", state: four-bins, size: tag, options: {showFrame: false}}
   - {title: "The same on a full display", state: due-soon, size: full}
   - {title: "A narrow frame puts the bins in a column", state: due-soon, size: half vertical}
@@ -16,3 +17,6 @@ docs:
   - {title: "A highlight color for each bin on a BWRY display", state: due-soon, size: quadrant, palette: bwry}
   - {title: "White on black, without the bin in the middle", state: four-bins, size: tag, options: {color: white, background: black, showIcon: false}}
   - {title: "Nothing chosen yet", state: missing-sources, size: tag}
+  - {title: "In Barlow Condensed", state: due-soon, size: tag, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf, showFrame: false}}
+  - {title: "In Inter on a quadrant", state: due-soon, size: quadrant, palette: spectra6, options: {font: Inter-SemiBold.ttf}}
+  - {title: "In Atkinson Hyperlegible, three bins", state: three-bins, size: half horizontal, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf}}

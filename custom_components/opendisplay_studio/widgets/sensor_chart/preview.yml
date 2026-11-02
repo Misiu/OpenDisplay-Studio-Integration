@@ -7,6 +7,7 @@ sizes:
   - {name: quadrant, width: 385, height: 225}
   - {name: small, width: 296, height: 128}
 docs:
+  - {title: "A chart in the colors of a Spectra 6 display", state: temperature, size: full, palette: spectra6, options: {color: blue}}
   - {title: "Full size: the chart below the value", state: temperature, size: full}
   - {title: "Half horizontal: the chart beside the value", state: temperature, size: half horizontal}
   - {title: "Half vertical", state: temperature, size: half vertical}
@@ -15,3 +16,6 @@ docs:
   - {title: "A week, without the details", state: week, size: half vertical, options: {showChip: false, showEntityId: false}}
   - {title: "An entity without history", state: no-history, size: quadrant}
   - {title: "Nothing chosen yet", state: missing-sources, size: small}
+  - {title: "In Inter", state: temperature, size: full, palette: spectra6, options: {font: Inter-SemiBold.ttf, color: red}}
+  - {title: "In Barlow Condensed", state: temperature, size: quadrant, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf, color: blue}}
+  - {title: "In IBM Plex Mono beside the value", state: temperature, size: half horizontal, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf}}

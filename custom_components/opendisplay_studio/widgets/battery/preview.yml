@@ -8,6 +8,7 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: full, width: 800, height: 480}
 docs:
+  - {title: "A charged battery in the colors of a Spectra 6 display", state: charged, size: wide, palette: spectra6}
   - {title: "A charged battery in a wide frame", state: charged, size: wide}
   - {title: "A low battery is drawn in the highlight color", state: low, size: wide}
   - {title: "A tall frame stands the battery up", state: low, size: tall}
@@ -22,3 +23,7 @@ docs:
   - {title: "A sensor that only says low or fine", state: binary-low, size: wide}
   - {title: "White on black, without the name", state: charged, size: wide, options: {color: white, background: black, showName: false}}
   - {title: "Nothing chosen yet", state: missing-sources, size: wide}
+  - {title: "A low battery in red on a Spectra 6 display", state: low, size: wide, palette: spectra6}
+  - {title: "In Barlow Condensed", state: charged, size: wide, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf, color: blue}}
+  - {title: "Standing, in Inter", state: charged, size: tall, palette: spectra6, options: {font: Inter-SemiBold.ttf}}
+  - {title: "A half full battery in IBM Plex Mono", state: half-polish, size: tag, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf}}

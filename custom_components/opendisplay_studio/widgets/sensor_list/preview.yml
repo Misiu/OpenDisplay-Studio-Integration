@@ -7,8 +7,13 @@ sizes:
   - {name: quadrant, width: 400, height: 240}
   - {name: small, width: 296, height: 128}
 docs:
+  - {title: "A list in the colors of a Spectra 6 display", state: alert-list, size: quadrant, palette: spectra6, options: {color: blue}}
   - {title: "A list where one value is past its threshold", state: alert-list, size: quadrant}
   - {title: "White on black", state: alert-list, size: quadrant, options: {color: white, background: black}}
   - {title: "Without frame and dividers", state: alert-list, size: quadrant, options: {showFrame: false, showDividers: false}}
   - {title: "Names only in Polish", state: polish-list, size: half vertical, options: {showIcon: false}}
   - {title: "Nothing chosen yet", state: missing-sources, size: small}
+  - {title: "A smaller text size", state: alert-list, size: quadrant, palette: spectra6, options: {textSize: 14}}
+  - {title: "Numbers that line up in IBM Plex Mono", state: alert-list, size: quadrant, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf}}
+  - {title: "In Barlow Condensed", state: alert-list, size: half horizontal, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf}}
+  - {title: "In Atkinson Hyperlegible on a tall frame", state: alert-list, size: half vertical, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf}}

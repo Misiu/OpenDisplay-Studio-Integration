@@ -23,6 +23,9 @@ display can fetch.
   codes, progress bars, history plots and a debug grid.
 - **Turn anything.** Drag the round handle above any element to rotate it, or type an
   angle; the preview follows at once.
+- **Your own fonts.** Open Settings in the list of dashboards, drop in any `.ttf` or `.otf`
+  and pick it for any text or widget, previewed in its own letters. Removing a font that
+  dashboards use asks first, and nothing breaks if it is gone.
 - **Live widgets**: Sensor card, Sensor list, Sensor chart, Gauge, Thermometer,
   Calendar, Agenda, School timetable, Waste collection, Battery and Weather read your entities, calendars and forecasts. Write
   your own widget as a small Python package (see

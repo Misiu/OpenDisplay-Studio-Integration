@@ -10,6 +10,7 @@ sizes:
   - {name: tall, width: 160, height: 400}
   - {name: strip, width: 400, height: 120}
 docs:
+  - {title: "A tile in the colors of a Spectra 6 display", state: single, size: quadrant, palette: spectra6, options: {color: blue}}
   - {title: "A wide tile puts the icon on the left and the unit beside the value", state: single, size: quadrant}
   - {title: "A square tile stacks icon, name, value and unit", state: single, size: square}
   - {title: "A tall tile is separated by a line", state: single, size: tall}
@@ -17,3 +18,7 @@ docs:
   - {title: "Red with yellow elements on a BWRY display", state: single, size: quadrant, options: {color: yellow, background: red}, palette: bwry}
   - {title: "Without frame and background", state: single, size: quadrant, options: {showFrame: false}}
   - {title: "Nothing chosen yet", state: missing-sources, size: small}
+  - {title: "In Barlow Condensed, a big value in a narrow tile", state: single, size: tall, palette: spectra6, options: {font: BarlowCondensed-Bold.ttf, color: red}}
+  - {title: "In IBM Plex Mono", state: single, size: quadrant, palette: spectra6, options: {font: IBMPlexMono-Medium.ttf, color: blue}}
+  - {title: "In Atkinson Hyperlegible", state: single, size: square, palette: spectra6, options: {font: AtkinsonHyperlegible-Bold.ttf}}
+  - {title: "In Inter on a strip", state: single, size: strip, palette: spectra6, options: {font: Inter-SemiBold.ttf, color: green}}

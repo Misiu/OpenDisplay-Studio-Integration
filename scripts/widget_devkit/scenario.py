@@ -23,8 +23,11 @@ from typing import Any
 import yaml  # type: ignore[import-untyped]
 from odl_renderer import generate_image  # type: ignore[import-untyped]
 
+from custom_components.opendisplay_studio.fonts import STUDIO_FOLDER
+from custom_components.opendisplay_studio.measure import use_font_directories
 from custom_components.opendisplay_studio.odl import Box, DisplayContext, WidgetContext
 from custom_components.opendisplay_studio.palette import accent_color_for_palette
+from custom_components.opendisplay_studio.sdk.typeface import render_in_font
 from custom_components.opendisplay_studio.widgets import WidgetRegistry
 from custom_components.opendisplay_studio.widgets.options import option_defaults
 
@@ -116,6 +119,16 @@ def with_datetimes(value: Any) -> Any:
     return value
 
 
+_MEASURING: dict[str, bool] = {"ready": False}
+
+
+def _measure_with_our_fonts() -> None:
+    """Measure text in the fonts that come with the integration, once."""
+    if not _MEASURING["ready"]:
+        use_font_directories([str(STUDIO_FOLDER)])
+        _MEASURING["ready"] = True
+
+
 def context_for(
     registry: WidgetRegistry,
     widget_id: str,
@@ -124,6 +137,7 @@ def context_for(
     palette: str = DEFAULT_PALETTE,
 ) -> WidgetContext:
     """Build what a renderer receives for `state` drawn at `size`."""
+    _measure_with_our_fonts()
     width, height = size
     resolved = with_datetimes(state)
     language = resolved["language"]
@@ -131,7 +145,12 @@ def context_for(
         instance_id="devkit",
         box=Box(0, 0, width, height),
         display=DisplayContext(
-            width, height, palette, "white", accent_color_for_palette(palette)
+            width,
+            height,
+            palette,
+            "white",
+            accent_color_for_palette(palette),
+            font_dirs=(str(STUDIO_FOLDER),),
         ),
         language=language,
         options={
@@ -149,13 +168,14 @@ async def draw(
     context: WidgetContext, renderer: Any
 ) -> tuple[Any, list[dict[str, Any]]]:
     """Run `renderer` and the real `odl-renderer`; return the picture and the ODL."""
-    elements: list[dict[str, Any]] = renderer(context)
+    elements = render_in_font(renderer, context)
     image = await generate_image(
         context.box.width,
         context.box.height,
         elements,
         background="white",
         accent_color=context.display.accent_color,
+        font_dirs=list(context.display.font_dirs),
     )
     return image.convert("RGB"), elements
 
