@@ -55,12 +55,21 @@ def _with_clear_margin(image: Image.Image, margin: int) -> Image.Image:
     return rgb
 
 
-def _encode_png(image: Image.Image, rotation: int, margin: int = 0) -> bytes:
+def _without_margin(image: Image.Image, margin: int) -> Image.Image:
+    """Return the display itself: the picture with the margin around it cut off."""
+    return image.crop((margin, margin, image.width - margin, image.height - margin))
+
+
+def _encode_png(
+    image: Image.Image, rotation: int, margin: int = 0, *, show_margin: bool = False
+) -> bytes:
+    if margin and not show_margin:
+        image = _without_margin(image, margin)
     if rotation:
         # PIL turns counter-clockwise; the dashboard setting is clockwise.
         image = image.rotate(-rotation, expand=True)
     output = BytesIO()
-    if margin:
+    if margin and show_margin:
         _with_clear_margin(image, margin).save(output, format="PNG", optimize=False)
     else:
         image.convert("RGB").save(output, format="PNG", optimize=False)
@@ -93,8 +102,14 @@ class OdlRenderService:
         history: DataProvider | None = None,
         rotation: int = 0,
         margin: int = 0,
+        show_margin: bool = False,
     ) -> OdlRenderResult:
-        """Render ODL, check the size, then turn the picture clockwise by `rotation`."""
+        """
+        Render ODL, check the size, then turn the picture clockwise by `rotation`.
+
+        `width` and `height` include a `margin` drawn around the display. It is cut
+        off the PNG, unless `show_margin` keeps it for the editor to look at.
+        """
         requested_at = monotonic()
         async with self._semaphore:
             started_at = monotonic()
@@ -118,7 +133,9 @@ class OdlRenderService:
                     f"expected {width}x{height}"
                 )
                 raise OdlRenderError(message)
-            png = await asyncio.to_thread(_encode_png, image, rotation, margin)
+            png = await asyncio.to_thread(
+                _encode_png, image, rotation, margin, show_margin=show_margin
+            )
             completed_at = monotonic()
         return OdlRenderResult(
             png=png,

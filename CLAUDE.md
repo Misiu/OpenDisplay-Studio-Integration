@@ -141,7 +141,9 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   (`preview_margin`; elements are shifted into it just before rendering), so what hangs
   out of the display is seen (the empty margin is transparent) and the canvas outlines
   the display.
-  Item bounds stay in display coordinates, and the Media Source picture has no margin.
+  Item bounds stay in display coordinates. The Media Source picture is drawn on that same
+  picture, margin and all, and the margin is cut off afterwards, so the display receives
+  exactly the pixels the editor shows (a test compares them, at every rotation).
 - **The dashboard document is the only persisted state** (HA `Store`,
   versioned). No `localStorage`/IndexedDB for dashboards. Per-viewer UI
   conveniences (panel widths, collapsed sections, clipboard) may use memory or
