@@ -352,6 +352,11 @@ export interface Dashboard {
     rotation: Rotation;
     /** The OpenDisplay device the dashboard is made for, which it can be sent to. */
     deviceId: string | null;
+    /**
+     * The Media Source gives the picture as it is designed, not turned for the display.
+     * What is sent to a device from the editor is turned for it either way.
+     */
+    mediaAsDesigned: boolean;
   };
   items: StudioItem[];
   createdAt: string;

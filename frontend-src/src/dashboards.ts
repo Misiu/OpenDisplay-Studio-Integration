@@ -72,6 +72,7 @@ export interface DashboardFormData {
   rotation: string;
   padding: number;
   snapSize: number;
+  mediaAsDesigned: boolean;
 }
 
 export const freshDashboard = (
@@ -96,6 +97,7 @@ export const freshDashboard = (
       snapSize: 5,
       rotation: 0,
       deviceId: null,
+      mediaAsDesigned: false,
     },
     items: [],
     createdAt: "",
@@ -112,6 +114,7 @@ export const dashboardFormData = (dashboard: Dashboard): DashboardFormData => ({
   rotation: String(dashboard.display.rotation),
   padding: dashboard.display.padding,
   snapSize: dashboard.display.snapSize,
+  mediaAsDesigned: dashboard.display.mediaAsDesigned,
 });
 
 interface DisplaySettings {
@@ -192,6 +195,7 @@ export const dashboardFromForm = (
   next.display.palette = value.palette in PALETTE_LABELS ? value.palette : "bw";
   next.display.padding = Math.round(Number(value.padding) || 0);
   next.display.snapSize = Math.round(Number(value.snapSize) || 0);
+  next.display.mediaAsDesigned = value.mediaAsDesigned === true;
   const colors = PALETTE_COLORS[next.display.palette];
   next.display.background = colors.includes(value.background)
     ? value.background
@@ -353,6 +357,24 @@ const rotationFields = (): StudioFormSchema[] => [
   },
 ];
 
+export const MEDIA_AS_DESIGNED = "mediaAsDesigned";
+
+const mediaFields = (): StudioFormSchema[] => [
+  {
+    name: MEDIA_AS_DESIGNED,
+    label: strings.fields.mediaAsDesigned,
+    selector: { boolean: {} },
+  },
+];
+
+/** What a form tells about a field below it; only the Media Source switch has anything to say. */
+export const dashboardFormHelper =
+  (rotation: Rotation) =>
+  (entry: StudioFormSchema): string =>
+    "name" in entry && entry.name === MEDIA_AS_DESIGNED
+      ? strings.fields.mediaAsDesignedHelp(rotation)
+      : "";
+
 export const advancedFields = (): StudioFormSchema[] => [
   {
     name: "advanced",
@@ -399,6 +421,7 @@ export const dashboardFormSchema = (
     ? backgroundFields(display.backgrounds)
     : []),
   ...rotationFields(),
+  ...mediaFields(),
   ...advancedFields(),
 ];
 

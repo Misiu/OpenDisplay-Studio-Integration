@@ -289,10 +289,17 @@ if (!customElements.get("ha-form")) {
       private formData: Record<string, unknown> = {};
       private formSchema: DemoFormSchema[] = [];
       private labelFor?: (entry: DemoFormSchema) => string;
+      private helperFor?: (entry: DemoFormSchema) => string;
       private openSections = new Set<string>();
       set hass(_value: unknown) {}
       set computeLabel(value: ((entry: DemoFormSchema) => string) | undefined) {
         this.labelFor = value;
+        this.draw();
+      }
+      set computeHelper(
+        value: ((entry: DemoFormSchema) => string) | undefined
+      ) {
+        this.helperFor = value;
         this.draw();
       }
       set data(value: Record<string, unknown>) {
@@ -352,8 +359,18 @@ if (!customElements.get("ha-form")) {
             target.append(details);
           } else if (entry.name && entry.selector) {
             target.append(this.renderField(entry));
+            const helper = this.helperFor?.(entry);
+            if (helper) target.append(this.renderHelper(helper));
           }
         }
+      }
+      private renderHelper(text: string): HTMLElement {
+        const helper = document.createElement("small");
+        helper.className = "form-helper";
+        helper.style.cssText =
+          "display:block;margin:-6px 0 12px;color:#68727a;font:11px Roboto,sans-serif";
+        helper.textContent = text;
+        return helper;
       }
       private renderField(field: DemoFormSchema): HTMLLabelElement {
         const name = field.name!;
@@ -586,6 +603,7 @@ const demoDashboard: Dashboard = {
     snapSize: 5,
     rotation: 0,
     deviceId: "hallway",
+    mediaAsDesigned: false,
   },
   items: [
     {
@@ -625,6 +643,7 @@ const hallwayDashboard: Dashboard = {
     snapSize: 5,
     rotation: 0,
     deviceId: null,
+    mediaAsDesigned: false,
   },
   items: [
     {
@@ -757,6 +776,7 @@ const officeDashboard: Dashboard = {
     snapSize: 5,
     rotation: 0,
     deviceId: null,
+    mediaAsDesigned: false,
   },
   items: [],
   createdAt: "2026-09-18T10:00:00+00:00",

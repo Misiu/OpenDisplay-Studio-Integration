@@ -3,6 +3,7 @@ import { customElement, property, state } from "lit/decorators.js";
 import {
   dashboardFormData,
   dashboardFormLabel,
+  dashboardFormHelper,
   dashboardFormSchema,
   settingsFormFields,
   dashboardIsValid,
@@ -354,6 +355,7 @@ export class OdsGallery extends LitElement {
             .data=${dashboardFormData(dashboard)}
             .schema=${dashboardFormSchema(settingsFormFields(dashboard))}
             .computeLabel=${dashboardFormLabel}
+            .computeHelper=${dashboardFormHelper(dashboard.display.rotation)}
             @value-changed=${this.settingsChanged}
           ></ha-form>
         </div>

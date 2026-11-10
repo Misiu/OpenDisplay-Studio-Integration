@@ -386,6 +386,17 @@ export const polish: StringsOverride = {
     background: "Tło",
     advanced: "Zaawansowane ustawienia wyświetlacza",
     padding: "Margines zewnętrzny",
+    mediaAsDesigned: "Obraz Media Source tak jak w edytorze",
+    mediaAsDesignedHelp: (rotation: number): string =>
+      rotation === 0
+        ? "Obraz Media Source jest taki sam w obu przypadkach: ten dashboard nie jest obrócony."
+        : [
+            "Obraz Media Source zachowuje orientację z edytora, co dobrze nadaje się",
+            "do podglądu albo karty. Nie jest obrócony dla wyświetlacza, więc aby pokazać go",
+            `przez opendisplay.upload_image, ustaw rotation na ${rotation}.`,
+            "Gdy wyłączone, obraz jest obrócony dla wyświetlacza.",
+            "To, co edytor wysyła na urządzenie, jest zawsze obrócone dla niego.",
+          ].join(" "),
     snapSize: "Krok przyciągania",
     innerPadding: "Margines wewnętrzny",
   },
