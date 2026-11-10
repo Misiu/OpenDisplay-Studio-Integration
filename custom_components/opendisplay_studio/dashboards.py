@@ -20,6 +20,7 @@ from .palette import PALETTE_COLORS
 from .primitives import DEFAULT_PRIMITIVES, PrimitiveRegistry
 from .validation import (
     DashboardValidationError,
+    boolean,
     color,
     device_id,
     integer,
@@ -60,6 +61,9 @@ def validate_dashboard(
     if padding * 2 >= min(width, height):
         raise DashboardValidationError("display.padding leaves no working area")
     snap_size = integer(display.get("snapSize", 5), "display.snapSize", 1, 256)
+    media_as_designed = boolean(
+        display.get("mediaAsDesigned", False), "display.mediaAsDesigned"
+    )
     items = validate_items(value.get("items", []), registry, primitives, width, height)
     language = value.get("language", "en")
     if not isinstance(language, str) or LANGUAGE_PATTERN.fullmatch(language) is None:
@@ -91,6 +95,7 @@ def validate_dashboard(
             "snapSize": snap_size,
             "rotation": rotation(display.get("rotation", 0)),
             "deviceId": device_id(display.get("deviceId")),
+            "mediaAsDesigned": media_as_designed,
         },
         "items": items,
     }

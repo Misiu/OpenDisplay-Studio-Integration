@@ -42,8 +42,12 @@ class OpenDisplayStudioMediaSource(MediaSource):
         if dashboard is None or dashboard["status"] != "ready":
             raise Unresolvable("Unknown or Draft OpenDisplay Studio dashboard")
         try:
+            # The picture is turned for the display unless the dashboard asks for it as
+            # designed, which a person looking at it, or a card, finds easier to read.
             rendered = await async_render_dashboard(
-                self.hass, dashboard, for_device=True
+                self.hass,
+                dashboard,
+                for_device=not dashboard["display"].get("mediaAsDesigned", False),
             )
         except (DashboardCompileError, OdlRenderError) as err:
             LOGGER.error("Could not render %s: %s", item.identifier, err)

@@ -85,6 +85,7 @@ export const dashboardWith = (
     snapSize: 5,
     rotation: 0,
     deviceId: null,
+    mediaAsDesigned: false,
     ...display,
   },
   items,

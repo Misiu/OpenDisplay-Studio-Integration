@@ -391,6 +391,17 @@ export const strings = {
     advanced: "Advanced display options",
     padding: "Outer padding",
     snapSize: "Snap size",
+    mediaAsDesigned: "Media Source picture as designed",
+    mediaAsDesignedHelp: (rotation: number): string =>
+      rotation === 0
+        ? "The picture of the Media Source is the same either way: this dashboard is not turned."
+        : [
+            "The picture of the Media Source keeps the orientation you see in the designer,",
+            "which suits a preview or a card. It is not turned for the display, so to show",
+            `it with opendisplay.upload_image set rotation to ${rotation}.`,
+            "Left off, the picture is turned for the display.",
+            "What the editor sends to a device is always turned for it.",
+          ].join(" "),
     x: "X",
     y: "Y",
     innerPadding: "Inner padding",

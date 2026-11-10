@@ -4,6 +4,7 @@ import {
   dashboardAccent,
   dashboardDate,
   dashboardFormData,
+  dashboardFormHelper,
   dashboardFormLabel,
   dashboardFormSchema,
   dashboardFromDevice,
@@ -33,6 +34,52 @@ describe("freshDashboard", () => {
 
   it("falls back to English when no language is known", () => {
     expect(freshDashboard("").language).toBe("en");
+  });
+});
+
+describe("the Media Source picture of a dashboard", () => {
+  it("is turned for the display unless the dashboard says otherwise", () => {
+    expect(freshDashboard("en").display.mediaAsDesigned).toBe(false);
+  });
+
+  it("is a setting of the form that the dashboard is made from", () => {
+    const dashboard = dashboardWith([], { mediaAsDesigned: true });
+
+    expect(dashboardFormData(dashboard).mediaAsDesigned).toBe(true);
+    const asked = dashboardFromForm(dashboardWith(), { mediaAsDesigned: true });
+    expect(asked.display.mediaAsDesigned).toBe(true);
+    const undone = dashboardFromForm(dashboard, { mediaAsDesigned: false });
+    expect(undone.display.mediaAsDesigned).toBe(false);
+  });
+
+  it("is left as it was when the form changes something else", () => {
+    const dashboard = dashboardWith([], { mediaAsDesigned: true });
+
+    const next = dashboardFromForm(dashboard, { name: "Other" });
+
+    expect(next.display.mediaAsDesigned).toBe(true);
+  });
+
+  it("is offered in the display settings", () => {
+    const names = dashboardFormSchema().map((entry) => entry.name);
+
+    expect(names).toContain("mediaAsDesigned");
+  });
+
+  it("says which rotation to give opendisplay.upload_image", () => {
+    const helper = dashboardFormHelper(90);
+    const field = { name: "mediaAsDesigned", label: "", selector: {} };
+
+    expect(helper(field)).toContain("rotation to 90");
+    expect(helper({ ...field, name: "width" })).toBe("");
+  });
+
+  it("needs no rotation to be told for a dashboard that is not turned", () => {
+    const helper = dashboardFormHelper(0);
+
+    const text = helper({ name: "mediaAsDesigned", label: "", selector: {} });
+
+    expect(text).not.toContain("set rotation");
   });
 });
 
@@ -257,11 +304,12 @@ describe("starting from a display", () => {
     expect(names({ size: false, palettes: [], backgrounds: [] })).toEqual([
       "name",
       "rotation",
+      "mediaAsDesigned",
       "advanced",
     ]);
     expect(
       names({ size: false, palettes: ["bw", "bwr"], backgrounds: [] })
-    ).toEqual(["name", "palette", "rotation", "advanced"]);
+    ).toEqual(["name", "palette", "rotation", "mediaAsDesigned", "advanced"]);
     expect(
       names({ size: false, palettes: ["bw"], backgrounds: [] })
     ).not.toContain("palette");
@@ -270,6 +318,7 @@ describe("starting from a display", () => {
       "dimensions",
       "palette",
       "rotation",
+      "mediaAsDesigned",
       "advanced",
     ]);
   });

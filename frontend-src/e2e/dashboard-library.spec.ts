@@ -717,3 +717,74 @@ test.describe("the display preview of the new dashboard dialog", () => {
     await expect(dialog.getByText("Advanced display options")).toHaveCount(0);
   });
 });
+
+test.describe("the Media Source picture in the display settings", () => {
+  const openSettings = async (page: Page, name: string) => {
+    const menu = await openDashboardMenu(page, name);
+    await menu
+      .getByRole("menuitem", { name: "Display Settings", exact: true })
+      .click();
+    return page.getByRole("dialog", { name: "Display settings", exact: true });
+  };
+
+  test("is turned for the display until the setting is switched on", async ({
+    page,
+  }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+
+    await expect(
+      dialog.getByRole("checkbox", { name: "Media Source picture as designed" })
+    ).not.toBeChecked();
+  });
+
+  test("is kept as designed once the setting is saved", async ({ page }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+
+    await dialog
+      .getByRole("checkbox", { name: "Media Source picture as designed" })
+      .check();
+    await dialog
+      .getByRole("button", { name: "Save changes", exact: true })
+      .click();
+
+    await expect(dialog).toHaveCount(0);
+    const update = await lastCall(page, "opendisplay_studio/update_dashboard");
+    expect(update).toMatchObject({
+      dashboard: { display: { mediaAsDesigned: true } },
+    });
+    const reopened = await openSettings(page, "Kitchen display");
+    await expect(
+      reopened.getByRole("checkbox", {
+        name: "Media Source picture as designed",
+      })
+    ).toBeChecked();
+  });
+
+  test("names the rotation to give opendisplay.upload_image for a turned display", async ({
+    page,
+  }) => {
+    await page
+      .getByRole("button", { name: "New dashboard", exact: true })
+      .click();
+    const created = page.getByRole("dialog", { name: "New dashboard" });
+    await created.getByRole("radio", { name: /Custom size/ }).click();
+    await created.getByRole("textbox", { name: "Dashboard name" }).fill("Tall");
+    await created
+      .getByRole("button", { name: "Turn 90° to the right" })
+      .click();
+    await created.getByRole("button", { name: "Create dashboard" }).click();
+    await page.getByRole("button", { name: "Dashboards", exact: true }).click();
+
+    const dialog = await openSettings(page, "Tall");
+
+    await expect(dialog).toContainText("set rotation to 90");
+  });
+
+  test("says there is nothing to give for a display that is not turned", async ({
+    page,
+  }) => {
+    const dialog = await openSettings(page, "Kitchen display");
+
+    await expect(dialog).toContainText("the same either way");
+  });
+});

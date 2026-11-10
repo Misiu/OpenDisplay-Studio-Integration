@@ -373,6 +373,17 @@ export const german: StringsOverride = {
     background: "Hintergrund",
     advanced: "Erweiterte Display-Optionen",
     padding: "Äußerer Rand",
+    mediaAsDesigned: "Bild der Media Source wie im Editor",
+    mediaAsDesignedHelp: (rotation: number): string =>
+      rotation === 0
+        ? "Das Bild der Media Source ist in beiden Fällen gleich: Dieses Dashboard ist nicht gedreht."
+        : [
+            "Das Bild der Media Source behält die Ausrichtung aus dem Editor,",
+            "passend für eine Vorschau oder eine Karte. Es ist nicht für das Display gedreht;",
+            `um es mit opendisplay.upload_image zu zeigen, setze rotation auf ${rotation}.`,
+            "Ausgeschaltet wird das Bild für das Display gedreht.",
+            "Was der Editor an ein Gerät sendet, ist immer für dieses gedreht.",
+          ].join(" "),
     snapSize: "Rasterschritt",
     innerPadding: "Innerer Rand",
   },
