@@ -94,7 +94,24 @@ import { chooseFile, downloadFile, isMacPlatform, isTypingTarget } from "./dom";
 import { exportFileName, parseJson } from "./dashboard-file";
 import { messageFrom } from "./error-message";
 import { rememberFonts } from "./font-catalog";
-import { type DashboardDialog, type EditorView, type OdsEvent } from "./events";
+import {
+  type BasicStep,
+  type DashboardDialog,
+  type EditorView,
+  type OdsEvent,
+} from "./events";
+import {
+  mergeRegionsIn,
+  placeWidget,
+  regionForNewWidget,
+  resizeGridIn,
+  setGapIn,
+  splitRegionIn,
+  widgetInRegion,
+  widgetsOf,
+  withMode,
+} from "./basic-ops";
+import { regionAt, regionIdAtPoint } from "./grid-layout";
 import { snapToGrid, workingArea } from "./geometry";
 import { History } from "./history";
 import { strings } from "./strings";
@@ -119,6 +136,8 @@ import type {
   DisplayDevice,
   HomeAssistant,
   ImportPlan,
+  LayoutFrames,
+  LayoutLimits,
   PrimitiveDefinition,
   StudioItem,
   WidgetLoadError,
@@ -131,7 +150,9 @@ import "./ods-confirm-dialog";
 import "./ods-import-dialog";
 import "./ods-context-menu";
 import "./ods-shortcuts-dialog";
+import "./ods-basic-steps";
 import "./ods-gallery";
+import "./ods-layout-panel";
 import "./ods-settings";
 import "./ods-header";
 import "./ods-inspector";
@@ -261,6 +282,12 @@ export class OdsApp extends LitElement {
           );
         overflow: hidden;
       }
+      .basic-left {
+        min-width: 0;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
       .dashboard-empty {
         position: relative;
         height: 100%;
@@ -328,6 +355,11 @@ export class OdsApp extends LitElement {
   @state() private displayDevices: DisplayDevice[] = [];
   @state() private dashboardDialog?: DashboardDialog;
   @state() private dashboardDraft?: Dashboard;
+  @state() private layoutLimits?: LayoutLimits;
+  /** Where the cells and regions of the open basic dashboard are on its display. */
+  @state() private layoutFrames?: LayoutFrames;
+  @state() private basicStep: BasicStep = "layout";
+  @state() private selectedRegionId = "";
 
   @query("ods-canvas") private canvas?: OdsCanvas;
 
@@ -335,6 +367,8 @@ export class OdsApp extends LitElement {
   private stateTimer?: number;
   private clockTimer?: number;
   private previewRequest = 0;
+  private layoutRequest = 0;
+  private layoutKey = "";
   private bootstrapStarted = false;
   private readonly history = new History<Dashboard>();
 
@@ -361,6 +395,7 @@ export class OdsApp extends LitElement {
       this.ensureBootstrap();
       this.refreshOnStateChange(changed.get("hass"));
     }
+    void this.refreshLayoutFrames();
   }
   disconnectedCallback(): void {
     super.disconnectedCallback();
@@ -390,6 +425,7 @@ export class OdsApp extends LitElement {
       this.widgetErrors = data.widgetErrors;
       this.primitives = data.primitives;
       rememberFonts(data.fonts);
+      this.layoutLimits = data.layoutLimits;
       this.current = undefined;
       this.preview = undefined;
       this.view = "dashboards";
@@ -461,6 +497,7 @@ export class OdsApp extends LitElement {
       this.dirty = false;
       this.newDashboardOpen = false;
       this.view = "design";
+      this.basicStep = "layout";
       this.clearHistory();
       await this.composePreview();
       await this.updateComplete;
@@ -577,6 +614,8 @@ export class OdsApp extends LitElement {
     if (this.dirty && !window.confirm(strings.app.discardChanges)) return;
     this.current = structuredClone(dashboard);
     this.clearSelection();
+    this.selectedRegionId = "";
+    this.basicStep = widgetsOf(dashboard).length > 0 ? "widgets" : "layout";
     this.dirty = false;
     this.clearHistory();
     this.view = "design";
@@ -808,6 +847,7 @@ export class OdsApp extends LitElement {
       entered: this.enteredGroupId !== "",
       canPaste: (this.clipboard?.items.length ?? 0) > 0,
       dirty: this.dirty,
+      basic: this.isBasic,
     };
   }
 
@@ -1183,10 +1223,16 @@ export class OdsApp extends LitElement {
     if (view === "code" && !this.preview) void this.composePreview();
   }
   private selectItem(itemId: string): void {
-    this.setSelection(itemId ? [itemId] : []);
+    if (!itemId) {
+      this.clearSelection();
+      return;
+    }
+    this.setSelection([itemId]);
   }
+  /** Nothing is selected: no element, and no region of a basic dashboard either. */
   private clearSelection(): void {
     this.setSelection([]);
+    this.selectedRegionId = "";
   }
   private setSelection(ids: string[]): void {
     const same =
@@ -1275,6 +1321,10 @@ export class OdsApp extends LitElement {
   }
   private addFromCatalog(value: string): void {
     if (!this.current) return;
+    if (this.isBasic) {
+      this.addToRegion(value, this.selectedRegionId);
+      return;
+    }
     const { x, y } = catalogCascadePosition(this.current, this.snapEnabled);
     this.addAt(value, x, y);
   }
@@ -1286,6 +1336,10 @@ export class OdsApp extends LitElement {
     const dashboard = this.current;
     const point = this.canvas?.displayPointAt(clientX, clientY);
     if (!dashboard || !point) return;
+    if (this.isBasic) {
+      this.addToRegion(value, this.regionAtPoint(point));
+      return;
+    }
     const area = workingArea(dashboard);
     const x = clamp(
       snapToGrid(point.x, dashboard, this.snapEnabled),
@@ -1305,6 +1359,104 @@ export class OdsApp extends LitElement {
       this.enteredGroupId || undefined
     );
     this.addAt(value, x, y, target?.id);
+  }
+
+  // --- the basic editor --------------------------------------------------------
+
+  private get isBasic(): boolean {
+    return this.current?.mode === "basic";
+  }
+
+  private regionAtPoint(point: { x: number; y: number }): string {
+    if (!this.layoutFrames) return "";
+    return regionIdAtPoint(this.layoutFrames, point) ?? "";
+  }
+
+  /** Asks the backend where the cells and regions are, whenever the grid or display changes. */
+  private async refreshLayoutFrames(): Promise<void> {
+    const dashboard = this.current;
+    const layout = dashboard?.layout;
+    if (!this.hass || !dashboard || !layout) {
+      this.layoutFrames = undefined;
+      this.layoutKey = "";
+      return;
+    }
+    const { width, height, padding } = dashboard.display;
+    const key = JSON.stringify([width, height, padding, layout]);
+    if (key === this.layoutKey) return;
+    this.layoutKey = key;
+    const request = (this.layoutRequest += 1);
+    try {
+      const frames = await api.layoutFrames(
+        this.hass,
+        dashboard.display,
+        layout
+      );
+      if (request === this.layoutRequest) this.layoutFrames = frames;
+    } catch (error) {
+      this.error = messageFrom(error, strings.app.previewFailed);
+    }
+  }
+
+  /** The widget goes to the chosen region, or to the first free one. */
+  private addToRegion(value: string, chosenRegionId: string): void {
+    const dashboard = this.current;
+    const layout = dashboard?.layout;
+    const [kind, type] = value.split(":");
+    const definition = this.widgets.find((widget) => widget.id === type);
+    if (!dashboard || !layout || kind !== "widget" || !definition) return;
+    const region = regionForNewWidget(dashboard, layout, chosenRegionId);
+    const frame = this.layoutFrames?.regions.find((r) => r.id === region?.id);
+    if (!region || !frame) {
+      this.showNotice(strings.basic.noEmptyRegion);
+      return;
+    }
+    this.mutate((next) => placeWidget(next, definition, region, frame));
+    this.selectRegion(region.id);
+    void this.composePreview();
+  }
+
+  private selectRegion(regionId: string): void {
+    const widget = this.current && widgetInRegion(this.current, regionId);
+    this.setSelection(widget ? [widget.id] : []);
+    this.selectedRegionId = regionId;
+  }
+
+  private onBasicStepChange(event: OdsEvent<"basic-step-change">): void {
+    this.basicStep = event.detail.step;
+  }
+
+  private onRegionSelect(event: OdsEvent<"region-select">): void {
+    this.selectRegion(event.detail.regionId);
+  }
+
+  private onRegionsMerge(event: OdsEvent<"regions-merge">): void {
+    const { rectangle } = event.detail;
+    this.mutate((next) => mergeRegionsIn(next, rectangle));
+    const layout = this.current?.layout;
+    const merged = layout && regionAt(layout, rectangle);
+    this.selectRegion(merged?.id ?? "");
+    void this.composePreview();
+  }
+
+  private onRegionSplit(event: OdsEvent<"region-split">): void {
+    this.mutate((next) => splitRegionIn(next, event.detail.regionId));
+    this.selectRegion(event.detail.regionId);
+  }
+
+  private onGridChange(event: OdsEvent<"grid-change">): void {
+    const { columns, rows, gap } = event.detail;
+    this.mutate((next) => {
+      const layout = next.layout;
+      if (!layout) return;
+      if (gap !== undefined) setGapIn(next, gap);
+      resizeGridIn(next, {
+        columns: columns ?? layout.columns,
+        rows: rows ?? layout.rows,
+      });
+    });
+    if (this.current) this.keepExistingSelection(this.current);
+    void this.composePreview();
   }
 
   // --- groups ----------------------------------------------------------------
@@ -1390,6 +1542,11 @@ export class OdsApp extends LitElement {
     );
   }
 
+  private onNewDashboardMode(event: OdsEvent<"new-dashboard-mode">): void {
+    const gap = this.layoutLimits?.defaultGap ?? 8;
+    this.newDashboard = withMode(this.newDashboard, event.detail.mode, gap);
+  }
+
   private onNewDashboardSource(event: OdsEvent<"new-dashboard-source">): void {
     this.chooseNewDashboardSource(event.detail.source);
   }
@@ -1406,6 +1563,10 @@ export class OdsApp extends LitElement {
 
   private closeNewDashboard(): void {
     this.newDashboardOpen = false;
+  }
+
+  private onRenameHandled(): void {
+    this.renameRequestId = "";
   }
 
   private showGallery(): void {
@@ -1720,6 +1881,7 @@ export class OdsApp extends LitElement {
         .saving=${this.saving}
         @new-dashboard-change=${this.onNewDashboardChange}
         @new-dashboard-source=${this.onNewDashboardSource}
+        @new-dashboard-mode=${this.onNewDashboardMode}
         @new-dashboard-device=${this.onNewDashboardDevice}
         @new-dashboard-profile=${this.onNewDashboardProfile}
         @new-dashboard-close=${this.closeNewDashboard}
@@ -1766,91 +1928,167 @@ export class OdsApp extends LitElement {
     `;
   }
 
-  private renderDesign(dashboard: Dashboard): TemplateResult {
-    const layoutStyle = styleMap({
+  private layoutStyle(): ReturnType<typeof styleMap> {
+    return styleMap({
       "--toolbox-width": this.leftCollapsed ? "48px" : "255px",
       "--inspector-width": this.rightCollapsed
         ? "48px"
         : `${this.inspectorWidth}px`,
     });
+  }
+
+  private renderLibrary(widgetsOnly: boolean): TemplateResult {
+    return html`
+      <ods-library
+        .widgets=${this.widgets}
+        .widgetErrors=${this.widgetErrors}
+        .primitives=${this.primitives}
+        .collapsed=${this.leftCollapsed}
+        .widgetsOnly=${widgetsOnly}
+        @widgets-reload=${this.reloadWidgets}
+        @library-collapse=${this.onLibraryCollapse}
+        @catalog-add=${this.onCatalogAdd}
+        @catalog-drag=${this.onCatalogDrag}
+        @catalog-drop=${this.onCatalogDrop}
+      ></ods-library>
+    `;
+  }
+
+  private renderCanvas(dashboard: Dashboard): TemplateResult {
+    return html`
+      <ods-canvas
+        .dashboard=${dashboard}
+        .preview=${this.preview}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selection}
+        .enteredGroupId=${this.enteredGroupId}
+        .snapEnabled=${this.snapEnabled}
+        .alignTo=${this.alignTo}
+        .acceptingDrop=${this.draggingCatalog}
+        .canUndo=${this.undoCount > 0}
+        .canRedo=${this.redoCount > 0}
+        .viewport=${this.viewport}
+        .layoutFrames=${this.layoutFrames}
+        .basicStep=${this.basicStep}
+        .selectedRegionId=${this.selectedRegionId}
+        @viewport-change=${this.onViewportChange}
+        @items-transform=${this.onItemsTransform}
+        @item-transform-end=${this.onItemTransformEnd}
+        @gesture-cancel=${this.onGestureCancel}
+        @primitive-field-change=${this.onPrimitiveFieldChange}
+        @snap-toggle=${this.toggleSnap}
+        @align-target-change=${this.onAlignTargetChange}
+        @region-select=${this.onRegionSelect}
+        @regions-merge=${this.onRegionsMerge}
+        @region-split=${this.onRegionSplit}
+      ></ods-canvas>
+    `;
+  }
+
+  private renderInspector(dashboard: Dashboard): TemplateResult {
+    return html`
+      <ods-inspector
+        .hass=${this.hass}
+        .dashboard=${dashboard}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .preview=${this.preview}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selection}
+        .enteredGroupId=${this.enteredGroupId}
+        .renameRequestId=${this.renameRequestId}
+        .collapsed=${this.rightCollapsed}
+        .width=${this.inspectorWidth}
+        @inspector-collapse=${this.onInspectorCollapse}
+        @inspector-resize=${this.onInspectorResize}
+        @layers-reorder=${this.onLayersReorder}
+        @item-number-change=${this.onItemNumberChange}
+        @display-number-change=${this.onDisplayNumberChange}
+        @display-background-change=${this.onDisplayBackgroundChange}
+        @widget-options-change=${this.onWidgetOptionsChange}
+        @widget-picks-change=${this.onWidgetPicksChange}
+        @widgets-reload=${this.reloadWidgets}
+        @primitive-change=${this.onPrimitiveChange}
+        @primitive-field-change=${this.onPrimitiveFieldChange}
+        @primitive-fields-reset=${this.onPrimitiveFieldsReset}
+        @align-in-parent=${this.onAlignInParent}
+        @container-background-change=${this.onContainerBackgroundChange}
+        @expression-change=${this.onExpressionChange}
+      ></ods-inspector>
+    `;
+  }
+
+  private renderDialogs(): TemplateResult {
+    return html`
+      ${this.renderDeleteDialog()} ${this.renderImportDialog()}
+      ${this.renderMenu()} ${this.renderShortcutsDialog()}
+    `;
+  }
+
+  private renderDesign(dashboard: Dashboard): TemplateResult {
     return html`
       <div
         class="layout"
-        style=${layoutStyle}
+        style=${this.layoutStyle()}
         @item-select=${this.onItemSelect}
         @selection-change=${this.onSelectionChange}
         @group-enter=${this.onGroupEnter}
         @item-rename=${this.onItemRename}
         @context-menu=${this.onContextMenu}
-        @rename-handled=${() => {
-          this.renameRequestId = "";
-        }}
+        @rename-handled=${this.onRenameHandled}
         @command=${this.onCommand}
       >
-        <ods-library
-          .widgets=${this.widgets}
-          .widgetErrors=${this.widgetErrors}
-          .primitives=${this.primitives}
-          .collapsed=${this.leftCollapsed}
-          @widgets-reload=${this.reloadWidgets}
-          @library-collapse=${this.onLibraryCollapse}
-          @catalog-add=${this.onCatalogAdd}
-          @catalog-drag=${this.onCatalogDrag}
-          @catalog-drop=${this.onCatalogDrop}
-        ></ods-library>
-        <ods-canvas
-          .dashboard=${dashboard}
-          .preview=${this.preview}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selection}
-          .enteredGroupId=${this.enteredGroupId}
-          .snapEnabled=${this.snapEnabled}
-          .alignTo=${this.alignTo}
-          .acceptingDrop=${this.draggingCatalog}
-          .canUndo=${this.undoCount > 0}
-          .canRedo=${this.redoCount > 0}
-          .viewport=${this.viewport}
-          @viewport-change=${this.onViewportChange}
-          @items-transform=${this.onItemsTransform}
-          @item-transform-end=${this.onItemTransformEnd}
-          @gesture-cancel=${this.onGestureCancel}
-          @primitive-field-change=${this.onPrimitiveFieldChange}
-          @snap-toggle=${this.toggleSnap}
-          @align-target-change=${this.onAlignTargetChange}
-        ></ods-canvas>
-        <ods-inspector
-          .hass=${this.hass}
-          .dashboard=${dashboard}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .preview=${this.preview}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selection}
-          .enteredGroupId=${this.enteredGroupId}
-          .renameRequestId=${this.renameRequestId}
-          .collapsed=${this.rightCollapsed}
-          .width=${this.inspectorWidth}
-          @inspector-collapse=${this.onInspectorCollapse}
-          @inspector-resize=${this.onInspectorResize}
-          @layers-reorder=${this.onLayersReorder}
-          @item-number-change=${this.onItemNumberChange}
-          @display-number-change=${this.onDisplayNumberChange}
-          @display-background-change=${this.onDisplayBackgroundChange}
-          @widget-options-change=${this.onWidgetOptionsChange}
-          @widget-picks-change=${this.onWidgetPicksChange}
-          @widgets-reload=${this.reloadWidgets}
-          @primitive-change=${this.onPrimitiveChange}
-          @primitive-field-change=${this.onPrimitiveFieldChange}
-          @primitive-fields-reset=${this.onPrimitiveFieldsReset}
-          @align-in-parent=${this.onAlignInParent}
-          @container-background-change=${this.onContainerBackgroundChange}
-          @expression-change=${this.onExpressionChange}
-        ></ods-inspector>
+        ${this.renderLibrary(false)} ${this.renderCanvas(dashboard)}
+        ${this.renderInspector(dashboard)}
       </div>
-      ${this.renderDeleteDialog()} ${this.renderImportDialog()}
-      ${this.renderMenu()} ${this.renderShortcutsDialog()}
+      ${this.renderDialogs()}
+    `;
+  }
+
+  /** The left panel of the basic editor: the tabs, and below them the tab's own tools. */
+  private renderBasicLeft(dashboard: Dashboard): TemplateResult {
+    return html`
+      <div class="basic-left">
+        <ods-basic-steps
+          .step=${this.basicStep}
+          @basic-step-change=${this.onBasicStepChange}
+        ></ods-basic-steps>
+        ${
+          this.basicStep === "layout"
+            ? html`
+                <ods-layout-panel
+                  .layout=${dashboard.layout}
+                  .limits=${this.layoutLimits}
+                  .padding=${dashboard.display.padding}
+                  @grid-change=${this.onGridChange}
+                  @display-number-change=${this.onDisplayNumberChange}
+                ></ods-layout-panel>
+              `
+            : this.renderLibrary(true)
+        }
+      </div>
+    `;
+  }
+
+  /**
+   * The basic editor: the same canvas, properties and library as the advanced one, with
+   * regions on the canvas, no structure tree and no arrange bar.
+   */
+  private renderBasicDesign(dashboard: Dashboard): TemplateResult {
+    return html`
+      <div
+        class="layout"
+        style=${this.layoutStyle()}
+        @item-select=${this.onItemSelect}
+        @selection-change=${this.onSelectionChange}
+        @command=${this.onCommand}
+      >
+        ${this.renderBasicLeft(dashboard)} ${this.renderCanvas(dashboard)}
+        ${this.renderInspector(dashboard)}
+      </div>
+      ${this.renderDialogs()}
     `;
   }
 
@@ -1870,6 +2108,12 @@ export class OdsApp extends LitElement {
     return html`
       <ha-alert alert-type="success" class="notice">${this.notice}</ha-alert>
     `;
+  }
+
+  private renderEditorBody(dashboard: Dashboard): TemplateResult {
+    return dashboard.mode === "basic"
+      ? this.renderBasicDesign(dashboard)
+      : this.renderDesign(dashboard);
   }
 
   private renderEditor(dashboard: Dashboard): TemplateResult {
@@ -1899,7 +2143,7 @@ export class OdsApp extends LitElement {
             ? html`
                 <ods-code-view .preview=${this.preview}></ods-code-view>
               `
-            : this.renderDesign(dashboard)
+            : this.renderEditorBody(dashboard)
         }
       </div>
     `;

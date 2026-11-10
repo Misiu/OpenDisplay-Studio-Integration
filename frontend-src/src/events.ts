@@ -1,10 +1,13 @@
 import type { AlignTarget } from "./align-selection";
 import type { CommandId } from "./commands";
 import type { DashboardFormData, DashboardSource } from "./dashboards";
-import type { Dashboard, StudioItem, WidgetPick } from "./types";
+import type { CellRectangle } from "./grid-layout";
+import type { Dashboard, DashboardMode, StudioItem, WidgetPick } from "./types";
 import type { Viewport } from "./viewport";
 
 export type EditorView = "dashboards" | "design" | "code" | "settings";
+/** The two tabs of the basic editor: cut the screen into regions, then fill them. */
+export type BasicStep = "layout" | "widgets";
 export type DashboardAction = "rename" | "duplicate" | "settings" | "delete";
 export type DashboardDialog = Exclude<DashboardAction, "duplicate">;
 
@@ -30,6 +33,7 @@ export interface OdsEventMap {
   "new-dashboard-change": { value: Partial<DashboardFormData> };
   "new-dashboard-close": undefined;
   "new-dashboard-source": { source: DashboardSource };
+  "new-dashboard-mode": { mode: DashboardMode };
   "new-dashboard-device": { deviceId: string };
   "new-dashboard-profile": { profileId: string };
   "dashboard-create": undefined;
@@ -93,6 +97,13 @@ export interface OdsEventMap {
   "zoom-step": { direction: 1 | -1 };
   "zoom-reset": undefined;
   "zoom-fit": undefined;
+  // basic editor
+  "basic-step-change": { step: BasicStep };
+  "region-select": { regionId: string };
+  /** Two cells were chosen; the regions between them are to become one. */
+  "regions-merge": { rectangle: CellRectangle };
+  "region-split": { regionId: string };
+  "grid-change": { columns?: number; rows?: number; gap?: number };
   // structure and inspector
   "layers-reorder": {
     itemId: string;

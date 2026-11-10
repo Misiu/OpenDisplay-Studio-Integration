@@ -51,6 +51,8 @@ export interface WidgetItem extends ItemState {
   };
   frame: ItemFrame;
   layout: { padding: number };
+  /** The region of a basic dashboard's layout the widget fills; its frame follows it. */
+  region?: string;
 }
 
 /** What every primitive but the debug grid can be: turned clockwise about its middle. */
@@ -296,10 +298,47 @@ export type StudioItem = LeafItem | ContainerItem;
 /** How far, clockwise, the picture is turned before a display gets it. */
 export type Rotation = 0 | 90 | 180 | 270;
 
+/** How a dashboard is edited: by regions of a grid (basic) or by free placement (advanced). */
+export type DashboardMode = "basic" | "advanced";
+
+/** A rectangle of cells of the grid; every cell of the grid belongs to exactly one. */
+export interface GridRegion {
+  id: string;
+  row: number;
+  column: number;
+  rowSpan: number;
+  columnSpan: number;
+}
+
+export interface GridLayout {
+  columns: number;
+  rows: number;
+  gap: number;
+  regions: GridRegion[];
+}
+
+/** Where the cells and the regions of a layout are on the display, as the backend lays them. */
+export interface LayoutFrames {
+  cells: ItemFrame[];
+  regions: Array<ItemFrame & { id: string }>;
+}
+
+/** What the backend accepts of a grid; the panel never declares these itself. */
+export interface LayoutLimits {
+  minLines: number;
+  maxLines: number;
+  defaultGap: number;
+  maxGap: number;
+}
+
 export interface Dashboard {
   id: string;
   schemaVersion: 1;
   name: string;
+  /** Chosen when the dashboard is created and never changed afterwards. */
+  mode: DashboardMode;
+  /** The grid of a basic dashboard; an advanced one has none. */
+  layout?: GridLayout;
   status: DashboardStatus;
   language: string;
   display: {
@@ -547,6 +586,7 @@ export interface BootstrapResponse {
   widgetErrors: WidgetLoadError[];
   primitives: PrimitiveDefinition[];
   fonts: FontInfo[];
+  layoutLimits: LayoutLimits;
 }
 
 export interface ReloadWidgetsResponse {

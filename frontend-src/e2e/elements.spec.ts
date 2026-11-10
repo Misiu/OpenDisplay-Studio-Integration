@@ -843,10 +843,10 @@ test.describe("rotation and sending to a device", () => {
       .click();
     const dialog = page.getByRole("dialog", { name: "New dashboard" });
 
-    await dialog.getByRole("combobox", { name: "Rotation" }).selectOption("90");
+    await dialog.getByRole("button", { name: "Turn 90° to the right" }).click();
 
     await expect(
-      dialog.getByRole("group", { name: "Dashboard size and colors" })
+      dialog.getByRole("region", { name: "Display preview" })
     ).toContainText("480 × 800 px");
     await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Tall");
     await dialog.getByRole("button", { name: "Create dashboard" }).click();

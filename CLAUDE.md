@@ -160,6 +160,10 @@ dashboard document ─▶ validate ─▶ resolve widget data ─▶ resolve exp
   tested with a stored fixture of the previous version. Never rely on "records
   that fail validation are skipped".
 - TypeScript types and Python validation change together, in one change.
+- A dashboard has a `mode`, `advanced` (the default) or `basic`, chosen when it is created
+  and never changed. A basic dashboard has a `layout` (a grid and its regions) and widget
+  items with a `region`; the backend sets their frames from the layout. An advanced one has
+  neither. Never add a conversion between the modes.
 - `items` is a **tree**. Sibling order is z-order: first drawn first; the last
   child is on top. Item kinds: `primitive` (exactly one ODL element), `widget`
   (zero or more ODL elements from its renderer), `container` (editor-side

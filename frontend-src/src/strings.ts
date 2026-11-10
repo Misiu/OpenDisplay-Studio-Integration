@@ -154,6 +154,9 @@ export const strings = {
     deviceDetails: "Dashboard size and colors",
     colors: "Colors",
     create: "Create dashboard",
+    previewLabel: "Display preview",
+    turnLeft: "Turn 90° to the left",
+    turnRight: "Turn 90° to the right",
     creating: "Creating…",
   },
 
@@ -589,5 +592,45 @@ export const strings = {
     seven_color: "Seven colors · Spectra 6 and orange",
     grayscale4: "Grayscale · 4 levels",
     grayscale16: "Grayscale · 16 levels",
+  },
+
+  basic: {
+    modeTitle: "Editor",
+    basic: "Basic",
+    basicHint: "A grid of regions, a widget in each.",
+    advanced: "Advanced",
+    advancedHint: "Place every element freely.",
+    badgeBasic: "Basic",
+    badgeAdvanced: "Advanced",
+    stepsLabel: "Editor steps",
+    stepLayout: "Layout",
+    stepWidgets: "Widgets",
+    widgetsHeading: "Widgets",
+    layoutTitle: "Layout",
+    layoutHeading: "Regions",
+    gridHeading: "Grid",
+    columns: "Columns",
+    rows: "Rows",
+    gap: "Gap",
+    regionsHeading: "Regions",
+    regionsHint:
+      "Click one cell, then another, to join the cells between them into a region. Double-click a region to remove it.",
+    joinStarted: "Click a second cell to finish the region.",
+    joinInvalid: "That would cut a region in two.",
+    cancelJoin: "Cancel",
+    regionCount: (count: number): string =>
+      `${count} ${count === 1 ? "region" : "regions"}`,
+    cell: (row: number, column: number): string =>
+      `Cell in row ${row} and column ${column}`,
+    regionSize: (columns: number, rows: number): string =>
+      `${columns}×${rows} region`,
+    region: (name: string): string => `Region ${name}`,
+    emptyRegion: "Empty region",
+    emptyRegionHint: "Pick a widget from the list.",
+    noEmptyRegion: "Every region already holds a widget.",
+    layoutStepHint:
+      "Draw the regions first, then fill them on the Widgets tab.",
+    widgetsStepHint:
+      "Drag a widget into a region, or click one to fill the selected region.",
   },
 } as const;

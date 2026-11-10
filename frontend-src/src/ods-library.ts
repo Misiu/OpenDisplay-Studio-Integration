@@ -287,6 +287,8 @@ export class OdsLibrary extends LitElement {
   @property({ attribute: false }) public widgetErrors: WidgetLoadError[] = [];
   @property({ attribute: false }) public primitives: PrimitiveDefinition[] = [];
   @property({ type: Boolean }) public collapsed = false;
+  /** The basic editor offers widgets only: no containers and no primitives. */
+  @property({ type: Boolean }) public widgetsOnly = false;
 
   @state() private searchText = "";
   /** The sections the viewer folded; a search opens them all. */
@@ -575,6 +577,9 @@ export class OdsLibrary extends LitElement {
     primitives: PrimitiveEntry[],
     widgets: WidgetDefinition[]
   ): TemplateResult {
+    if (this.widgetsOnly) {
+      return this.renderWidgetSection(widgets);
+    }
     const searching = this.searchText !== "";
     if (
       searching &&
@@ -593,6 +598,12 @@ export class OdsLibrary extends LitElement {
       )}
       ${searching && widgets.length === 0 ? nothing : this.renderWidgetSection(widgets)}
     `;
+  }
+
+  private get heading(): string {
+    return this.widgetsOnly
+      ? strings.basic.widgetsHeading
+      : strings.library.heading;
   }
 
   protected render(): TemplateResult {
@@ -622,7 +633,7 @@ export class OdsLibrary extends LitElement {
         <div class="panel-title">
           <div>
             <span class="eyebrow">${strings.library.title}</span>
-            <h2>${strings.library.heading}</h2>
+            <h2>${this.heading}</h2>
           </div>
           <button
             class="icon-button"

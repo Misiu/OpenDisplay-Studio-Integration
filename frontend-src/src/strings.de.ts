@@ -150,6 +150,9 @@ export const german: StringsOverride = {
     deviceDetails: "Größe und Farben des Dashboards",
     colors: "Farben",
     create: "Dashboard erstellen",
+    previewLabel: "Vorschau des Displays",
+    turnLeft: "Um 90° nach links drehen",
+    turnRight: "Um 90° nach rechts drehen",
     creating: "Wird erstellt…",
   },
 
@@ -584,5 +587,45 @@ export const german: StringsOverride = {
     seven_color: "Sieben Farben · Spectra 6 und Orange",
     grayscale4: "Graustufen · 4 Stufen",
     grayscale16: "Graustufen · 16 Stufen",
+  },
+
+  basic: {
+    modeTitle: "Editor",
+    basic: "Einfach",
+    basicHint: "Ein Raster aus Bereichen, in jedem ein Widget.",
+    advanced: "Erweitert",
+    advancedHint: "Jedes Element frei platzieren.",
+    badgeBasic: "Einfach",
+    badgeAdvanced: "Erweitert",
+    stepsLabel: "Schritte des Editors",
+    stepLayout: "Layout",
+    stepWidgets: "Widgets",
+    widgetsHeading: "Widgets",
+    layoutTitle: "Layout",
+    layoutHeading: "Bereiche",
+    gridHeading: "Raster",
+    columns: "Spalten",
+    rows: "Zeilen",
+    gap: "Abstand",
+    regionsHeading: "Bereiche",
+    regionsHint:
+      "Klicke eine Zelle und dann eine zweite, um die Zellen dazwischen zu einem Bereich zu verbinden. Klicke einen Bereich doppelt an, um ihn zu entfernen.",
+    joinStarted: "Klicke eine zweite Zelle, um den Bereich abzuschließen.",
+    joinInvalid: "Das würde einen Bereich zerschneiden.",
+    cancelJoin: "Abbrechen",
+    regionCount: (count: number): string =>
+      `${count} ${count === 1 ? "Bereich" : "Bereiche"}`,
+    cell: (row: number, column: number): string =>
+      `Zelle in Zeile ${row} und Spalte ${column}`,
+    regionSize: (columns: number, rows: number): string =>
+      `Bereich ${columns}×${rows}`,
+    region: (name: string): string => `Bereich ${name}`,
+    emptyRegion: "Leerer Bereich",
+    emptyRegionHint: "Wähle ein Widget aus der Liste.",
+    noEmptyRegion: "Jeder Bereich enthält schon ein Widget.",
+    layoutStepHint:
+      "Zeichne zuerst die Bereiche und fülle sie dann im Tab Widgets.",
+    widgetsStepHint:
+      "Ziehe ein Widget in einen Bereich oder klicke es an, um den gewählten Bereich zu füllen.",
   },
 };

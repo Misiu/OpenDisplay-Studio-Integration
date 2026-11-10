@@ -138,6 +138,9 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		deviceDetails: "Dashboard size and colors",
 		colors: "Colors",
 		create: "Create dashboard",
+		previewLabel: "Display preview",
+		turnLeft: "Turn 90° to the left",
+		turnRight: "Turn 90° to the right",
 		creating: "Creating…"
 	},
 	header: {
@@ -528,6 +531,39 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		seven_color: "Seven colors · Spectra 6 and orange",
 		grayscale4: "Grayscale · 4 levels",
 		grayscale16: "Grayscale · 16 levels"
+	},
+	basic: {
+		modeTitle: "Editor",
+		basic: "Basic",
+		basicHint: "A grid of regions, a widget in each.",
+		advanced: "Advanced",
+		advancedHint: "Place every element freely.",
+		badgeBasic: "Basic",
+		badgeAdvanced: "Advanced",
+		stepsLabel: "Editor steps",
+		stepLayout: "Layout",
+		stepWidgets: "Widgets",
+		widgetsHeading: "Widgets",
+		layoutTitle: "Layout",
+		layoutHeading: "Regions",
+		gridHeading: "Grid",
+		columns: "Columns",
+		rows: "Rows",
+		gap: "Gap",
+		regionsHeading: "Regions",
+		regionsHint: "Click one cell, then another, to join the cells between them into a region. Double-click a region to remove it.",
+		joinStarted: "Click a second cell to finish the region.",
+		joinInvalid: "That would cut a region in two.",
+		cancelJoin: "Cancel",
+		regionCount: (e) => `${e} ${e === 1 ? "region" : "regions"}`,
+		cell: (e, t) => `Cell in row ${e} and column ${t}`,
+		regionSize: (e, t) => `${e}×${t} region`,
+		region: (e) => `Region ${e}`,
+		emptyRegion: "Empty region",
+		emptyRegionHint: "Pick a widget from the list.",
+		noEmptyRegion: "Every region already holds a widget.",
+		layoutStepHint: "Draw the regions first, then fill them on the Widgets tab.",
+		widgetsStepHint: "Drag a widget into a region, or click one to fill the selected region."
 	}
 }, n = {
 	common: {
@@ -664,6 +700,9 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		deviceDetails: "Größe und Farben des Dashboards",
 		colors: "Farben",
 		create: "Dashboard erstellen",
+		previewLabel: "Vorschau des Displays",
+		turnLeft: "Um 90° nach links drehen",
+		turnRight: "Um 90° nach rechts drehen",
 		creating: "Wird erstellt…"
 	},
 	header: {
@@ -1046,6 +1085,39 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		seven_color: "Sieben Farben · Spectra 6 und Orange",
 		grayscale4: "Graustufen · 4 Stufen",
 		grayscale16: "Graustufen · 16 Stufen"
+	},
+	basic: {
+		modeTitle: "Editor",
+		basic: "Einfach",
+		basicHint: "Ein Raster aus Bereichen, in jedem ein Widget.",
+		advanced: "Erweitert",
+		advancedHint: "Jedes Element frei platzieren.",
+		badgeBasic: "Einfach",
+		badgeAdvanced: "Erweitert",
+		stepsLabel: "Schritte des Editors",
+		stepLayout: "Layout",
+		stepWidgets: "Widgets",
+		widgetsHeading: "Widgets",
+		layoutTitle: "Layout",
+		layoutHeading: "Bereiche",
+		gridHeading: "Raster",
+		columns: "Spalten",
+		rows: "Zeilen",
+		gap: "Abstand",
+		regionsHeading: "Bereiche",
+		regionsHint: "Klicke eine Zelle und dann eine zweite, um die Zellen dazwischen zu einem Bereich zu verbinden. Klicke einen Bereich doppelt an, um ihn zu entfernen.",
+		joinStarted: "Klicke eine zweite Zelle, um den Bereich abzuschließen.",
+		joinInvalid: "Das würde einen Bereich zerschneiden.",
+		cancelJoin: "Abbrechen",
+		regionCount: (e) => `${e} ${e === 1 ? "Bereich" : "Bereiche"}`,
+		cell: (e, t) => `Zelle in Zeile ${e} und Spalte ${t}`,
+		regionSize: (e, t) => `Bereich ${e}×${t}`,
+		region: (e) => `Bereich ${e}`,
+		emptyRegion: "Leerer Bereich",
+		emptyRegionHint: "Wähle ein Widget aus der Liste.",
+		noEmptyRegion: "Jeder Bereich enthält schon ein Widget.",
+		layoutStepHint: "Zeichne zuerst die Bereiche und fülle sie dann im Tab Widgets.",
+		widgetsStepHint: "Ziehe ein Widget in einen Bereich oder klicke es an, um den gewählten Bereich zu füllen."
 	}
 }, r = (e, t, n, r) => {
 	if (e === 1) return t;
@@ -1187,6 +1259,9 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		deviceDetails: "Rozmiar i kolory dashboardu",
 		colors: "Kolory",
 		create: "Utwórz dashboard",
+		previewLabel: "Podgląd wyświetlacza",
+		turnLeft: "Obróć o 90° w lewo",
+		turnRight: "Obróć o 90° w prawo",
 		creating: "Tworzenie…"
 	},
 	header: {
@@ -1569,6 +1644,39 @@ var e = (e, t) => `${e} × ${t}`, t = {
 		seven_color: "Siedem kolorów · Spectra 6 i pomarańczowy",
 		grayscale4: "Skala szarości · 4 poziomy",
 		grayscale16: "Skala szarości · 16 poziomów"
+	},
+	basic: {
+		modeTitle: "Edytor",
+		basic: "Podstawowy",
+		basicHint: "Siatka regionów, w każdym widżet.",
+		advanced: "Zaawansowany",
+		advancedHint: "Każdy element ustawiasz swobodnie.",
+		badgeBasic: "Podstawowy",
+		badgeAdvanced: "Zaawansowany",
+		stepsLabel: "Kroki edytora",
+		stepLayout: "Układ",
+		stepWidgets: "Widżety",
+		widgetsHeading: "Widżety",
+		layoutTitle: "Układ",
+		layoutHeading: "Regiony",
+		gridHeading: "Siatka",
+		columns: "Kolumny",
+		rows: "Wiersze",
+		gap: "Odstęp",
+		regionsHeading: "Regiony",
+		regionsHint: "Kliknij jedną komórkę, potem drugą, aby połączyć komórki między nimi w region. Kliknij region dwukrotnie, aby go usunąć.",
+		joinStarted: "Kliknij drugą komórkę, aby zakończyć region.",
+		joinInvalid: "To przecięłoby region na pół.",
+		cancelJoin: "Anuluj",
+		regionCount: (e) => `${e} ${r(e, "region", "regiony", "regionów")}`,
+		cell: (e, t) => `Komórka w wierszu ${e} i kolumnie ${t}`,
+		regionSize: (e, t) => `region ${e}×${t}`,
+		region: (e) => `Region ${e}`,
+		emptyRegion: "Pusty region",
+		emptyRegionHint: "Wybierz widżet z listy.",
+		noEmptyRegion: "Każdy region ma już widżet.",
+		layoutStepHint: "Najpierw narysuj regiony, potem wypełnij je na karcie Widżety.",
+		widgetsStepHint: "Przeciągnij widżet do regionu albo kliknij go, aby wypełnić zaznaczony region."
 	}
 }, a = "en", o = {
 	de: n,
@@ -7059,16 +7167,16 @@ var jc = class extends HTMLElement {
 jc.elementStyles = [], jc.shadowRootOptions = { mode: "open" }, jc[Dc("elementProperties")] = /* @__PURE__ */ new Map(), jc[Dc("finalized")] = /* @__PURE__ */ new Map(), Ec?.({ ReactiveElement: jc }), (Cc.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var Mc = globalThis, Nc = (e) => e, Pc = Mc.trustedTypes, Fc = Pc ? Pc.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, Ic = "$lit$", Lc = `lit$${Math.random().toFixed(9).slice(2)}$`, Rc = "?" + Lc, zc = `<${Rc}>`, Bc = document, Vc = () => Bc.createComment(""), Hc = (e) => e === null || typeof e != "object" && typeof e != "function", Uc = Array.isArray, Wc = (e) => Uc(e) || typeof e?.[Symbol.iterator] == "function", Gc = "[ 	\n\f\r]", Kc = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, qc = /-->/g, Jc = />/g, Yc = RegExp(`>|${Gc}(?:([^\\s"'>=/]+)(${Gc}*=${Gc}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), Xc = /'/g, Zc = /"/g, Qc = /^(?:script|style|textarea|title)$/i, F = ((e) => (t, ...n) => ({
+var Mc = globalThis, Nc = (e) => e, Pc = Mc.trustedTypes, Fc = Pc ? Pc.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, Ic = "$lit$", Lc = `lit$${Math.random().toFixed(9).slice(2)}$`, Rc = "?" + Lc, zc = `<${Rc}>`, Bc = document, Vc = () => Bc.createComment(""), Hc = (e) => e === null || typeof e != "object" && typeof e != "function", Uc = Array.isArray, Wc = (e) => Uc(e) || typeof e?.[Symbol.iterator] == "function", Gc = "[ 	\n\f\r]", Kc = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, qc = /-->/g, Jc = />/g, Yc = RegExp(`>|${Gc}(?:([^\\s"'>=/]+)(${Gc}*=${Gc}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), Xc = /'/g, Zc = /"/g, Qc = /^(?:script|style|textarea|title)$/i, $c = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), $c = Symbol.for("lit-noChange"), I = Symbol.for("lit-nothing"), el = /* @__PURE__ */ new WeakMap(), tl = Bc.createTreeWalker(Bc, 129);
-function nl(e, t) {
+}), F = $c(1), el = $c(2), tl = Symbol.for("lit-noChange"), I = Symbol.for("lit-nothing"), nl = /* @__PURE__ */ new WeakMap(), rl = Bc.createTreeWalker(Bc, 129);
+function il(e, t) {
 	if (!Uc(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return Fc === void 0 ? t : Fc.createHTML(t);
 }
-var rl = (e, t) => {
+var al = (e, t) => {
 	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = Kc;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
@@ -7076,17 +7184,17 @@ var rl = (e, t) => {
 		let d = o === Yc && e[t + 1].startsWith("/>") ? " " : "";
 		a += o === Kc ? n + zc : l >= 0 ? (r.push(s), n.slice(0, l) + Ic + n.slice(l) + Lc + d) : n + Lc + (l === -2 ? t : d);
 	}
-	return [nl(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, il = class e {
+	return [il(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, ol = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = rl(t, n);
-		if (this.el = e.createElement(l, r), tl.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = al(t, n);
+		if (this.el = e.createElement(l, r), rl.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = tl.nextNode()) !== null && c.length < s;) {
+		for (; (i = rl.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
 				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(Ic)) {
 					let t = u[o++], n = i.getAttribute(e).split(Lc), r = /([.?@])?(.*)/.exec(t);
@@ -7095,7 +7203,7 @@ var rl = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? ll : r[1] === "?" ? ul : r[1] === "@" ? dl : cl
+						ctor: r[1] === "." ? dl : r[1] === "?" ? fl : r[1] === "@" ? pl : ul
 					}), i.removeAttribute(e);
 				} else e.startsWith(Lc) && (c.push({
 					type: 6,
@@ -7105,7 +7213,7 @@ var rl = (e, t) => {
 					let e = i.textContent.split(Lc), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = Pc ? Pc.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], Vc()), tl.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], Vc()), rl.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
@@ -7133,12 +7241,12 @@ var rl = (e, t) => {
 		return n.innerHTML = e, n;
 	}
 };
-function al(e, t, n = e, r) {
-	if (t === $c) return t;
+function sl(e, t, n = e, r) {
+	if (t === tl) return t;
 	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = Hc(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = al(e, i._$AS(e, t.values), i, r)), t;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = sl(e, i._$AS(e, t.values), i, r)), t;
 }
-var ol = class {
+var cl = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -7150,22 +7258,22 @@ var ol = class {
 	}
 	u(e) {
 		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? Bc).importNode(t, !0);
-		tl.currentNode = r;
-		let i = tl.nextNode(), a = 0, o = 0, s = n[0];
+		rl.currentNode = r;
+		let i = rl.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new sl(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new fl(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new ll(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ml(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = tl.nextNode(), a++);
+			a !== s?.index && (i = rl.nextNode(), a++);
 		}
-		return tl.currentNode = Bc, r;
+		return rl.currentNode = Bc, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, sl = class e {
+}, ll = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
@@ -7183,7 +7291,7 @@ var ol = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = al(this, e, t), Hc(e) ? e === I || e == null || e === "" ? (this._$AH !== I && this._$AR(), this._$AH = I) : e !== this._$AH && e !== $c && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? Wc(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = sl(this, e, t), Hc(e) ? e === I || e == null || e === "" ? (this._$AH !== I && this._$AR(), this._$AH = I) : e !== this._$AH && e !== tl && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? Wc(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -7195,16 +7303,16 @@ var ol = class {
 		this._$AH !== I && Hc(this._$AH) ? this._$AA.nextSibling.data = e : this.T(Bc.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = il.createElement(nl(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = ol.createElement(il(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new ol(r, this), n = e.u(this.options);
+			let e = new cl(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = el.get(e.strings);
-		return t === void 0 && el.set(e.strings, t = new il(e)), t;
+		let t = nl.get(e.strings);
+		return t === void 0 && nl.set(e.strings, t = new ol(e)), t;
 	}
 	k(t) {
 		Uc(this._$AH) || (this._$AH = [], this._$AR());
@@ -7221,7 +7329,7 @@ var ol = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, cl = class {
+}, ul = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -7233,43 +7341,43 @@ var ol = class {
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = al(this, e, t, 0), a = !Hc(e) || e !== this._$AH && e !== $c, a && (this._$AH = e);
+		if (i === void 0) e = sl(this, e, t, 0), a = !Hc(e) || e !== this._$AH && e !== tl, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = al(this, r[n + o], t, o), s === $c && (s = this._$AH[o]), a ||= !Hc(s) || s !== this._$AH[o], s === I ? e = I : e !== I && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = sl(this, r[n + o], t, o), s === tl && (s = this._$AH[o]), a ||= !Hc(s) || s !== this._$AH[o], s === I ? e = I : e !== I && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
 		e === I ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, ll = class extends cl {
+}, dl = class extends ul {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
 		this.element[this.name] = e === I ? void 0 : e;
 	}
-}, ul = class extends cl {
+}, fl = class extends ul {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
 		this.element.toggleAttribute(this.name, !!e && e !== I);
 	}
-}, dl = class extends cl {
+}, pl = class extends ul {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = al(this, e, t, 0) ?? I) === $c) return;
+		if ((e = sl(this, e, t, 0) ?? I) === tl) return;
 		let n = this._$AH, r = e === I && n !== I || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== I && (n === I || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, fl = class {
+}, ml = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -7277,18 +7385,18 @@ var ol = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		al(this, e);
+		sl(this, e);
 	}
-}, pl = Mc.litHtmlPolyfillSupport;
-pl?.(il, sl), (Mc.litHtmlVersions ??= []).push("3.3.3");
-var ml = (e, t, n) => {
+}, hl = Mc.litHtmlPolyfillSupport;
+hl?.(ol, ll), (Mc.litHtmlVersions ??= []).push("3.3.3");
+var gl = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new sl(t.insertBefore(Vc(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new ll(t.insertBefore(Vc(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, hl = globalThis, L = class extends jc {
+}, _l = globalThis, L = class extends jc {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -7298,7 +7406,7 @@ var ml = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ml(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = gl(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -7307,25 +7415,25 @@ var ml = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return $c;
+		return tl;
 	}
 };
-L._$litElement$ = !0, L.finalized = !0, hl.litElementHydrateSupport?.({ LitElement: L });
-var gl = hl.litElementPolyfillSupport;
-gl?.({ LitElement: L }), (hl.litElementVersions ??= []).push("4.2.2");
+L._$litElement$ = !0, L.finalized = !0, _l.litElementHydrateSupport?.({ LitElement: L });
+var vl = _l.litElementPolyfillSupport;
+vl?.({ LitElement: L }), (_l.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/custom-element.js
 var R = (e) => (t, n) => {
 	n === void 0 ? customElements.define(e, t) : n.addInitializer(() => {
 		customElements.define(e, t);
 	});
-}, _l = {
+}, yl = {
 	attribute: !0,
 	type: String,
 	converter: Oc,
 	reflect: !1,
 	hasChanged: kc
-}, vl = (e = _l, t, n) => {
+}, bl = (e = yl, t, n) => {
 	let { kind: r, metadata: i } = n, a = globalThis.litPropertyMetadata.get(i);
 	if (a === void 0 && globalThis.litPropertyMetadata.set(i, a = /* @__PURE__ */ new Map()), r === "setter" && ((e = Object.create(e)).wrapped = !0), a.set(n.name, e), r === "accessor") {
 		let { name: r } = n;
@@ -7349,7 +7457,7 @@ var R = (e) => (t, n) => {
 	throw Error("Unsupported decorator location: " + r);
 };
 function z(e) {
-	return (t, n) => typeof n == "object" ? vl(e, t, n) : ((e, t, n) => {
+	return (t, n) => typeof n == "object" ? bl(e, t, n) : ((e, t, n) => {
 		let r = t.hasOwnProperty(n);
 		return t.constructor.createProperty(n, e), r ? Object.getOwnPropertyDescriptor(t, n) : void 0;
 	})(e, t, n);
@@ -7365,10 +7473,10 @@ function B(e) {
 }
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/base.js
-var yl = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
+var xl = (e, t, n) => (n.configurable = !0, n.enumerable = !0, Reflect.decorate && typeof t != "object" && Object.defineProperty(e, t, n), n);
 //#endregion
 //#region node_modules/@lit/reactive-element/decorators/query.js
-function bl(e, t) {
+function Sl(e, t) {
 	return (n, r, i) => {
 		let a = (t) => t.renderRoot?.querySelector(e) ?? null;
 		if (t) {
@@ -7383,29 +7491,29 @@ function bl(e, t) {
 					}
 				};
 			})();
-			return yl(n, r, { get() {
+			return xl(n, r, { get() {
 				let n = e.call(this);
 				return n === void 0 && (n = a(this), (n !== null || this.hasUpdated) && t.call(this, n)), n;
 			} });
 		}
-		return yl(n, r, { get() {
+		return xl(n, r, { get() {
 			return a(this);
 		} });
 	};
 }
 //#endregion
 //#region node_modules/lit-html/directive.js
-var xl = {
+var Cl = {
 	ATTRIBUTE: 1,
 	CHILD: 2,
 	PROPERTY: 3,
 	BOOLEAN_ATTRIBUTE: 4,
 	EVENT: 5,
 	ELEMENT: 6
-}, Sl = (e) => (...t) => ({
+}, wl = (e) => (...t) => ({
 	_$litDirective$: e,
 	values: t
-}), Cl = class {
+}), Tl = class {
 	constructor(e) {}
 	get _$AU() {
 		return this._$AM._$AU;
@@ -7419,9 +7527,9 @@ var xl = {
 	update(e, t) {
 		return this.render(...t);
 	}
-}, wl = "important", Tl = " !" + wl, V = Sl(class extends Cl {
+}, El = "important", Dl = " !" + El, V = wl(class extends Tl {
 	constructor(e) {
-		if (super(e), e.type !== xl.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
+		if (super(e), e.type !== Cl.ATTRIBUTE || e.name !== "style" || e.strings?.length > 2) throw Error("The `styleMap` directive must be used in the `style` attribute and must be the only part in the attribute.");
 	}
 	render(e) {
 		return Object.keys(e).reduce((t, n) => {
@@ -7437,13 +7545,13 @@ var xl = {
 			let r = t[e];
 			if (r != null) {
 				this.ft.add(e);
-				let t = typeof r == "string" && r.endsWith(Tl);
-				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? wl : "") : n[e] = r;
+				let t = typeof r == "string" && r.endsWith(Dl);
+				e.includes("-") || t ? n.setProperty(e, t ? r.slice(0, -11) : r, t ? El : "") : n[e] = r;
 			}
 		}
-		return $c;
+		return tl;
 	}
-}), El = (e, t, n, r, i, a) => {
+}), Ol = (e, t, n, r, i, a) => {
 	let o = e.primitive, s = a?.fields.find((e) => e.key === t);
 	if (s?.shape === "coordinate") {
 		let i = x(e), a = { ...o }, c = Number(Reflect.get(a, t)), l = s.axis === "x", u = (l ? i.x : i.y) - c, [d, f] = gt(l ? r.x : r.y, l ? r.width : r.height, l ? i.width : i.height);
@@ -7454,9 +7562,9 @@ var xl = {
 		let e = et(s.min, i, n), r = et(s.max, i, n);
 		Object.assign(o, { [t]: _(n, e, r) });
 	}
-}, Dl = (e, t, n, r, i) => {
+}, kl = (e, t, n, r, i) => {
 	t === "x" && (e.x = _(n, ...gt(r.x, r.width, e.width))), t === "y" && (e.y = _(n, ...gt(r.y, r.height, e.height))), t === "width" && (e.width = _(n, 1, Qe(i.width))), t === "height" && (e.height = _(n, 1, Qe(i.height)));
-}, Ol = (e, t, n, r, i) => {
+}, Al = (e, t, n, r, i) => {
 	if (t === "x") {
 		let t = e.x_end - e.x_start;
 		e.x_start = _(n, ...gt(r.x, r.width, t + 1)), e.x_end = e.x_start + t;
@@ -7466,10 +7574,10 @@ var xl = {
 		e.y_start = _(n, ...gt(r.y, r.height, t + 1)), e.y_end = e.y_start + t;
 	}
 	t === "width" && (e.x_end = _(e.x_start + Math.max(1, n) - 1, e.x_start + 1, e.x_start + Qe(i.width) - 1)), t === "height" && (e.y_end = _(e.y_start + Math.max(1, n) - 1, e.y_start + 1, e.y_start + Qe(i.height) - 1));
-}, kl = (e, t, n, r, i) => {
+}, jl = (e, t, n, r, i) => {
 	let a = pt(r);
 	if (e.kind === "widget") {
-		t === "padding" && (e.layout.padding = _(n, 0, 128)), Dl(e.frame, t, n, a, r.display);
+		t === "padding" && (e.layout.padding = _(n, 0, 128)), kl(e.frame, t, n, a, r.display);
 		return;
 	}
 	if (e.kind === "container") {
@@ -7477,47 +7585,47 @@ var xl = {
 			width: e.width,
 			height: e.height
 		};
-		Dl(e, t, n, a, r.display), e.grouped && ft(e, e.width / Math.max(1, o.width), e.height / Math.max(1, o.height), i, r.display);
+		kl(e, t, n, a, r.display), e.grouped && ft(e, e.width / Math.max(1, o.width), e.height / Math.max(1, o.height), i, r.display);
 		return;
 	}
 	let o = e.primitive;
-	ue(o) ? Ol(o, t, n, a, r.display) : El(e, t, n, a, r.display, Bo(e, i));
-}, Al = (e, t, n, r, i) => {
+	ue(o) ? Al(o, t, n, a, r.display) : Ol(e, t, n, a, r.display, Bo(e, i));
+}, Ml = (e, t, n, r, i) => {
 	let a = w(e.items, t);
 	if (!a || a.item.locked) return;
 	let { item: o, offset: s } = a;
-	S(o, s.x, s.y), kl(o, n, jl(n, r, s), e, i), S(o, -s.x, -s.y);
-}, jl = (e, t, n) => e === "x" ? t + n.x : e === "y" ? t + n.y : t, Ml = (e) => e.items.forEach((t) => ht(t, e)), Nl = (e, t, n) => {
-	t === "padding" && (e.display.padding = _(n, 0, Math.floor((Math.min(e.display.width, e.display.height) - 1) / 2))), t === "snapSize" && (e.display.snapSize = _(n, 1, 256)), Ml(e);
-}, Pl = (e, t) => {
+	S(o, s.x, s.y), jl(o, n, Nl(n, r, s), e, i), S(o, -s.x, -s.y);
+}, Nl = (e, t, n) => e === "x" ? t + n.x : e === "y" ? t + n.y : t, Pl = (e) => e.items.forEach((t) => ht(t, e)), Fl = (e, t, n) => {
+	t === "padding" && (e.display.padding = _(n, 0, Math.floor((Math.min(e.display.width, e.display.height) - 1) / 2))), t === "snapSize" && (e.display.snapSize = _(n, 1, 256)), Pl(e);
+}, Il = (e, t) => {
 	xo[e.display.palette].includes(t) && (e.display.background = t);
-}, Fl = (e, t, n) => {
+}, Ll = (e, t, n) => {
 	let r = T(e.items, t);
 	r && (r[n] = !r[n]);
-}, Il = (e, t) => {
+}, Rl = (e, t) => {
 	Pt(e, t);
-}, Ll = (e, t, n, r) => {
+}, zl = (e, t, n, r) => {
 	if (r === "inside") {
 		Nt(e, t, n || void 0, S);
 		return;
 	}
 	Rt(e, t, n, r, S);
-}, Rl = (e, t, n) => {
+}, Bl = (e, t, n) => {
 	let r = T(e.items, t), i = n.trim();
 	r && i && (r.name = i.slice(0, 100));
-}, zl = (e, t, n) => {
+}, Vl = (e, t, n) => {
 	let r = T(e.items, t);
 	r?.kind === "widget" && (r.widget.options = {
 		...r.widget.options,
 		...n
 	});
-}, Bl = (e, t, n, r) => {
+}, Hl = (e, t, n, r) => {
 	let i = T(e.items, t);
 	i?.kind === "widget" && (i.widget.sources = {
 		...i.widget.sources,
 		[n]: r
 	});
-}, Vl = (e, t, n, r, i) => {
+}, Ul = (e, t, n, r, i) => {
 	let a = w(e.items, t);
 	if (a?.item.kind !== "primitive" || a.item.locked) return;
 	let o = a.item, s = ["x", "y"].some((e) => o.expressions?.[e]);
@@ -7529,7 +7637,7 @@ var xl = {
 		...o.primitive,
 		[n]: r
 	};
-}, Hl = (e, t, n) => {
+}, Wl = (e, t, n) => {
 	let r = T(e.items, t);
 	if (!(r?.kind !== "primitive" || r.locked) && (r.primitive = {
 		...r.primitive,
@@ -7538,7 +7646,7 @@ var xl = {
 		for (let e of Object.keys(n)) delete r.expressions[e];
 		Object.keys(r.expressions).length === 0 && delete r.expressions;
 	}
-}, Ul = (e, t, n, r) => {
+}, Gl = (e, t, n, r) => {
 	let i = T(e.items, t);
 	if (i?.kind !== "primitive") return;
 	let a = ts(n, Bo(i, r));
@@ -7546,7 +7654,7 @@ var xl = {
 		...i.primitive,
 		...a
 	};
-}, Wl = (e, t, n, r) => {
+}, Kl = (e, t, n, r) => {
 	let i = pt(r), a = Math.min(e.layout.defaultSize?.width ?? 240, i.width), o = Math.min(e.layout.defaultSize?.height ?? 144, i.height);
 	return {
 		id: g(),
@@ -7568,7 +7676,7 @@ var xl = {
 		},
 		layout: { padding: 0 }
 	};
-}, Gl = (e, t, n, r, i) => {
+}, ql = (e, t, n, r, i) => {
 	let { width: a, height: o } = i.display, s = at(e.find((e) => e.type === t.trim()), {
 		x: Math.round(a / 2),
 		y: Math.round(o / 2),
@@ -7585,21 +7693,21 @@ var xl = {
 		primitive: s
 	}, l = x(c);
 	return S(c, Math.round(n - (l.x + l.width / 2)), Math.round(r - (l.y + l.height / 2))), ht(c, i), c;
-}, Kl = (e, t) => {
+}, Jl = (e, t) => {
 	let n = pt(e), r = E(e.items).length * Math.max(e.display.snapSize, 5) * 3 % Math.max(1, Math.min(n.width, n.height) / 3);
 	return {
 		x: mt(n.x + Math.min(24 + r, Math.max(0, n.width - 1)), e, t),
 		y: mt(n.y + Math.min(24 + r, Math.max(0, n.height - 1)), e, t)
 	};
-}, ql = (e, t) => {
+}, Yl = (e, t) => {
 	if (t === "visible") return !e.hidden;
 	if (e.kind === "primitive") return Object.entries(e.primitive).find(([e]) => e === t)?.[1];
-}, Jl = (e, t, n, r) => {
+}, Xl = (e, t, n, r) => {
 	let i = T(e.items, t);
 	if (!i || i.locked) return;
 	let a = { ...i.expressions };
-	r === null ? delete a[n] : a[n] = r ?? kn(ql(i, n)), Object.keys(a).length === 0 ? delete i.expressions : i.expressions = a;
-}, Yl = {
+	r === null ? delete a[n] : a[n] = r ?? kn(Yl(i, n)), Object.keys(a).length === 0 ? delete i.expressions : i.expressions = a;
+}, Zl = {
 	align: {
 		selection: 2,
 		parent: 1
@@ -7608,7 +7716,7 @@ var xl = {
 		selection: 3,
 		parent: 2
 	}
-}, Xl = (e, t) => t === 1 ? "parent" : e, Zl = {
+}, Ql = (e, t) => t === 1 ? "parent" : e, $l = {
 	left: {
 		axis: "x",
 		fraction: 0
@@ -7633,11 +7741,11 @@ var xl = {
 		axis: "y",
 		fraction: 1
 	}
-}, Ql = (e, t) => t === "x" ? e.x : e.y, $l = (e, t) => t === "x" ? e.width : e.height, eu = (e, t) => Ql(e, t) + $l(e, t), tu = (e, t, n) => ({
+}, eu = (e, t) => t === "x" ? e.x : e.y, tu = (e, t) => t === "x" ? e.width : e.height, nu = (e, t) => eu(e, t) + tu(e, t), ru = (e, t, n) => ({
 	id: e,
 	dx: t === "x" ? n : 0,
 	dy: t === "y" ? n : 0
-}), nu = (e, t) => {
+}), iu = (e, t) => {
 	let { parent: n, offset: r } = t;
 	return n ? {
 		x: r.x,
@@ -7645,48 +7753,48 @@ var xl = {
 		width: n.width,
 		height: n.height
 	} : pt(e);
-}, ru = (e, t, n) => {
+}, au = (e, t, n) => {
 	let r = new Set(t);
 	return [...r].flatMap((t) => {
 		let i = w(e.items, t);
-		return !i || i.item.locked || !n.movable(i.item) || iu(e, t, r) ? [] : [{
+		return !i || i.item.locked || !n.movable(i.item) || ou(e, t, r) ? [] : [{
 			id: t,
 			box: At(x(i.item, n.measure(i.item)), i.offset),
-			area: nu(e, i)
+			area: iu(e, i)
 		}];
 	});
-}, iu = (e, t, n) => {
+}, ou = (e, t, n) => {
 	let r = w(e.items, t)?.parent;
 	for (; r;) {
 		if (n.has(r.id)) return !0;
 		r = w(e.items, r.id)?.parent;
 	}
 	return !1;
-}, au = (e) => e.filter((e) => e.dx !== 0 || e.dy !== 0), ou = (e, t, n, r) => {
-	let i = ru(e, t, r), a = Xl(r.target, i.length);
-	if (i.length < Yl.align[a]) return [];
-	let { axis: o, fraction: s } = Zl[n], c = Qt(i.map((e) => e.box));
-	return au(i.map((e) => {
-		let t = a === "parent" ? e.area : c, n = $l(t, o) - $l(e.box, o), r = Ql(t, o) + n * s;
-		return tu(e.id, o, Math.round(r - Ql(e.box, o)));
-	}));
-}, su = (e, t) => {
-	let [n, ...r] = t.map((e) => e.area);
-	return r.every((e) => e.x === n.x && e.y === n.y && e.width === n.width && e.height === n.height) ? n : pt(e);
-}, cu = (e, t, n, r) => {
-	let i = ru(e, t, r);
-	if (i.length < Yl.distribute[r.target]) return [];
-	let a = n === "horizontal" ? "x" : "y", o = [...i].sort((e, t) => Ql(e.box, a) - Ql(t.box, a) || eu(e.box, a) - eu(t.box, a)), s = r.target === "parent" ? su(e, i) : Qt(i.map((e) => e.box)), c = o.reduce((e, t) => e + $l(t.box, a), 0), l = ($l(s, a) - c) / (o.length - 1), u = 0;
-	return au(o.map((e, t) => {
-		let n = Math.round(Ql(s, a) + u + l * t);
-		return u += $l(e.box, a), tu(e.id, a, n - Ql(e.box, a));
+}, su = (e) => e.filter((e) => e.dx !== 0 || e.dy !== 0), cu = (e, t, n, r) => {
+	let i = au(e, t, r), a = Ql(r.target, i.length);
+	if (i.length < Zl.align[a]) return [];
+	let { axis: o, fraction: s } = $l[n], c = Qt(i.map((e) => e.box));
+	return su(i.map((e) => {
+		let t = a === "parent" ? e.area : c, n = tu(t, o) - tu(e.box, o), r = eu(t, o) + n * s;
+		return ru(e.id, o, Math.round(r - eu(e.box, o)));
 	}));
 }, lu = (e, t) => {
+	let [n, ...r] = t.map((e) => e.area);
+	return r.every((e) => e.x === n.x && e.y === n.y && e.width === n.width && e.height === n.height) ? n : pt(e);
+}, uu = (e, t, n, r) => {
+	let i = au(e, t, r);
+	if (i.length < Zl.distribute[r.target]) return [];
+	let a = n === "horizontal" ? "x" : "y", o = [...i].sort((e, t) => eu(e.box, a) - eu(t.box, a) || nu(e.box, a) - nu(t.box, a)), s = r.target === "parent" ? lu(e, i) : Qt(i.map((e) => e.box)), c = o.reduce((e, t) => e + tu(t.box, a), 0), l = (tu(s, a) - c) / (o.length - 1), u = 0;
+	return su(o.map((e, t) => {
+		let n = Math.round(eu(s, a) + u + l * t);
+		return u += tu(e.box, a), ru(e.id, a, n - eu(e.box, a));
+	}));
+}, du = (e, t) => {
 	for (let n of t) {
 		let t = w(e.items, n.id);
 		t && S(t.item, n.dx, n.dy);
 	}
-}, uu = (e) => ({
+}, fu = (e) => ({
 	canUndo: !1,
 	canRedo: !1,
 	item: e,
@@ -7694,13 +7802,13 @@ var xl = {
 	canGroup: e.kind === "container" && !e.grouped,
 	canUngroup: e.kind === "container" && e.grouped,
 	canEnter: e.kind === "container" && e.grouped
-}), du = (e) => e.targets ?? (e.item ? [e.item] : []), fu = (e) => du(e).length > 0, pu = (e) => du(e).filter((e) => !e.locked).length, mu = (e) => {
-	let t = pu(e), n = Xl(e.alignTo ?? "selection", t);
-	return t >= Yl.align[n];
-}, hu = (e) => pu(e) >= Yl.distribute[e.alignTo ?? "selection"], H = (e, t) => {
-	let n = du(e).map((e) => e.id);
+}), pu = (e) => e.targets ?? (e.item ? [e.item] : []), mu = (e) => pu(e).length > 0, hu = (e) => pu(e).filter((e) => !e.locked).length, gu = (e) => {
+	let t = hu(e), n = Ql(e.alignTo ?? "selection", t);
+	return t >= Zl.align[n];
+}, _u = (e) => hu(e) >= Zl.distribute[e.alignTo ?? "selection"], H = (e, t) => {
+	let n = pu(e).map((e) => e.id);
 	n.length > 0 && t(n);
-}, gu = {
+}, vu = {
 	left: {
 		key: "ArrowLeft",
 		icon: "mdi:arrow-left"
@@ -7717,45 +7825,45 @@ var xl = {
 		key: "ArrowDown",
 		icon: "mdi:arrow-down"
 	}
-}, _u = () => Object.keys(gu).flatMap((e) => [!1, !0].map((n) => ({
+}, yu = () => Object.keys(vu).flatMap((e) => [!1, !0].map((n) => ({
 	id: n ? `nudge-${e}-snap` : `nudge-${e}`,
 	group: "arrange",
 	label: () => t.commands.nudge[e],
-	icon: () => gu[e].icon,
+	icon: () => vu[e].icon,
 	shortcuts: [{
-		key: gu[e].key,
+		key: vu[e].key,
 		shift: n
 	}],
-	isEnabled: fu,
+	isEnabled: mu,
 	isRelevant: () => !1,
 	run: (t, r) => H(t, (t) => r.nudge(t, e, n))
-}))), vu = {
+}))), bu = {
 	left: "mdi:align-horizontal-left",
 	center: "mdi:align-horizontal-center",
 	right: "mdi:align-horizontal-right",
 	top: "mdi:align-vertical-top",
 	middle: "mdi:align-vertical-center",
 	bottom: "mdi:align-vertical-bottom"
-}, yu = {
+}, xu = {
 	horizontal: "mdi:arrow-expand-horizontal",
 	vertical: "mdi:arrow-expand-vertical"
-}, bu = () => Object.keys(vu).map((e) => ({
+}, Su = () => Object.keys(bu).map((e) => ({
 	id: `align-${e}`,
 	group: "arrange",
 	label: () => t.commands.align[e],
-	icon: () => vu[e],
+	icon: () => bu[e],
 	shortcuts: [],
-	isEnabled: mu,
+	isEnabled: gu,
 	run: (t, n) => H(t, (t) => n.align(t, e))
-})), xu = () => Object.keys(yu).map((e) => ({
+})), Cu = () => Object.keys(xu).map((e) => ({
 	id: `distribute-${e}`,
 	group: "arrange",
 	label: () => t.commands.distribute[e],
-	icon: () => yu[e],
+	icon: () => xu[e],
 	shortcuts: [],
-	isEnabled: hu,
+	isEnabled: _u,
 	run: (t, n) => H(t, (t) => n.distribute(t, e))
-})), Su = [
+})), wu = [
 	{
 		id: "undo",
 		group: "history",
@@ -7790,7 +7898,7 @@ var xl = {
 		label: () => t.commands.delete,
 		icon: () => "mdi:delete-outline",
 		shortcuts: [{ key: "Delete" }, { key: "Backspace" }],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.requestDelete(e))
 	},
 	{
@@ -7799,7 +7907,7 @@ var xl = {
 		label: ({ item: e }) => e?.hidden ? t.commands.show : t.commands.hide,
 		icon: ({ item: e }) => e?.hidden ? "mdi:eye-off-outline" : "mdi:eye-outline",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.toggleFlag(e, "hidden"))
 	},
 	{
@@ -7808,7 +7916,7 @@ var xl = {
 		label: ({ item: e }) => e?.locked ? t.commands.unlock : t.commands.lock,
 		icon: ({ item: e }) => e?.locked ? "mdi:lock" : "mdi:lock-open-variant-outline",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.toggleFlag(e, "locked"))
 	},
 	{
@@ -7820,7 +7928,7 @@ var xl = {
 			key: "c",
 			mod: !0
 		}],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.copy(e))
 	},
 	{
@@ -7832,7 +7940,7 @@ var xl = {
 			key: "x",
 			mod: !0
 		}],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.cut(e))
 	},
 	{
@@ -7865,7 +7973,7 @@ var xl = {
 			key: "d",
 			mod: !0
 		}],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.duplicate(e))
 	},
 	{
@@ -7885,7 +7993,7 @@ var xl = {
 		label: () => t.commands.bringToFront,
 		icon: () => "mdi:arrange-bring-to-front",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.arrange(e, "front"))
 	},
 	{
@@ -7894,7 +8002,7 @@ var xl = {
 		label: () => t.commands.sendToBack,
 		icon: () => "mdi:arrange-send-to-back",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.arrange(e, "back"))
 	},
 	{
@@ -7903,7 +8011,7 @@ var xl = {
 		label: () => t.commands.moveUp,
 		icon: () => "mdi:arrow-up",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.arrange(e, "up"))
 	},
 	{
@@ -7912,12 +8020,12 @@ var xl = {
 		label: () => t.commands.moveDown,
 		icon: () => "mdi:arrow-down",
 		shortcuts: [],
-		isEnabled: fu,
+		isEnabled: mu,
 		run: (e, t) => H(e, (e) => t.arrange(e, "down"))
 	},
-	...bu(),
-	...xu(),
-	..._u(),
+	...Su(),
+	...Cu(),
+	...yu(),
 	{
 		id: "group",
 		group: "group",
@@ -7975,7 +8083,7 @@ var xl = {
 		label: () => t.commands.deselect,
 		icon: () => "mdi:selection-off",
 		shortcuts: [{ key: "Escape" }],
-		isEnabled: fu,
+		isEnabled: mu,
 		isRelevant: () => !1,
 		run: (e, t) => t.deselect()
 	},
@@ -8054,17 +8162,31 @@ var xl = {
 		isEnabled: () => !0,
 		run: (e, t) => t.showShortcuts()
 	}
-], Cu = (e) => Su.some((t) => t.id === e), wu = (e) => {
-	let t = Su.find((t) => t.id === e);
+], Tu = /* @__PURE__ */ new Set([
+	"undo",
+	"redo",
+	"delete-item",
+	"deselect",
+	"save",
+	"toggle-code",
+	"zoom-in",
+	"zoom-out",
+	"zoom-reset",
+	"show-shortcuts"
+]), Eu = wu.map((e) => Tu.has(e.id) ? e : {
+	...e,
+	isEnabled: (t) => !t.basic && e.isEnabled(t)
+}), Du = (e) => Eu.some((t) => t.id === e), Ou = (e) => {
+	let t = Eu.find((t) => t.id === e);
 	if (!t) throw Error(`Unknown command ${e}`);
 	return t;
-}, Tu = (e, t) => {
+}, ku = (e, t) => {
 	let n = t.ctrlKey || t.metaKey;
-	return t.key.toLowerCase() === e.key.toLowerCase() && n === !!e.mod && (t.shiftKey === !!e.shift || Eu(e)) && !t.altKey;
-}, Eu = (e) => e.key === "?" || e.key === "+", Du = (e, t) => {
-	let n = Su.filter((t) => t.shortcuts.some((t) => Tu(t, e)));
+	return t.key.toLowerCase() === e.key.toLowerCase() && n === !!e.mod && (t.shiftKey === !!e.shift || Au(e)) && !t.altKey;
+}, Au = (e) => e.key === "?" || e.key === "+", ju = (e, t) => {
+	let n = Eu.filter((t) => t.shortcuts.some((t) => ku(t, e)));
 	return t ? n.find((e) => e.isEnabled(t)) : n[0];
-}, Ou = {
+}, Mu = {
 	Delete: "Del",
 	Backspace: "⌫",
 	Escape: "Esc",
@@ -8072,15 +8194,15 @@ var xl = {
 	ArrowRight: "→",
 	ArrowUp: "↑",
 	ArrowDown: "↓"
-}, ku = (e, t) => {
-	let n = Ou[e.key] ?? e.key.toUpperCase();
+}, Nu = (e, t) => {
+	let n = Mu[e.key] ?? e.key.toUpperCase();
 	return t ? `${e.mod ? "⌘" : ""}${e.shift ? "⇧" : ""}${n}` : [
 		e.mod ? "Ctrl" : "",
 		e.shift ? "Shift" : "",
 		n
 	].filter(Boolean).join("+");
-}, Au = (e, t, n = !1) => {
-	let r = e.label(t), [i] = e.shortcuts, a = i ? ku(i, n) : "";
+}, Pu = (e, t, n = !1) => {
+	let r = e.label(t), [i] = e.shortcuts, a = i ? Nu(i, n) : "";
 	return {
 		label: r,
 		icon: e.icon(t),
@@ -8088,7 +8210,7 @@ var xl = {
 		shortcut: a,
 		enabled: e.isEnabled(t)
 	};
-}, ju = [
+}, Fu = [
 	[
 		"copy",
 		"cut",
@@ -8103,7 +8225,7 @@ var xl = {
 		"enter-group",
 		"exit-group"
 	]
-], Mu = [
+], Iu = [
 	[
 		"copy",
 		"cut",
@@ -8119,8 +8241,8 @@ var xl = {
 		"enter-group",
 		"exit-group"
 	]
-], Nu = [["paste", "paste-here"]], Pu = (e, t, n) => e.flatMap((e, r) => e.map((e) => wu(e)).filter((e) => e.isRelevant?.(t) ?? !0).map((e, i) => {
-	let a = Au(e, t, n);
+], Lu = [["paste", "paste-here"]], Ru = (e, t, n) => e.flatMap((e, r) => e.map((e) => Ou(e)).filter((e) => e.isRelevant?.(t) ?? !0).map((e, i) => {
+	let a = Pu(e, t, n);
 	return {
 		id: e.id,
 		label: a.label,
@@ -8130,29 +8252,30 @@ var xl = {
 		danger: e.id === "delete-item",
 		separatorBefore: i === 0 && r > 0
 	};
-})), Fu = [
+})), zu = [
 	0,
 	90,
 	180,
 	270
-], Iu = (e) => Fu.some((t) => t === e), Lu = (e) => e === 90 || e === 270, Ru = (e, t) => Lu(t) ? {
+], Bu = (e, t) => zu[(zu.indexOf(e) + t + zu.length) % zu.length], Vu = (e) => zu.some((t) => t === e), Hu = (e) => e === 90 || e === 270, Uu = (e, t) => Hu(t) ? {
 	width: e.height,
 	height: e.width
 } : {
 	width: e.width,
 	height: e.height
-}, zu = (e, t, n) => Lu(t) === Lu(n) ? e : {
+}, Wu = (e, t, n) => Hu(t) === Hu(n) ? e : {
 	width: e.height,
 	height: e.width
-}, Bu = (e, t) => {
+}, Gu = (e, t) => {
 	let n = Number(e);
-	return Iu(n) ? n : t;
-}, Vu = (e, t = "custom") => {
+	return Vu(n) ? n : t;
+}, Ku = (e, t = "custom") => {
 	let n = Oo(t);
 	return {
 		id: "",
 		schemaVersion: 1,
 		name: "",
+		mode: "advanced",
 		status: "draft",
 		language: e || "en",
 		display: {
@@ -8170,7 +8293,7 @@ var xl = {
 		createdAt: "",
 		updatedAt: ""
 	};
-}, Hu = (e) => ({
+}, qu = (e) => ({
 	name: e.name,
 	width: e.display.width,
 	height: e.display.height,
@@ -8179,50 +8302,50 @@ var xl = {
 	rotation: String(e.display.rotation),
 	padding: e.display.padding,
 	snapSize: e.display.snapSize
-}), Uu = (e, t) => {
+}), Ju = (e, t) => {
 	let n = structuredClone(e);
 	return Object.assign(n.display, t), xo[t.palette].includes(n.display.background) || (n.display.background = "white"), n;
-}, Wu = (e, t) => Uu(e, {
+}, Yu = (e, t) => Ju(e, {
 	profileId: "custom",
 	deviceId: t.id,
-	...Ru(t, e.display.rotation),
+	...Uu(t, e.display.rotation),
 	palette: t.palette
-}), Gu = (e, t, n = t.defaultPalette) => Uu(e, {
+}), Xu = (e, t, n = t.defaultPalette) => Ju(e, {
 	profileId: t.id,
 	deviceId: null,
-	...Ru(t, e.display.rotation),
+	...Uu(t, e.display.rotation),
 	palette: t.palettes.includes(n) ? n : t.defaultPalette
-}), Ku = (e, t) => {
+}), Zu = (e, t) => {
 	let n = {
-		...Hu(e),
+		...qu(e),
 		...t
 	}, r = structuredClone(e);
 	r.name = String(n.name);
 	let i = {
 		width: Math.round(Number(n.width) || 0),
 		height: Math.round(Number(n.height) || 0)
-	}, a = i.width !== e.display.width || i.height !== e.display.height, o = Bu(n.rotation, e.display.rotation), s = a ? i : zu(i, e.display.rotation, o);
+	}, a = i.width !== e.display.width || i.height !== e.display.height, o = Gu(n.rotation, e.display.rotation), s = a ? i : Wu(i, e.display.rotation, o);
 	a && (r.display.profileId = "custom", r.display.deviceId = null), r.display.width = s.width, r.display.height = s.height, r.display.rotation = o, r.display.palette = n.palette in bo ? n.palette : "bw", r.display.padding = Math.round(Number(n.padding) || 0), r.display.snapSize = Math.round(Number(n.snapSize) || 0);
 	let c = xo[r.display.palette];
 	return r.display.background = c.includes(n.background) ? n.background : "white", r;
-}, qu = (e) => {
+}, Qu = (e) => {
 	let { width: t, height: n, padding: r, snapSize: i } = e.display;
 	return !!e.name.trim() && t >= 64 && t <= 4096 && n >= 64 && n <= 4096 && r >= 0 && r * 2 < Math.min(t, n) && i >= 1 && i <= 256;
-}, Ju = (e, t, n, r) => {
+}, $u = (e, t, n, r) => {
 	let i = t.trim().toLocaleLowerCase(r);
 	return e.filter((e) => !i || e.name.toLocaleLowerCase(r).includes(i)).sort((e, t) => n === "name" ? e.name.localeCompare(t.name, r) : t.updatedAt.localeCompare(e.updatedAt) || e.name.localeCompare(t.name, r));
-}, Yu = (e, t, n) => {
+}, ed = (e, t, n) => {
 	let r = new Set(t.map((e) => e.name.toLocaleLowerCase(n))), i = `${e.name} copy`, a = i, o = 2;
 	for (; r.has(a.toLocaleLowerCase(n));) a = `${i} ${o++}`;
 	return a;
-}, Xu = Object.keys(bo).filter(ko), Zu = Do.filter((e) => e.id !== "custom"), Qu = {
+}, td = Object.keys(bo).filter(ko), nd = Do.filter((e) => e.id !== "custom"), rd = {
 	size: !0,
-	palettes: Xu,
+	palettes: td,
 	backgrounds: []
-}, $u = (e) => ({
-	...Qu,
+}, id = (e) => ({
+	...rd,
 	backgrounds: xo[e.display.palette]
-}), ed = (e, t) => ({
+}), ad = (e, t) => ({
 	name: e,
 	label: t,
 	required: !0,
@@ -8232,12 +8355,12 @@ var xl = {
 		max: 4096,
 		unit_of_measurement: "px"
 	} }
-}), td = () => [{
+}), od = () => [{
 	name: "dimensions",
 	type: "grid",
 	flatten: !0,
-	schema: [ed("width", t.fields.width), ed("height", t.fields.height)]
-}], nd = (e) => [{
+	schema: [ad("width", t.fields.width), ad("height", t.fields.height)]
+}], sd = (e) => [{
 	name: "palette",
 	label: t.fields.palette,
 	required: !0,
@@ -8248,7 +8371,7 @@ var xl = {
 			label: bo[e]
 		}))
 	} }
-}], rd = (e) => [{
+}], cd = (e) => [{
 	name: "background",
 	label: t.fields.background,
 	required: !0,
@@ -8259,18 +8382,18 @@ var xl = {
 			label: `${e[0].toUpperCase()}${e.slice(1)}`
 		}))
 	} }
-}], id = () => [{
+}], ld = () => [{
 	name: "rotation",
 	label: t.fields.rotation,
 	required: !0,
 	selector: { select: {
 		mode: "dropdown",
-		options: Fu.map((e) => ({
+		options: zu.map((e) => ({
 			value: String(e),
 			label: t.rotations[e]
 		}))
 	} }
-}], ad = () => [{
+}], ud = () => [{
 	name: "advanced",
 	type: "expandable",
 	flatten: !0,
@@ -8295,97 +8418,224 @@ var xl = {
 			unit_of_measurement: "px"
 		} }
 	}]
-}], od = (e = Qu) => [
-	{
-		name: "name",
-		label: t.fields.name,
-		required: !0,
-		selector: { text: {} }
-	},
-	...e.size ? td() : [],
-	...e.palettes.length > 1 ? nd(e.palettes) : [],
-	...e.backgrounds.length > 0 ? rd(e.backgrounds) : [],
-	...id(),
-	...ad()
-], sd = (e) => "label" in e ? e.label : e.title ?? "", cd = {
+}], dd = () => [{
+	name: "name",
+	label: t.fields.name,
+	required: !0,
+	selector: { text: {} }
+}], fd = (e = rd) => [
+	...dd(),
+	...e.size ? od() : [],
+	...e.palettes.length > 1 ? sd(e.palettes) : [],
+	...e.backgrounds.length > 0 ? cd(e.backgrounds) : [],
+	...ld(),
+	...ud()
+], pd = (e) => "label" in e ? e.label : e.title ?? "", md = {
 	bwr: "#d32f2f",
 	bwry: "#d32f2f",
 	bwy: "#d6a800",
 	spectra6: "#246bfd",
 	seven_color: "#ff8000"
-}, ld = (e) => cd[e] ?? "#202124", ud = (e, t) => {
+}, hd = (e) => md[e] ?? "#202124", gd = (e, t) => {
 	let n = new Date(e.updatedAt);
 	return Number.isNaN(n.getTime()) ? "" : new Intl.DateTimeFormat(t, { dateStyle: "medium" }).format(n);
-}, dd = (e) => e.target.value, fd = (e) => e.composedPath().some((e) => e instanceof HTMLElement && (e.matches("input, textarea, select") || e.isContentEditable)), pd = () => /Mac|iPhone|iPad/.test(navigator.platform), md = (e) => e.shiftKey || e.ctrlKey || e.metaKey, hd = (e, t, n = "application/json") => {
+}, _d = (e) => e.target.value, vd = (e) => e.composedPath().some((e) => e instanceof HTMLElement && (e.matches("input, textarea, select") || e.isContentEditable)), yd = () => /Mac|iPhone|iPad/.test(navigator.platform), bd = (e) => e.shiftKey || e.ctrlKey || e.metaKey, xd = (e, t, n = "application/json") => {
 	let r = URL.createObjectURL(new Blob([t], { type: n })), i = document.createElement("a");
 	i.href = r, i.download = e, i.click(), URL.revokeObjectURL(r);
-}, gd = (e) => new Promise((t) => {
+}, Sd = (e) => new Promise((t) => {
 	let n = document.createElement("input");
 	n.type = "file", n.accept = e, n.addEventListener("change", () => t(n.files?.[0])), n.addEventListener("cancel", () => t(void 0)), n.click();
-}), _d = "dashboard", vd = (e) => `${e.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/ł/g, "l").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || _d}.json`, yd = (e) => Object.fromEntries(e.map((e) => [e.source, e.suggestion])), bd = (e) => {
+}), Cd = "dashboard", wd = (e) => `${e.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/ł/g, "l").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || Cd}.json`, Td = (e) => Object.fromEntries(e.map((e) => [e.source, e.suggestion])), Ed = (e) => {
 	try {
 		return JSON.parse(e);
 	} catch {
 		return;
 	}
-}, xd = (e) => typeof e == "string" && e !== "" ? e : void 0, U = (e, t) => e instanceof Error || typeof e == "object" && e && "message" in e ? xd(e.message) ?? t : xd(e) ?? t, Sd = (e) => {
-	if (typeof e == "object" && e && "code" in e) return xd(e.code);
-}, Cd = (e) => e.callWS({
+}, Dd = (e) => typeof e == "string" && e !== "" ? e : void 0, U = (e, t) => e instanceof Error || typeof e == "object" && e && "message" in e ? Dd(e.message) ?? t : Dd(e) ?? t, Od = (e) => {
+	if (typeof e == "object" && e && "code" in e) return Dd(e.code);
+}, kd = (e) => e.callWS({
 	type: "opendisplay_studio/bootstrap",
 	language: e.language
-}), wd = (e) => e.callWS({
+}), Ad = (e, t, n) => e.callWS({
+	type: "opendisplay_studio/layout_frames",
+	width: t.width,
+	height: t.height,
+	padding: t.padding,
+	layout: n
+}), jd = (e) => e.callWS({
 	type: "opendisplay_studio/reload_widgets",
 	language: e.language
-}), Td = async (e, t) => (await e.callWS({
+}), Md = async (e, t) => (await e.callWS({
 	type: "opendisplay_studio/create_dashboard",
 	dashboard: t
-})).dashboard, Ed = async (e, t) => (await e.callWS({
+})).dashboard, Nd = async (e, t) => (await e.callWS({
 	type: "opendisplay_studio/update_dashboard",
 	dashboard_id: t.id,
 	dashboard: t
-})).dashboard, Dd = async (e, t) => {
+})).dashboard, Pd = async (e, t) => {
 	await e.callWS({
 		type: "opendisplay_studio/delete_dashboard",
 		dashboard_id: t
 	});
-}, Od = (e, t) => e.callWS({
+}, Fd = (e, t) => e.callWS({
 	type: "opendisplay_studio/compose_preview",
 	dashboard: structuredClone(t)
-}), kd = async (e) => (await e.callWS({ type: "opendisplay_studio/list_devices" })).devices, Ad = async (e, t) => {
+}), Id = async (e) => (await e.callWS({ type: "opendisplay_studio/list_devices" })).devices, Ld = async (e, t) => {
 	await e.callWS({
 		type: "opendisplay_studio/send_to_device",
 		dashboard: structuredClone(t)
 	});
-}, jd = async (e, t) => (await e.callWS({
+}, Rd = async (e, t) => (await e.callWS({
 	type: "opendisplay_studio/export_dashboard",
 	dashboard: structuredClone(t)
-})).file, Md = (e, t, n, r = {}) => e.callWS({
+})).file, zd = (e, t, n, r = {}) => e.callWS({
 	type: "opendisplay_studio/prepare_import",
 	file: t,
 	display: n,
 	colorMap: r
-}), Nd, Pd = (e) => (Nd ??= e.callWS({ type: "opendisplay_studio/list_icons" }).then((e) => ({
+}), Bd, Vd = (e) => (Bd ??= e.callWS({ type: "opendisplay_studio/list_icons" }).then((e) => ({
 	names: e.icons,
 	glyphs: Object.fromEntries(Object.entries(e.glyphs).map(([e, t]) => [e, String.fromCodePoint(t)]))
-})), Nd), Fd = async (e) => (await e.callWS({ type: "opendisplay_studio/list_fonts" })).fonts, Id = async (e, t, n) => (await e.callWS({
+})), Bd), Hd = async (e) => (await e.callWS({ type: "opendisplay_studio/list_fonts" })).fonts, Ud = async (e, t, n) => (await e.callWS({
 	type: "opendisplay_studio/install_font",
 	filename: t,
 	data: n
-})).fonts, Ld = async (e, t, n) => (await e.callWS({
+})).fonts, Wd = async (e, t, n) => (await e.callWS({
 	type: "opendisplay_studio/delete_font",
 	name: t,
 	force: n
-})).fonts, Rd, zd = (e) => (Rd ??= Fd(e).catch((e) => {
-	throw Rd = void 0, e;
-}), Rd), Bd = (e) => {
-	Rd = Promise.resolve(e);
-}, Vd = (e) => [e.family, e.style].filter((e) => e !== "" && e !== "Regular").join(" "), Hd = (e, t) => e.find((e) => e.name === t), W = (e, t, ...n) => {
+})).fonts, Gd, Kd = (e) => (Gd ??= Hd(e).catch((e) => {
+	throw Gd = void 0, e;
+}), Gd), qd = (e) => {
+	Gd = Promise.resolve(e);
+}, Jd = (e) => [e.family, e.style].filter((e) => e !== "" && e !== "Regular").join(" "), Yd = (e, t) => e.find((e) => e.name === t), W = (e, t, ...n) => {
 	e.dispatchEvent(new CustomEvent(t, {
 		detail: n[0],
 		bubbles: !0,
 		composed: !0
 	}));
-}, Ud = 100, Wd = class {
+}, Xd = 26, Zd = (e) => {
+	let t = String.fromCharCode(65 + e % Xd);
+	return e < Xd ? t : Zd(Math.floor(e / Xd) - 1) + t;
+}, Qd = "region-", $d = (e) => {
+	let t = 1;
+	for (; e.has(`${Qd}${t}`);) t += 1;
+	let n = `${Qd}${t}`;
+	return e.add(n), n;
+}, ef = (e) => e.rowSpan > 1 || e.columnSpan > 1, tf = (e, t) => e.row - t.row || e.column - t.column, nf = (e) => {
+	let t = [];
+	for (let n = e.row; n < e.row + e.rowSpan; n += 1) for (let r = e.column; r < e.column + e.columnSpan; r += 1) t.push({
+		row: n,
+		column: r
+	});
+	return t;
+}, rf = (e, t) => e.regions.find((e) => nf(e).some((e) => e.row === t.row && e.column === t.column)), af = (e, t) => ({
+	row: Math.min(e.row, t.row),
+	column: Math.min(e.column, t.column),
+	rowSpan: Math.abs(e.row - t.row) + 1,
+	columnSpan: Math.abs(e.column - t.column) + 1
+}), of = (e) => {
+	let t = [...e.regions], n = new Set(t.map((e) => e.id));
+	for (let r = 0; r < e.rows; r += 1) for (let i = 0; i < e.columns; i += 1) rf({
+		...e,
+		regions: t
+	}, {
+		row: r,
+		column: i
+	}) || t.push({
+		id: $d(n),
+		row: r,
+		column: i,
+		rowSpan: 1,
+		columnSpan: 1
+	});
+	return sf(t);
+}, sf = (e) => [...e.filter(ef), ...e.filter((e) => !ef(e)).sort(tf)], cf = (e, t, n) => ({
+	columns: e,
+	rows: t,
+	gap: n,
+	regions: of({
+		columns: e,
+		rows: t,
+		gap: n,
+		regions: []
+	})
+}), lf = (e, t) => e.row >= t.row && e.column >= t.column && e.row + e.rowSpan <= t.row + t.rowSpan && e.column + e.columnSpan <= t.column + t.columnSpan, uf = (e, t) => e.row < t.row + t.rowSpan && e.row + e.rowSpan > t.row && e.column < t.column + t.columnSpan && e.column + e.columnSpan > t.column, df = (e, t) => e.regions.filter((e) => uf(e, t)).sort(tf), ff = (e, t) => {
+	let n = df(e, t);
+	return n.length > 1 && n.every((e) => lf(e, t));
+}, pf = (e, t, n) => {
+	let r = df(e, t), i = r.find((e) => n.has(e.id)) ?? r[0], a = r.filter((e) => e.id !== i.id), o = e.regions.filter((e) => !r.includes(e)).concat({
+		id: i.id,
+		...t
+	});
+	return {
+		layout: {
+			...e,
+			regions: sf(o)
+		},
+		removedRegionIds: a.map((e) => e.id)
+	};
+}, mf = (e, t) => {
+	let n = e.regions.find((e) => e.id === t);
+	if (!n) return e;
+	let r = e.regions.filter((e) => e !== n), i = {
+		id: n.id,
+		row: n.row,
+		column: n.column,
+		rowSpan: 1,
+		columnSpan: 1
+	}, a = of({
+		...e,
+		regions: [...r, i]
+	});
+	return {
+		...e,
+		regions: a
+	};
+}, hf = (e, t, n) => {
+	let r = {
+		row: 0,
+		column: 0,
+		rowSpan: n,
+		columnSpan: t
+	}, i = e.regions.filter((e) => lf(e, r)), a = e.regions.filter((e) => !i.includes(e)), o = {
+		...e,
+		columns: t,
+		rows: n,
+		regions: i
+	};
+	return {
+		layout: {
+			...o,
+			regions: of(o)
+		},
+		removedRegionIds: a.map((e) => e.id)
+	};
+}, gf = (e, t) => e.regions.find((e) => t.x >= e.x && t.x < e.x + e.width && t.y >= e.y && t.y < e.y + e.height)?.id, _f = (e, t, n) => {
+	let r = structuredClone(e);
+	return r.mode = t, t === "basic" ? r.layout = cf(2, 2, n) : delete r.layout, r;
+}, vf = (e) => e.items.filter((e) => e.kind === "widget"), yf = (e, t) => vf(e).find((e) => e.region === t), bf = (e) => new Set(vf(e).flatMap((e) => e.region ?? [])), xf = (e, t, n) => {
+	let r = bf(e), i = t.regions.filter((e) => !r.has(e.id));
+	return i.find((e) => e.id === n) ?? i[0];
+}, Sf = (e, t, n, r) => {
+	let i = Kl(t, 0, 0, e);
+	return i.region = n.id, i.frame = { ...r }, e.items.push(i), i;
+}, Cf = (e, t) => e.filter((e) => e.kind !== "widget" || !t.includes(e.region ?? "")), wf = (e, t) => {
+	e.layout = t.layout, e.items = Cf(e.items, t.removedRegionIds);
+}, Tf = (e, t) => {
+	if (!e.layout) return;
+	let n = bf(e);
+	wf(e, pf(e.layout, t, n));
+}, Ef = (e, t) => {
+	e.layout &&= mf(e.layout, t);
+}, Df = (e, t) => {
+	e.layout && wf(e, hf(e.layout, t.columns, t.rows));
+}, Of = (e, t) => {
+	e.layout &&= {
+		...e.layout,
+		gap: t
+	};
+}, kf = 100, Af = class {
 	constructor() {
 		this.undoStack = [], this.redoStack = [];
 	}
@@ -8396,7 +8646,7 @@ var xl = {
 		return this.redoStack.length;
 	}
 	record(e) {
-		this.undoStack.push(structuredClone(e)), this.undoStack.length > Ud && this.undoStack.shift(), this.redoStack = [];
+		this.undoStack.push(structuredClone(e)), this.undoStack.length > kf && this.undoStack.shift(), this.redoStack = [];
 	}
 	undo(e) {
 		let t = this.undoStack.pop();
@@ -8409,7 +8659,7 @@ var xl = {
 	clear() {
 		this.undoStack = [], this.redoStack = [];
 	}
-}, Gd = (e, t) => {
+}, jf = (e, t) => {
 	let n = w(e.items, t);
 	if (!n) return;
 	let { parent: r } = n;
@@ -8419,8 +8669,8 @@ var xl = {
 		width: r.width,
 		height: r.height
 	} : pt(e);
-}, Kd = (e, t, n, r) => {
-	let i = w(e.items, t), a = Gd(e, t);
+}, Mf = (e, t, n, r) => {
+	let i = w(e.items, t), a = jf(e, t);
 	if (!i || !a || i.item.locked) return;
 	let o = x(i.item, r), s = ce(n, "lt"), c = a.x + (a.width - o.width) * s.x, l = a.y + (a.height - o.height) * s.y;
 	S(i.item, Math.round(c - o.x), Math.round(l - o.y));
@@ -8495,17 +8745,20 @@ var xl = {
   ha-dialog {
     --dialog-content-padding: 0;
   }
-`, qd = P`
+`, Nf = P`
   .dashboard-card,
   .dashboard-add-card {
     min-width: 0;
-    min-height: 236px;
     padding: 0;
     border: 1px solid var(--studio-border);
     border-radius: 13px;
     text-align: start;
     background: var(--studio-surface);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  /* A card is as tall as its picture and its two lines; the add card matches it. */
+  .dashboard-add-card {
+    min-height: 200px;
   }
   .dashboard-card:hover,
   .dashboard-card:focus-within,
@@ -8520,7 +8773,7 @@ var xl = {
     outline: 0;
     transform: translateY(-1px);
   }
-`, Jd = P`
+`, Pf = P`
   .box {
     display: flex;
     align-items: center;
@@ -8614,9 +8867,9 @@ var xl = {
     background: var(--primary-color);
     color: var(--text-primary-color, #fff);
   }
-`, Yd = Sl(class extends Cl {
+`, Ff = wl(class extends Tl {
 	constructor(e) {
-		if (super(e), e.type !== xl.ATTRIBUTE || e.name !== "class" || e.strings?.length > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
+		if (super(e), e.type !== Cl.ATTRIBUTE || e.name !== "class" || e.strings?.length > 2) throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.");
 	}
 	render(e) {
 		return " " + Object.keys(e).filter((t) => e[t]).join(" ") + " ";
@@ -8633,18 +8886,18 @@ var xl = {
 			let r = !!t[e];
 			r === this.st.has(e) || this.nt?.has(e) || (r ? (n.add(e), this.st.add(e)) : (n.remove(e), this.st.delete(e)));
 		}
-		return $c;
+		return tl;
 	}
-}), Xd = 2, q = (e, t) => t === "x" ? e.x : e.y, J = (e, t) => t === "x" ? e.width : e.height, Zd = (e, t) => {
+}), If = 2, q = (e, t) => t === "x" ? e.x : e.y, J = (e, t) => t === "x" ? e.width : e.height, Lf = (e, t) => {
 	let n = q(e, t), r = J(e, t);
 	return [
 		n,
 		n + r / 2,
 		n + r
 	];
-}, Qd = (e, t, n) => {
+}, Rf = (e, t, n) => {
 	let r = [], i = (t, i, a) => {
-		for (let o of Zd(t, n)) Zd(e, n).forEach((e, t) => {
+		for (let o of Lf(t, n)) Lf(e, n).forEach((e, t) => {
 			let n = Math.abs(o - e);
 			n <= i && r.push({
 				offset: Math.round(o - e),
@@ -8655,9 +8908,9 @@ var xl = {
 			});
 		});
 	};
-	return t.siblings.forEach((e) => i(e, 5, "sibling")), i(t.parent, 8, "parent"), r.push(...ef(e, t.siblings, n)), r.sort(nf)[0];
-}, $d = (e, t, n) => q(e, n) < q(t, n) + J(t, n) && q(t, n) < q(e, n) + J(e, n), ef = (e, t, n) => {
-	let r = n === "x" ? "y" : "x", i = t.filter((t) => $d(t, e, r)), a = [];
+	return t.siblings.forEach((e) => i(e, 5, "sibling")), i(t.parent, 8, "parent"), r.push(...Bf(e, t.siblings, n)), r.sort(Hf)[0];
+}, zf = (e, t, n) => q(e, n) < q(t, n) + J(t, n) && q(t, n) < q(e, n) + J(e, n), Bf = (e, t, n) => {
+	let r = n === "x" ? "y" : "x", i = t.filter((t) => zf(t, e, r)), a = [];
 	for (let t of i) for (let r of i) {
 		let i = q(r, n) - (q(t, n) + J(t, n)) - J(e, n);
 		if (i < 0) continue;
@@ -8669,22 +8922,22 @@ var xl = {
 		});
 	}
 	return a;
-}, tf = (e) => e.distance - (e.source === "parent" ? Xd : 0), nf = (e, t) => tf(e) - tf(t) || Number(t.source === "parent") - Number(e.source === "parent"), rf = (e, t, n) => ({
-	dx: af(e, t, "x", n),
-	dy: af(e, t, "y", n)
-}), af = (e, t, n, r) => {
-	let i = Qd(e, t, n), a = r?.[n];
+}, Vf = (e) => e.distance - (e.source === "parent" ? If : 0), Hf = (e, t) => Vf(e) - Vf(t) || Number(t.source === "parent") - Number(e.source === "parent"), Uf = (e, t, n) => ({
+	dx: Wf(e, t, "x", n),
+	dy: Wf(e, t, "y", n)
+}), Wf = (e, t, n, r) => {
+	let i = Rf(e, t, n), a = r?.[n];
 	if (a) {
-		let t = Zd(e, n)[a.own], r = Math.abs(a.line - t);
+		let t = Lf(e, n)[a.own], r = Math.abs(a.line - t);
 		if (r <= 12 && (!i || i.distance >= r)) return Math.round(a.line - t);
 	}
 	return r && (i?.source === "parent" && i.own !== void 0 && i.line !== void 0 ? r[n] = {
 		own: i.own,
 		line: i.line
 	} : delete r[n]), i?.offset ?? 0;
-}, of = (e, t, n) => {
+}, Gf = (e, t, n) => {
 	let r = [], i = (t, i, a) => {
-		for (let o of Zd(t, n)) {
+		for (let o of Lf(t, n)) {
 			let t = Math.abs(o - e);
 			t <= i && r.push({
 				offset: Math.round(o - e),
@@ -8694,25 +8947,25 @@ var xl = {
 		}
 	};
 	return t.siblings.forEach((e) => i(e, 5, "sibling")), i(t.parent, 8, "parent"), r;
-}, sf = (e, t, n) => {
+}, Kf = (e, t, n) => {
 	let [r, i] = n === "x" ? ["w", "e"] : ["n", "s"];
 	if (t.includes(r)) return q(e, n);
 	if (t.includes(i)) return q(e, n) + J(e, n);
-}, cf = (e, t, n) => {
+}, qf = (e, t, n) => {
 	let r = (r) => {
-		let i = sf(e, t, r);
-		return i === void 0 ? 0 : of(i, n, r).sort(nf)[0]?.offset ?? 0;
+		let i = Kf(e, t, r);
+		return i === void 0 ? 0 : Gf(i, n, r).sort(Hf)[0]?.offset ?? 0;
 	};
 	return {
 		dx: r("x"),
 		dy: r("y")
 	};
-}, lf = .5, uf = (e, t) => {
+}, Jf = .5, Yf = (e, t) => {
 	let n = [], r = [...t.siblings, t.parent];
 	for (let t of ["x", "y"]) {
 		let i = t === "x" ? "y" : "x";
-		for (let a of Zd(e, t)) {
-			let o = r.filter((e) => Zd(e, t).some((e) => Math.abs(e - a) <= lf));
+		for (let a of Lf(e, t)) {
+			let o = r.filter((e) => Lf(e, t).some((e) => Math.abs(e - a) <= Jf));
 			if (o.length === 0) continue;
 			let s = [e, ...o].map((e) => [q(e, i), q(e, i) + J(e, i)]);
 			n.push({
@@ -8723,17 +8976,17 @@ var xl = {
 			});
 		}
 	}
-	return pf(n);
-}, df = (e, t, n) => {
-	let r = n === "x" ? "y" : "x", i = t.filter((t) => $d(t, e, r)), a = (e) => q(e, n) + J(e, n);
+	return Qf(n);
+}, Xf = (e, t, n) => {
+	let r = n === "x" ? "y" : "x", i = t.filter((t) => zf(t, e, r)), a = (e) => q(e, n) + J(e, n);
 	return {
 		before: i.filter((t) => a(t) <= q(e, n)).sort((e, t) => a(t) - a(e))[0],
 		after: i.filter((t) => q(t, n) >= q(e, n) + J(e, n)).sort((e, t) => q(e, n) - q(t, n))[0]
 	};
-}, ff = (e, t) => {
+}, Zf = (e, t) => {
 	let n = [];
 	for (let r of ["x", "y"]) {
-		let { before: i, after: a } = df(e, t, r);
+		let { before: i, after: a } = Xf(e, t, r);
 		if (!i || !a) continue;
 		let o = q(i, r) + J(i, r), s = q(a, r), c = q(e, r) - o, l = s - (q(e, r) + J(e, r));
 		if (Math.abs(c - l) > 3) continue;
@@ -8751,19 +9004,19 @@ var xl = {
 		});
 	}
 	return n;
-}, pf = (e) => e.filter((t, n) => e.findIndex((e) => e.axis === t.axis && Math.abs(e.position - t.position) <= lf) === n), mf = (e, t, n) => n?.absolute ? {
+}, Qf = (e) => e.filter((t, n) => e.findIndex((e) => e.axis === t.axis && Math.abs(e.position - t.position) <= Jf) === n), $f = (e, t, n) => n?.absolute ? {
 	x: n.x,
 	y: n.y,
 	width: n.width,
 	height: n.height
-} : At(x(e, n), t), hf = (e, t, n) => t.flatMap((t) => {
+} : At(x(e, n), t), ep = (e, t, n) => t.flatMap((t) => {
 	let r = w(e.items, t);
 	return r ? [{
 		original: structuredClone(r.item),
 		offset: r.offset,
 		measured: n(r.item)
 	}] : [];
-}), gf = (e) => Qt(e.map((e) => At(x(e.original, e.measured), e.offset))), _f = (e, t, n, r) => At(x(t, n && e.kind === "primitive" && t.kind === "primitive" ? je(e.primitive, t.primitive, n) : n), r), vf = (e, t, n, r, i, a, o) => {
+}), tp = (e) => Qt(e.map((e) => At(x(e.original, e.measured), e.offset))), np = (e, t, n, r) => At(x(t, n && e.kind === "primitive" && t.kind === "primitive" ? je(e.primitive, t.primitive, n) : n), r), rp = (e, t, n, r, i, a, o) => {
 	let s = a.offset ?? {
 		x: 0,
 		y: 0
@@ -8774,36 +9027,36 @@ var xl = {
 	}, r, o, i, {
 		...a,
 		snapEnabled: s
-	}), l = (t) => _f(e, t, a.measured, s), u = c(r.dx, r.dy, a.snapEnabled);
+	}), l = (t) => np(e, t, a.measured, s), u = c(r.dx, r.dy, a.snapEnabled);
 	if (!o || !a.snapEnabled) return {
 		item: u,
 		guides: []
 	};
-	let d = l(u), f = cf(d, t, o);
+	let d = l(u), f = qf(d, t, o);
 	if (f.dx === 0 && f.dy === 0) return {
 		item: u,
-		guides: uf(d, o)
+		guides: Yf(d, o)
 	};
-	let p = l(e), m = (e) => (sf(d, t, e) ?? 0) - (sf(p, t, e) ?? 0), h = c(m("x") + f.dx, m("y") + f.dy, !1);
+	let p = l(e), m = (e) => (Kf(d, t, e) ?? 0) - (Kf(p, t, e) ?? 0), h = c(m("x") + f.dx, m("y") + f.dy, !1);
 	return {
 		item: h,
-		guides: uf(l(h), o)
+		guides: Yf(l(h), o)
 	};
-}, yf = (e, t, n, r) => {
+}, ip = (e, t, n, r) => {
 	let i = w(e.items, n);
 	if (!i) return;
 	let a = i.parent?.id, o = zt(e.items).filter((e) => e.parent?.id === a).filter((e) => !e.item.hidden).filter((e) => !t.includes(e.item.id)).flatMap((e) => {
 		let t = C(e.item) ? Bt(e) : At(x(e.item, r(e.item)), e.offset);
 		return t ? [t] : [];
-	}), s = i.parent ? bf(e, i.parent.id) : pt(e);
+	}), s = i.parent ? ap(e, i.parent.id) : pt(e);
 	return s ? {
 		siblings: o,
 		parent: s
 	} : void 0;
-}, bf = (e, t) => {
+}, ap = (e, t) => {
 	let n = w(e.items, t);
 	return n && C(n.item) ? At(x(n.item), n.offset) : void 0;
-}, xf = (e, t, n, r, i, a, o, s) => {
+}, op = (e, t, n, r, i, a, o, s) => {
 	let c = e.find((e) => e.original.id === t);
 	if (!c) return [];
 	let l = St(c.original, { mode: "move" }, n, r, i, {
@@ -8812,7 +9065,7 @@ var xl = {
 		measured: c.measured
 	}), u = x(c.original, c.measured), d = x(l, c.measured), f = d.x - u.x, p = d.y - u.y;
 	if (o && a && !c.original.locked) {
-		let t = gf(e), i = rf({
+		let t = tp(e), i = Uf({
 			...t,
 			x: t.x + n,
 			y: t.y + r
@@ -8824,36 +9077,36 @@ var xl = {
 		let n = structuredClone(e.original);
 		return n.locked || S(n, f, p), n;
 	});
-}, Sf = (e, t, n) => {
+}, sp = (e, t, n) => {
 	let r = e.flatMap((e) => {
 		let n = t.find((t) => t.id === e.original.id);
 		return n ? [At(x(n, e.measured), e.offset)] : [];
 	});
-	return r.length > 0 ? uf(Qt(r), n) : [];
-}, Cf = (e, t, n) => {
+	return r.length > 0 ? Yf(Qt(r), n) : [];
+}, cp = (e, t, n) => {
 	let r = e.flatMap((e) => {
 		let n = t.find((t) => t.id === e.original.id);
 		return n ? [At(x(n, e.measured), e.offset)] : [];
 	});
-	return r.length > 0 ? ff(Qt(r), n.siblings) : [];
-}, wf = (e, t, n) => {
+	return r.length > 0 ? Zf(Qt(r), n.siblings) : [];
+}, lp = (e, t, n) => {
 	let r = w(e.items, t);
-	if (r) return mf(r.item, r.offset, n(r.item));
-}, Tf = (e, t, n) => {
-	let r = t.flatMap((t) => wf(e, t, n) ?? []);
+	if (r) return $f(r.item, r.offset, n(r.item));
+}, up = (e, t, n) => {
+	let r = t.flatMap((t) => lp(e, t, n) ?? []);
 	return r.length > 0 ? Qt(r) : void 0;
-}, Ef = (e, t, n, r) => {
+}, dp = (e, t, n, r) => {
 	let i = n ? w(e.items, n)?.item : void 0, a = i && C(i) ? i.id : void 0;
 	return zt(e.items).filter((e) => (e.parent?.id ?? void 0) === a).filter((e) => !e.item.hidden).filter((e) => {
-		let n = C(e.item) ? Bt(e) : mf(e.item, e.offset, r(e.item));
+		let n = C(e.item) ? Bt(e) : $f(e.item, e.offset, r(e.item));
 		return n !== void 0 && Mt(n, t);
 	}).map((e) => e.item.id);
-}, Df = (e, t) => ({
+}, fp = (e, t) => ({
 	x: Math.min(e.x, t.x),
 	y: Math.min(e.y, t.y),
 	width: Math.abs(t.x - e.x),
 	height: Math.abs(t.y - e.y)
-}), Of = (e) => {
+}), pp = (e) => {
 	let { origin: t, threshold: n = 0, target: r = window, onActivate: i, onMove: a, onEnd: o, onCancel: s } = e, c = !1, l = () => {
 		r.removeEventListener("pointermove", u), r.removeEventListener("pointerup", d), r.removeEventListener("pointercancel", f);
 	}, u = (e) => {
@@ -8868,18 +9121,18 @@ var xl = {
 		l(), s?.();
 	};
 	return r.addEventListener("pointermove", u), r.addEventListener("pointerup", d), r.addEventListener("pointercancel", f), l;
-}, kf = (e) => Array.isArray(e) && e.length === 2 && e.every((e) => typeof e == "number"), Af = (e) => Array.isArray(e) ? e.filter(kf).map(([e, t]) => [e, t]) : [], jf = (e) => e.length < 256, Mf = (e) => e.length > 3, Nf = (e) => {
-	if (!jf(e) || e.length === 0) return e;
+}, mp = (e) => Array.isArray(e) && e.length === 2 && e.every((e) => typeof e == "number"), hp = (e) => Array.isArray(e) ? e.filter(mp).map(([e, t]) => [e, t]) : [], gp = (e) => e.length < 256, _p = (e) => e.length > 3, vp = (e) => {
+	if (!gp(e) || e.length === 0) return e;
 	let [t, n] = e[e.length - 1], [r, i] = e[0];
 	return [...e, [Math.round((t + r) / 2), Math.round((n + i) / 2)]];
-}, Pf = (e, t) => Mf(e) ? e.filter((e, n) => n !== t) : e, Ff = (e, t, n, r) => e.map((e, i) => i === t ? n === 0 ? [r, e[1]] : [e[0], r] : e), If = (e, t, n) => e.map((e, r) => r === t ? n : e), Lf = (e, t, n) => jf(e) ? [
+}, yp = (e, t) => _p(e) ? e.filter((e, n) => n !== t) : e, bp = (e, t, n, r) => e.map((e, i) => i === t ? n === 0 ? [r, e[1]] : [e[0], r] : e), xp = (e, t, n) => e.map((e, r) => r === t ? n : e), Sp = (e, t, n) => gp(e) ? [
 	...e.slice(0, t + 1),
 	n,
 	...e.slice(t + 1)
-] : e, Rf = (e, t) => [Math.round((e[0] + t[0]) / 2), Math.round((e[1] + t[1]) / 2)], zf = (e) => {
-	if (e.type === "polygon") return Af(e.points);
+] : e, Cp = (e, t) => [Math.round((e[0] + t[0]) / 2), Math.round((e[1] + t[1]) / 2)], wp = (e) => {
+	if (e.type === "polygon") return hp(e.points);
 	if (e.type === "line") return [[e.x_start, e.y_start], [e.x_end, e.y_end]];
-}, Bf = (e, t) => {
+}, Tp = (e, t) => {
 	if (e.type === "polygon") return {
 		...e,
 		points: t
@@ -8905,13 +9158,303 @@ function Y(e, t, n, r) {
 	return i > 3 && a && Object.defineProperty(t, n, a), a;
 }
 //#endregion
+//#region src/ods-region-layer.ts
+var Ep = (e) => ({
+	left: `${e.x}px`,
+	top: `${e.y}px`,
+	width: `${e.width}px`,
+	height: `${e.height}px`
+}), Dp = class extends L {
+	constructor(...e) {
+		super(...e), this.step = "layout", this.selectedRegionId = "", this.onKeyDown = (e) => {
+			e.key === "Escape" && this.corner && this.stopJoining();
+		};
+	}
+	static {
+		this.styles = [G, P`
+      :host {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      button {
+        position: absolute;
+        box-sizing: border-box;
+        padding: 0;
+        pointer-events: auto;
+        cursor: pointer;
+        background: transparent;
+        color: var(--studio-text);
+      }
+      .cell {
+        border: calc(1px * var(--ui, 1)) dashed var(--studio-accent);
+      }
+      .cell.joined {
+        border-color: transparent;
+      }
+      .cell:hover,
+      .cell.in-rectangle {
+        background: var(--studio-accent-soft);
+      }
+      .cell.corner {
+        background: var(--studio-accent-soft);
+        border-style: solid;
+      }
+      .cell.in-rectangle.invalid {
+        background: color-mix(
+          in srgb,
+          var(--error-color, #db4437) 18%,
+          transparent
+        );
+        border-color: var(--error-color, #db4437);
+      }
+      .outline {
+        position: absolute;
+        box-sizing: border-box;
+        border: calc(2px * var(--ui, 1)) solid var(--studio-accent);
+        pointer-events: none;
+      }
+      .outline {
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: calc(2px * var(--ui, 1));
+        color: var(--studio-text);
+      }
+      .letter {
+        font-size: calc(26px * var(--ui, 1));
+        font-weight: 700;
+      }
+      .size {
+        color: var(--studio-muted);
+        font: calc(10px * var(--ui, 1)) var(--code-font-family, monospace);
+      }
+      .outline.selected {
+        background: var(--studio-accent-soft);
+        box-shadow: 0 0 0 calc(2px * var(--ui, 1)) var(--studio-accent);
+      }
+      /* A region with a widget draws nothing of its own, so the picture is what will be
+         rendered; only an empty region is marked, and the selected one is outlined. */
+      .slot {
+        border: 0;
+      }
+      .slot:hover {
+        box-shadow: inset 0 0 0 calc(1px * var(--ui, 1)) var(--studio-accent);
+      }
+      .slot.empty {
+        border: calc(1px * var(--ui, 1)) dashed var(--studio-accent);
+        background: color-mix(in srgb, var(--studio-surface) 70%, transparent);
+      }
+      .slot.empty:hover {
+        background: var(--studio-accent-soft);
+        box-shadow: none;
+      }
+      .slot.selected {
+        border: calc(2px * var(--ui, 1)) solid var(--studio-accent);
+        box-shadow: none;
+      }
+      .slot.empty.selected {
+        background: var(--studio-accent-soft);
+      }
+      .slot-label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        max-width: 100%;
+        padding: calc(2px * var(--ui, 1)) calc(6px * var(--ui, 1));
+        overflow: hidden;
+        background: var(--studio-accent);
+        color: var(--studio-on-accent, #fff);
+        font-size: calc(11px * var(--ui, 1));
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .slot-empty {
+        display: grid;
+        gap: calc(4px * var(--ui, 1));
+        place-items: center;
+        font-size: calc(12px * var(--ui, 1));
+      }
+      .slot-empty ha-icon {
+        --mdc-icon-size: calc(28px * var(--ui, 1));
+        color: var(--studio-accent);
+      }
+      .status {
+        position: absolute;
+        bottom: calc(8px * var(--ui, 1));
+        left: 50%;
+        padding: calc(4px * var(--ui, 1)) calc(10px * var(--ui, 1));
+        border-radius: 999px;
+        background: var(--studio-text);
+        color: var(--studio-surface);
+        font-size: calc(12px * var(--ui, 1));
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
+    `];
+	}
+	connectedCallback() {
+		super.connectedCallback(), window.addEventListener("keydown", this.onKeyDown);
+	}
+	disconnectedCallback() {
+		super.disconnectedCallback(), window.removeEventListener("keydown", this.onKeyDown);
+	}
+	willUpdate(e) {
+		e.has("step") && this.stopJoining();
+	}
+	get layout() {
+		return this.dashboard.layout;
+	}
+	hoverCell(e) {
+		this.hover = e;
+	}
+	stopJoining() {
+		this.corner = void 0, this.hover = void 0;
+	}
+	cellAt(e, t) {
+		return {
+			row: Math.floor(e / t.columns),
+			column: e % t.columns
+		};
+	}
+	isCorner(e) {
+		return this.corner?.row === e.row && this.corner.column === e.column;
+	}
+	get joining() {
+		if (!(!this.corner || !this.hover)) return af(this.corner, this.hover);
+	}
+	isInJoin(e) {
+		let t = this.joining;
+		return t ? e.row >= t.row && e.row < t.row + t.rowSpan && e.column >= t.column && e.column < t.column + t.columnSpan : !1;
+	}
+	isInJoinedRegion(e, t) {
+		let n = rf(t, e);
+		return n !== void 0 && (n.rowSpan > 1 || n.columnSpan > 1);
+	}
+	joinIsValid(e) {
+		let t = this.joining;
+		return t !== void 0 && ff(e, t);
+	}
+	onCellClick(e, t) {
+		let n = rf(t, e);
+		if (!this.corner) {
+			this.corner = e, n && W(this, "region-select", { regionId: n.id });
+			return;
+		}
+		let r = af(this.corner, e);
+		if (r.rowSpan === 1 && r.columnSpan === 1) {
+			this.stopJoining();
+			return;
+		}
+		ff(t, r) && (this.stopJoining(), W(this, "regions-merge", { rectangle: r }));
+	}
+	onCellDoubleClick(e, t) {
+		let n = rf(t, e);
+		n && this.isInJoinedRegion(e, t) && (this.stopJoining(), W(this, "region-split", { regionId: n.id }));
+	}
+	onSlotClick(e) {
+		W(this, "region-select", { regionId: e });
+	}
+	renderCell(e, n, r) {
+		let i = this.cellAt(n, r), a = this.isInJoin(i);
+		return F`
+      <button
+        type="button"
+        class=${[
+			"cell",
+			this.isCorner(i) ? "corner" : "",
+			a ? "in-rectangle" : "",
+			this.isInJoinedRegion(i, r) ? "joined" : "",
+			a && !this.joinIsValid(r) ? "invalid" : ""
+		].join(" ")}
+        style=${V(Ep(e))}
+        aria-label=${t.basic.cell(i.row + 1, i.column + 1)}
+        @pointerenter=${() => this.hoverCell(i)}
+        @click=${() => this.onCellClick(i, r)}
+        @dblclick=${() => this.onCellDoubleClick(i, r)}
+      ></button>
+    `;
+	}
+	renderOutline(e, n, r) {
+		let i = e.regions.find((e) => e.id === n.id);
+		return i ? F`
+      <div
+        class="outline ${n.id === this.selectedRegionId ? "selected" : ""}"
+        style=${V(Ep(i))}
+      >
+        <span class="letter">${Zd(r)}</span>
+        <span class="size">
+          ${t.basic.regionSize(n.columnSpan, n.rowSpan)}
+        </span>
+      </div>
+    ` : I;
+	}
+	renderLayoutStep(e, t) {
+		return F`
+      ${t.regions.map((t, n) => this.renderOutline(e, t, n))}
+      ${e.cells.map((e, n) => this.renderCell(e, n, t))}
+      ${this.renderStatus(t)}
+    `;
+	}
+	statusMessage(e) {
+		if (this.corner) return this.joining !== void 0 && !this.joinIsValid(e) ? t.basic.joinInvalid : t.basic.joinStarted;
+	}
+	renderStatus(e) {
+		let t = this.statusMessage(e);
+		return t ? F`
+      <div class="status" role="status">${t}</div>
+    ` : I;
+	}
+	renderSlotContent(e, n) {
+		let r = yf(this.dashboard, e);
+		return r ? e === this.selectedRegionId ? F`
+      <span class="slot-label">${r.name}</span>
+    ` : I : F`
+        <span class="slot-empty">
+          <span class="letter">${n}</span>
+          <span>${t.basic.emptyRegion}</span>
+        </span>
+      `;
+	}
+	renderSlot(e, n, r) {
+		let i = !yf(this.dashboard, n), a = n === this.selectedRegionId;
+		return F`
+      <button
+        type="button"
+        class=${[
+			"slot",
+			i ? "empty" : "",
+			a ? "selected" : ""
+		].join(" ")}
+        data-region-id=${n}
+        style=${V(Ep(e))}
+        aria-label=${t.basic.region(r)}
+        aria-pressed=${a ? "true" : "false"}
+        @click=${() => this.onSlotClick(n)}
+      >
+        ${this.renderSlotContent(n, r)}
+      </button>
+    `;
+	}
+	renderWidgetsStep(e) {
+		return F`
+      ${e.regions.map((e, t) => this.renderSlot(e, e.id, Zd(t)))}
+    `;
+	}
+	render() {
+		let e = this.layout, t = this.frames;
+		return !e || !t ? I : this.step === "layout" ? this.renderLayoutStep(t, e) : this.renderWidgetsStep(t);
+	}
+};
+Y([z({ attribute: !1 })], Dp.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], Dp.prototype, "frames", void 0), Y([z()], Dp.prototype, "step", void 0), Y([z()], Dp.prototype, "selectedRegionId", void 0), Y([B()], Dp.prototype, "corner", void 0), Y([B()], Dp.prototype, "hover", void 0), Dp = Y([R("ods-region-layer")], Dp);
+//#endregion
 //#region src/ods-zoom-bar.ts
-var Vf = [
+var Op = [
 	.5,
 	1,
 	2,
 	3
-], Hf = class extends L {
+], kp = class extends L {
 	constructor(...e) {
 		super(...e), this.zoom = 1;
 	}
@@ -8974,7 +9517,7 @@ var Vf = [
         <button aria-label=${t.zoom.out} @click=${() => this.step(-1)}>
           −
         </button>
-        ${Vf.map((e) => F`
+        ${Op.map((e) => F`
             <button
               class=${this.zoom === e ? "active" : ""}
               aria-label=${t.zoom.preset(e)}
@@ -9002,30 +9545,30 @@ var Vf = [
     `;
 	}
 };
-Y([z({ type: Number })], Hf.prototype, "zoom", void 0), Hf = Y([R("ods-zoom-bar")], Hf);
+Y([z({ type: Number })], kp.prototype, "zoom", void 0), kp = Y([R("ods-zoom-bar")], kp);
 //#endregion
 //#region src/ods-canvas.ts
-var Uf = 3, Wf = 1, Gf = (e, t) => ({
+var Ap = 3, jp = 1, Mp = (e, t) => ({
 	left: `${e.x / t.width * 100}%`,
 	top: `${e.y / t.height * 100}%`,
 	width: `${e.width / t.width * 100}%`,
 	height: `${e.height / t.height * 100}%`
-}), Kf = [
+}), Np = [
 	"align-left",
 	"align-center",
 	"align-right",
 	"align-top",
 	"align-middle",
 	"align-bottom"
-], qf = ["distribute-horizontal", "distribute-vertical"], Jf = [
+], Pp = ["distribute-horizontal", "distribute-vertical"], Fp = [
 	"bring-to-front",
 	"move-up",
 	"move-down",
 	"send-to-back"
 ], X = class extends L {
 	constructor(...e) {
-		super(...e), this.widgets = [], this.primitives = [], this.selectedItemId = "", this.selectedItemIds = [], this.enteredGroupId = "", this.snapEnabled = !0, this.alignTo = "selection", this.acceptingDrop = !1, this.canUndo = !1, this.canRedo = !1, this.viewport = Es, this.dropContainerId = "", this.guides = [], this.spacing = [], this.panMode = !0, this.gridVisible = !0, this.spaceHeld = !1, this.onSpaceDown = (e) => {
-			e.key !== " " || fd(e) || (e.preventDefault(), this.spaceHeld = !0);
+		super(...e), this.widgets = [], this.primitives = [], this.selectedItemId = "", this.selectedItemIds = [], this.enteredGroupId = "", this.snapEnabled = !0, this.alignTo = "selection", this.acceptingDrop = !1, this.canUndo = !1, this.canRedo = !1, this.basicStep = "layout", this.selectedRegionId = "", this.viewport = Es, this.dropContainerId = "", this.guides = [], this.spacing = [], this.panMode = !0, this.gridVisible = !0, this.spaceHeld = !1, this.onSpaceDown = (e) => {
+			e.key !== " " || vd(e) || (e.preventDefault(), this.spaceHeld = !0);
 		}, this.onSpaceUp = (e) => {
 			e.key === " " && this.releaseSpace();
 		}, this.releaseSpace = () => {
@@ -9058,6 +9601,9 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
         background: var(--primary-background-color, #f4f6f8);
         color: var(--studio-text);
         overflow: hidden;
+      }
+      .workspace.basic {
+        grid-template-rows: 42px minmax(0, 1fr);
       }
       .history-controls {
         flex: none;
@@ -9574,6 +10120,9 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 			y: (t - r.top) / r.height * a
 		};
 	}
+	get isBasic() {
+		return this.dashboard.mode === "basic";
+	}
 	setViewport(e) {
 		W(this, "viewport-change", e);
 	}
@@ -9611,18 +10160,26 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		this.setViewport(Vs(this.viewport, e, t, this.panMode));
 	}
 	startsViewDrag(e, t = !1) {
-		return e.button === Wf ? !0 : e.button === 0 ? this.spaceHeld || t && (e.ctrlKey || e.metaKey) : !1;
+		return e.button === jp ? !0 : e.button === 0 ? this.spaceHeld || t && (e.ctrlKey || e.metaKey) : !1;
 	}
 	onStagePointerDown(e) {
-		if (!this.startsViewDrag(e, !0)) return;
+		if (!this.startsViewDrag(e, !0)) {
+			this.releaseRegion(e);
+			return;
+		}
 		e.preventDefault();
 		let t = e;
-		this.stopGesture?.(), this.stopGesture = Of({
+		this.stopGesture?.(), this.stopGesture = pp({
 			origin: e,
 			onMove: (e) => {
 				this.setViewport(As(this.viewport, e.clientX - t.clientX, e.clientY - t.clientY)), t = e;
 			}
 		});
+	}
+	releaseRegion(e) {
+		if (!this.isBasic || e.button !== 0) return;
+		let t = e.target;
+		t instanceof Element && t.closest("ods-region-layer, ods-zoom-bar") || W(this, "region-select", { regionId: "" });
 	}
 	toggleGrid() {
 		this.gridVisible = !this.gridVisible;
@@ -9654,7 +10211,7 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		if (this.startsViewDrag(e)) return;
 		e.stopPropagation(), e.preventDefault();
 		let n = this.targetOf(t);
-		if (md(e)) {
+		if (bd(e)) {
 			W(this, "item-select", {
 				itemId: n.id,
 				additive: !0
@@ -9678,19 +10235,19 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		this.stopGesture?.();
 		let i = structuredClone(this.dashboard), a = this.watchEscape(i, () => {
 			this.dropContainerId = "", this.guides = [], this.spacing = [];
-		}), o = {}, s = hf(this.dashboard, n, this.measure), c = yf(this.dashboard, n, t.id, this.measure), l = {
+		}), o = {}, s = ep(this.dashboard, n, this.measure), c = ip(this.dashboard, n, t.id, this.measure), l = {
 			clientX: e.clientX,
 			clientY: e.clientY
-		}, u = Of({
+		}, u = pp({
 			origin: e,
-			threshold: Uf,
+			threshold: Ap,
 			onMove: (r) => {
 				l = {
 					clientX: r.clientX,
 					clientY: r.clientY
 				};
-				let { dx: i, dy: a } = this.displayDelta(e, r), u = this.snapEnabled && !r.ctrlKey && !r.metaKey, d = xf(s, t.id, i, a, this.dashboard, u, c, o);
-				this.guides = u && c ? Sf(s, d, c) : [], this.spacing = u && c ? Cf(s, d, c) : [], W(this, "items-transform", { items: d }), this.updateDropContainer(l, n);
+				let { dx: i, dy: a } = this.displayDelta(e, r), u = this.snapEnabled && !r.ctrlKey && !r.metaKey, d = op(s, t.id, i, a, this.dashboard, u, c, o);
+				this.guides = u && c ? sp(s, d, c) : [], this.spacing = u && c ? cp(s, d, c) : [], W(this, "items-transform", { items: d }), this.updateDropContainer(l, n);
 			},
 			onEnd: (e, r) => {
 				if (a(), this.dropContainerId = "", this.guides = [], this.spacing = [], !r) return;
@@ -9727,11 +10284,11 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 			original: a,
 			measured: s
 		};
-		let c = yf(this.dashboard, [t.id], t.id, this.measure), l = t.kind === "widget" ? this.widgets.find((e) => e.id === t.widget.type)?.layout.minSize : void 0, u = Of({
+		let c = ip(this.dashboard, [t.id], t.id, this.measure), l = t.kind === "widget" ? this.widgets.find((e) => e.id === t.widget.type)?.layout.minSize : void 0, u = pp({
 			origin: e,
-			threshold: Uf,
+			threshold: Ap,
 			onMove: (t) => {
-				let r = this.snapEnabled && !t.altKey && !t.ctrlKey && !t.metaKey, i = vf(a, n, t.shiftKey, this.displayDelta(e, t), this.dashboard, {
+				let r = this.snapEnabled && !t.altKey && !t.ctrlKey && !t.metaKey, i = rp(a, n, t.shiftKey, this.displayDelta(e, t), this.dashboard, {
 					snapEnabled: r,
 					minSize: l,
 					measured: s,
@@ -9773,9 +10330,9 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		let r = structuredClone(this.dashboard), i = this.watchEscape(r, () => void 0), a = {
 			x: e.clientX,
 			y: e.clientY
-		}, o = as(t), s = Of({
+		}, o = as(t), s = pp({
 			origin: e,
-			threshold: Uf,
+			threshold: Ap,
 			onMove: (e) => {
 				let r = {
 					x: e.clientX,
@@ -9814,19 +10371,19 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		this.dropContainerId = r && r.id !== i?.id ? r.id : "";
 	}
 	onCanvasPointerDown(e) {
-		if (this.startsViewDrag(e, !0)) return;
+		if (this.startsViewDrag(e, !0) || this.isBasic) return;
 		let t = this.clampedPointAt(e.clientX, e.clientY);
 		if (!t) return;
 		let n = e.shiftKey, r = n ? this.selectedItemIds : [];
-		this.stopGesture?.(), this.stopGesture = Of({
+		this.stopGesture?.(), this.stopGesture = pp({
 			origin: e,
-			threshold: Uf,
+			threshold: Ap,
 			onMove: (e) => {
 				let n = this.clampedPointAt(e.clientX, e.clientY);
 				if (!n) return;
-				let i = Df(t, n);
+				let i = fp(t, n);
 				this.marquee = i;
-				let a = Ef(this.dashboard, i, this.enteredGroupId || void 0, this.measure);
+				let a = dp(this.dashboard, i, this.enteredGroupId || void 0, this.measure);
 				W(this, "selection-change", { itemIds: [.../* @__PURE__ */ new Set([...r, ...a])] });
 			},
 			onEnd: (e, t) => {
@@ -9846,7 +10403,7 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		});
 	}
 	onCanvasContextMenu(e) {
-		e.preventDefault(), W(this, "context-menu", {
+		e.preventDefault(), !this.isBasic && W(this, "context-menu", {
 			source: "empty",
 			clientX: e.clientX,
 			clientY: e.clientY,
@@ -9974,7 +10531,7 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 	}
 	renderPointHandles(e, n, r) {
 		if (e.kind !== "primitive" || as(e) !== 0) return [];
-		let i = zf(e.primitive);
+		let i = wp(e.primitive);
 		return !i || xs(e, this.primitives).position.length > 0 ? [] : [...i.map((i, a) => F`
         <button
           data-point-handle=${a}
@@ -9988,13 +10545,13 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
       `), ...this.renderEdgeAdders(e, i, n, r)];
 	}
 	renderEdgeAdders(e, n, r, i) {
-		return e.primitive.type !== "polygon" || !jf(n) ? [] : n.map((a, o) => F`
+		return e.primitive.type !== "polygon" || !gp(n) ? [] : n.map((a, o) => F`
         <button
           data-edge-add=${o}
           class="edge-add"
           tabindex="-1"
           aria-label=${t.canvas.addPoint(e.name, o + 1)}
-          style=${V(this.pointPosition(Rf(a, n[(o + 1) % n.length]), r, i))}
+          style=${V(this.pointPosition(Cp(a, n[(o + 1) % n.length]), r, i))}
           @pointerdown=${this.stopHandlePress}
           @click=${() => this.addPointAfter(e, n, o)}
         ></button>
@@ -10011,30 +10568,30 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 	}
 	addPointAfter(e, t, n) {
 		let r = t[(n + 1) % t.length];
-		this.changePoints(e, Lf(t, n, Rf(t[n], r)));
+		this.changePoints(e, Sp(t, n, Cp(t[n], r)));
 	}
 	onPointHandleDoubleClick(e, t, n) {
 		if (e.stopPropagation(), t.kind !== "primitive" || t.locked) return;
-		let r = zf(t.primitive);
-		!r || t.primitive.type !== "polygon" || this.changePoints(t, Pf(r, n));
+		let r = wp(t.primitive);
+		!r || t.primitive.type !== "polygon" || this.changePoints(t, yp(r, n));
 	}
 	onPointHandlePointerDown(e, t, n) {
 		this.startsViewDrag(e) || (e.stopPropagation(), e.preventDefault(), W(this, "item-select", { itemId: t.id }), !(t.kind !== "primitive" || t.locked) && this.beginPointDrag(e, t, n));
 	}
 	beginPointDrag(e, t, n) {
-		let r = zf(t.primitive);
+		let r = wp(t.primitive);
 		if (!r) return;
 		this.stopGesture?.();
 		let i = structuredClone(this.dashboard), a = this.watchEscape(i, () => void 0), o = w(this.dashboard.items, t.id)?.offset ?? {
 			x: 0,
 			y: 0
-		}, { width: s, height: c } = this.dashboard.display, l = Of({
+		}, { width: s, height: c } = this.dashboard.display, l = pp({
 			origin: e,
-			threshold: Uf,
+			threshold: Ap,
 			onMove: (i) => {
 				let { dx: a, dy: l } = this.displayDelta(e, i), u = this.snapEnabled && !i.ctrlKey && !i.metaKey, d = (e, t, n) => _(mt(e + t, this.dashboard, u) - t, -n, 2 * n), f = [d(r[n][0] + a, o.x, s), d(r[n][1] + l, o.y, c)], p = {
 					...t,
-					primitive: Bf(t.primitive, If(r, n, f))
+					primitive: Tp(t.primitive, xp(r, n, f))
 				};
 				W(this, "items-transform", { items: [p] });
 			},
@@ -10074,13 +10631,13 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		};
 	}
 	renderPlaced(e) {
-		let { item: t } = e, n = mf(t, e.offset, this.measure(t)), r = this.selectedItemIds.includes(t.id), i = this.selectedItemIds.length === 1;
+		let { item: t } = e, n = $f(t, e.offset, this.measure(t)), r = this.selectedItemIds.includes(t.id), i = this.selectedItemIds.length === 1;
 		return F`
       <div
         data-item-id=${t.id}
-        class=${Yd(this.itemClasses(e))}
+        class=${Ff(this.itemClasses(e))}
         style=${V({
-			...Gf(n, this.dashboard.display),
+			...Mp(n, this.dashboard.display),
 			...this.turnStyle(t, n)
 		})}
         @pointerdown=${(e) => this.onItemPointerDown(e, t)}
@@ -10098,11 +10655,11 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 	}
 	renderSelectionBox() {
 		if (this.selectedItemIds.length < 2) return I;
-		let e = Tf(this.dashboard, this.selectedItemIds, this.measure);
+		let e = up(this.dashboard, this.selectedItemIds, this.measure);
 		return e ? F`
       <div
         class="multi-selection"
-        style=${V(Gf(e, this.dashboard.display))}
+        style=${V(Mp(e, this.dashboard.display))}
       >
         ${this.renderSelectionSize(e)}
       </div>
@@ -10148,12 +10705,12 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 		return this.marquee ? F`
       <div
         class="marquee"
-        style=${V(Gf(this.marquee, this.dashboard.display))}
+        style=${V(Mp(this.marquee, this.dashboard.display))}
       ></div>
     ` : I;
 	}
 	renderCommandButton(e, t) {
-		let n = Au(wu(e), t, pd());
+		let n = Pu(Ou(e), t, yd());
 		return F`
       <button
         aria-label=${n.label}
@@ -10204,66 +10761,98 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
         role="toolbar"
         aria-label=${t.canvas.arrangeLabel}
       >
-        ${this.renderArrangeGroup(Kf)}
+        ${this.renderArrangeGroup(Np)}
         <span class="separator"></span>
-        ${this.renderArrangeGroup(qf)}
+        ${this.renderArrangeGroup(Pp)}
         <span class="separator"></span>
         ${this.renderAlignTargetButton("selection", "mdi:selection", t.canvas.alignToSelection)}
         ${this.renderAlignTargetButton("parent", "mdi:crop-free", t.canvas.alignToParent)}
         <span class="separator"></span>
-        ${this.renderArrangeGroup(Jf)}
+        ${this.renderArrangeGroup(Fp)}
       </div>
     `;
 	}
-	renderToolbar() {
-		let e = this.dashboard, { width: n, height: r, padding: i, snapSize: a } = e.display, o = Yd({
-			"tool-toggle": !0,
-			active: this.snapEnabled
-		}), s = Yd({
+	renderPanToggle() {
+		return F`
+      <button
+        class=${Ff({
 			"tool-toggle": !0,
 			active: this.panMode
-		}), c = Yd({
+		})}
+        aria-pressed=${this.panMode}
+        title=${t.canvas.panTitle}
+        @click=${this.togglePan}
+      >
+        <ha-icon icon="mdi:pan"></ha-icon>
+        <span>${t.canvas.pan}</span>
+      </button>
+    `;
+	}
+	renderGridToggle() {
+		return F`
+      <button
+        class=${Ff({
 			"tool-toggle": !0,
 			active: this.gridVisible
-		});
+		})}
+        aria-pressed=${this.gridVisible}
+        title=${t.canvas.gridTitle}
+        @click=${this.toggleGrid}
+      >
+        <ha-icon icon="mdi:grid"></ha-icon>
+        <span>${t.canvas.grid}</span>
+      </button>
+    `;
+	}
+	renderSnapToggle() {
+		return F`
+      <button
+        class=${Ff({
+			"tool-toggle": !0,
+			active: this.snapEnabled
+		})}
+        aria-pressed=${this.snapEnabled}
+        @click=${this.toggleSnap}
+      >
+        <ha-icon icon="mdi:magnet"></ha-icon>
+        <span>${t.canvas.snap(this.dashboard.display.snapSize)}</span>
+      </button>
+    `;
+	}
+	renderHistoryControls() {
+		return F`
+      <div class="history-controls">
+        ${this.renderCommandButton("undo", this.historyContext)}
+        ${this.renderCommandButton("redo", this.historyContext)}
+      </div>
+    `;
+	}
+	renderZoomReadout() {
+		return F`
+      <span class="zoom-readout">${Math.round(this.viewport.zoom * 100)}%</span>
+    `;
+	}
+	renderToolbar() {
+		let e = this.dashboard, { width: n, height: r, padding: i } = e.display;
 		return F`
       <div class="workspace-meta">
         <span>${t.common.sizeInPixels(n, r)}</span>
         <span>${t.canvas.layers(Dt(e.items))}</span>
         <span>${t.canvas.padding(i)}</span>
-        <div class="history-controls">
-          ${this.renderCommandButton("undo", this.historyContext)}
-          ${this.renderCommandButton("redo", this.historyContext)}
-        </div>
-        <button
-          class=${s}
-          aria-pressed=${this.panMode}
-          title=${t.canvas.panTitle}
-          @click=${this.togglePan}
-        >
-          <ha-icon icon="mdi:pan"></ha-icon>
-          <span>${t.canvas.pan}</span>
-        </button>
-        <button
-          class=${c}
-          aria-pressed=${this.gridVisible}
-          title=${t.canvas.gridTitle}
-          @click=${this.toggleGrid}
-        >
-          <ha-icon icon="mdi:grid"></ha-icon>
-          <span>${t.canvas.grid}</span>
-        </button>
-        <button
-          class=${o}
-          aria-pressed=${this.snapEnabled}
-          @click=${this.toggleSnap}
-        >
-          <ha-icon icon="mdi:magnet"></ha-icon>
-          <span>${t.canvas.snap(a)}</span>
-        </button>
-        <span class="zoom-readout">
-          ${Math.round(this.viewport.zoom * 100)}%
-        </span>
+        ${this.renderHistoryControls()} ${this.renderPanToggle()}
+        ${this.renderGridToggle()} ${this.renderSnapToggle()}
+        ${this.renderZoomReadout()}
+      </div>
+    `;
+	}
+	renderBasicToolbar() {
+		let { width: e, height: n, padding: r } = this.dashboard.display;
+		return F`
+      <div class="workspace-meta">
+        <span>${t.common.sizeInPixels(e, n)}</span>
+        <span>${t.canvas.padding(r)}</span>
+        ${this.renderHistoryControls()} ${this.renderPanToggle()}
+        ${this.renderZoomReadout()}
       </div>
     `;
 	}
@@ -10295,18 +10884,42 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
       <div class="clip-frame" aria-hidden="true"></div>
     `;
 	}
+	renderRegions() {
+		return F`
+      <ods-region-layer
+        .dashboard=${this.dashboard}
+        .frames=${this.layoutFrames}
+        .step=${this.basicStep}
+        .selectedRegionId=${this.selectedRegionId}
+      ></ods-region-layer>
+    `;
+	}
+	renderItems() {
+		let e = this.dashboard, t = V({
+			...Mp(pt(e), e.display),
+			"--snap-size": `${e.display.snapSize * this.viewport.zoom}px`
+		});
+		return F`
+      <div
+        class="working-area ${this.gridVisible ? "" : "no-grid"}"
+        aria-hidden="true"
+        style=${t}
+      ></div>
+      ${zt(e.items).map((e) => this.renderPlaced(e))}
+      ${this.renderSelectionBox()} ${this.renderMarquee()}
+      ${this.guides.map((e) => this.renderGuide(e))}
+      ${this.spacing.map((e) => this.renderSpacing(e))}
+    `;
+	}
 	renderStage() {
-		let e = this.dashboard, { width: t, height: n, snapSize: r } = e.display, { zoom: i, panX: a, panY: o } = this.viewport, s = V({ transform: `translate(${a}px, ${o}px) scale(${i})` }), c = V({
-			width: `${t}px`,
-			height: `${n}px`,
-			"--ui": String(1 / i)
-		}), l = V({
-			...Gf(pt(e), e.display),
-			"--snap-size": `${r * i}px`
+		let { width: e, height: t } = this.dashboard.display, { zoom: n, panX: r, panY: i } = this.viewport, a = V({ transform: `translate(${r}px, ${i}px) scale(${n})` }), o = V({
+			width: `${e}px`,
+			height: `${t}px`,
+			"--ui": String(1 / n)
 		});
 		return F`
       <section
-        class=${Yd({
+        class=${Ff({
 			"canvas-stage": !0,
 			"view-drag": this.spaceHeld,
 			"accepting-drop": this.acceptingDrop
@@ -10316,27 +10929,19 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
         @dragover=${this.onStageDragOver}
         @drop=${this.onStageDrop}
       >
-        <div class="canvas-viewport" style=${s}>
+        <div class="canvas-viewport" style=${a}>
           <div
             class="canvas"
-            style=${c}
+            style=${o}
             @pointerdown=${this.onCanvasPointerDown}
             @contextmenu=${this.onCanvasContextMenu}
           >
             ${this.renderPreview()}
-            <div
-              class="working-area ${this.gridVisible ? "" : "no-grid"}"
-              aria-hidden="true"
-              style=${l}
-            ></div>
-            ${zt(e.items).map((e) => this.renderPlaced(e))}
-            ${this.renderSelectionBox()} ${this.renderMarquee()}
-            ${this.guides.map((e) => this.renderGuide(e))}
-            ${this.spacing.map((e) => this.renderSpacing(e))}
+            ${this.isBasic ? this.renderRegions() : this.renderItems()}
           </div>
         </div>
         <ods-zoom-bar
-          .zoom=${i}
+          .zoom=${n}
           @zoom-change=${this.onZoomChange}
           @zoom-step=${this.onZoomStep}
           @zoom-reset=${this.onZoomReset}
@@ -10347,20 +10952,22 @@ var Uf = 3, Wf = 1, Gf = (e, t) => ({
 	}
 	render() {
 		return F`
-      <main class="workspace">
-        ${this.renderToolbar()} ${this.renderArrangeBar()} ${this.renderStage()}
+      <main class="workspace ${this.isBasic ? "basic" : ""}">
+        ${this.isBasic ? this.renderBasicToolbar() : this.renderToolbar()}
+        ${this.isBasic ? I : this.renderArrangeBar()}
+        ${this.renderStage()}
       </main>
     `;
 	}
 };
-Y([z({ attribute: !1 })], X.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], X.prototype, "preview", void 0), Y([z({ attribute: !1 })], X.prototype, "widgets", void 0), Y([z({ attribute: !1 })], X.prototype, "primitives", void 0), Y([z()], X.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], X.prototype, "selectedItemIds", void 0), Y([z()], X.prototype, "enteredGroupId", void 0), Y([z({ type: Boolean })], X.prototype, "snapEnabled", void 0), Y([z()], X.prototype, "alignTo", void 0), Y([z({ type: Boolean })], X.prototype, "acceptingDrop", void 0), Y([z({ type: Boolean })], X.prototype, "canUndo", void 0), Y([z({ type: Boolean })], X.prototype, "canRedo", void 0), Y([z({ attribute: !1 })], X.prototype, "viewport", void 0), Y([bl(".canvas")], X.prototype, "canvas", void 0), Y([bl(".canvas-stage")], X.prototype, "stage", void 0), Y([B()], X.prototype, "dropContainerId", void 0), Y([B()], X.prototype, "marquee", void 0), Y([B()], X.prototype, "guides", void 0), Y([B()], X.prototype, "spacing", void 0), Y([B()], X.prototype, "panMode", void 0), Y([B()], X.prototype, "gridVisible", void 0), Y([B()], X.prototype, "spaceHeld", void 0), X = Y([R("ods-canvas")], X);
+Y([z({ attribute: !1 })], X.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], X.prototype, "preview", void 0), Y([z({ attribute: !1 })], X.prototype, "widgets", void 0), Y([z({ attribute: !1 })], X.prototype, "primitives", void 0), Y([z()], X.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], X.prototype, "selectedItemIds", void 0), Y([z()], X.prototype, "enteredGroupId", void 0), Y([z({ type: Boolean })], X.prototype, "snapEnabled", void 0), Y([z()], X.prototype, "alignTo", void 0), Y([z({ type: Boolean })], X.prototype, "acceptingDrop", void 0), Y([z({ type: Boolean })], X.prototype, "canUndo", void 0), Y([z({ type: Boolean })], X.prototype, "canRedo", void 0), Y([z({ attribute: !1 })], X.prototype, "layoutFrames", void 0), Y([z()], X.prototype, "basicStep", void 0), Y([z()], X.prototype, "selectedRegionId", void 0), Y([z({ attribute: !1 })], X.prototype, "viewport", void 0), Y([Sl(".canvas")], X.prototype, "canvas", void 0), Y([Sl(".canvas-stage")], X.prototype, "stage", void 0), Y([B()], X.prototype, "dropContainerId", void 0), Y([B()], X.prototype, "marquee", void 0), Y([B()], X.prototype, "guides", void 0), Y([B()], X.prototype, "spacing", void 0), Y([B()], X.prototype, "panMode", void 0), Y([B()], X.prototype, "gridVisible", void 0), Y([B()], X.prototype, "spaceHeld", void 0), X = Y([R("ods-canvas")], X);
 //#endregion
 //#region src/ods-code-view.ts
-var Yf = {
+var Ip = {
 	idle: "mdi:content-copy",
 	copied: "mdi:check",
 	failed: "mdi:alert-circle-outline"
-}, Xf = 2200, Zf = class extends L {
+}, Lp = 2200, Rp = class extends L {
 	constructor(...e) {
 		super(...e), this.copyState = "idle";
 	}
@@ -10463,7 +11070,7 @@ var Yf = {
 			}
 			this.copyTimer = window.setTimeout(() => {
 				this.copyState = "idle";
-			}, Xf);
+			}, Lp);
 		}
 	}
 	render() {
@@ -10484,7 +11091,7 @@ var Yf = {
             >
               <ha-icon
                 slot="start"
-                .icon=${Yf[this.copyState]}
+                .icon=${Ip[this.copyState]}
               ></ha-icon>
               ${t.code.copy[this.copyState]}
             </ha-button>
@@ -10507,10 +11114,10 @@ var Yf = {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Zf.prototype, "preview", void 0), Y([B()], Zf.prototype, "copyState", void 0), Zf = Y([R("ods-code-view")], Zf);
+Y([z({ attribute: !1 })], Rp.prototype, "preview", void 0), Y([B()], Rp.prototype, "copyState", void 0), Rp = Y([R("ods-code-view")], Rp);
 //#endregion
 //#region src/ods-confirm-dialog.ts
-var Qf = class extends L {
+var zp = class extends L {
 	constructor(...e) {
 		super(...e), this.eyebrow = "", this.heading = "", this.body = "", this.confirmLabel = "";
 	}
@@ -10616,26 +11223,26 @@ var Qf = class extends L {
     `;
 	}
 };
-Y([z()], Qf.prototype, "eyebrow", void 0), Y([z()], Qf.prototype, "heading", void 0), Y([z()], Qf.prototype, "body", void 0), Y([z()], Qf.prototype, "confirmLabel", void 0), Qf = Y([R("ods-confirm-dialog")], Qf);
+Y([z()], zp.prototype, "eyebrow", void 0), Y([z()], zp.prototype, "heading", void 0), Y([z()], zp.prototype, "body", void 0), Y([z()], zp.prototype, "confirmLabel", void 0), zp = Y([R("ods-confirm-dialog")], zp);
 //#endregion
 //#region src/series.ts
-var $f = "entity", ep = (e) => e.shape === "objects" && (e.nested ?? []).some((e) => e.shape === "entity"), tp = (e) => typeof e == "object" && !!e && !Array.isArray(e), np = (e) => Array.isArray(e) ? e.filter(tp) : [], rp = (e, t = "") => {
+var Bp = "entity", Vp = (e) => e.shape === "objects" && (e.nested ?? []).some((e) => e.shape === "entity"), Hp = (e) => typeof e == "object" && !!e && !Array.isArray(e), Up = (e) => Array.isArray(e) ? e.filter(Hp) : [], Wp = (e, t = "") => {
 	let n = (e.nested ?? []).flatMap((e) => e.default === void 0 ? [] : [[e.key, e.default]]);
 	return {
 		...Object.fromEntries(n),
-		[$f]: t
+		[Bp]: t
 	};
-}, ip = (e, t) => t.length < (typeof e.max == "number" ? e.max : t.length + 1), ap = (e, t) => t.length > (typeof e.min == "number" ? e.min : 1), op = (e, t, n) => e.map((e, r) => r === t ? {
+}, Gp = (e, t) => t.length < (typeof e.max == "number" ? e.max : t.length + 1), Kp = (e, t) => t.length > (typeof e.min == "number" ? e.min : 1), qp = (e, t, n) => e.map((e, r) => r === t ? {
 	...e,
 	...n
-} : e), sp = (e, t) => e.filter((e, n) => n !== t), cp = class extends L {
+} : e), Jp = (e, t) => e.filter((e, n) => n !== t), Yp = class extends L {
 	constructor(...e) {
 		super(...e), this.label = "", this.fieldKey = "", this.unit = "", this.placeholder = "", this.value = 0, this.min = 0, this.max = 4096, this.disabled = !1;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -10728,7 +11335,7 @@ var $f = "entity", ep = (e) => e.shape === "objects" && (e.nested ?? []).some((e
 	onChange(e) {
 		W(this, "field-change", {
 			key: this.fieldKey,
-			value: dd(e)
+			value: _d(e)
 		});
 	}
 	render() {
@@ -10755,10 +11362,10 @@ var $f = "entity", ep = (e) => e.shape === "objects" && (e.nested ?? []).some((e
     `;
 	}
 };
-Y([z()], cp.prototype, "label", void 0), Y([z()], cp.prototype, "fieldKey", void 0), Y([z()], cp.prototype, "unit", void 0), Y([z()], cp.prototype, "placeholder", void 0), Y([z({ attribute: !1 })], cp.prototype, "value", void 0), Y([z({ type: Number })], cp.prototype, "min", void 0), Y([z({ type: Number })], cp.prototype, "max", void 0), Y([z({ type: Boolean })], cp.prototype, "disabled", void 0), Y([bl("input")], cp.prototype, "input", void 0), cp = Y([R("ods-property-field")], cp);
+Y([z()], Yp.prototype, "label", void 0), Y([z()], Yp.prototype, "fieldKey", void 0), Y([z()], Yp.prototype, "unit", void 0), Y([z()], Yp.prototype, "placeholder", void 0), Y([z({ attribute: !1 })], Yp.prototype, "value", void 0), Y([z({ type: Number })], Yp.prototype, "min", void 0), Y([z({ type: Number })], Yp.prototype, "max", void 0), Y([z({ type: Boolean })], Yp.prototype, "disabled", void 0), Y([Sl("input")], Yp.prototype, "input", void 0), Yp = Y([R("ods-property-field")], Yp);
 //#endregion
 //#region src/ods-anchor-picker.ts
-var lp = [
+var Xp = [
 	"lt",
 	"mt",
 	"rt",
@@ -10768,7 +11375,7 @@ var lp = [
 	"lb",
 	"mb",
 	"rb"
-], up = (e) => lp.some((t) => t === e), dp = class extends L {
+], Zp = (e) => Xp.some((t) => t === e), Qp = class extends L {
 	constructor(...e) {
 		super(...e), this.value = "", this.disabled = !1;
 	}
@@ -10837,15 +11444,15 @@ var lp = [
 	render() {
 		return F`
       <div class="grid" role="group" aria-label=${t.fields.anchor}>
-        ${lp.map((e) => this.renderPosition(e))}
+        ${Xp.map((e) => this.renderPosition(e))}
       </div>
     `;
 	}
 };
-Y([z()], dp.prototype, "value", void 0), Y([z({ type: Boolean })], dp.prototype, "disabled", void 0), dp = Y([R("ods-anchor-picker")], dp);
+Y([z()], Qp.prototype, "value", void 0), Y([z({ type: Boolean })], Qp.prototype, "disabled", void 0), Qp = Y([R("ods-anchor-picker")], Qp);
 //#endregion
 //#region src/ods-color-picker.ts
-var fp = class extends L {
+var $p = class extends L {
 	constructor(...e) {
 		super(...e), this.palette = "bw", this.value = "", this.nullable = !1;
 	}
@@ -10932,10 +11539,10 @@ var fp = class extends L {
     `;
 	}
 };
-Y([z()], fp.prototype, "palette", void 0), Y([z()], fp.prototype, "value", void 0), Y([z({ type: Boolean })], fp.prototype, "nullable", void 0), fp = Y([R("ods-color-picker")], fp);
+Y([z()], $p.prototype, "palette", void 0), Y([z()], $p.prototype, "value", void 0), Y([z({ type: Boolean })], $p.prototype, "nullable", void 0), $p = Y([R("ods-color-picker")], $p);
 //#endregion
 //#region src/font-faces.ts
-var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-font", hp = "ods-mdi", gp = /* @__PURE__ */ new Map(), _p = (e) => `ods-font-${e.name.replace(/[^A-Za-z0-9_-]/g, "_")}-${e.version}`, vp = (e) => `${pp}/${encodeURIComponent(e.name)}?v=${e.version}`, yp = async (e, t, n) => {
+var em = "/api/opendisplay_studio/fonts", tm = "/api/opendisplay_studio/icon-font", nm = "ods-mdi", rm = /* @__PURE__ */ new Map(), im = (e) => `ods-font-${e.name.replace(/[^A-Za-z0-9_-]/g, "_")}-${e.version}`, am = (e) => `${em}/${encodeURIComponent(e.name)}?v=${e.version}`, om = async (e, t, n) => {
 	if (e.fetchWithAuth) try {
 		let r = await e.fetchWithAuth(n);
 		if (!r.ok) return;
@@ -10944,32 +11551,32 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
 	} catch {
 		return;
 	}
-}, bp = (e, t, n) => {
-	let r = gp.get(t);
-	return r || (r = yp(e, t, n), gp.set(t, r)), r;
-}, xp = (e, t) => bp(e, _p(t), vp(t)), Sp = (e) => bp(e, hp, mp), Cp = "mdi:", wp = 36, Tp = 288, Ep = 6, Dp = (e) => e.startsWith(Cp) ? e.slice(4) : e, Op = (e, t) => {
+}, sm = (e, t, n) => {
+	let r = rm.get(t);
+	return r || (r = om(e, t, n), rm.set(t, r)), r;
+}, cm = (e, t) => sm(e, im(t), am(t)), lm = (e) => sm(e, nm, tm), um = "mdi:", dm = 36, fm = 288, pm = 6, mm = (e) => e.startsWith(um) ? e.slice(4) : e, hm = (e, t) => {
 	let n = t.trim().toLowerCase().split(/\s+/).filter(Boolean);
 	if (n.length === 0) return e;
 	let r = e.filter((e) => n.every((t) => e.includes(t))), i = n[0], a = r.filter((e) => e.startsWith(i)), o = r.filter((e) => !e.startsWith(i));
 	return [...a, ...o];
-}, kp = (e, t) => ({
-	first: Math.max(0, Math.floor(e / wp) - Ep),
-	last: Math.min(t, Math.ceil((e + Tp) / wp) + Ep)
-}), Ap = class extends L {
+}, gm = (e, t) => ({
+	first: Math.max(0, Math.floor(e / dm) - pm),
+	last: Math.min(t, Math.ceil((e + fm) / dm) + pm)
+}), _m = class extends L {
 	constructor(...e) {
 		super(...e), this.icons = [], this.glyphs = {}, this.value = "", this.iconFontReady = !1, this.search = "", this.listScroll = 0;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
       }
       .list {
         position: relative;
-        height: ${Tp}px;
+        height: ${fm}px;
         margin-top: 8px;
         overflow: auto;
         overscroll-behavior: contain;
@@ -10984,7 +11591,7 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
         align-items: center;
         gap: 10px;
         width: 100%;
-        height: ${wp}px;
+        height: ${dm}px;
         padding: 0 8px;
         border: 1px solid transparent;
         border-radius: 7px;
@@ -11016,7 +11623,7 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
       .glyph {
         flex: none;
         width: 22px;
-        font-family: "${mc(hp)}";
+        font-family: "${mc(nm)}";
         font-size: 22px;
         line-height: 22px;
         text-align: center;
@@ -11033,7 +11640,7 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
 		e.has("hass") && this.hass && !this.iconFontReady && this.loadGlyphs(this.hass);
 	}
 	async loadGlyphs(e) {
-		this.iconFontReady = await Sp(e) !== void 0;
+		this.iconFontReady = await lm(e) !== void 0;
 	}
 	onSearch(e) {
 		e.target instanceof HTMLInputElement && (this.search = e.target.value, this.listScroll = 0, this.list?.scrollTo({ top: 0 }));
@@ -11049,7 +11656,7 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
 		return this.iconFontReady && t ? F`
         <span class="glyph" aria-hidden="true">${t}</span>
       ` : F`
-      <ha-icon icon=${`${Cp}${e}`}></ha-icon>
+      <ha-icon icon=${`${um}${e}`}></ha-icon>
     `;
 	}
 	renderIcon(e) {
@@ -11058,7 +11665,7 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
         type="button"
         title=${e}
         aria-label=${e}
-        aria-pressed=${e === Dp(this.value) ? "true" : "false"}
+        aria-pressed=${e === mm(this.value) ? "true" : "false"}
         @click=${() => this.choose(e)}
       >
         ${this.renderPicture(e)}
@@ -11067,17 +11674,17 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
     `;
 	}
 	renderResults() {
-		let e = Op(this.icons, this.search);
+		let e = hm(this.icons, this.search);
 		if (e.length === 0) return F`
         <p class="empty">${t.iconPicker.noMatch}</p>
       `;
-		let { first: n, last: r } = kp(this.listScroll, e.length);
+		let { first: n, last: r } = gm(this.listScroll, e.length);
 		return F`
       <div class="list" @scroll=${this.onScroll}>
-        <div style=${V({ height: `${e.length * wp}px` })}>
+        <div style=${V({ height: `${e.length * dm}px` })}>
           <div
             class="rows"
-            style=${V({ top: `${n * wp}px` })}
+            style=${V({ top: `${n * dm}px` })}
           >
             ${e.slice(n, r).map((e) => this.renderIcon(e))}
           </div>
@@ -11100,10 +11707,10 @@ var pp = "/api/opendisplay_studio/fonts", mp = "/api/opendisplay_studio/icon-fon
     `;
 	}
 };
-Y([z({ attribute: !1 })], Ap.prototype, "hass", void 0), Y([z({ attribute: !1 })], Ap.prototype, "icons", void 0), Y([z({ attribute: !1 })], Ap.prototype, "glyphs", void 0), Y([z()], Ap.prototype, "value", void 0), Y([B()], Ap.prototype, "iconFontReady", void 0), Y([B()], Ap.prototype, "search", void 0), Y([B()], Ap.prototype, "listScroll", void 0), Y([bl(".list")], Ap.prototype, "list", void 0), Ap = Y([R("ods-icon-picker")], Ap);
+Y([z({ attribute: !1 })], _m.prototype, "hass", void 0), Y([z({ attribute: !1 })], _m.prototype, "icons", void 0), Y([z({ attribute: !1 })], _m.prototype, "glyphs", void 0), Y([z()], _m.prototype, "value", void 0), Y([B()], _m.prototype, "iconFontReady", void 0), Y([B()], _m.prototype, "search", void 0), Y([B()], _m.prototype, "listScroll", void 0), Y([Sl(".list")], _m.prototype, "list", void 0), _m = Y([R("ods-icon-picker")], _m);
 //#endregion
 //#region src/ods-popover.ts
-var jp = 6, Mp = 8, Np = class extends L {
+var vm = 6, ym = 8, bm = class extends L {
 	constructor(...e) {
 		super(...e), this.heading = "", this.width = 220, this.resizeObserver = new ResizeObserver(() => this.place()), this.onOutsidePointer = (e) => {
 			e.composedPath().includes(this) || this.close();
@@ -11178,8 +11785,8 @@ var jp = 6, Mp = 8, Np = class extends L {
 	place() {
 		let e = this.panel;
 		if (!e || !this.anchor) return;
-		let t = e.offsetHeight, n = this.anchor.bottom + jp, r = n + t + Mp <= window.innerHeight ? n : this.anchor.top - jp - t, i = Math.min(this.width, window.innerWidth - 16), a = Math.min(Math.max(Mp, this.anchor.left), window.innerWidth - i - Mp);
-		e.style.top = `${Math.max(Mp, r)}px`, e.style.left = `${a}px`, e.style.width = `${i}px`;
+		let t = e.offsetHeight, n = this.anchor.bottom + vm, r = n + t + ym <= window.innerHeight ? n : this.anchor.top - vm - t, i = Math.min(this.width, window.innerWidth - 16), a = Math.min(Math.max(ym, this.anchor.left), window.innerWidth - i - ym);
+		e.style.top = `${Math.max(ym, r)}px`, e.style.left = `${a}px`, e.style.width = `${i}px`;
 	}
 	render() {
 		return this.anchor ? F`
@@ -11205,17 +11812,17 @@ var jp = 6, Mp = 8, Np = class extends L {
     ` : I;
 	}
 };
-Y([z()], Np.prototype, "heading", void 0), Y([z({ attribute: !1 })], Np.prototype, "anchor", void 0), Y([z({ type: Number })], Np.prototype, "width", void 0), Y([bl(".popover")], Np.prototype, "panel", void 0), Np = Y([R("ods-popover")], Np);
+Y([z()], bm.prototype, "heading", void 0), Y([z({ attribute: !1 })], bm.prototype, "anchor", void 0), Y([z({ type: Number })], bm.prototype, "width", void 0), Y([Sl(".popover")], bm.prototype, "panel", void 0), bm = Y([R("ods-popover")], bm);
 //#endregion
 //#region src/ods-icon-field.ts
-var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
+var xm = "mdi:", Sm = 250, Cm = -1, wm = class extends L {
 	constructor(...e) {
 		super(...e), this.disabled = !1, this.names = [], this.glyphs = {}, this.closedAt = 0;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -11304,14 +11911,14 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
 	}
 	async loadNames() {
 		if (!(this.names.length > 0 || !this.hass)) try {
-			let e = await Pd(this.hass);
+			let e = await Vd(this.hass);
 			this.names = e.names, this.glyphs = e.glyphs;
 		} catch {
 			this.names = [];
 		}
 	}
 	openAt(e, t) {
-		if (this.disabled || Date.now() - this.closedAt < Fp) return;
+		if (this.disabled || Date.now() - this.closedAt < Sm) return;
 		let n = t.currentTarget;
 		n instanceof HTMLElement && (this.open = {
 			index: e,
@@ -11322,14 +11929,14 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
 		this.openAt(0, e);
 	}
 	openNew(e) {
-		this.openAt(Ip, e);
+		this.openAt(Cm, e);
 	}
 	close() {
 		this.closedAt = Date.now(), this.open = void 0;
 	}
 	onIconChange(e) {
-		let t = Dp(e.detail.icon), n = this.open?.index ?? 0;
-		this.isList ? n === Ip ? this.change([...this.icons, t]) : this.change(this.icons.map((e, r) => r === n ? t : e)) : this.change(t), this.close();
+		let t = mm(e.detail.icon), n = this.open?.index ?? 0;
+		this.isList ? n === Cm ? this.change([...this.icons, t]) : this.change(this.icons.map((e, r) => r === n ? t : e)) : this.change(t), this.close();
 	}
 	removeAt(e) {
 		let t = this.icons.filter((t, n) => n !== e);
@@ -11359,7 +11966,7 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
           .disabled=${this.disabled}
           @click=${(e) => this.openAt(n, e)}
         >
-          <ha-icon icon=${`${Pp}${Dp(e)}`}></ha-icon>
+          <ha-icon icon=${`${xm}${mm(e)}`}></ha-icon>
         </button>
         <button
           type="button"
@@ -11399,7 +12006,7 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
     `;
 	}
 	renderSingle() {
-		let e = Dp(String(this.value ?? ""));
+		let e = mm(String(this.value ?? ""));
 		return F`
       <button
         type="button"
@@ -11409,7 +12016,7 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
         @click=${this.openSingle}
       >
         ${e ? F`
-                <ha-icon icon=${`${Pp}${e}`}></ha-icon>
+                <ha-icon icon=${`${xm}${e}`}></ha-icon>
               ` : I}
         <span class="name">${e || t.iconPicker.empty}</span>
       </button>
@@ -11443,17 +12050,17 @@ var Pp = "mdi:", Fp = 250, Ip = -1, Lp = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Lp.prototype, "hass", void 0), Y([z({ attribute: !1 })], Lp.prototype, "field", void 0), Y([z({ attribute: !1 })], Lp.prototype, "value", void 0), Y([z({ type: Boolean })], Lp.prototype, "disabled", void 0), Y([B()], Lp.prototype, "open", void 0), Y([B()], Lp.prototype, "names", void 0), Y([B()], Lp.prototype, "glyphs", void 0), Lp = Y([R("ods-icon-field")], Lp);
+Y([z({ attribute: !1 })], wm.prototype, "hass", void 0), Y([z({ attribute: !1 })], wm.prototype, "field", void 0), Y([z({ attribute: !1 })], wm.prototype, "value", void 0), Y([z({ type: Boolean })], wm.prototype, "disabled", void 0), Y([B()], wm.prototype, "open", void 0), Y([B()], wm.prototype, "names", void 0), Y([B()], wm.prototype, "glyphs", void 0), wm = Y([R("ods-icon-field")], wm);
 //#endregion
 //#region src/ods-points-field.ts
-var Rp = class extends L {
+var Tm = class extends L {
 	constructor(...e) {
 		super(...e), this.disabled = !1;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -11505,7 +12112,7 @@ var Rp = class extends L {
 		];
 	}
 	get points() {
-		return Af(this.value);
+		return hp(this.value);
 	}
 	change(e) {
 		W(this, "primitive-field-change", {
@@ -11520,7 +12127,7 @@ var Rp = class extends L {
 			n.target.value = String(this.points[e][t]);
 			return;
 		}
-		this.change(Ff(this.points, e, t, r));
+		this.change(bp(this.points, e, t, r));
 	}
 	onXChange(e, t) {
 		this.onCoordinateChange(e, 0, t);
@@ -11529,10 +12136,10 @@ var Rp = class extends L {
 		this.onCoordinateChange(e, 1, t);
 	}
 	removeAt(e) {
-		this.change(Pf(this.points, e));
+		this.change(yp(this.points, e));
 	}
 	add() {
-		this.change(Nf(this.points));
+		this.change(vp(this.points));
 	}
 	renderCoordinate(e, t, n) {
 		return F`
@@ -11559,7 +12166,7 @@ var Rp = class extends L {
           type="button"
           title=${r}
           aria-label=${r}
-          .disabled=${this.disabled || !Mf(this.points)}
+          .disabled=${this.disabled || !_p(this.points)}
           @click=${() => this.removeAt(n)}
         >
           <ha-icon icon="mdi:close"></ha-icon>
@@ -11576,7 +12183,7 @@ var Rp = class extends L {
       <button
         type="button"
         class="add"
-        .disabled=${this.disabled || !jf(e)}
+        .disabled=${this.disabled || !gp(e)}
         @click=${this.add}
       >
         <ha-icon icon="mdi:plus"></ha-icon>
@@ -11585,22 +12192,22 @@ var Rp = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Rp.prototype, "field", void 0), Y([z({ attribute: !1 })], Rp.prototype, "value", void 0), Y([z({ type: Boolean })], Rp.prototype, "disabled", void 0), Rp = Y([R("ods-points-field")], Rp);
+Y([z({ attribute: !1 })], Tm.prototype, "field", void 0), Y([z({ attribute: !1 })], Tm.prototype, "value", void 0), Y([z({ type: Boolean })], Tm.prototype, "disabled", void 0), Tm = Y([R("ods-points-field")], Tm);
 //#endregion
 //#region src/ods-series-field.ts
-var zp = [
+var Em = [
 	"sensor",
 	"input_number",
 	"number",
 	"counter"
-], Bp = class extends L {
+], Dm = class extends L {
 	constructor(...e) {
 		super(...e), this.palette = "bwr", this.disabled = !1;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -11659,7 +12266,7 @@ var zp = [
 		];
 	}
 	get list() {
-		return np(this.value);
+		return Up(this.value);
 	}
 	change(e) {
 		W(this, "primitive-field-change", {
@@ -11668,19 +12275,19 @@ var zp = [
 		});
 	}
 	onEntityChange(e, t) {
-		t.stopPropagation(), this.change(op(this.list, e, { [$f]: t.detail.value }));
+		t.stopPropagation(), this.change(qp(this.list, e, { [Bp]: t.detail.value }));
 	}
 	onSettingsChange(e, t) {
-		this.change(op(this.list, e, t.detail.value));
+		this.change(qp(this.list, e, t.detail.value));
 	}
 	removeAt(e) {
-		this.change(sp(this.list, e));
+		this.change(Jp(this.list, e));
 	}
 	add() {
-		this.change([...this.list, rp(this.field)]);
+		this.change([...this.list, Wp(this.field)]);
 	}
 	get settingsSchema() {
-		return (this.field.nested ?? []).filter((e) => e.key !== $f).map((e) => $o(e, this.palette));
+		return (this.field.nested ?? []).filter((e) => e.key !== Bp).map((e) => $o(e, this.palette));
 	}
 	renderSeries(e, n) {
 		let r = t.seriesField.remove(n + 1);
@@ -11691,7 +12298,7 @@ var zp = [
             .hass=${this.hass}
             .value=${String(e.entity ?? "")}
             .label=${t.seriesField.entity}
-            .includeDomains=${zp}
+            .includeDomains=${Em}
             .disabled=${this.disabled}
             @value-changed=${(e) => this.onEntityChange(n, e)}
           ></ha-entity-picker>
@@ -11699,7 +12306,7 @@ var zp = [
             type="button"
             title=${r}
             aria-label=${r}
-            .disabled=${this.disabled || !ap(this.field, this.list)}
+            .disabled=${this.disabled || !Kp(this.field, this.list)}
             @click=${() => this.removeAt(n)}
           >
             <ha-icon icon="mdi:close"></ha-icon>
@@ -11725,7 +12332,7 @@ var zp = [
       <button
         type="button"
         class="add"
-        .disabled=${this.disabled || !ip(this.field, e)}
+        .disabled=${this.disabled || !Gp(this.field, e)}
         @click=${this.add}
       >
         <ha-icon icon="mdi:plus"></ha-icon>
@@ -11734,10 +12341,10 @@ var zp = [
     `;
 	}
 };
-Y([z({ attribute: !1 })], Bp.prototype, "hass", void 0), Y([z({ attribute: !1 })], Bp.prototype, "field", void 0), Y([z({ attribute: !1 })], Bp.prototype, "value", void 0), Y([z({ attribute: !1 })], Bp.prototype, "palette", void 0), Y([z({ type: Boolean })], Bp.prototype, "disabled", void 0), Bp = Y([R("ods-series-field")], Bp);
+Y([z({ attribute: !1 })], Dm.prototype, "hass", void 0), Y([z({ attribute: !1 })], Dm.prototype, "field", void 0), Y([z({ attribute: !1 })], Dm.prototype, "value", void 0), Y([z({ attribute: !1 })], Dm.prototype, "palette", void 0), Y([z({ type: Boolean })], Dm.prototype, "disabled", void 0), Dm = Y([R("ods-series-field")], Dm);
 //#endregion
 //#region src/ods-font-sample.ts
-var Vp = class extends L {
+var Om = class extends L {
 	constructor(...e) {
 		super(...e), this.failed = !1;
 	}
@@ -11770,7 +12377,7 @@ var Vp = class extends L {
 	async load() {
 		let { hass: e, font: t } = this;
 		if (!e || !t) return;
-		let n = await xp(e, t);
+		let n = await cm(e, t);
 		t === this.font && (this.family = n, this.failed = n === void 0);
 	}
 	render() {
@@ -11786,17 +12393,17 @@ var Vp = class extends L {
     ` : I;
 	}
 };
-Y([z({ attribute: !1 })], Vp.prototype, "hass", void 0), Y([z({ attribute: !1 })], Vp.prototype, "font", void 0), Y([B()], Vp.prototype, "family", void 0), Y([B()], Vp.prototype, "failed", void 0), Vp = Y([R("ods-font-sample")], Vp);
+Y([z({ attribute: !1 })], Om.prototype, "hass", void 0), Y([z({ attribute: !1 })], Om.prototype, "font", void 0), Y([B()], Om.prototype, "family", void 0), Y([B()], Om.prototype, "failed", void 0), Om = Y([R("ods-font-sample")], Om);
 //#endregion
 //#region src/ods-font-field.ts
-var Hp = 250, Up = 400, Wp = class extends L {
+var km = 250, Am = 400, jm = class extends L {
 	constructor(...e) {
 		super(...e), this.disabled = !1, this.fonts = [], this.loaded = !1, this.closedAt = 0;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -11886,7 +12493,7 @@ var Hp = 250, Up = 400, Wp = class extends L {
 	async loadList() {
 		if (this.hass) {
 			try {
-				this.fonts = await zd(this.hass);
+				this.fonts = await Kd(this.hass);
 			} catch {
 				this.fonts = [];
 			}
@@ -11894,7 +12501,7 @@ var Hp = 250, Up = 400, Wp = class extends L {
 		}
 	}
 	open(e) {
-		if (this.disabled || Date.now() - this.closedAt < Hp) return;
+		if (this.disabled || Date.now() - this.closedAt < km) return;
 		let t = e.currentTarget;
 		t instanceof HTMLElement && (this.anchor = t.getBoundingClientRect(), this.loadList());
 	}
@@ -11908,9 +12515,9 @@ var Hp = 250, Up = 400, Wp = class extends L {
 		}), this.close();
 	}
 	renderCurrent() {
-		let e = Hd(this.fonts, this.chosen);
+		let e = Yd(this.fonts, this.chosen);
 		if (e) return F`
-        <span class="name">${Vd(e)}</span>
+        <span class="name">${Jd(e)}</span>
       `;
 		let n = this.loaded && this.chosen !== "", r = n ? t.fontField.missing(this.chosen) : this.chosen || t.fontField.choose;
 		return F`
@@ -11952,7 +12559,7 @@ var Hp = 250, Up = 400, Wp = class extends L {
       <ods-popover
         .heading=${this.field.label}
         .anchor=${this.anchor}
-        .width=${Up}
+        .width=${Am}
         @popover-close=${this.close}
       >
         ${this.renderList()}
@@ -11977,48 +12584,48 @@ var Hp = 250, Up = 400, Wp = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Wp.prototype, "hass", void 0), Y([z({ attribute: !1 })], Wp.prototype, "field", void 0), Y([z({ attribute: !1 })], Wp.prototype, "value", void 0), Y([z({ type: Boolean })], Wp.prototype, "disabled", void 0), Y([B()], Wp.prototype, "fonts", void 0), Y([B()], Wp.prototype, "loaded", void 0), Y([B()], Wp.prototype, "anchor", void 0), Wp = Y([R("ods-font-field")], Wp);
+Y([z({ attribute: !1 })], jm.prototype, "hass", void 0), Y([z({ attribute: !1 })], jm.prototype, "field", void 0), Y([z({ attribute: !1 })], jm.prototype, "value", void 0), Y([z({ type: Boolean })], jm.prototype, "disabled", void 0), Y([B()], jm.prototype, "fonts", void 0), Y([B()], jm.prototype, "loaded", void 0), Y([B()], jm.prototype, "anchor", void 0), jm = Y([R("ods-font-field")], jm);
 //#endregion
 //#region src/ranges.ts
-var Gp = 12, Kp = [
+var Mm = 12, Nm = [
 	"green",
 	"yellow",
 	"orange",
 	"red",
 	"blue",
 	"black"
-], qp = (e) => typeof e == "object" && !!e && !Array.isArray(e), Jp = (e) => Array.isArray(e) ? e.filter(qp).map((e) => ({
+], Pm = (e) => typeof e == "object" && !!e && !Array.isArray(e), Fm = (e) => Array.isArray(e) ? e.filter(Pm).map((e) => ({
 	from: typeof e.from == "number" ? e.from : null,
 	color: typeof e.color == "string" ? e.color : "black"
-})) : [], Yp = (e, t) => {
+})) : [], Im = (e, t) => {
 	let n = xo[e], r = new Set(t.map((e) => e.color));
-	return Kp.find((e) => n.includes(e) && !r.has(e)) || (n.find((e) => !r.has(e)) ?? n[0] ?? "black");
-}, Xp = (e, t) => ({
+	return Nm.find((e) => n.includes(e) && !r.has(e)) || (n.find((e) => !r.has(e)) ?? n[0] ?? "black");
+}, Lm = (e, t) => ({
 	from: null,
-	color: Yp(e, t)
-}), Zp = (e, t) => t.length < (typeof e.max == "number" ? e.max : Gp), Qp = (e, t, n) => e.map((e, r) => r === t ? {
+	color: Im(e, t)
+}), Rm = (e, t) => t.length < (typeof e.max == "number" ? e.max : Mm), zm = (e, t, n) => e.map((e, r) => r === t ? {
 	...e,
 	...n
-} : e), $p = (e, t) => e.filter((e, n) => n !== t), em = (e, t) => e[t].from === null && e.findIndex((e) => e.from === null) !== t, tm = () => ({
+} : e), Bm = (e, t) => e.filter((e, n) => n !== t), Vm = (e, t) => e[t].from === null && e.findIndex((e) => e.from === null) !== t, Hm = () => ({
 	key: "from",
 	label: t.rangesField.from,
 	shape: "number",
 	section: "appearance",
 	decimal: !0,
 	optional: !0
-}), nm = () => ({
+}), Um = () => ({
 	key: "color",
 	label: t.rangesField.color,
 	shape: "color",
 	section: "appearance"
-}), rm = class extends L {
+}), Wm = class extends L {
 	constructor(...e) {
 		super(...e), this.palette = "bwr", this.disabled = !1;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -12069,7 +12676,7 @@ var Gp = 12, Kp = [
 		];
 	}
 	get list() {
-		return Jp(this.value);
+		return Fm(this.value);
 	}
 	change(e) {
 		W(this, "primitive-field-change", {
@@ -12080,30 +12687,30 @@ var Gp = 12, Kp = [
 	onRangeChange(e, t) {
 		t.stopPropagation();
 		let { key: n, value: r } = t.detail;
-		this.change(Qp(this.list, e, { [n]: r }));
+		this.change(zm(this.list, e, { [n]: r }));
 	}
 	removeAt(e) {
-		this.change($p(this.list, e));
+		this.change(Bm(this.list, e));
 	}
 	add() {
-		this.change([...this.list, Xp(this.palette, this.list)]);
+		this.change([...this.list, Lm(this.palette, this.list)]);
 	}
 	renderRange(e, n) {
 		let r = t.rangesField.remove(n + 1);
 		return F`
       <div
-        class=${em(this.list, n) ? "range idle" : "range"}
+        class=${Vm(this.list, n) ? "range idle" : "range"}
         data-range=${n}
       >
         <ods-value-field
-          .field=${tm()}
+          .field=${Hm()}
           .value=${e.from}
           .palette=${this.palette}
           .disabled=${this.disabled}
           @primitive-field-change=${(e) => this.onRangeChange(n, e)}
         ></ods-value-field>
         <ods-value-field
-          .field=${nm()}
+          .field=${Um()}
           compact
           .value=${e.color}
           .palette=${this.palette}
@@ -12130,7 +12737,7 @@ var Gp = 12, Kp = [
       <button
         type="button"
         class="add"
-        .disabled=${this.disabled || !Zp(this.field, e)}
+        .disabled=${this.disabled || !Rm(this.field, e)}
         @click=${this.add}
       >
         <ha-icon icon="mdi:plus"></ha-icon>
@@ -12139,20 +12746,20 @@ var Gp = 12, Kp = [
     `;
 	}
 };
-Y([z({ attribute: !1 })], rm.prototype, "hass", void 0), Y([z({ attribute: !1 })], rm.prototype, "field", void 0), Y([z({ attribute: !1 })], rm.prototype, "value", void 0), Y([z({ attribute: !1 })], rm.prototype, "palette", void 0), Y([z({ type: Boolean })], rm.prototype, "disabled", void 0), rm = Y([R("ods-ranges-field")], rm);
+Y([z({ attribute: !1 })], Wm.prototype, "hass", void 0), Y([z({ attribute: !1 })], Wm.prototype, "field", void 0), Y([z({ attribute: !1 })], Wm.prototype, "value", void 0), Y([z({ attribute: !1 })], Wm.prototype, "palette", void 0), Y([z({ type: Boolean })], Wm.prototype, "disabled", void 0), Wm = Y([R("ods-ranges-field")], Wm);
 //#endregion
 //#region src/image-source.ts
-var im = /^(camera|image)\.[a-z0-9_]+$/, am = /^media-source:\/\/media_source\/([^/]+)\/(.+)$/, om = "media-source://", sm = (e) => im.test(e) ? "entity" : /^https?:\/\//.test(e) || e.startsWith("data:") ? "web" : e.startsWith("/local/") || e.startsWith("/media/") || e.startsWith(om) ? "file" : "other", cm = (e) => {
-	let t = am.exec(e);
-	return t ? `/media/${t[1]}/${decodeURIComponent(t[2])}` : e.startsWith(om) ? e : void 0;
-}, lm = class extends L {
+var Gm = /^(camera|image)\.[a-z0-9_]+$/, Km = /^media-source:\/\/media_source\/([^/]+)\/(.+)$/, qm = "media-source://", Jm = (e) => Gm.test(e) ? "entity" : /^https?:\/\//.test(e) || e.startsWith("data:") ? "web" : e.startsWith("/local/") || e.startsWith("/media/") || e.startsWith(qm) ? "file" : "other", Ym = (e) => {
+	let t = Km.exec(e);
+	return t ? `/media/${t[1]}/${decodeURIComponent(t[2])}` : e.startsWith(qm) ? e : void 0;
+}, Xm = class extends L {
 	constructor(...e) {
 		super(...e), this.value = "";
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: grid;
@@ -12175,7 +12782,7 @@ var im = /^(camera|image)\.[a-z0-9_]+$/, am = /^media-source:\/\/media_source\/(
 	}
 	onMedia(e) {
 		e.stopPropagation();
-		let t = e.detail.value.media, n = cm(typeof t == "object" && t && "media_content_id" in t ? String(t.media_content_id) : String(t ?? ""));
+		let t = e.detail.value.media, n = Ym(typeof t == "object" && t && "media_content_id" in t ? String(t.media_content_id) : String(t ?? ""));
 		n && this.choose(n);
 	}
 	onEntity(e) {
@@ -12199,7 +12806,7 @@ var im = /^(camera|image)\.[a-z0-9_]+$/, am = /^media-source:\/\/media_source\/(
     `;
 	}
 	render() {
-		let e = sm(this.value);
+		let e = Jm(this.value);
 		return F`
       <label>
         <span class="field-label">${t.imagePicker.address}</span>
@@ -12221,22 +12828,22 @@ var im = /^(camera|image)\.[a-z0-9_]+$/, am = /^media-source:\/\/media_source\/(
     `;
 	}
 };
-Y([z({ attribute: !1 })], lm.prototype, "hass", void 0), Y([z()], lm.prototype, "value", void 0), lm = Y([R("ods-image-picker")], lm);
+Y([z({ attribute: !1 })], Xm.prototype, "hass", void 0), Y([z()], Xm.prototype, "value", void 0), Xm = Y([R("ods-image-picker")], Xm);
 //#endregion
 //#region src/ods-image-field.ts
-var um = 250, dm = {
+var Zm = 250, Qm = {
 	entity: "mdi:cctv",
 	web: "mdi:web",
 	file: "mdi:file-image-outline",
 	other: "mdi:image-off-outline"
-}, fm = class extends L {
+}, $m = class extends L {
 	constructor(...e) {
 		super(...e), this.value = "", this.disabled = !1, this.closedAt = 0;
 	}
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -12267,7 +12874,7 @@ var um = 250, dm = {
 		];
 	}
 	openPicker(e) {
-		if (this.disabled || Date.now() - this.closedAt < um) return;
+		if (this.disabled || Date.now() - this.closedAt < Zm) return;
 		let t = e.currentTarget;
 		t instanceof HTMLElement && (this.anchor = t.getBoundingClientRect());
 	}
@@ -12297,7 +12904,7 @@ var um = 250, dm = {
     ` : I;
 	}
 	render() {
-		let e = sm(this.value);
+		let e = Jm(this.value);
 		return F`
       <span class="field-label">${this.field.label}</span>
       <button
@@ -12308,17 +12915,17 @@ var um = 250, dm = {
         title=${this.value}
         @click=${this.openPicker}
       >
-        <ha-icon icon=${dm[e]}></ha-icon>
+        <ha-icon icon=${Qm[e]}></ha-icon>
         <span class="name">${this.value || t.imagePicker.empty}</span>
       </button>
       ${this.renderPicker()}
     `;
 	}
 };
-Y([z({ attribute: !1 })], fm.prototype, "hass", void 0), Y([z({ attribute: !1 })], fm.prototype, "field", void 0), Y([z()], fm.prototype, "value", void 0), Y([z({ type: Boolean })], fm.prototype, "disabled", void 0), Y([B()], fm.prototype, "anchor", void 0), fm = Y([R("ods-image-field")], fm);
+Y([z({ attribute: !1 })], $m.prototype, "hass", void 0), Y([z({ attribute: !1 })], $m.prototype, "field", void 0), Y([z()], $m.prototype, "value", void 0), Y([z({ type: Boolean })], $m.prototype, "disabled", void 0), Y([B()], $m.prototype, "anchor", void 0), $m = Y([R("ods-image-field")], $m);
 //#endregion
 //#region src/ods-value-field.ts
-var pm = 250, mm = 4, hm = "lt", gm = class extends L {
+var eh = 250, th = 4, nh = "lt", rh = class extends L {
 	constructor(...e) {
 		super(...e), this.palette = "bw", this.display = {
 			width: 800,
@@ -12328,7 +12935,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
 	static {
 		this.styles = [
 			G,
-			Jd,
+			Pf,
 			P`
       :host {
         display: block;
@@ -12433,7 +13040,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
 		});
 	}
 	openPicker(e, t) {
-		if (this.disabled || Date.now() - this.closedAt < pm) return;
+		if (this.disabled || Date.now() - this.closedAt < eh) return;
 		let n = t.currentTarget;
 		n instanceof HTMLElement && (this.picker = {
 			kind: e,
@@ -12558,14 +13165,14 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
 	renderAnchorMark(e) {
 		return F`
       <span class="anchor-mark">
-        ${lp.map((t) => F`
+        ${Xp.map((t) => F`
             <i class=${t === e ? "on" : ""}></i>
           `)}
       </span>
     `;
 	}
 	renderAnchor() {
-		let e = String(this.value ?? "") || hm, n = up(e) ? t.anchors[e] : e;
+		let e = String(this.value ?? "") || nh, n = Zp(e) ? t.anchors[e] : e;
 		return F`
       <button
         type="button"
@@ -12582,7 +13189,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
 	}
 	renderEnum() {
 		let e = this.field.options ?? [];
-		return this.field.key === "anchor" ? this.renderAnchor() : e.length <= mm && e.every((e) => this.optionLabel(e).length <= 10) ? this.renderSegmented(e) : this.renderSelect(e);
+		return this.field.key === "anchor" ? this.renderAnchor() : e.length <= th && e.every((e) => this.optionLabel(e).length <= 10) ? this.renderSegmented(e) : this.renderSelect(e);
 	}
 	colorName() {
 		let e = String(this.value ?? "");
@@ -12725,7 +13332,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
     `;
 	}
 	renderNested() {
-		return ep(this.field) ? this.renderSeries() : F`
+		return Vp(this.field) ? this.renderSeries() : F`
       <ha-form
         .hass=${this.hass}
         .data=${{ [this.field.key]: Io(this.field, this.value) }}
@@ -12736,7 +13343,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
     `;
 	}
 	isLabelledInside() {
-		return this.compact || this.field.shape === "icon" || this.field.shape === "icons" || this.field.shape === "font" || this.field.shape === "image" || this.field.shape === "number" || this.field.shape === "coordinate" || this.field.shape === "boolean" || this.field.shape === "object" || this.field.shape === "objects" && !ep(this.field);
+		return this.compact || this.field.shape === "icon" || this.field.shape === "icons" || this.field.shape === "font" || this.field.shape === "image" || this.field.shape === "number" || this.field.shape === "coordinate" || this.field.shape === "boolean" || this.field.shape === "object" || this.field.shape === "objects" && !Vp(this.field);
 	}
 	renderControl() {
 		switch (this.field.shape) {
@@ -12777,7 +13384,7 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
                 ></ods-color-picker>
               ` : F`
                 <ods-anchor-picker
-                  .value=${String(this.value ?? "") || hm}
+                  .value=${String(this.value ?? "") || nh}
                   @anchor-change=${this.onAnchorChange}
                 ></ods-anchor-picker>
               `}
@@ -12792,10 +13399,10 @@ var pm = 250, mm = 4, hm = "lt", gm = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], gm.prototype, "hass", void 0), Y([z({ attribute: !1 })], gm.prototype, "field", void 0), Y([z({ attribute: !1 })], gm.prototype, "value", void 0), Y([z()], gm.prototype, "palette", void 0), Y([z({ attribute: !1 })], gm.prototype, "display", void 0), Y([z({ type: Boolean })], gm.prototype, "disabled", void 0), Y([z({ type: Boolean })], gm.prototype, "compact", void 0), Y([B()], gm.prototype, "picker", void 0), gm = Y([R("ods-value-field")], gm);
+Y([z({ attribute: !1 })], rh.prototype, "hass", void 0), Y([z({ attribute: !1 })], rh.prototype, "field", void 0), Y([z({ attribute: !1 })], rh.prototype, "value", void 0), Y([z()], rh.prototype, "palette", void 0), Y([z({ attribute: !1 })], rh.prototype, "display", void 0), Y([z({ type: Boolean })], rh.prototype, "disabled", void 0), Y([z({ type: Boolean })], rh.prototype, "compact", void 0), Y([B()], rh.prototype, "picker", void 0), rh = Y([R("ods-value-field")], rh);
 //#endregion
 //#region src/ods-import-dialog.ts
-var _m = class extends L {
+var ih = class extends L {
 	constructor(...e) {
 		super(...e), this.colors = [], this.replaces = !1, this.busy = !1, this.adjusted = !1, this.mapping = {};
 	}
@@ -12886,7 +13493,7 @@ var _m = class extends L {
 		];
 	}
 	willUpdate(e) {
-		e.has("colors") && (this.mapping = yd(this.colors));
+		e.has("colors") && (this.mapping = Td(this.colors));
 	}
 	get palette() {
 		return this.display.palette;
@@ -13002,10 +13609,10 @@ var _m = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], _m.prototype, "hass", void 0), Y([z({ attribute: !1 })], _m.prototype, "colors", void 0), Y([z({ type: Boolean })], _m.prototype, "replaces", void 0), Y([z({ type: Boolean })], _m.prototype, "busy", void 0), Y([z({ type: Boolean })], _m.prototype, "adjusted", void 0), Y([z({ attribute: !1 })], _m.prototype, "display", void 0), Y([B()], _m.prototype, "mapping", void 0), _m = Y([R("ods-import-dialog")], _m);
+Y([z({ attribute: !1 })], ih.prototype, "hass", void 0), Y([z({ attribute: !1 })], ih.prototype, "colors", void 0), Y([z({ type: Boolean })], ih.prototype, "replaces", void 0), Y([z({ type: Boolean })], ih.prototype, "busy", void 0), Y([z({ type: Boolean })], ih.prototype, "adjusted", void 0), Y([z({ attribute: !1 })], ih.prototype, "display", void 0), Y([B()], ih.prototype, "mapping", void 0), ih = Y([R("ods-import-dialog")], ih);
 //#endregion
 //#region src/ods-context-menu.ts
-var vm = class extends L {
+var ah = class extends L {
 	constructor(...e) {
 		super(...e), this.entries = [], this.label = "";
 	}
@@ -13095,16 +13702,16 @@ var vm = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], vm.prototype, "entries", void 0), Y([z()], vm.prototype, "label", void 0), vm = Y([R("ods-context-menu")], vm);
+Y([z({ attribute: !1 })], ah.prototype, "entries", void 0), Y([z()], ah.prototype, "label", void 0), ah = Y([R("ods-context-menu")], ah);
 //#endregion
 //#region src/ods-shortcuts-dialog.ts
-var ym = [
+var oh = [
 	"edit",
 	"arrange",
 	"group",
 	"view",
 	"history"
-], bm = class extends L {
+], sh = class extends L {
 	static {
 		this.styles = [
 			G,
@@ -13172,11 +13779,11 @@ var ym = [
 		e.target === e.currentTarget && this.close();
 	}
 	renderGroup(e) {
-		let n = pd(), r = Su.filter((t) => t.group === e && t.shortcuts.length > 0).map((e) => {
-			let t = Au(e, {
+		let n = yd(), r = Eu.filter((t) => t.group === e && t.shortcuts.length > 0).map((e) => {
+			let t = Pu(e, {
 				canUndo: !0,
 				canRedo: !0
-			}, n), r = e.shortcuts.map((t) => Au({
+			}, n), r = e.shortcuts.map((t) => Pu({
 				...e,
 				shortcuts: [t]
 			}, {
@@ -13217,16 +13824,287 @@ var ym = [
               <ha-icon icon="mdi:close"></ha-icon>
             </button>
           </header>
-          ${ym.map((e) => this.renderGroup(e))}
+          ${oh.map((e) => this.renderGroup(e))}
         </div>
       </div>
     `;
 	}
 };
-bm = Y([R("ods-shortcuts-dialog")], bm);
+sh = Y([R("ods-shortcuts-dialog")], sh);
 //#endregion
-//#region src/ods-dashboard-card.ts
-var xm = () => [
+//#region src/ods-basic-steps.ts
+var ch = class extends L {
+	constructor(...e) {
+		super(...e), this.step = "layout";
+	}
+	static {
+		this.styles = [
+			G,
+			K,
+			Pf,
+			P`
+      :host {
+        display: block;
+        padding: var(--ha-space-2, 8px) 9px;
+        border-inline-end: 1px solid var(--studio-border);
+        border-bottom: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+      }
+      .segmented {
+        height: 32px;
+      }
+      .segmented button {
+        font-size: 12px;
+      }
+      .segmented button[aria-pressed="true"] {
+        background: var(--studio-accent);
+      }
+    `
+		];
+	}
+	renderStep(e, t) {
+		return F`
+      <button
+        type="button"
+        aria-pressed=${this.step === e ? "true" : "false"}
+        @click=${() => W(this, "basic-step-change", { step: e })}
+      >
+        ${t}
+      </button>
+    `;
+	}
+	render() {
+		return F`
+      <div
+        class="segmented"
+        role="group"
+        aria-label=${t.basic.stepsLabel}
+      >
+        ${this.renderStep("layout", t.basic.stepLayout)}
+        ${this.renderStep("widgets", t.basic.stepWidgets)}
+      </div>
+    `;
+	}
+};
+Y([z()], ch.prototype, "step", void 0), ch = Y([R("ods-basic-steps")], ch);
+//#endregion
+//#region src/display-shape.ts
+var lh = .03, uh = 2.5, dh = 5, fh = (e, t, n) => Math.min(n, Math.max(t, e)), ph = (e) => e === 90 || e === 270, mh = (e, t) => ph(t) ? {
+	width: e.height,
+	height: e.width
+} : e, hh = (e, t) => {
+	let n = mh(e, e.rotation), r = fh(Math.min(t.width, t.height) * lh, uh, dh), i = Math.min((t.width - 2 * r) / n.width, (t.height - 2 * r) / n.height), a = {
+		width: n.width * i,
+		height: n.height * i
+	};
+	return {
+		housing: {
+			width: a.width + 2 * r,
+			height: a.height + 2 * r
+		},
+		screen: a,
+		bezel: r
+	};
+}, gh = (e) => e * Math.PI / 180, _h = (e, t) => {
+	let n = Math.abs(Math.cos(gh(t))), r = Math.abs(Math.sin(gh(t)));
+	return {
+		width: e.width * n + e.height * r,
+		height: e.width * r + e.height * n
+	};
+}, vh = (e, t, n) => {
+	let r = _h(e, t);
+	return Math.min(1, n.width / r.width, n.height / r.height);
+}, yh = (e, t) => {
+	let n = Math.abs(Math.cos(gh(t))), r = Math.abs(Math.sin(gh(t))), i = _h(e, t), a = i.width / i.height, o = Math.min(e.width / (n + r / a), e.height / (r + n / a));
+	return {
+		width: o,
+		height: o / a
+	};
+}, bh = 6, xh = 9, Sh = .13, Ch = .76, wh = (e) => Math.sin(Math.PI / 2 * e), Th = (e) => 1 - (1 - e) ** 3, Eh = (e) => Math.min(1, Math.max(0, e)), Dh = (e, t, n) => {
+	let r = Math.sign(t - e);
+	if (r === 0) return t;
+	let i = Eh(n);
+	if (i >= 1) return t;
+	if (i < Sh) {
+		let t = wh(i / Sh);
+		return e - r * bh * t;
+	}
+	if (i < Ch) {
+		let n = Th((i - Sh) / .63);
+		return e - r * bh + (t - e + r * 15) * n;
+	}
+	let a = Th((i - Ch) / .24);
+	return t + r * xh * (1 - a);
+}, Oh = (e, t) => {
+	let n = (t - (e % 360 + 360) % 360 + 540) % 360 - 180;
+	return n === -180 ? 180 : n;
+}, kh = {
+	width: 240,
+	height: 92
+}, Ah = class extends L {
+	constructor(...e) {
+		super(...e), this.width = 800, this.height = 480, this.rotation = 0, this.background = "white", this.accent = "#202124", this.box = kh, this.turns = !1, this.angle = 0, this.target = 0, this.frame = 0;
+	}
+	static {
+		this.styles = P`
+    :host {
+      display: block;
+    }
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .housing {
+      fill: #35383b;
+    }
+    .screen {
+      stroke: color-mix(in srgb, var(--studio-text, #202124) 30%, transparent);
+      stroke-width: 0.5;
+    }
+    .light {
+      fill: #4fd1a5;
+    }
+    .button {
+      fill: #8a9096;
+    }
+    .skeleton-title {
+      fill: color-mix(in srgb, var(--studio-muted, #68727a) 50%, transparent);
+    }
+    .skeleton-line {
+      fill: color-mix(in srgb, var(--studio-muted, #68727a) 28%, transparent);
+    }
+    .skeleton-block {
+      fill: color-mix(
+        in srgb,
+        var(--display-accent, #202124) 18%,
+        var(--studio-surface, #fff)
+      );
+    }
+    .skeleton-accent {
+      fill: var(--display-accent, #202124);
+    }
+  `;
+	}
+	connectedCallback() {
+		super.connectedCallback(), this.angle = this.rotation, this.target = this.rotation;
+	}
+	disconnectedCallback() {
+		super.disconnectedCallback(), cancelAnimationFrame(this.frame);
+	}
+	willUpdate(e) {
+		e.has("rotation") && this.hasUpdated && this.turnTo(this.rotation);
+	}
+	turnTo(e) {
+		cancelAnimationFrame(this.frame);
+		let t = this.angle;
+		if (this.target += Oh(this.target, e), !this.turns || jh()) {
+			this.angle = this.target;
+			return;
+		}
+		let n = this.target, r = performance.now(), i = (e) => {
+			let a = (e - r) / 860;
+			this.angle = Dh(t, n, a), a < 1 && (this.frame = requestAnimationFrame(i));
+		};
+		this.frame = requestAnimationFrame(i);
+	}
+	renderSkeleton(e) {
+		let t = -e.width / 2, n = -e.height / 2, r = Math.max(3, e.height * .04), i = n + e.height * .25;
+		return el`
+      <rect
+        class="skeleton-title"
+        x=${t + e.width * .12}
+        y=${i}
+        width=${e.width * .25}
+        height=${r}
+        rx=${r / 2}
+      ></rect>
+      <circle
+        class="skeleton-accent"
+        cx=${t + e.width * .88 - 2.5}
+        cy=${i + r / 2}
+        r="2.5"
+      ></circle>
+      <rect
+        class="skeleton-block"
+        x=${t + e.width * .12}
+        y=${n + e.height * .48}
+        width=${e.width * .72}
+        height=${e.height * .13}
+        rx=${e.height * .065}
+      ></rect>
+      <rect
+        class="skeleton-line"
+        x=${t + e.width * .12}
+        y=${n + e.height * .7}
+        width=${e.width * .48}
+        height=${r}
+        rx=${r / 2}
+      ></rect>
+    `;
+	}
+	renderHousing(e) {
+		let { housing: t, screen: n, bezel: r } = e;
+		return el`
+      <rect
+        class="housing"
+        x=${-t.width / 2}
+        y=${-t.height / 2}
+        width=${t.width}
+        height=${t.height}
+        rx=${r * 1.6}
+      ></rect>
+      <rect
+        class="screen"
+        x=${-n.width / 2}
+        y=${-n.height / 2}
+        width=${n.width}
+        height=${n.height}
+        rx="1"
+        fill=${this.background}
+      ></rect>
+      <circle
+        class="light"
+        cx=${-t.width / 2 + r * 1.6}
+        cy=${t.height / 2 - r / 2}
+        r=${r * .32}
+      ></circle>
+      <rect
+        class="button"
+        x=${t.width / 2 - r * 7}
+        y=${t.height / 2 - r * .78}
+        width=${r * 5}
+        height=${r * .5}
+        rx=${r * .25}
+      ></rect>
+    `;
+	}
+	render() {
+		let e = this.box, n = hh({
+			width: this.width,
+			height: this.height,
+			rotation: this.rotation
+		}, e), r = vh(n.housing, this.angle, e), i = yh(n.screen, this.angle), a = `${t.common.sizeInPixels(this.width, this.height)} · ${this.rotation}°`, o = `translate(${`${e.width / 2} ${e.height / 2}`}) rotate(${this.angle}) scale(${r})`;
+		return F`
+      <svg
+        viewBox="0 0 ${e.width} ${e.height}"
+        style="--display-accent: ${this.accent}"
+        role="img"
+        aria-label=${a}
+      >
+        <g transform=${o}>
+          ${this.renderHousing(n)}
+          <g transform="rotate(${-this.angle})">${this.renderSkeleton(i)}</g>
+        </g>
+      </svg>
+    `;
+	}
+};
+Y([z({ type: Number })], Ah.prototype, "width", void 0), Y([z({ type: Number })], Ah.prototype, "height", void 0), Y([z({ type: Number })], Ah.prototype, "rotation", void 0), Y([z()], Ah.prototype, "background", void 0), Y([z()], Ah.prototype, "accent", void 0), Y([z({ attribute: !1 })], Ah.prototype, "box", void 0), Y([z({ type: Boolean })], Ah.prototype, "turns", void 0), Y([B()], Ah.prototype, "angle", void 0), Ah = Y([R("ods-display-preview")], Ah);
+var jh = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches, Mh = {
+	width: 240,
+	height: 92
+}, Nh = () => [
 	{
 		id: "rename",
 		label: t.gallery.menu.rename,
@@ -13248,7 +14126,7 @@ var xm = () => [
 		icon: "mdi:delete-outline",
 		danger: !0
 	}
-], Sm = class extends L {
+], Ph = class extends L {
 	constructor(...e) {
 		super(...e), this.language = "en", this.menuOpen = !1, this.renaming = !1, this.draftName = "";
 	}
@@ -13256,7 +14134,7 @@ var xm = () => [
 		this.styles = [
 			G,
 			K,
-			qd,
+			Nf,
 			P`
       :host {
         display: contents;
@@ -13287,7 +14165,7 @@ var xm = () => [
         display: grid;
         place-items: center;
         overflow: hidden;
-        padding: 23px;
+        padding: 35px 23px 23px;
         border-radius: 12px 12px 0 0;
         background: color-mix(
           in srgb,
@@ -13295,54 +14173,6 @@ var xm = () => [
           var(--studio-surface)
         );
         pointer-events: none;
-      }
-      .dashboard-miniature {
-        position: relative;
-        width: min(145px, 70%);
-        max-height: 96px;
-        overflow: hidden;
-        border: 2px solid
-          color-mix(in srgb, var(--dashboard-accent) 22%, var(--studio-border));
-        border-radius: 9px;
-        box-shadow: 0 7px 18px rgba(0, 0, 0, 0.12);
-      }
-      .dashboard-miniature > span {
-        position: absolute;
-        display: block;
-        border-radius: 99px;
-      }
-      .miniature-title {
-        left: 12%;
-        top: 25%;
-        width: 25%;
-        height: 4%;
-        min-height: 3px;
-        background: color-mix(in srgb, var(--studio-muted) 50%, transparent);
-      }
-      .miniature-accent {
-        right: 12%;
-        top: 25%;
-        width: 5px;
-        height: 5px;
-        background: var(--dashboard-accent);
-      }
-      .miniature-line {
-        left: 12%;
-        bottom: 26%;
-        width: 48%;
-        height: 4%;
-        min-height: 3px;
-        background: color-mix(in srgb, var(--studio-muted) 28%, transparent);
-      }
-      .miniature-line.long {
-        bottom: 39%;
-        width: 72%;
-        height: 13%;
-        background: color-mix(
-          in srgb,
-          var(--dashboard-accent) 18%,
-          var(--studio-surface)
-        );
       }
       .dashboard-resolution {
         position: absolute;
@@ -13392,22 +14222,26 @@ var xm = () => [
         font-weight: 700;
         pointer-events: auto;
       }
-      .dashboard-card-meta {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        color: var(--studio-muted);
-        font-size: 10px;
-      }
-      .dashboard-card-meta > span + span::before {
-        content: "·";
-        margin-right: 7px;
-      }
       .dashboard-card-copy small {
         color: var(--studio-muted);
         font-size: 10px;
       }
+      .mode-badge {
+        position: absolute;
+        top: var(--ha-space-2, 8px);
+        inset-inline-start: var(--ha-space-2, 8px);
+        padding: 1px 7px;
+        border: 1px solid var(--studio-border);
+        border-radius: 999px;
+        background: var(--studio-surface);
+        color: var(--studio-accent);
+        font-size: 10px;
+        font-weight: 600;
+      }
       .palette-dots {
+        position: absolute;
+        inset-inline-start: 11px;
+        bottom: var(--ha-space-2, 8px);
         display: inline-flex;
         align-items: center;
         gap: 2px;
@@ -13486,14 +14320,14 @@ var xm = () => [
 		e.stopPropagation(), W(this, "dashboard-menu-toggle", { dashboardId: this.dashboard.id });
 	}
 	onMenuSelect(e) {
-		let t = xm().find((t) => t.id === e.detail.id);
+		let t = Nh().find((t) => t.id === e.detail.id);
 		t && (e.stopPropagation(), W(this, "dashboard-menu-action", {
 			dashboard: this.dashboard,
 			action: t.id
 		}));
 	}
 	onRenameInput(e) {
-		W(this, "dashboard-rename-input", { name: dd(e) });
+		W(this, "dashboard-rename-input", { name: _d(e) });
 	}
 	onRenameKeyDown(e) {
 		e.stopPropagation(), e.key === "Enter" ? (e.preventDefault(), W(this, "dashboard-rename-commit")) : e.key === "Escape" && (e.preventDefault(), W(this, "dashboard-rename-cancel"));
@@ -13505,19 +14339,17 @@ var xm = () => [
 		let { display: e } = this.dashboard;
 		return F`
       <div class="dashboard-card-preview">
-        <div class="dashboard-miniature" style=${V({
-			aspectRatio: `${e.width} / ${e.height}`,
-			background: e.background,
-			"--dashboard-accent": ld(e.palette)
-		})}>
-          <span class="miniature-title"></span>
-          <span class="miniature-accent"></span>
-          <span class="miniature-line long"></span>
-          <span class="miniature-line"></span>
-        </div>
-        <span class="dashboard-resolution">
-          ${t.common.size(e.width, e.height)}
-        </span>
+        <span class="mode-badge">${this.modeLabel()}</span>
+        <ods-display-preview
+          .width=${e.width}
+          .height=${e.height}
+          .rotation=${e.rotation}
+          .background=${e.background}
+          .accent=${hd(e.palette)}
+          .box=${Mh}
+        ></ods-display-preview>
+        ${this.renderPaletteDots()}
+        <span class="dashboard-resolution">${this.resolutionLabel()}</span>
       </div>
     `;
 	}
@@ -13543,20 +14375,25 @@ var xm = () => [
       </span>
     `;
 	}
-	renderMeta() {
-		let { display: e } = this.dashboard;
+	resolutionLabel() {
+		let { width: e, height: n, rotation: r } = this.dashboard.display, i = t.common.size(e, n);
+		return r === 0 ? i : `${i} · ${r}°`;
+	}
+	modeLabel() {
+		return this.dashboard.mode === "basic" ? t.basic.badgeBasic : t.basic.badgeAdvanced;
+	}
+	renderPaletteDots() {
+		let { palette: e } = this.dashboard.display;
 		return F`
-      <span class="dashboard-card-meta">
-        <span>${t.common.size(e.width, e.height)}</span>
-        <span
-          class="palette-dots"
-          aria-label=${bo[e.palette]}
-        >
-          ${xo[e.palette].map((e) => F`
-              <i style=${V({ background: e })}></i>
-            `)}
-        </span>
-        <span>${bo[e.palette]}</span>
+      <span
+        class="palette-dots"
+        role="img"
+        aria-label=${bo[e]}
+        title=${bo[e]}
+      >
+        ${xo[e].map((e) => F`
+            <i style=${V({ background: e })}></i>
+          `)}
       </span>
     `;
 	}
@@ -13566,7 +14403,7 @@ var xm = () => [
         class="dashboard-menu"
         id=${this.menuId}
         label=${t.gallery.menuFor(this.dashboard.name)}
-        .entries=${xm()}
+        .entries=${Nh()}
         @menu-select=${this.onMenuSelect}
       ></ods-context-menu>
     ` : I;
@@ -13574,15 +14411,15 @@ var xm = () => [
 	render() {
 		let e = this.dashboard;
 		return F`
-      <article class=${Yd({
+      <article class=${Ff({
 			"dashboard-card": !0,
 			"menu-open": this.menuOpen
 		})} data-dashboard-id=${e.id}>
         ${this.renderMiniature()}
         <div class="dashboard-card-copy">
-          ${this.renderTitle()} ${this.renderMeta()}
+          ${this.renderTitle()}
           <small>
-            ${t.gallery.updated(ud(e, this.language))}
+            ${t.gallery.updated(gd(e, this.language))}
           </small>
         </div>
         <button
@@ -13605,10 +14442,10 @@ var xm = () => [
     `;
 	}
 };
-Y([z({ attribute: !1 })], Sm.prototype, "dashboard", void 0), Y([z()], Sm.prototype, "language", void 0), Y([z({ type: Boolean })], Sm.prototype, "menuOpen", void 0), Y([z({ type: Boolean })], Sm.prototype, "renaming", void 0), Y([z()], Sm.prototype, "draftName", void 0), Y([bl(".dashboard-rename-input")], Sm.prototype, "renameInput", void 0), Sm = Y([R("ods-dashboard-card")], Sm);
+Y([z({ attribute: !1 })], Ph.prototype, "dashboard", void 0), Y([z()], Ph.prototype, "language", void 0), Y([z({ type: Boolean })], Ph.prototype, "menuOpen", void 0), Y([z({ type: Boolean })], Ph.prototype, "renaming", void 0), Y([z()], Ph.prototype, "draftName", void 0), Y([Sl(".dashboard-rename-input")], Ph.prototype, "renameInput", void 0), Ph = Y([R("ods-dashboard-card")], Ph);
 //#endregion
 //#region src/ods-gallery.ts
-var Cm = class extends L {
+var Fh = class extends L {
 	constructor(...e) {
 		super(...e), this.dashboards = [], this.error = "", this.saving = !1, this.searchText = "", this.sort = "updated", this.menuDashboardId = "", this.onOutsidePointerDown = (e) => {
 			this.menuDashboardId && (e.composedPath().some((e) => e instanceof HTMLElement && (e.classList.contains("dashboard-menu") || e.classList.contains("dashboard-menu-trigger"))) || (this.menuDashboardId = ""));
@@ -13620,7 +14457,7 @@ var Cm = class extends L {
 		this.styles = [
 			G,
 			K,
-			qd,
+			Nf,
 			P`
       :host {
         display: contents;
@@ -13814,10 +14651,10 @@ var Cm = class extends L {
 		W(this, "settings-open");
 	}
 	onSearchInput(e) {
-		this.searchText = dd(e);
+		this.searchText = _d(e);
 	}
 	onSortChange(e) {
-		this.sort = dd(e) === "name" ? "name" : "updated";
+		this.sort = _d(e) === "name" ? "name" : "updated";
 	}
 	onMenuToggle(e) {
 		e.stopPropagation();
@@ -13891,9 +14728,9 @@ var Cm = class extends L {
           <ha-form
             autofocus
             .hass=${this.hass}
-            .data=${Hu(e)}
-            .schema=${od($u(e))}
-            .computeLabel=${sd}
+            .data=${qu(e)}
+            .schema=${fd(id(e))}
+            .computeLabel=${pd}
             @value-changed=${this.settingsChanged}
           ></ha-form>
         </div>
@@ -13908,7 +14745,7 @@ var Cm = class extends L {
           <ha-button
             slot="primaryAction"
             appearance="filled"
-            .disabled=${this.saving || !qu(e)}
+            .disabled=${this.saving || !Qu(e)}
             @click=${() => W(this, "dashboard-settings-save")}
           >
             ${this.saving ? t.gallery.saving : t.gallery.settingsSave}
@@ -13918,7 +14755,7 @@ var Cm = class extends L {
     `;
 	}
 	render() {
-		let e = Ju(this.dashboards, this.searchText, this.sort, this.language);
+		let e = $u(this.dashboards, this.searchText, this.sort, this.language);
 		return F`
       <main class="dashboard-library">
         <header class="dashboard-library-header">
@@ -14006,17 +14843,142 @@ var Cm = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Cm.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], Cm.prototype, "hass", void 0), Y([z()], Cm.prototype, "error", void 0), Y([z({ type: Boolean })], Cm.prototype, "saving", void 0), Y([z()], Cm.prototype, "dialog", void 0), Y([z({ attribute: !1 })], Cm.prototype, "draft", void 0), Y([B()], Cm.prototype, "searchText", void 0), Y([B()], Cm.prototype, "sort", void 0), Y([B()], Cm.prototype, "menuDashboardId", void 0), Cm = Y([R("ods-gallery")], Cm);
+Y([z({ attribute: !1 })], Fh.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], Fh.prototype, "hass", void 0), Y([z()], Fh.prototype, "error", void 0), Y([z({ type: Boolean })], Fh.prototype, "saving", void 0), Y([z()], Fh.prototype, "dialog", void 0), Y([z({ attribute: !1 })], Fh.prototype, "draft", void 0), Y([B()], Fh.prototype, "searchText", void 0), Y([B()], Fh.prototype, "sort", void 0), Y([B()], Fh.prototype, "menuDashboardId", void 0), Fh = Y([R("ods-gallery")], Fh);
+//#endregion
+//#region src/ods-layout-panel.ts
+var Ih = (e) => e === "columns" || e === "rows" || e === "gap", Lh = "padding", Rh = 1024, zh = class extends L {
+	constructor(...e) {
+		super(...e), this.padding = 0;
+	}
+	static {
+		this.styles = [
+			G,
+			K,
+			P`
+      :host {
+        display: contents;
+      }
+      .toolbox {
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+        border-inline-end: 1px solid var(--studio-border);
+        background: var(--studio-surface);
+      }
+      .panel-title {
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        padding: 11px 12px;
+      }
+      .panel-title h2 {
+        margin: 1px 0 0;
+        font-size: 15px;
+      }
+      .section {
+        display: grid;
+        gap: var(--ha-space-2, 8px);
+        padding: var(--ha-space-1, 4px) var(--ha-space-3, 12px)
+          var(--ha-space-4, 16px);
+      }
+      .section h3 {
+        margin: 0;
+        color: var(--studio-muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .fields {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ha-space-2, 8px);
+      }
+      p {
+        margin: 0;
+        color: var(--studio-muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .count {
+        color: var(--studio-text);
+        font-weight: 600;
+      }
+    `
+		];
+	}
+	onFieldChange(e) {
+		e.stopPropagation();
+		let { key: t, value: n } = e.detail, r = Number(n);
+		Number.isFinite(r) && (Ih(t) && W(this, "grid-change", { [t]: r }), t === Lh && W(this, "display-number-change", {
+			key: Lh,
+			value: r
+		}));
+	}
+	renderField(e, t, n, r, i) {
+		return F`
+      <ods-property-field
+        .label=${n}
+        .fieldKey=${e}
+        .value=${t}
+        .min=${r}
+        .max=${i}
+        @field-change=${this.onFieldChange}
+      ></ods-property-field>
+    `;
+	}
+	renderGrid() {
+		let { minLines: e, maxLines: n, maxGap: r } = this.limits;
+		return F`
+      <div class="section">
+        <h3>${t.basic.gridHeading}</h3>
+        <div class="fields">
+          ${this.renderField("columns", this.layout.columns, t.basic.columns, e, n)}
+          ${this.renderField("rows", this.layout.rows, t.basic.rows, e, n)}
+          ${this.renderField("gap", this.layout.gap, t.basic.gap, 0, r)}
+          ${this.renderField(Lh, this.padding, t.fields.padding, 0, Rh)}
+        </div>
+      </div>
+    `;
+	}
+	renderRegions() {
+		return F`
+      <div class="section">
+        <h3>${t.basic.regionsHeading}</h3>
+        <span class="count">
+          ${t.basic.regionCount(this.layout.regions.length)}
+        </span>
+        <p>${t.basic.regionsHint}</p>
+      </div>
+    `;
+	}
+	render() {
+		return !this.layout || !this.limits ? I : F`
+      <aside class="toolbox">
+        <div class="panel-title">
+          <div>
+            <span class="eyebrow">${t.basic.layoutTitle}</span>
+            <h2>${t.basic.layoutHeading}</h2>
+          </div>
+        </div>
+        ${this.renderGrid()} ${this.renderRegions()}
+      </aside>
+    `;
+	}
+};
+Y([z({ attribute: !1 })], zh.prototype, "layout", void 0), Y([z({ attribute: !1 })], zh.prototype, "limits", void 0), Y([z({ type: Number })], zh.prototype, "padding", void 0), zh = Y([R("ods-layout-panel")], zh);
 //#endregion
 //#region src/font-file.ts
-var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some((t) => e.toLowerCase().endsWith(t)), Om = async (e) => {
+var Bh = [".ttf", ".otf"], Vh = Bh.join(","), Hh = 2097152, Uh = (e) => Bh.some((t) => e.toLowerCase().endsWith(t)), Wh = async (e) => {
 	let t = new Uint8Array(await e.arrayBuffer()), n = 32768, r = "";
 	for (let e = 0; e < t.length; e += n) r += String.fromCharCode(...t.subarray(e, e + n));
 	return btoa(r);
-}, km = (e) => e < 1048576 ? `${Math.max(1, Math.round(e / 1024))} KB` : `${(e / 1048576).toFixed(1)} MB`, Am = 6, jm = (e, n) => {
-	let r = Sd(e);
+}, Gh = (e) => e < 1048576 ? `${Math.max(1, Math.round(e / 1024))} KB` : `${(e / 1048576).toFixed(1)} MB`, Kh = 6, qh = (e, n) => {
+	let r = Od(e);
 	return (r ? t.settings.fonts.errors[r] : void 0) ?? U(e, n);
-}, Mm = class extends L {
+}, Jh = class extends L {
 	constructor(...e) {
 		super(...e), this.fonts = [], this.error = "", this.busy = !1, this.dragging = !1;
 	}
@@ -14122,7 +15084,7 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
 	}
 	async refresh() {
 		if (this.hass) try {
-			this.show(await Fd(this.hass));
+			this.show(await Hd(this.hass));
 		} catch (e) {
 			this.error = U(e, t.settings.fonts.loadFailed);
 		}
@@ -14131,11 +15093,11 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
 		e.has("hass") && this.fonts.length === 0 && this.refresh();
 	}
 	show(e) {
-		this.fonts = e, Bd(e);
+		this.fonts = e, qd(e);
 	}
 	async installFile(e) {
 		if (this.hass) {
-			if (!Dm(e.name)) {
+			if (!Uh(e.name)) {
 				this.error = t.settings.fonts.notFontFile(e.name);
 				return;
 			}
@@ -14144,10 +15106,10 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
 				return;
 			}
 			try {
-				let t = await Om(e);
-				this.show(await Id(this.hass, e.name, t));
+				let t = await Wh(e);
+				this.show(await Ud(this.hass, e.name, t));
 			} catch (e) {
-				this.error = jm(e, t.settings.fonts.installFailed);
+				this.error = qh(e, t.settings.fonts.installFailed);
 			}
 		}
 	}
@@ -14187,15 +15149,15 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
 		if (this.removing = void 0, !(!e || !this.hass)) {
 			this.error = "";
 			try {
-				this.show(await Ld(this.hass, e.name, !0));
+				this.show(await Wd(this.hass, e.name, !0));
 			} catch (e) {
-				this.error = jm(e, t.settings.fonts.removeFailed);
+				this.error = qh(e, t.settings.fonts.removeFailed);
 			}
 		}
 	}
 	removalBody(e) {
 		if (e.usedBy.length === 0) return t.settings.fonts.removeUnusedBody;
-		let n = e.usedBy.slice(0, Am).map((e) => e.name).join(", "), r = e.usedBy.length - Am;
+		let n = e.usedBy.slice(0, Kh).map((e) => e.name).join(", "), r = e.usedBy.length - Kh;
 		return t.settings.fonts.removeUsedBody(e.usedBy.length, r > 0 ? `${n}, +${r}` : n);
 	}
 	renderDrop() {
@@ -14209,7 +15171,7 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
         <ha-icon icon="mdi:file-upload-outline"></ha-icon>
         <span class="hint">
           <strong>${t.settings.fonts.dropHint}</strong>
-          ${t.settings.fonts.limit(km(Em))}
+          ${t.settings.fonts.limit(Gh(Hh))}
         </span>
         <ha-button
           appearance="filled"
@@ -14220,7 +15182,7 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
         </ha-button>
         <input
           type="file"
-          accept=${Tm}
+          accept=${Vh}
           multiple
           hidden
           aria-label=${t.settings.fonts.install}
@@ -14261,7 +15223,7 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
         <ods-font-sample .hass=${this.hass} .font=${e}></ods-font-sample>
         <div>
           <span class="family">${e.family} ${e.style}</span>
-          <span class="file">${e.name} · ${km(e.size)}</span>
+          <span class="file">${e.name} · ${Gh(e.size)}</span>
           <div class="chips">${this.renderUsage(e)}</div>
         </div>
         ${this.renderAction(e)}
@@ -14296,10 +15258,10 @@ var wm = [".ttf", ".otf"], Tm = wm.join(","), Em = 2097152, Dm = (e) => wm.some(
     `;
 	}
 };
-Y([z({ attribute: !1 })], Mm.prototype, "hass", void 0), Y([B()], Mm.prototype, "fonts", void 0), Y([B()], Mm.prototype, "error", void 0), Y([B()], Mm.prototype, "busy", void 0), Y([B()], Mm.prototype, "dragging", void 0), Y([B()], Mm.prototype, "removing", void 0), Mm = Y([R("ods-settings-fonts")], Mm);
+Y([z({ attribute: !1 })], Jh.prototype, "hass", void 0), Y([B()], Jh.prototype, "fonts", void 0), Y([B()], Jh.prototype, "error", void 0), Y([B()], Jh.prototype, "busy", void 0), Y([B()], Jh.prototype, "dragging", void 0), Y([B()], Jh.prototype, "removing", void 0), Jh = Y([R("ods-settings-fonts")], Jh);
 //#endregion
 //#region src/settings-stats.ts
-var Nm = (e) => {
+var Yh = (e) => {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) for (let e of E(n.items)) {
 		if (e.kind !== "widget") continue;
@@ -14307,8 +15269,8 @@ var Nm = (e) => {
 		t.set(n, (t.get(n) ?? 0) + 1);
 	}
 	return t;
-}, Pm = (e, t) => {
-	let n = new Map(t.map((e) => [e.id, e.name])), r = [...Nm(e)].map(([e, t]) => ({
+}, Xh = (e, t) => {
+	let n = new Map(t.map((e) => [e.id, e.name])), r = [...Yh(e)].map(([e, t]) => ({
 		id: e,
 		name: n.get(e) ?? e,
 		count: t
@@ -14318,7 +15280,7 @@ var Nm = (e) => {
 		elements: e.reduce((e, t) => e + E(t.items).length, 0),
 		widgetUse: r
 	};
-}, Fm = class extends L {
+}, Zh = class extends L {
 	constructor(...e) {
 		super(...e), this.dashboards = [], this.widgets = [], this.fontCount = 0;
 	}
@@ -14416,7 +15378,7 @@ var Nm = (e) => {
     `;
 	}
 	render() {
-		let e = Pm(this.dashboards, this.widgets), n = t.settings.overview;
+		let e = Xh(this.dashboards, this.widgets), n = t.settings.overview;
 		return F`
       <ul class="tiles">
         ${this.renderTile(n.dashboards, e.dashboards)}
@@ -14429,10 +15391,10 @@ var Nm = (e) => {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Fm.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], Fm.prototype, "widgets", void 0), Y([z({ type: Number })], Fm.prototype, "fontCount", void 0), Fm = Y([R("ods-settings-overview")], Fm);
+Y([z({ attribute: !1 })], Zh.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], Zh.prototype, "widgets", void 0), Y([z({ type: Number })], Zh.prototype, "fontCount", void 0), Zh = Y([R("ods-settings-overview")], Zh);
 //#endregion
 //#region src/ods-settings-widgets.ts
-var Im = class extends L {
+var Qh = class extends L {
 	constructor(...e) {
 		super(...e), this.widgets = [], this.errors = [];
 	}
@@ -14617,10 +15579,10 @@ var Im = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Im.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Im.prototype, "errors", void 0), Im = Y([R("ods-settings-widgets")], Im);
+Y([z({ attribute: !1 })], Qh.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Qh.prototype, "errors", void 0), Qh = Y([R("ods-settings-widgets")], Qh);
 //#endregion
 //#region src/ods-settings.ts
-var Lm = () => ({
+var $h = () => ({
 	overview: {
 		text: t.settings.about.overview,
 		abilities: []
@@ -14651,7 +15613,7 @@ var Lm = () => ({
 			}
 		]
 	}
-}), Rm = () => [
+}), eg = () => [
 	{
 		id: "overview",
 		label: t.settings.tabs.overview,
@@ -14667,7 +15629,7 @@ var Lm = () => ({
 		label: t.settings.tabs.widgets,
 		icon: "mdi:widgets-outline"
 	}
-], zm = class extends L {
+], tg = class extends L {
 	constructor(...e) {
 		super(...e), this.dashboards = [], this.widgets = [], this.widgetErrors = [], this.tab = "overview", this.fontCount = 0;
 	}
@@ -14786,7 +15748,7 @@ var Lm = () => ({
 	}
 	async countFonts() {
 		if (this.hass) try {
-			this.fontCount = (await zd(this.hass)).length;
+			this.fontCount = (await Kd(this.hass)).length;
 		} catch {
 			this.fontCount = 0;
 		}
@@ -14825,7 +15787,7 @@ var Lm = () => ({
     `;
 	}
 	renderAbout() {
-		let e = Lm()[this.tab];
+		let e = $h()[this.tab];
 		return F`
       <div class="about">
         <p>${e.text}</p>
@@ -14870,7 +15832,7 @@ var Lm = () => ({
           </div>
         </header>
         <nav role="tablist" aria-label=${t.settings.sections}>
-          ${Rm().map((e) => this.renderTab(e))}
+          ${eg().map((e) => this.renderTab(e))}
         </nav>
         <div class="body" role="tabpanel">
           ${this.renderAbout()} ${this.renderBody()}
@@ -14879,10 +15841,10 @@ var Lm = () => ({
     `;
 	}
 };
-Y([z({ attribute: !1 })], zm.prototype, "hass", void 0), Y([z({ attribute: !1 })], zm.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], zm.prototype, "widgets", void 0), Y([z({ attribute: !1 })], zm.prototype, "widgetErrors", void 0), Y([B()], zm.prototype, "tab", void 0), Y([B()], zm.prototype, "fontCount", void 0), zm = Y([R("ods-settings")], zm);
+Y([z({ attribute: !1 })], tg.prototype, "hass", void 0), Y([z({ attribute: !1 })], tg.prototype, "dashboards", void 0), Y([z({ attribute: !1 })], tg.prototype, "widgets", void 0), Y([z({ attribute: !1 })], tg.prototype, "widgetErrors", void 0), Y([B()], tg.prototype, "tab", void 0), Y([B()], tg.prototype, "fontCount", void 0), tg = Y([R("ods-settings")], tg);
 //#endregion
 //#region src/ods-header.ts
-var Bm = class extends L {
+var ng = class extends L {
 	constructor(...e) {
 		super(...e), this.view = "design", this.dirty = !1, this.saving = !1, this.sending = !1;
 	}
@@ -15036,7 +15998,7 @@ var Bm = class extends L {
 		];
 	}
 	onNameInput(e) {
-		W(this, "dashboard-name-change", { name: dd(e) });
+		W(this, "dashboard-name-change", { name: _d(e) });
 	}
 	get statusToggleLabel() {
 		return this.dashboard.status === "ready" ? t.header.setDraft : t.header.setReady;
@@ -15146,13 +16108,13 @@ var Bm = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], Bm.prototype, "dashboard", void 0), Y([z()], Bm.prototype, "view", void 0), Y([z({ type: Boolean })], Bm.prototype, "dirty", void 0), Y([z({ type: Boolean })], Bm.prototype, "saving", void 0), Y([z({ type: Boolean })], Bm.prototype, "sending", void 0), Bm = Y([R("ods-header")], Bm);
+Y([z({ attribute: !1 })], ng.prototype, "dashboard", void 0), Y([z()], ng.prototype, "view", void 0), Y([z({ type: Boolean })], ng.prototype, "dirty", void 0), Y([z({ type: Boolean })], ng.prototype, "saving", void 0), Y([z({ type: Boolean })], ng.prototype, "sending", void 0), ng = Y([R("ods-header")], ng);
 //#endregion
 //#region src/item-labels.ts
-var Vm = (e, t, n) => {
+var rg = (e, t, n) => {
 	if (e.kind === "widget") return t.find((t) => t.id === e.widget.type);
 	if (e.kind !== "container") return n.find((t) => t.type === e.primitive.type);
-}, Hm = (e, t, n) => e.kind === "container" ? e.grouped ? "mdi:group" : "mdi:select-all" : Vm(e, t, n)?.icon ?? "mdi:puzzle", Um = (e, t) => JSON.stringify(e ?? null) === JSON.stringify(t ?? null), Wm = (e, t, n = {}) => e.filter((e) => e.key in n || !Um(t[e.key], e.default)), Gm = (e) => Object.fromEntries(e.map((e) => [e.key, e.default ?? null])), Km = "{{  }}", qm = class extends L {
+}, ig = (e, t, n) => e.kind === "container" ? e.grouped ? "mdi:group" : "mdi:select-all" : rg(e, t, n)?.icon ?? "mdi:puzzle", ag = (e, t) => JSON.stringify(e ?? null) === JSON.stringify(t ?? null), og = (e, t, n = {}) => e.filter((e) => e.key in n || !ag(t[e.key], e.default)), sg = (e) => Object.fromEntries(e.map((e) => [e.key, e.default ?? null])), cg = "{{  }}", lg = class extends L {
 	constructor(...e) {
 		super(...e), this.label = "", this.fieldKey = "", this.disabled = !1, this.focusEditor = !1;
 	}
@@ -15237,7 +16199,7 @@ var Vm = (e, t, n) => {
 	}
 	onLiteralInput(e) {
 		let t = e.composedPath()[0];
-		t instanceof HTMLInputElement && t.type === "text" && t.value.trimStart().startsWith("{") && (this.focusEditor = !0, this.change(Km));
+		t instanceof HTMLInputElement && t.type === "text" && t.value.trimStart().startsWith("{") && (this.focusEditor = !0, this.change(cg));
 	}
 	onEditorChange(e) {
 		if (!(e.target instanceof HTMLTextAreaElement)) return;
@@ -15285,30 +16247,30 @@ var Vm = (e, t, n) => {
     `;
 	}
 };
-Y([z()], qm.prototype, "label", void 0), Y([z()], qm.prototype, "fieldKey", void 0), Y([z()], qm.prototype, "expression", void 0), Y([z({ type: Boolean })], qm.prototype, "disabled", void 0), Y([bl("textarea")], qm.prototype, "editor", void 0), qm = Y([R("ods-expression-field")], qm);
+Y([z()], lg.prototype, "label", void 0), Y([z()], lg.prototype, "fieldKey", void 0), Y([z()], lg.prototype, "expression", void 0), Y([z({ type: Boolean })], lg.prototype, "disabled", void 0), Y([Sl("textarea")], lg.prototype, "editor", void 0), lg = Y([R("ods-expression-field")], lg);
 //#endregion
 //#region src/structure-model.ts
-var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e, t) => {
+var ug = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), dg = (e, t) => {
 	let n = /* @__PURE__ */ new Set();
-	for (let r of E(e)) if (Jm(r, t)) {
+	for (let r of E(e)) if (ug(r, t)) {
 		n.add(r.id);
 		for (let t of Ot(e, r.id)) n.add(t.id);
 	}
 	return n;
-}, Xm = (e, t, n, r) => [...e].reverse().flatMap((e) => {
+}, fg = (e, t, n, r) => [...e].reverse().flatMap((e) => {
 	if (r && !r.has(e.id)) return [];
 	let i = {
 		item: e,
 		depth: t
 	};
-	return C(e) && (r || !n.has(e.id)) ? [i, ...Xm(e.children, t + 1, n, r)] : [i];
-}), Zm = (e, t, n = "") => {
+	return C(e) && (r || !n.has(e.id)) ? [i, ...fg(e.children, t + 1, n, r)] : [i];
+}), pg = (e, t, n = "") => {
 	let r = n.trim().toLocaleLowerCase();
-	return Xm(e, 0, t, r ? Ym(e, r) : void 0);
-}, Qm = (e, t) => t && e >= .25 && e <= .75 ? "inside" : e < .5 ? "before" : "after", $m = (e, t, n) => {
+	return fg(e, 0, t, r ? dg(e, r) : void 0);
+}, mg = (e, t) => t && e >= .25 && e <= .75 ? "inside" : e < .5 ? "before" : "after", hg = (e, t, n) => {
 	let r = e.findIndex((e) => e.item.id === t);
 	return r < 0 ? e[0] : e[Math.min(e.length - 1, Math.max(0, r + n))];
-}, eh = 4, th = 16, nh = (e) => {
+}, gg = 4, _g = 16, vg = (e) => {
 	let t = [
 		"toggle-hidden",
 		"toggle-locked",
@@ -15434,14 +16396,14 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
         align-items: center;
         min-height: 34px;
         gap: 4px;
-        padding: 2px 3px 2px calc(var(--depth, 0) * ${th}px + 3px);
+        padding: 2px 3px 2px calc(var(--depth, 0) * ${_g}px + 3px);
         border: 1px solid transparent;
         border-radius: 5px;
       }
       .layer-row[data-depth]:not([data-depth="0"])::after {
         content: "";
         position: absolute;
-        left: calc(var(--depth) * ${th}px - 5px);
+        left: calc(var(--depth) * ${_g}px - 5px);
         top: 0;
         bottom: 0;
         width: 1px;
@@ -15621,7 +16583,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 		n.has(t.id) ? n.delete(t.id) : n.add(t.id), this.collapsed = n;
 	}
 	onSearchInput(e) {
-		this.searchText = dd(e);
+		this.searchText = _d(e);
 	}
 	startRename(e) {
 		this.renamingId = e.id, this.updateComplete.then(() => this.shadowRoot?.querySelector(".rename")?.select());
@@ -15629,7 +16591,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 	commitRename(e, t) {
 		this.renamingId === t.id && (this.renamingId = "", W(this, "item-rename", {
 			itemId: t.id,
-			name: dd(e)
+			name: _d(e)
 		}));
 	}
 	onRenameKeyDown(e, t) {
@@ -15640,9 +16602,9 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 		e.button !== 0 || !(n instanceof HTMLElement) || n.closest("button, input") || this.startDrag(e, t.id);
 	}
 	startDrag(e, t) {
-		this.stopGesture = Of({
+		this.stopGesture = pp({
 			origin: e,
-			threshold: eh,
+			threshold: gg,
 			onActivate: () => {
 				this.draggingId = t, this.suppressClick = !0;
 			},
@@ -15674,7 +16636,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 		let a = n.getBoundingClientRect();
 		return {
 			itemId: i.id,
-			zone: Qm((e.clientY - a.top) / a.height, C(i))
+			zone: mg((e.clientY - a.top) / a.height, C(i))
 		};
 	}
 	clearDrag() {
@@ -15692,7 +16654,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 	selectRow(e, t) {
 		this.suppressClick || W(this, "item-select", {
 			itemId: t.id,
-			additive: md(e)
+			additive: bd(e)
 		});
 	}
 	selectRoot() {
@@ -15717,10 +16679,10 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 	}
 	onTreeKeyDown(e) {
 		if (e.target instanceof HTMLInputElement) return;
-		let t = Zm(this.items, this.collapsed, this.searchText), n = T(this.items, this.selectedItemId);
+		let t = pg(this.items, this.collapsed, this.searchText), n = T(this.items, this.selectedItemId);
 		if (e.key === "ArrowDown" || e.key === "ArrowUp") {
 			e.preventDefault();
-			let n = $m(t, this.selectedItemId, e.key === "ArrowDown" ? 1 : -1);
+			let n = hg(t, this.selectedItemId, e.key === "ArrowDown" ? 1 : -1);
 			n && this.focusAndSelect(n);
 		}
 		e.key === "ArrowLeft" && n && (e.preventDefault(), this.foldOrGoUp(n, t)), e.key === "ArrowRight" && n && (e.preventDefault(), this.unfoldOrGoDown(n, t));
@@ -15747,9 +16709,9 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 		r && this.focusAndSelect(r);
 	}
 	renderCommandButton(e, t) {
-		let n = uu(t), r = wu(e);
+		let n = fu(t), r = Ou(e);
 		if (!r.isEnabled(n)) return I;
-		let i = Au(r, n, pd());
+		let i = Pu(r, n, yd());
 		return F`
       <button
         class=${e === "delete-item" ? "delete" : ""}
@@ -15813,7 +16775,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
     `;
 	}
 	renderRow(e) {
-		let { item: t, depth: n } = e, r = this.dropTarget?.itemId === t.id ? this.dropTarget.zone : void 0, i = Yd({
+		let { item: t, depth: n } = e, r = this.dropTarget?.itemId === t.id ? this.dropTarget.zone : void 0, i = Ff({
 			"layer-row": !0,
 			active: this.selectedItemIds.includes(t.id),
 			"is-hidden": t.hidden,
@@ -15842,11 +16804,11 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
         ${this.renderChevron(t)}
         <ha-icon
           class="layer-type-icon"
-          .icon=${Hm(t, this.widgets, this.primitives)}
+          .icon=${ig(t, this.widgets, this.primitives)}
         ></ha-icon>
         <span>${this.renderName(t)} ${this.renderCaption(t)}</span>
         <div class="layer-actions">
-          ${nh(t).map((e) => this.renderCommandButton(e, t))}
+          ${vg(t).map((e) => this.renderCommandButton(e, t))}
         </div>
       </div>
     `;
@@ -15855,7 +16817,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
 		let e = this.dropTarget?.itemId === "" && this.dropTarget.zone === "inside";
 		return F`
       <div
-        class=${Yd({
+        class=${Ff({
 			"root-row": !0,
 			active: this.selectedItemIds.length === 0,
 			"drop-inside": e
@@ -15885,7 +16847,7 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
     ` : I;
 	}
 	renderRows() {
-		let e = Zm(this.items, this.collapsed, this.searchText);
+		let e = pg(this.items, this.collapsed, this.searchText);
 		return this.items.length === 0 ? F`
         <p class="empty-layers">${t.structure.empty}</p>
       ` : F`
@@ -15929,15 +16891,15 @@ var Jm = (e, t) => `${e.name} ${p(e)}`.toLocaleLowerCase().includes(t), Ym = (e,
     `;
 	}
 };
-Y([z({ attribute: !1 })], Z.prototype, "items", void 0), Y([z({ attribute: !1 })], Z.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Z.prototype, "primitives", void 0), Y([z()], Z.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], Z.prototype, "selectedItemIds", void 0), Y([z()], Z.prototype, "enteredGroupId", void 0), Y([z()], Z.prototype, "renameRequestId", void 0), Y([B()], Z.prototype, "collapsed", void 0), Y([B()], Z.prototype, "searchText", void 0), Y([B()], Z.prototype, "renamingId", void 0), Y([B()], Z.prototype, "draggingId", void 0), Y([B()], Z.prototype, "dropTarget", void 0), Y([bl(".layer-list")], Z.prototype, "layerList", void 0), Z = Y([R("ods-structure")], Z);
+Y([z({ attribute: !1 })], Z.prototype, "items", void 0), Y([z({ attribute: !1 })], Z.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Z.prototype, "primitives", void 0), Y([z()], Z.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], Z.prototype, "selectedItemIds", void 0), Y([z()], Z.prototype, "enteredGroupId", void 0), Y([z()], Z.prototype, "renameRequestId", void 0), Y([B()], Z.prototype, "collapsed", void 0), Y([B()], Z.prototype, "searchText", void 0), Y([B()], Z.prototype, "renamingId", void 0), Y([B()], Z.prototype, "draggingId", void 0), Y([B()], Z.prototype, "dropTarget", void 0), Y([Sl(".layer-list")], Z.prototype, "layerList", void 0), Z = Y([R("ods-structure")], Z);
 //#endregion
 //#region src/ods-inspector.ts
-var rh = 340, ih = 560, ah = () => ({
+var yg = 340, bg = 560, xg = () => ({
 	key: "background",
 	label: t.fields.background,
 	shape: "color",
 	section: "appearance"
-}), oh = ["padding", "snapSize"], sh = (e) => oh.some((t) => t === e), ch = (e) => e.label, Q = class extends L {
+}), Sg = ["padding", "snapSize"], Cg = (e) => Sg.some((t) => t === e), wg = (e) => e.label, Q = class extends L {
 	constructor(...e) {
 		super(...e), this.widgets = [], this.primitives = [], this.selectedItemId = "", this.selectedItemIds = [], this.enteredGroupId = "", this.renameRequestId = "", this.collapsed = !1, this.width = 350, this.showCorners = !1;
 	}
@@ -16239,11 +17201,11 @@ var rh = 340, ih = 560, ah = () => ({
 	startResize(e) {
 		e.preventDefault();
 		let t = e.clientX, n = this.width;
-		this.stopGesture = Of({
+		this.stopGesture = pp({
 			origin: e,
 			onMove: (e) => {
 				let r = n + t - e.clientX;
-				W(this, "inspector-resize", { width: _(r, rh, ih) });
+				W(this, "inspector-resize", { width: _(r, yg, bg) });
 			}
 		});
 	}
@@ -16265,7 +17227,7 @@ var rh = 340, ih = 560, ah = () => ({
 	onDisplayFieldChange(e) {
 		e.stopPropagation();
 		let { key: t } = e.detail, n = this.numberFrom(e);
-		n !== void 0 && sh(t) && W(this, "display-number-change", {
+		n !== void 0 && Cg(t) && W(this, "display-number-change", {
 			key: t,
 			value: n
 		});
@@ -16343,12 +17305,21 @@ var rh = 340, ih = 560, ah = () => ({
 	renderDashboardBackground() {
 		return F`
       <ods-value-field
-        .field=${ah()}
+        .field=${xg()}
         .value=${this.dashboard.display.background}
         .palette=${this.dashboard.display.palette}
         .display=${this.dashboard.display}
         @primitive-field-change=${this.onDashboardBackgroundChange}
       ></ods-value-field>
+    `;
+	}
+	renderWorkingArea() {
+		return F`
+      <div class="field-grid">
+        ${this.renderDisplayField(t.fields.padding, "padding", 0, 1024)}
+        ${this.renderDisplayField(t.fields.snapSize, "snapSize", 1, 256)}
+      </div>
+      <p class="field-help">${t.inspector.workingAreaHelp}</p>
     `;
 	}
 	renderDashboardInspector() {
@@ -16358,11 +17329,7 @@ var rh = 340, ih = 560, ah = () => ({
         <summary>${t.inspector.appearance}</summary>
         <div class="section-body">
           ${this.renderDashboardBackground()}
-          <div class="field-grid">
-            ${this.renderDisplayField(t.fields.padding, "padding", 0, 1024)}
-            ${this.renderDisplayField(t.fields.snapSize, "snapSize", 1, 256)}
-          </div>
-          <p class="field-help">${t.inspector.workingAreaHelp}</p>
+          ${this.isBasic ? I : this.renderWorkingArea()}
         </div>
       </details>
       ${this.renderMetrics()}
@@ -16493,7 +17460,7 @@ var rh = 340, ih = 560, ah = () => ({
           .hass=${this.hass}
           .data=${{ [e.key]: t }}
           .schema=${[this.formSchema(e)]}
-          .computeLabel=${ch}
+          .computeLabel=${wg}
           @value-changed=${(t) => n(e.key, t.detail.value[e.key])}
         ></ha-form>
       </div>
@@ -16528,7 +17495,7 @@ var rh = 340, ih = 560, ah = () => ({
           .hass=${this.hass}
           .data=${{ [t.key]: nc(t, n) }}
           .schema=${[this.formSchema(t, t.required)]}
-          .computeLabel=${ch}
+          .computeLabel=${wg}
           @value-changed=${(n) => this.onPicksChange(n, t, e)}
         ></ha-form>
         ${t.perSource.length > 0 ? n.map((n) => this.renderPickFields(e, t, n)) : I}
@@ -16569,10 +17536,10 @@ var rh = 340, ih = 560, ah = () => ({
     `;
 	}
 	renderOptionSection(e, t, n) {
-		let r = Wm(t.fields.filter((e) => e.default !== void 0), e.widget.options);
+		let r = og(t.fields.filter((e) => e.default !== void 0), e.widget.options);
 		return F`
       <details class="inspector-section" ?open=${n}>
-        ${this.renderResettableSummary(t.section, r.length > 0, () => W(this, "widget-options-change", { value: Gm(r) }))}
+        ${this.renderResettableSummary(t.section, r.length > 0, () => W(this, "widget-options-change", { value: sg(r) }))}
         <div class="section-body">
           <div class="value-fields">
             ${t.fields.map((t) => this.renderWidgetField(t, e.widget.options[t.key], (e, t) => this.setWidgetOption(e, t)))}
@@ -16637,17 +17604,17 @@ var rh = 340, ih = 560, ah = () => ({
 	renderAdvancedFields(e) {
 		let n = es(e, this.primitives, "appearance").filter((e) => e.advanced);
 		return n.length === 0 ? I : F`
-      <details class="disclosure" ?open=${Wm(n, { ...e.primitive }, e.expressions).length > 0}>
+      <details class="disclosure" ?open=${og(n, { ...e.primitive }, e.expressions).length > 0}>
         <summary>${t.inspector.advanced}</summary>
         ${this.renderValueFields(e, "appearance", !0)}
       </details>
     `;
 	}
 	renderAppearance(e) {
-		let n = Wm(es(e, this.primitives, "appearance").filter((e) => !e.required || e.default !== void 0), { ...e.primitive }, e.expressions);
+		let n = og(es(e, this.primitives, "appearance").filter((e) => !e.required || e.default !== void 0), { ...e.primitive }, e.expressions);
 		return F`
       <details class="inspector-section" open>
-        ${this.renderResettableSummary(t.inspector.appearance, n.length > 0, () => W(this, "primitive-fields-reset", { values: Gm(n) }))}
+        ${this.renderResettableSummary(t.inspector.appearance, n.length > 0, () => W(this, "primitive-fields-reset", { values: sg(n) }))}
         <div class="section-body">
           ${this.renderValueFields(e, "appearance")}
           ${this.renderAdvancedFields(e)}
@@ -16695,7 +17662,8 @@ var rh = 340, ih = 560, ah = () => ({
 	}
 	renderItemSections(e) {
 		return e.kind === "widget" ? F`
-        ${this.renderLayoutSection(e)} ${this.renderWidgetSettings(e)}
+        ${this.isBasic ? I : this.renderLayoutSection(e)}
+        ${this.renderWidgetSettings(e)}
       ` : e.kind === "container" ? F`
         ${this.renderLayoutSection(e)}
         ${this.renderContainerBackground(e)}
@@ -16718,13 +17686,13 @@ var rh = 340, ih = 560, ah = () => ({
 	}
 	renderItemInspector(e) {
 		return F`
-      ${this.renderHeader(e.name, t.inspector.subtitle(this.kindOf(e), e.locked), Hm(e, this.widgets, this.primitives))}
+      ${this.renderHeader(e.name, t.inspector.subtitle(this.kindOf(e), e.locked), ig(e, this.widgets, this.primitives))}
       ${this.renderGroupedChip(e)} ${this.renderLockedNotice(e)}
       ${this.renderItemSections(e)} ${this.renderMetrics()}
     `;
 	}
 	renderMultiInspector() {
-		let e = this.selectedItemIds.length, n = Tf(this.dashboard, this.selectedItemIds, (e) => this.preview?.itemBounds[e.id]);
+		let e = this.selectedItemIds.length, n = up(this.dashboard, this.selectedItemIds, (e) => this.preview?.itemBounds[e.id]);
 		return F`
       ${this.renderHeader(t.inspector.selectedElements(e), t.inspector.selectionHint, "mdi:select-multiple")}
       ${n ? F`
@@ -16770,6 +17738,22 @@ var rh = 340, ih = 560, ah = () => ({
 	renderProperties(e) {
 		return this.selectedItemIds.length > 1 ? this.renderMultiInspector() : e ? this.renderItemInspector(e) : this.renderDashboardInspector();
 	}
+	get isBasic() {
+		return this.dashboard.mode === "basic";
+	}
+	renderStructure() {
+		return this.isBasic ? I : F`
+      <ods-structure
+        .items=${this.dashboard.items}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selectedItemIds}
+        .enteredGroupId=${this.enteredGroupId}
+        .renameRequestId=${this.renameRequestId}
+      ></ods-structure>
+    `;
+	}
 	render() {
 		if (this.collapsed) return this.renderRail();
 		let e = T(this.dashboard.items, this.selectedItemId);
@@ -16782,50 +17766,42 @@ var rh = 340, ih = 560, ah = () => ({
           aria-label=${t.inspector.resize}
           @pointerdown=${this.startResize}
         ></div>
-        <ods-structure
-          .items=${this.dashboard.items}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selectedItemIds}
-          .enteredGroupId=${this.enteredGroupId}
-          .renameRequestId=${this.renameRequestId}
-        ></ods-structure>
+        ${this.renderStructure()}
         <section class="properties">${this.renderProperties(e)}</section>
       </aside>
     `;
 	}
 };
-Y([z({ attribute: !1 })], Q.prototype, "hass", void 0), Y([z({ attribute: !1 })], Q.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], Q.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Q.prototype, "primitives", void 0), Y([z({ attribute: !1 })], Q.prototype, "preview", void 0), Y([z()], Q.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], Q.prototype, "selectedItemIds", void 0), Y([z()], Q.prototype, "enteredGroupId", void 0), Y([z()], Q.prototype, "renameRequestId", void 0), Y([z({ type: Boolean })], Q.prototype, "collapsed", void 0), Y([z({ type: Number })], Q.prototype, "width", void 0), Y([B()], Q.prototype, "showCorners", void 0), Y([bl(".properties")], Q.prototype, "propertiesPanel", void 0), Q = Y([R("ods-inspector")], Q);
+Y([z({ attribute: !1 })], Q.prototype, "hass", void 0), Y([z({ attribute: !1 })], Q.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], Q.prototype, "widgets", void 0), Y([z({ attribute: !1 })], Q.prototype, "primitives", void 0), Y([z({ attribute: !1 })], Q.prototype, "preview", void 0), Y([z()], Q.prototype, "selectedItemId", void 0), Y([z({ attribute: !1 })], Q.prototype, "selectedItemIds", void 0), Y([z()], Q.prototype, "enteredGroupId", void 0), Y([z()], Q.prototype, "renameRequestId", void 0), Y([z({ type: Boolean })], Q.prototype, "collapsed", void 0), Y([z({ type: Number })], Q.prototype, "width", void 0), Y([B()], Q.prototype, "showCorners", void 0), Y([Sl(".properties")], Q.prototype, "propertiesPanel", void 0), Q = Y([R("ods-inspector")], Q);
 //#endregion
 //#region src/catalog.ts
-var lh = (e, t) => {
+var Tg = (e, t) => {
 	let n = t.trim().toLocaleLowerCase();
 	return n ? e.filter((e) => `${e.name} ${e.description}`.toLocaleLowerCase().includes(n)) : e;
-}, uh = [
+}, Eg = [
 	"text",
 	"shapes",
 	"media",
 	"data",
 	"debug"
-], dh = (e) => {
-	let t = [...uh], n = [...new Set(e.map((e) => e.category).filter((e) => !t.includes(e)))];
+], Dg = (e) => {
+	let t = [...Eg], n = [...new Set(e.map((e) => e.category).filter((e) => !t.includes(e)))];
 	return [...t, ...n].map((t) => ({
 		id: t,
 		entries: e.filter((e) => e.category === t)
 	})).filter((e) => e.entries.length > 0);
-}, fh = (e) => {
+}, Og = (e) => {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) t.set(n.category, [...t.get(n.category) ?? [], n]);
 	return [...t.entries()];
-}, ph = 4, mh = () => ({
+}, kg = 4, Ag = () => ({
 	id: "container",
 	name: t.library.container,
 	description: t.library.containerHint,
 	icon: "mdi:select-all"
-}), hh = class extends L {
+}), jg = class extends L {
 	constructor(...e) {
-		super(...e), this.widgets = [], this.widgetErrors = [], this.primitives = [], this.collapsed = !1, this.searchText = "", this.foldedSections = /* @__PURE__ */ new Set(), this.suppressClick = !1;
+		super(...e), this.widgets = [], this.widgetErrors = [], this.primitives = [], this.collapsed = !1, this.widgetsOnly = !1, this.searchText = "", this.foldedSections = /* @__PURE__ */ new Set(), this.suppressClick = !1;
 	}
 	static {
 		this.styles = [
@@ -17072,9 +18048,9 @@ var lh = (e, t) => {
 		if (e.button !== 0) return;
 		e.preventDefault();
 		let r = e.currentTarget.getBoundingClientRect(), i = e.clientX - r.left, a = e.clientY - r.top;
-		this.stopGesture = Of({
+		this.stopGesture = pp({
 			origin: e,
-			threshold: ph,
+			threshold: kg,
 			onActivate: () => W(this, "catalog-drag", { active: !0 }),
 			onMove: (e) => {
 				e.preventDefault();
@@ -17135,7 +18111,7 @@ var lh = (e, t) => {
     `;
 	}
 	onSearchInput(e) {
-		this.searchText = dd(e);
+		this.searchText = _d(e);
 	}
 	addFromClick(e) {
 		this.suppressClick || W(this, "catalog-add", { value: e });
@@ -17188,7 +18164,7 @@ var lh = (e, t) => {
 		return e.length === 0 ? F`
         <p class="empty-result">${t.library.noWidgets}</p>
       ` : F`
-      ${fh(e).map(([e, t]) => F`
+      ${Og(e).map(([e, t]) => F`
           <h4 class="catalog-category">${e}</h4>
           <div class="catalog-grid">
             ${t.map((e) => this.renderEntry({
@@ -17250,14 +18226,18 @@ var lh = (e, t) => {
       `, n);
 	}
 	renderSections(e, n, r) {
+		if (this.widgetsOnly) return this.renderWidgetSection(r);
 		let i = this.searchText !== "";
 		return i && !e.length && !n.length && !r.length ? F`
         <p class="empty-result">${t.library.noMatches}</p>
       ` : F`
       ${i && e.length === 0 ? I : this.renderContainerSection(e)}
-      ${dh(n).map((e) => this.renderPrimitiveSection(e.id, e.entries))}
+      ${Dg(n).map((e) => this.renderPrimitiveSection(e.id, e.entries))}
       ${i && r.length === 0 ? I : this.renderWidgetSection(r)}
     `;
+	}
+	get heading() {
+		return this.widgetsOnly ? t.basic.widgetsHeading : t.library.heading;
 	}
 	render() {
 		if (this.collapsed) return F`
@@ -17273,7 +18253,7 @@ var lh = (e, t) => {
           <span class="rail-label">${t.library.title}</span>
         </aside>
       `;
-		let e = lh(this.widgets, this.searchText), n = lh([mh()], this.searchText), r = lh(this.primitives, this.searchText).map((e) => ({
+		let e = Tg(this.widgets, this.searchText), n = Tg([Ag()], this.searchText), r = Tg(this.primitives, this.searchText).map((e) => ({
 			...e,
 			id: e.type
 		}));
@@ -17283,7 +18263,7 @@ var lh = (e, t) => {
         <div class="panel-title">
           <div>
             <span class="eyebrow">${t.library.title}</span>
-            <h2>${t.library.heading}</h2>
+            <h2>${this.heading}</h2>
           </div>
           <button
             class="icon-button"
@@ -17311,10 +18291,13 @@ var lh = (e, t) => {
     `;
 	}
 };
-Y([z({ attribute: !1 })], hh.prototype, "widgets", void 0), Y([z({ attribute: !1 })], hh.prototype, "widgetErrors", void 0), Y([z({ attribute: !1 })], hh.prototype, "primitives", void 0), Y([z({ type: Boolean })], hh.prototype, "collapsed", void 0), Y([B()], hh.prototype, "searchText", void 0), Y([B()], hh.prototype, "foldedSections", void 0), Y([B()], hh.prototype, "ghost", void 0), hh = Y([R("ods-library")], hh);
+Y([z({ attribute: !1 })], jg.prototype, "widgets", void 0), Y([z({ attribute: !1 })], jg.prototype, "widgetErrors", void 0), Y([z({ attribute: !1 })], jg.prototype, "primitives", void 0), Y([z({ type: Boolean })], jg.prototype, "collapsed", void 0), Y([z({ type: Boolean })], jg.prototype, "widgetsOnly", void 0), Y([B()], jg.prototype, "searchText", void 0), Y([B()], jg.prototype, "foldedSections", void 0), Y([B()], jg.prototype, "ghost", void 0), jg = Y([R("ods-library")], jg);
 //#endregion
 //#region src/ods-new-dashboard-dialog.ts
-var gh = class extends L {
+var Mg = {
+	width: 420,
+	height: 150
+}, Ng = class extends L {
 	constructor(...e) {
 		super(...e), this.devices = [], this.source = "custom", this.deviceId = "", this.saving = !1;
 	}
@@ -17381,40 +18364,99 @@ var gh = class extends L {
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .display-summary {
+      .swatch {
+        width: 9px;
+        height: 9px;
+        border: 1px solid
+          color-mix(in srgb, var(--studio-text) 25%, transparent);
+        border-radius: 50%;
+      }
+      .fields {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 9px;
-        margin: 0;
+        gap: var(--ha-space-3, 12px);
+        align-items: start;
       }
-      .display-summary div {
-        padding: 9px 11px;
+      .fields > * {
+        min-width: 0;
+      }
+      .preview {
+        overflow: hidden;
         border: 1px solid var(--studio-border);
-        border-radius: 9px;
+        border-radius: 11px;
+        background: var(--studio-surface);
       }
-      .display-summary dt {
-        color: var(--studio-muted);
-        font-size: 10px;
+      .preview-stage {
+        position: relative;
+        height: 190px;
+        background: var(--secondary-background-color, #f3f5f6);
       }
-      .display-summary dd {
+      .preview-stage ods-display-preview {
+        width: 100%;
+        height: 100%;
+      }
+      .turn {
+        position: absolute;
+        top: 10px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 1px solid var(--studio-border);
+        border-radius: 10px;
+        background: var(--studio-surface);
+        color: var(--studio-text);
+      }
+      .turn:hover,
+      .turn:focus-visible {
+        border-color: var(--studio-accent);
+        background: var(--studio-accent-soft);
+        outline: 0;
+      }
+      /* The arrows say which way the display turns, so they keep their sides in RTL. */
+      .turn.left {
+        left: 11px;
+      }
+      .turn.right {
+        right: 11px;
+      }
+      .preview-meta {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin: 3px 0 0;
-        font-size: 12px;
-        font-weight: 700;
+        justify-content: space-between;
+        gap: 10px;
+        height: 36px;
+        padding: 0 12px;
+        border-top: 1px solid var(--studio-border);
+        color: var(--studio-muted);
+        font-size: 11px;
       }
-      .swatch {
-        width: 12px;
-        height: 12px;
-        border: 1px solid var(--studio-border);
-        border-radius: 50%;
+      .preview-meta .resolution {
+        color: var(--studio-text);
+        font-variant-numeric: tabular-nums;
+      }
+      .preview-meta .colors {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .preview-meta .swatches {
+        display: inline-flex;
+        gap: 3px;
       }
       .new-dashboard-content ha-form {
         display: block;
       }
+      .dashboard-source-options.modes {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       @media (max-width: 600px) {
-        .dashboard-source-options {
+        .fields {
+          grid-template-columns: 1fr;
+        }
+        .dashboard-source-options,
+        .dashboard-source-options.modes {
           grid-template-columns: 1fr;
         }
       }
@@ -17436,15 +18478,14 @@ var gh = class extends L {
 	create() {
 		W(this, "dashboard-create");
 	}
-	renderSource(e, t, n, r) {
-		let i = this.source === e;
+	renderChoice(e, t, n, r, i) {
 		return F`
       <button
-        class=${i ? "dashboard-source selected" : "dashboard-source"}
+        class=${e ? "dashboard-source selected" : "dashboard-source"}
         type="button"
         role="radio"
-        aria-checked=${i ? "true" : "false"}
-        @click=${() => W(this, "new-dashboard-source", { source: e })}
+        aria-checked=${e ? "true" : "false"}
+        @click=${i}
       >
         <ha-icon icon=${t}></ha-icon>
         <span>
@@ -17452,6 +18493,26 @@ var gh = class extends L {
           <small>${r}</small>
         </span>
       </button>
+    `;
+	}
+	renderSource(e, t, n, r) {
+		return this.renderChoice(this.source === e, t, n, r, () => W(this, "new-dashboard-source", { source: e }));
+	}
+	renderMode(e, t, n, r) {
+		return this.renderChoice(this.dashboard.mode === e, t, n, r, () => W(this, "new-dashboard-mode", { mode: e }));
+	}
+	renderModes() {
+		let e = t.basic;
+		return F`
+      <span class="form-label">${e.modeTitle}</span>
+      <div
+        class="dashboard-source-options modes"
+        role="radiogroup"
+        aria-label=${e.modeTitle}
+      >
+        ${this.renderMode("basic", "mdi:view-grid-plus", e.basic, e.basicHint)}
+        ${this.renderMode("advanced", "mdi:vector-arrange-below", e.advanced, e.advancedHint)}
+      </div>
     `;
 	}
 	renderSources() {
@@ -17468,32 +18529,16 @@ var gh = class extends L {
       </div>
     `;
 	}
-	renderDisplaySummary() {
-		let { width: e, height: n, palette: r } = this.dashboard.display;
+	renderForm(e, t = !1) {
 		return F`
-      <dl
-        class="display-summary"
-        role="group"
-        aria-label=${t.newDashboard.deviceDetails}
-      >
-        <div>
-          <dt>${t.fields.resolution}</dt>
-          <dd>${t.common.sizeInPixels(e, n)}</dd>
-        </div>
-        <div>
-          <dt>${t.newDashboard.colors}</dt>
-          <dd class="swatches">
-            ${xo[r].map((e) => F`
-                <span
-                  class="swatch"
-                  title=${e}
-                  style=${`background:${e}`}
-                ></span>
-              `)}
-            ${bo[r]}
-          </dd>
-        </div>
-      </dl>
+      <ha-form
+        ?autofocus=${t}
+        .hass=${this.hass}
+        .data=${qu(this.dashboard)}
+        .schema=${e}
+        .computeLabel=${pd}
+        @value-changed=${this.formChanged}
+      ></ha-form>
     `;
 	}
 	renderPicker(e, t, n, r, i) {
@@ -17509,51 +18554,107 @@ var gh = class extends L {
 				options: n
 			} }
 		}]}
-        .computeLabel=${sd}
+        .computeLabel=${pd}
         @value-changed=${i}
       ></ha-form>
     `;
 	}
 	renderDevicePicker() {
-		if (this.devices.length === 0) return F`
-        <ha-alert alert-type="info">${t.newDashboard.noDevices}</ha-alert>
-      `;
 		let e = this.devices.map((e) => ({
 			value: e.id,
 			label: `${e.name} · ${t.common.size(e.width, e.height)}`
 		}));
-		return F`
-      ${this.renderPicker("deviceId", t.newDashboard.device, e, this.deviceId, this.deviceChanged)}
-      ${this.renderDisplaySummary()}
-    `;
+		return this.renderPicker("deviceId", t.newDashboard.device, e, this.deviceId, this.deviceChanged);
 	}
 	renderProfilePicker() {
-		let e = Zu.map((e) => ({
+		let e = nd.map((e) => ({
 			value: e.id,
 			label: `${e.manufacturer} · ${e.name}`
 		}));
+		return this.renderPicker("profileId", t.newDashboard.display, e, this.dashboard.display.profileId ?? "", this.profileChanged);
+	}
+	get palettes() {
+		return this.source === "custom" ? td : this.source === "preset" ? Oo(this.dashboard.display.profileId).palettes : [];
+	}
+	renderPickerAndName() {
+		if (this.source === "device" && this.devices.length === 0) return F`
+        <ha-alert alert-type="info">${t.newDashboard.noDevices}</ha-alert>
+        ${this.renderForm(dd(), !0)}
+      `;
+		if (this.source === "custom") {
+			let e = this.palettes;
+			return F`
+        <div class="fields">
+          ${this.renderForm(dd(), !0)}
+          ${this.renderForm(sd(e))}
+        </div>
+        ${this.renderForm(od())}
+      `;
+		}
 		return F`
-      ${this.renderPicker("profileId", t.newDashboard.display, e, this.dashboard.display.profileId ?? "", this.profileChanged)}
-      ${this.renderDisplaySummary()}
+      <div class="fields">${this.source === "device" ? this.renderDevicePicker() : this.renderProfilePicker()} ${this.renderForm(dd(), !0)}</div>
+      ${this.palettes.length > 1 ? this.renderForm(sd(this.palettes)) : I}
     `;
 	}
-	renderSourceBody() {
-		return this.source === "device" ? this.renderDevicePicker() : this.source === "preset" ? this.renderProfilePicker() : I;
+	turn(e) {
+		let t = Bu(this.dashboard.display.rotation, e);
+		W(this, "new-dashboard-change", { value: { rotation: String(t) } });
 	}
-	displayFields() {
-		return this.source === "custom" ? {
-			size: !0,
-			palettes: Xu,
-			backgrounds: []
-		} : this.source === "preset" ? {
-			size: !1,
-			palettes: Oo(this.dashboard.display.profileId).palettes,
-			backgrounds: []
-		} : {
-			size: !1,
-			palettes: [],
-			backgrounds: []
-		};
+	renderTurnButton(e, t, n) {
+		return F`
+      <button
+        type="button"
+        class="turn ${e === 1 ? "right" : "left"}"
+        aria-label=${t}
+        title=${t}
+        @click=${() => this.turn(e)}
+      >
+        <ha-icon icon=${n}></ha-icon>
+      </button>
+    `;
+	}
+	renderPaletteSummary() {
+		let { palette: e } = this.dashboard.display;
+		return F`
+      <span class="colors" title=${bo[e]}>
+        <span class="swatches">
+          ${xo[e].map((e) => F`
+              <i class="swatch" style=${`background:${e}`}></i>
+            `)}
+        </span>
+        ${bo[e]}
+      </span>
+    `;
+	}
+	renderPreview() {
+		let { display: e } = this.dashboard, n = t.newDashboard;
+		return F`
+      <section class="preview" aria-label=${n.previewLabel}>
+        <div class="preview-stage">
+          ${this.renderTurnButton(-1, n.turnLeft, "mdi:rotate-left")}
+          ${this.renderTurnButton(1, n.turnRight, "mdi:rotate-right")}
+          <ods-display-preview
+            turns
+            .width=${e.width}
+            .height=${e.height}
+            .rotation=${e.rotation}
+            .background=${e.background}
+            .accent=${hd(e.palette)}
+            .box=${Mg}
+          ></ods-display-preview>
+        </div>
+        <div class="preview-meta">
+          <span class="resolution" aria-live="polite">
+            ${t.common.sizeInPixels(e.width, e.height)} ·
+            ${e.rotation}°
+          </span>
+          ${this.renderPaletteSummary()}
+        </div>
+      </section>
+    `;
+	}
+	renderAdvanced() {
+		return this.dashboard.mode === "basic" ? I : this.renderForm(ud());
 	}
 	render() {
 		return F`
@@ -17566,16 +18667,10 @@ var gh = class extends L {
         @closed=${this.close}
       >
         <div class="new-dashboard-content">
+          ${this.renderModes()}
           <span class="form-label">${t.newDashboard.startFrom}</span>
-          ${this.renderSources()} ${this.renderSourceBody()}
-          <ha-form
-            autofocus
-            .hass=${this.hass}
-            .data=${Hu(this.dashboard)}
-            .schema=${od(this.displayFields())}
-            .computeLabel=${sd}
-            @value-changed=${this.formChanged}
-          ></ha-form>
+          ${this.renderSources()} ${this.renderPickerAndName()}
+          ${this.renderPreview()} ${this.renderAdvanced()}
         </div>
         <ha-dialog-footer slot="footer">
           <ha-button
@@ -17588,7 +18683,7 @@ var gh = class extends L {
           <ha-button
             slot="primaryAction"
             appearance="filled"
-            .disabled=${this.saving || !qu(this.dashboard)}
+            .disabled=${this.saving || !Qu(this.dashboard)}
             @click=${this.create}
           >
             ${this.saving ? t.newDashboard.creating : t.newDashboard.create}
@@ -17598,21 +18693,21 @@ var gh = class extends L {
     `;
 	}
 };
-Y([z({ attribute: !1 })], gh.prototype, "hass", void 0), Y([z({ attribute: !1 })], gh.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], gh.prototype, "devices", void 0), Y([z()], gh.prototype, "source", void 0), Y([z()], gh.prototype, "deviceId", void 0), Y([z({ type: Boolean })], gh.prototype, "saving", void 0), gh = Y([R("ods-new-dashboard-dialog")], gh);
+Y([z({ attribute: !1 })], Ng.prototype, "hass", void 0), Y([z({ attribute: !1 })], Ng.prototype, "dashboard", void 0), Y([z({ attribute: !1 })], Ng.prototype, "devices", void 0), Y([z()], Ng.prototype, "source", void 0), Y([z()], Ng.prototype, "deviceId", void 0), Y([z({ type: Boolean })], Ng.prototype, "saving", void 0), Ng = Y([R("ods-new-dashboard-dialog")], Ng);
 //#endregion
 //#region src/ods-app.ts
-var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.clipboard", yh = 228, bh = 36, xh = 9, Sh = 8, Ch = () => {
+var Pg = (e, t) => Ot(e.items, t).map((e) => e.id), Fg = "opendisplay_studio.clipboard", Ig = 228, Lg = 36, Rg = 9, zg = 8, Bg = () => {
 	try {
-		let e = window.localStorage.getItem(vh), t = e ? JSON.parse(e) : void 0;
-		return wh(t) ? t : void 0;
+		let e = window.localStorage.getItem(Fg), t = e ? JSON.parse(e) : void 0;
+		return Vg(t) ? t : void 0;
 	} catch {
 		return;
 	}
-}, wh = (e) => typeof e == "object" && !!e && "items" in e && Array.isArray(e.items), Th = (e) => {
+}, Vg = (e) => typeof e == "object" && !!e && "items" in e && Array.isArray(e.items), Hg = (e) => {
 	try {
-		window.localStorage.setItem(vh, JSON.stringify(e));
+		window.localStorage.setItem(Fg, JSON.stringify(e));
 	} catch {}
-}, Eh = 300, Dh = "debug_grid", Oh = (e, t) => e === "left" ? {
+}, Ug = 300, Wg = "debug_grid", Gg = (e, t) => e === "left" ? {
 	dx: -t,
 	dy: 0
 } : e === "right" ? {
@@ -17624,9 +18719,9 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 } : {
 	dx: 0,
 	dy: t
-}, kh = 220, Ah = 5e3, $ = class extends L {
+}, Kg = 220, qg = 5e3, $ = class extends L {
 	constructor(...e) {
-		super(...e), this.dashboards = [], this.view = "dashboards", this.widgets = [], this.widgetErrors = [], this.notice = "", this.sending = !1, this.primitives = [], this.selection = [], this.enteredGroupId = "", this.shortcutsOpen = !1, this.renameRequestId = "", this.clipboard = Ch(), this.loading = !0, this.saving = !1, this.dirty = !1, this.error = "", this.draggingCatalog = !1, this.undoCount = 0, this.redoCount = 0, this.pendingDeleteIds = [], this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.snapEnabled = !0, this.alignTo = "selection", this.viewport = Es, this.newDashboardOpen = !1, this.newDashboard = Vu("en"), this.newDashboardSource = "custom", this.newDashboardDeviceId = "", this.displayDevices = [], this.previewRequest = 0, this.bootstrapStarted = !1, this.history = new Wd(), this.undo = () => {
+		super(...e), this.dashboards = [], this.view = "dashboards", this.widgets = [], this.widgetErrors = [], this.notice = "", this.sending = !1, this.primitives = [], this.selection = [], this.enteredGroupId = "", this.shortcutsOpen = !1, this.renameRequestId = "", this.clipboard = Bg(), this.loading = !0, this.saving = !1, this.dirty = !1, this.error = "", this.draggingCatalog = !1, this.undoCount = 0, this.redoCount = 0, this.pendingDeleteIds = [], this.leftCollapsed = !1, this.rightCollapsed = !1, this.inspectorWidth = 350, this.snapEnabled = !0, this.alignTo = "selection", this.viewport = Es, this.newDashboardOpen = !1, this.newDashboard = Ku("en"), this.newDashboardSource = "custom", this.newDashboardDeviceId = "", this.displayDevices = [], this.basicStep = "layout", this.selectedRegionId = "", this.previewRequest = 0, this.layoutRequest = 0, this.layoutKey = "", this.bootstrapStarted = !1, this.history = new Af(), this.undo = () => {
 			this.current && this.restore(this.history.undo(this.current));
 		}, this.redo = () => {
 			this.current && this.restore(this.history.redo(this.current));
@@ -17637,7 +18732,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 				this.pendingDeleteIds = e;
 			},
 			toggleFlag: (e, t) => this.mutate((n) => {
-				for (let r of e) Fl(n, r, t);
+				for (let r of e) Ll(n, r, t);
 			}),
 			group: (e) => this.groupSelection(e),
 			ungroup: (e) => this.ungroup(e),
@@ -17672,8 +18767,8 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 				this.shortcutsOpen = !1;
 				return;
 			}
-			if (fd(e) || this.view === "dashboards" || this.view === "settings") return;
-			let t = Du(e, this.commandContext());
+			if (vd(e) || this.view === "dashboards" || this.view === "settings") return;
+			let t = ju(e, this.commandContext());
 			!t || this.view === "code" && !t.anywhere || (e.preventDefault(), this.runCommand(t.id));
 		}, this.lastNudgeAt = 0;
 	}
@@ -17734,6 +18829,12 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
           );
         overflow: hidden;
       }
+      .basic-left {
+        min-width: 0;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
       .dashboard-empty {
         position: relative;
         height: 100%;
@@ -17772,7 +18873,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		e.has("hass") && this.hass && f(this.hass.language);
 	}
 	updated(e) {
-		e.has("hass") && (this.ensureBootstrap(), this.refreshOnStateChange(e.get("hass")));
+		e.has("hass") && (this.ensureBootstrap(), this.refreshOnStateChange(e.get("hass"))), this.refreshLayoutFrames();
 	}
 	disconnectedCallback() {
 		super.disconnectedCallback(), this.previewTimer && window.clearTimeout(this.previewTimer), this.stateTimer && window.clearTimeout(this.stateTimer), this.clockTimer && window.clearTimeout(this.clockTimer), this.noticeTimer && window.clearTimeout(this.noticeTimer), window.removeEventListener("keydown", this.onKeyDown);
@@ -17785,8 +18886,8 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (e) {
 			this.loading = !0, this.error = "";
 			try {
-				let t = await Cd(e);
-				this.dashboards = t.dashboards, this.widgets = t.widgets, this.widgetErrors = t.widgetErrors, this.primitives = t.primitives, Bd(t.fonts), this.current = void 0, this.preview = void 0, this.view = "dashboards", this.clearHistory(), this.newDashboard = Vu(e.language);
+				let t = await kd(e);
+				this.dashboards = t.dashboards, this.widgets = t.widgets, this.widgetErrors = t.widgetErrors, this.primitives = t.primitives, qd(t.fonts), this.layoutLimits = t.layoutLimits, this.current = void 0, this.preview = void 0, this.view = "dashboards", this.clearHistory(), this.newDashboard = Ku(e.language);
 			} catch (e) {
 				this.error = U(e, t.app.loadFailed);
 			} finally {
@@ -17795,12 +18896,12 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		}
 	}
 	async openNewDashboard() {
-		this.displayDevices = await this.loadDisplayDevices(), this.newDashboard = Vu(this.language), this.newDashboardDeviceId = "", this.newDashboardOpen = !0, this.chooseNewDashboardSource(this.displayDevices.length ? "device" : "preset");
+		this.displayDevices = await this.loadDisplayDevices(), this.newDashboard = Ku(this.language), this.newDashboardDeviceId = "", this.newDashboardOpen = !0, this.chooseNewDashboardSource(this.displayDevices.length ? "device" : "preset");
 	}
 	async loadDisplayDevices() {
 		if (!this.hass) return [];
 		try {
-			return await kd(this.hass);
+			return await Id(this.hass);
 		} catch {
 			return [];
 		}
@@ -17810,18 +18911,18 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	useDevice(e) {
 		let t = this.displayDevices.find((t) => t.id === e);
-		t && (this.newDashboardDeviceId = t.id, this.newDashboard = Wu(this.newDashboard, t));
+		t && (this.newDashboardDeviceId = t.id, this.newDashboard = Yu(this.newDashboard, t));
 	}
 	useProfile(e) {
-		let t = Zu.find((t) => t.id === e) ?? Zu[0];
-		this.newDashboard = Gu(this.newDashboard, t);
+		let t = nd.find((t) => t.id === e) ?? nd[0];
+		this.newDashboard = Xu(this.newDashboard, t);
 	}
 	async createDashboard() {
 		if (this.hass) {
 			this.saving = !0, this.error = "";
 			try {
-				let e = await Td(this.hass, this.newDashboard);
-				this.dashboards = [...this.dashboards, e], this.current = structuredClone(e), this.clearSelection(), this.dirty = !1, this.newDashboardOpen = !1, this.view = "design", this.clearHistory(), await this.composePreview(), await this.updateComplete, this.showWholeCanvas();
+				let e = await Md(this.hass, this.newDashboard);
+				this.dashboards = [...this.dashboards, e], this.current = structuredClone(e), this.clearSelection(), this.dirty = !1, this.newDashboardOpen = !1, this.view = "design", this.basicStep = "layout", this.clearHistory(), await this.composePreview(), await this.updateComplete, this.showWholeCanvas();
 			} catch (e) {
 				this.error = U(e, t.app.createFailed);
 			} finally {
@@ -17833,7 +18934,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (!(!this.hass || !this.current)) {
 			this.saving = !0, this.error = "";
 			try {
-				let e = await Ed(this.hass, this.current);
+				let e = await Nd(this.hass, this.current);
 				this.current = structuredClone(e), this.dashboards = this.dashboards.map((t) => t.id === e.id ? e : t), this.dirty = !1;
 			} catch (e) {
 				this.error = U(e, t.app.saveFailed);
@@ -17846,8 +18947,8 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (!(!this.hass || !this.current)) {
 			this.error = "";
 			try {
-				let e = await jd(this.hass, this.current);
-				hd(vd(this.current.name), JSON.stringify(e, null, 2));
+				let e = await Rd(this.hass, this.current);
+				xd(wd(this.current.name), JSON.stringify(e, null, 2));
 			} catch (e) {
 				this.error = U(e, t.app.exportFailed);
 			}
@@ -17855,16 +18956,16 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	async chooseImport() {
 		if (!this.hass || !this.current) return;
-		let e = await gd(".json,application/json");
+		let e = await Sd(".json,application/json");
 		if (!e) return;
 		this.error = "";
-		let n = bd(await e.text());
+		let n = Ed(await e.text());
 		if (n === void 0) {
 			this.error = t.app.notAJsonFile;
 			return;
 		}
 		try {
-			let e = await Md(this.hass, n, this.current.display);
+			let e = await zd(this.hass, n, this.current.display);
 			this.importing = {
 				file: n,
 				plan: e
@@ -17879,7 +18980,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	async confirmImport(e) {
 		let { importing: n, hass: r, current: i } = this;
 		if (!(!n || !r || !i)) try {
-			let { items: a } = await Md(r, n.file, i.display, e.detail.colorMap);
+			let { items: a } = await zd(r, n.file, i.display, e.detail.colorMap);
 			this.mutate((e) => {
 				e.items = a;
 			}), this.clearSelection(), this.importing = void 0, this.showNotice(t.app.imported(a.length));
@@ -17891,7 +18992,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (!(!this.hass || !this.current)) {
 			this.sending = !0, this.error = "";
 			try {
-				await Ad(this.hass, this.current), this.showNotice(t.app.sentToDevice);
+				await Ld(this.hass, this.current), this.showNotice(t.app.sentToDevice);
 			} catch (e) {
 				this.error = U(e, t.app.sendFailed);
 			} finally {
@@ -17904,7 +19005,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 			this.view = "design", this.preview || this.composePreview();
 			return;
 		}
-		this.dirty && !window.confirm(t.app.discardChanges) || (this.current = structuredClone(e), this.clearSelection(), this.dirty = !1, this.clearHistory(), this.view = "design", this.composePreview().then(() => this.showWholeCanvas()));
+		this.dirty && !window.confirm(t.app.discardChanges) || (this.current = structuredClone(e), this.clearSelection(), this.selectedRegionId = "", this.basicStep = vf(e).length > 0 ? "widgets" : "layout", this.dirty = !1, this.clearHistory(), this.view = "design", this.composePreview().then(() => this.showWholeCanvas()));
 	}
 	openAction(e, t) {
 		this.dashboardDraft = structuredClone(e), this.dashboardDialog = t;
@@ -17916,7 +19017,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (!(!this.hass || this.saving)) {
 			this.saving = !0, this.error = "";
 			try {
-				let t = await Ed(this.hass, e);
+				let t = await Nd(this.hass, e);
 				return this.dashboards = this.dashboards.map((e) => e.id === t.id ? t : e), this.current?.id === t.id && (this.current = structuredClone(t), this.preview = void 0, this.dirty = !1), t;
 			} catch (e) {
 				this.error = U(e, t);
@@ -17943,9 +19044,9 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (!this.hass || this.saving) return;
 		this.saving = !0, this.error = "";
 		let n = structuredClone(e);
-		n.id = "", n.name = Yu(e, this.dashboards, this.language), n.status = "draft", n.createdAt = "", n.updatedAt = "";
+		n.id = "", n.name = ed(e, this.dashboards, this.language), n.status = "draft", n.createdAt = "", n.updatedAt = "";
 		try {
-			let e = await Td(this.hass, n);
+			let e = await Md(this.hass, n);
 			this.dashboards = [...this.dashboards, e];
 		} catch (e) {
 			this.error = U(e, t.app.duplicateFailed);
@@ -17954,7 +19055,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		}
 	}
 	async saveSettings() {
-		if (this.dashboardDialog !== "settings" || !this.dashboardDraft || !qu(this.dashboardDraft)) return;
+		if (this.dashboardDialog !== "settings" || !this.dashboardDraft || !Qu(this.dashboardDraft)) return;
 		let e = structuredClone(this.dashboardDraft);
 		e.name = e.name.trim(), await this.updateFromGallery(e, t.app.settingsFailed) && this.closeAction();
 	}
@@ -17963,7 +19064,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		let e = this.dashboardDraft.id;
 		this.saving = !0, this.error = "";
 		try {
-			await Dd(this.hass, e), this.dashboards = this.dashboards.filter((t) => t.id !== e), this.current?.id === e && (this.current = void 0, this.clearSelection(), this.preview = void 0, this.dirty = !1, this.clearHistory()), this.closeAction();
+			await Pd(this.hass, e), this.dashboards = this.dashboards.filter((t) => t.id !== e), this.current?.id === e && (this.current = void 0, this.clearSelection(), this.preview = void 0, this.dirty = !1, this.clearHistory()), this.closeAction();
 		} catch (e) {
 			this.error = U(e, t.app.deleteFailed);
 		} finally {
@@ -18000,7 +19101,8 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 			canEnter: a ? Tt(a) : !1,
 			entered: this.enteredGroupId !== "",
 			canPaste: (this.clipboard?.items.length ?? 0) > 0,
-			dirty: this.dirty
+			dirty: this.dirty,
+			basic: this.isBasic
 		};
 	}
 	get selectedItems() {
@@ -18011,7 +19113,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		return this.selectedItems.at(-1);
 	}
 	runCommand(e, t) {
-		let n = wu(e), r = this.commandContext(t);
+		let n = Ou(e), r = this.commandContext(t);
 		n.isEnabled(r) && n.run(r, this.commandActions);
 	}
 	onCommand(e) {
@@ -18020,11 +19122,11 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	copy(e) {
 		let t = this.current;
-		t && (this.clipboard = _n(t, e), Th(this.clipboard));
+		t && (this.clipboard = _n(t, e), Hg(this.clipboard));
 	}
 	cut(e) {
 		this.copy(e), this.mutate((t) => {
-			for (let n of e) Il(t, n);
+			for (let n of e) Rl(t, n);
 		}), this.setSelection(this.selection.filter((t) => !e.includes(t)));
 	}
 	paste() {
@@ -18040,7 +19142,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		this.pasteWith(() => ({ anchor: e }), n ? { parentId: n.id } : {});
 	}
 	pasteWith(e, t) {
-		let n = this.current, r = this.clipboard ?? Ch();
+		let n = this.current, r = this.clipboard ?? Bg();
 		if (!n || !r) return;
 		let i = [];
 		this.mutate((n) => {
@@ -18067,13 +19169,13 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		};
 	}
 	applyArrangement(e) {
-		e.length !== 0 && this.mutate((t) => lu(t, e));
+		e.length !== 0 && this.mutate((t) => du(t, e));
 	}
 	align(e, t) {
-		this.current && this.applyArrangement(ou(this.current, e, t, this.arrangeOptions));
+		this.current && this.applyArrangement(cu(this.current, e, t, this.arrangeOptions));
 	}
 	distribute(e, t) {
-		this.current && this.applyArrangement(cu(this.current, e, t, this.arrangeOptions));
+		this.current && this.applyArrangement(uu(this.current, e, t, this.arrangeOptions));
 	}
 	onAlignTargetChange(e) {
 		this.alignTo = e.detail.target;
@@ -18081,7 +19183,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	nudge(e, t, n) {
 		let r = this.current;
 		if (!r) return;
-		let { dx: i, dy: a } = Oh(t, n ? r.display.snapSize : 1), o = Date.now() - this.lastNudgeAt > Eh;
+		let { dx: i, dy: a } = Gg(t, n ? r.display.snapSize : 1), o = Date.now() - this.lastNudgeAt > Ug;
 		this.lastNudgeAt = Date.now(), this.mutate((t) => {
 			wn(t, e, i, a, pt(t), (e) => xs(e, this.primitives).position.length === 0);
 		}, !0, o);
@@ -18097,13 +19199,13 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		this.menu = void 0;
 	}
 	menuLayout(e) {
-		return e === "empty" ? Nu : e === "tree" ? Mu : ju;
+		return e === "empty" ? Lu : e === "tree" ? Iu : Fu;
 	}
 	onContextMenu(e) {
 		let { source: n, itemId: r, clientX: i, clientY: a, point: o } = e.detail, s = this.current;
 		if (!s) return;
 		r && !this.selection.includes(r) && this.selectItem(r), !r && n === "empty" && this.clearSelection();
-		let c = r ? T(s.items, r) : void 0, l = c ? this.targetsForMenu(c) : [], u = this.commandContext(c, l), d = Pu(this.menuLayout(n), u, pd());
+		let c = r ? T(s.items, r) : void 0, l = c ? this.targetsForMenu(c) : [], u = this.commandContext(c, l), d = Ru(this.menuLayout(n), u, yd());
 		d.length !== 0 && (this.menu = {
 			...this.menuPosition(i, a, d),
 			label: c?.name ?? t.canvas.menuLabel,
@@ -18116,18 +19218,18 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		return this.selection.includes(e.id) ? this.selectedItems : [e];
 	}
 	menuPosition(e, t, n) {
-		let r = this.getBoundingClientRect(), i = n.length * bh + n.filter((e) => e.separatorBefore).length * xh + 16, a = e - r.left, o = t - r.top;
+		let r = this.getBoundingClientRect(), i = n.length * Lg + n.filter((e) => e.separatorBefore).length * Rg + 16, a = e - r.left, o = t - r.top;
 		return {
-			x: a + yh + Sh > r.width ? Math.max(Sh, a - yh) : a,
-			y: o + i + Sh > r.height ? Math.max(Sh, r.height - i - Sh) : o
+			x: a + Ig + zg > r.width ? Math.max(zg, a - Ig) : a,
+			y: o + i + zg > r.height ? Math.max(zg, r.height - i - zg) : o
 		};
 	}
 	onMenuSelect(e) {
 		let t = this.menu;
 		if (this.closeMenu(), !t || !this.current) return;
 		let n = t.itemId ? T(this.current.items, t.itemId) : void 0;
-		if (!Cu(e.detail.id)) return;
-		let r = wu(e.detail.id), i = this.commandContext(n, n ? this.targetsForMenu(n) : []);
+		if (!Du(e.detail.id)) return;
+		let r = Ou(e.detail.id), i = this.commandContext(n, n ? this.targetsForMenu(n) : []);
 		r.isEnabled(i) && (this.menu = t, r.run(i, this.commandActions), this.menu = void 0);
 	}
 	renderMenu() {
@@ -18166,7 +19268,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
     ` : I;
 	}
 	schedulePreview() {
-		this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => void this.composePreview(), kh);
+		this.previewTimer && window.clearTimeout(this.previewTimer), this.previewTimer = window.setTimeout(() => void this.composePreview(), Kg);
 	}
 	refreshOnStateChange(e) {
 		let t = this.preview?.dependencies;
@@ -18180,7 +19282,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		this.error = "";
 		let e = ++this.previewRequest, n = structuredClone(this.current);
 		try {
-			let t = await Od(this.hass, n);
+			let t = await Fd(this.hass, n);
 			e === this.previewRequest && (this.preview = {
 				...t,
 				composedFrom: n
@@ -18193,10 +19295,14 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		this.view = e, e === "code" && !this.preview && this.composePreview();
 	}
 	selectItem(e) {
-		this.setSelection(e ? [e] : []);
+		if (!e) {
+			this.clearSelection();
+			return;
+		}
+		this.setSelection([e]);
 	}
 	clearSelection() {
-		this.setSelection([]);
+		this.setSelection([]), this.selectedRegionId = "";
 	}
 	setSelection(e) {
 		e.length === this.selection.length && e.every((e, t) => e === this.selection[t]) || (this.selection = e);
@@ -18209,7 +19315,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	isInsideEntered(e, t) {
 		let n = this.enteredGroupId;
-		return !n || [t, ..._h(e, t)].includes(n) || _h(e, n).includes(t);
+		return !n || [t, ...Pg(e, t)].includes(n) || Pg(e, n).includes(t);
 	}
 	showWholeCanvas() {
 		this.canvas?.resetView(), requestAnimationFrame(() => this.canvas?.fitView());
@@ -18220,14 +19326,14 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		if (a === "container") return Zt(i, n, r);
 		if (a === "widget") {
 			let e = this.widgets.find((e) => e.id === o);
-			return e ? Wl(e, n, r, i) : void 0;
+			return e ? Kl(e, n, r, i) : void 0;
 		}
-		if (o === Dh && this.selectExistingGrid(i)) return;
-		let s = Gl(this.primitives, o, n, r, i);
+		if (o === Wg && this.selectExistingGrid(i)) return;
+		let s = ql(this.primitives, o, n, r, i);
 		return s || (this.error = t.app.unsupportedPrimitive(o)), s;
 	}
 	selectExistingGrid(e) {
-		let t = E(e.items).find((e) => e.kind === "primitive" && e.primitive.type === Dh);
+		let t = E(e.items).find((e) => e.kind === "primitive" && e.primitive.type === Wg);
 		return t ? (this.selectItem(t.id), !0) : !1;
 	}
 	addAt(e, t, n, r) {
@@ -18238,14 +19344,89 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	addFromCatalog(e) {
 		if (!this.current) return;
-		let { x: t, y: n } = Kl(this.current, this.snapEnabled);
+		if (this.isBasic) {
+			this.addToRegion(e, this.selectedRegionId);
+			return;
+		}
+		let { x: t, y: n } = Jl(this.current, this.snapEnabled);
 		this.addAt(e, t, n);
 	}
 	dropFromCatalog(e, t, n) {
 		let r = this.current, i = this.canvas?.displayPointAt(t, n);
 		if (!r || !i) return;
+		if (this.isBasic) {
+			this.addToRegion(e, this.regionAtPoint(i));
+			return;
+		}
 		let a = pt(r), o = _(mt(i.x, r, this.snapEnabled), a.x, a.x + a.width - 1), s = _(mt(i.y, r, this.snapEnabled), a.y, a.y + a.height - 1), c = Vt(r.items, o, s, [], this.enteredGroupId || void 0);
 		this.addAt(e, o, s, c?.id);
+	}
+	get isBasic() {
+		return this.current?.mode === "basic";
+	}
+	regionAtPoint(e) {
+		return this.layoutFrames ? gf(this.layoutFrames, e) ?? "" : "";
+	}
+	async refreshLayoutFrames() {
+		let e = this.current, n = e?.layout;
+		if (!this.hass || !e || !n) {
+			this.layoutFrames = void 0, this.layoutKey = "";
+			return;
+		}
+		let { width: r, height: i, padding: a } = e.display, o = JSON.stringify([
+			r,
+			i,
+			a,
+			n
+		]);
+		if (o === this.layoutKey) return;
+		this.layoutKey = o;
+		let s = this.layoutRequest += 1;
+		try {
+			let t = await Ad(this.hass, e.display, n);
+			s === this.layoutRequest && (this.layoutFrames = t);
+		} catch (e) {
+			this.error = U(e, t.app.previewFailed);
+		}
+	}
+	addToRegion(e, n) {
+		let r = this.current, i = r?.layout, [a, o] = e.split(":"), s = this.widgets.find((e) => e.id === o);
+		if (!r || !i || a !== "widget" || !s) return;
+		let c = xf(r, i, n), l = this.layoutFrames?.regions.find((e) => e.id === c?.id);
+		if (!c || !l) {
+			this.showNotice(t.basic.noEmptyRegion);
+			return;
+		}
+		this.mutate((e) => Sf(e, s, c, l)), this.selectRegion(c.id), this.composePreview();
+	}
+	selectRegion(e) {
+		let t = this.current && yf(this.current, e);
+		this.setSelection(t ? [t.id] : []), this.selectedRegionId = e;
+	}
+	onBasicStepChange(e) {
+		this.basicStep = e.detail.step;
+	}
+	onRegionSelect(e) {
+		this.selectRegion(e.detail.regionId);
+	}
+	onRegionsMerge(e) {
+		let { rectangle: t } = e.detail;
+		this.mutate((e) => Tf(e, t));
+		let n = this.current?.layout, r = n && rf(n, t);
+		this.selectRegion(r?.id ?? ""), this.composePreview();
+	}
+	onRegionSplit(e) {
+		this.mutate((t) => Ef(t, e.detail.regionId)), this.selectRegion(e.detail.regionId);
+	}
+	onGridChange(e) {
+		let { columns: t, rows: n, gap: r } = e.detail;
+		this.mutate((e) => {
+			let i = e.layout;
+			i && (r !== void 0 && Of(e, r), Df(e, {
+				columns: t ?? i.columns,
+				rows: n ?? i.rows
+			}));
+		}), this.current && this.keepExistingSelection(this.current), this.composePreview();
 	}
 	groupSelection(e) {
 		let t;
@@ -18269,7 +19450,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	confirmDeleteItem() {
 		let e = this.pendingDeleteIds;
 		e.length !== 0 && (this.pendingDeleteIds = [], this.mutate((t) => {
-			for (let n of e) Il(t, n);
+			for (let n of e) Rl(t, n);
 		}), this.setSelection(this.selection.filter((t) => !e.includes(t))));
 	}
 	onDashboardOpen(e) {
@@ -18290,10 +19471,14 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		};
 	}
 	onSettingsChange(e) {
-		this.dashboardDraft &&= Ku(this.dashboardDraft, e.detail.value);
+		this.dashboardDraft &&= Zu(this.dashboardDraft, e.detail.value);
 	}
 	onNewDashboardChange(e) {
-		this.newDashboard = Ku(this.newDashboard, e.detail.value);
+		this.newDashboard = Zu(this.newDashboard, e.detail.value);
+	}
+	onNewDashboardMode(e) {
+		let t = this.layoutLimits?.defaultGap ?? 8;
+		this.newDashboard = _f(this.newDashboard, e.detail.mode, t);
 	}
 	onNewDashboardSource(e) {
 		this.chooseNewDashboardSource(e.detail.source);
@@ -18306,6 +19491,9 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	closeNewDashboard() {
 		this.newDashboardOpen = !1;
+	}
+	onRenameHandled() {
+		this.renameRequestId = "";
 	}
 	showGallery() {
 		this.view = "dashboards";
@@ -18343,7 +19531,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	onItemRename(e) {
 		let { itemId: t, name: n } = e.detail;
-		this.mutate((e) => Rl(e, t, n));
+		this.mutate((e) => Bl(e, t, n));
 	}
 	cancelDeleteItem() {
 		this.pendingDeleteIds = [];
@@ -18394,22 +19582,22 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	onLayersReorder(e) {
 		let { itemId: t, targetId: n, edge: r } = e.detail;
-		this.mutate((e) => Ll(e, t, n, r));
+		this.mutate((e) => zl(e, t, n, r));
 	}
 	onItemNumberChange(e) {
 		let { key: t, value: n } = e.detail;
-		this.mutate((e) => Al(e, this.selectedItemId, t, n, this.primitives));
+		this.mutate((e) => Ml(e, this.selectedItemId, t, n, this.primitives));
 	}
 	onExpressionChange(e) {
 		let { key: t, template: n } = e.detail;
-		this.mutate((e) => Jl(e, this.selectedItemId, t, n));
+		this.mutate((e) => Xl(e, this.selectedItemId, t, n));
 	}
 	onDisplayNumberChange(e) {
 		let { key: t, value: n } = e.detail;
-		this.mutate((e) => Nl(e, t, n));
+		this.mutate((e) => Fl(e, t, n));
 	}
 	onDisplayBackgroundChange(e) {
-		this.mutate((t) => Pl(t, e.detail.color));
+		this.mutate((t) => Il(t, e.detail.color));
 	}
 	onWidgetOptionsChange(e) {
 		let t = this.selectedItem;
@@ -18417,15 +19605,15 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		let n = this.widgets.find((e) => e.id === t.widget.type);
 		if (!n) return;
 		let r = ec(e.detail.value, n);
-		this.mutate((e) => zl(e, t.id, r));
+		this.mutate((e) => Vl(e, t.id, r));
 	}
 	onWidgetPicksChange(e) {
 		let { sourceKey: t, picks: n } = e.detail;
-		this.mutate((e) => Bl(e, this.selectedItemId, t, n));
+		this.mutate((e) => Hl(e, this.selectedItemId, t, n));
 	}
 	async reloadWidgets() {
 		if (this.hass) try {
-			let e = await wd(this.hass);
+			let e = await jd(this.hass);
 			this.widgets = e.widgets, this.widgetErrors = e.widgetErrors, this.showNotice(t.library.widgetsReloaded(e.widgets.length, e.widgetErrors.length)), this.composePreview();
 		} catch (e) {
 			this.error = U(e, t.library.reloadFailed);
@@ -18434,7 +19622,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	showNotice(e) {
 		this.notice = e, this.noticeTimer && window.clearTimeout(this.noticeTimer), this.noticeTimer = window.setTimeout(() => {
 			this.notice = "";
-		}, Ah);
+		}, qg);
 	}
 	onContainerBackgroundChange(e) {
 		let t = hn(e.detail.value);
@@ -18442,19 +19630,19 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 	}
 	onAlignInParent(e) {
 		let t = this.selectedItemId, n = this.preview?.itemBounds[t];
-		this.mutate((r) => Kd(r, t, e.detail.place, n));
+		this.mutate((r) => Mf(r, t, e.detail.place, n));
 	}
 	onPrimitiveFieldChange(e) {
 		let { key: t, value: n } = e.detail, r = this.selectedItemId, i = this.preview?.itemBounds[r];
-		this.mutate((e) => Vl(e, r, t, n, i));
+		this.mutate((e) => Ul(e, r, t, n, i));
 	}
 	onPrimitiveFieldsReset(e) {
 		let { values: t } = e.detail;
-		this.mutate((e) => Hl(e, this.selectedItemId, t));
+		this.mutate((e) => Wl(e, this.selectedItemId, t));
 	}
 	onPrimitiveChange(e) {
 		let { value: t } = e.detail;
-		this.mutate((e) => Ul(e, this.selectedItemId, t, this.primitives));
+		this.mutate((e) => Gl(e, this.selectedItemId, t, this.primitives));
 	}
 	renderDeleteDialog() {
 		let e = this.pendingDeleteIds.flatMap((e) => T(this.current?.items ?? [], e) ?? []), [n] = e;
@@ -18496,6 +19684,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
         .saving=${this.saving}
         @new-dashboard-change=${this.onNewDashboardChange}
         @new-dashboard-source=${this.onNewDashboardSource}
+        @new-dashboard-mode=${this.onNewDashboardMode}
         @new-dashboard-device=${this.onNewDashboardDevice}
         @new-dashboard-profile=${this.onNewDashboardProfile}
         @new-dashboard-close=${this.closeNewDashboard}
@@ -18539,88 +19728,149 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
       ></ods-settings>
     `;
 	}
+	layoutStyle() {
+		return V({
+			"--toolbox-width": this.leftCollapsed ? "48px" : "255px",
+			"--inspector-width": this.rightCollapsed ? "48px" : `${this.inspectorWidth}px`
+		});
+	}
+	renderLibrary(e) {
+		return F`
+      <ods-library
+        .widgets=${this.widgets}
+        .widgetErrors=${this.widgetErrors}
+        .primitives=${this.primitives}
+        .collapsed=${this.leftCollapsed}
+        .widgetsOnly=${e}
+        @widgets-reload=${this.reloadWidgets}
+        @library-collapse=${this.onLibraryCollapse}
+        @catalog-add=${this.onCatalogAdd}
+        @catalog-drag=${this.onCatalogDrag}
+        @catalog-drop=${this.onCatalogDrop}
+      ></ods-library>
+    `;
+	}
+	renderCanvas(e) {
+		return F`
+      <ods-canvas
+        .dashboard=${e}
+        .preview=${this.preview}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selection}
+        .enteredGroupId=${this.enteredGroupId}
+        .snapEnabled=${this.snapEnabled}
+        .alignTo=${this.alignTo}
+        .acceptingDrop=${this.draggingCatalog}
+        .canUndo=${this.undoCount > 0}
+        .canRedo=${this.redoCount > 0}
+        .viewport=${this.viewport}
+        .layoutFrames=${this.layoutFrames}
+        .basicStep=${this.basicStep}
+        .selectedRegionId=${this.selectedRegionId}
+        @viewport-change=${this.onViewportChange}
+        @items-transform=${this.onItemsTransform}
+        @item-transform-end=${this.onItemTransformEnd}
+        @gesture-cancel=${this.onGestureCancel}
+        @primitive-field-change=${this.onPrimitiveFieldChange}
+        @snap-toggle=${this.toggleSnap}
+        @align-target-change=${this.onAlignTargetChange}
+        @region-select=${this.onRegionSelect}
+        @regions-merge=${this.onRegionsMerge}
+        @region-split=${this.onRegionSplit}
+      ></ods-canvas>
+    `;
+	}
+	renderInspector(e) {
+		return F`
+      <ods-inspector
+        .hass=${this.hass}
+        .dashboard=${e}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .preview=${this.preview}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selection}
+        .enteredGroupId=${this.enteredGroupId}
+        .renameRequestId=${this.renameRequestId}
+        .collapsed=${this.rightCollapsed}
+        .width=${this.inspectorWidth}
+        @inspector-collapse=${this.onInspectorCollapse}
+        @inspector-resize=${this.onInspectorResize}
+        @layers-reorder=${this.onLayersReorder}
+        @item-number-change=${this.onItemNumberChange}
+        @display-number-change=${this.onDisplayNumberChange}
+        @display-background-change=${this.onDisplayBackgroundChange}
+        @widget-options-change=${this.onWidgetOptionsChange}
+        @widget-picks-change=${this.onWidgetPicksChange}
+        @widgets-reload=${this.reloadWidgets}
+        @primitive-change=${this.onPrimitiveChange}
+        @primitive-field-change=${this.onPrimitiveFieldChange}
+        @primitive-fields-reset=${this.onPrimitiveFieldsReset}
+        @align-in-parent=${this.onAlignInParent}
+        @container-background-change=${this.onContainerBackgroundChange}
+        @expression-change=${this.onExpressionChange}
+      ></ods-inspector>
+    `;
+	}
+	renderDialogs() {
+		return F`
+      ${this.renderDeleteDialog()} ${this.renderImportDialog()}
+      ${this.renderMenu()} ${this.renderShortcutsDialog()}
+    `;
+	}
 	renderDesign(e) {
 		return F`
       <div
         class="layout"
-        style=${V({
-			"--toolbox-width": this.leftCollapsed ? "48px" : "255px",
-			"--inspector-width": this.rightCollapsed ? "48px" : `${this.inspectorWidth}px`
-		})}
+        style=${this.layoutStyle()}
         @item-select=${this.onItemSelect}
         @selection-change=${this.onSelectionChange}
         @group-enter=${this.onGroupEnter}
         @item-rename=${this.onItemRename}
         @context-menu=${this.onContextMenu}
-        @rename-handled=${() => {
-			this.renameRequestId = "";
-		}}
+        @rename-handled=${this.onRenameHandled}
         @command=${this.onCommand}
       >
-        <ods-library
-          .widgets=${this.widgets}
-          .widgetErrors=${this.widgetErrors}
-          .primitives=${this.primitives}
-          .collapsed=${this.leftCollapsed}
-          @widgets-reload=${this.reloadWidgets}
-          @library-collapse=${this.onLibraryCollapse}
-          @catalog-add=${this.onCatalogAdd}
-          @catalog-drag=${this.onCatalogDrag}
-          @catalog-drop=${this.onCatalogDrop}
-        ></ods-library>
-        <ods-canvas
-          .dashboard=${e}
-          .preview=${this.preview}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selection}
-          .enteredGroupId=${this.enteredGroupId}
-          .snapEnabled=${this.snapEnabled}
-          .alignTo=${this.alignTo}
-          .acceptingDrop=${this.draggingCatalog}
-          .canUndo=${this.undoCount > 0}
-          .canRedo=${this.redoCount > 0}
-          .viewport=${this.viewport}
-          @viewport-change=${this.onViewportChange}
-          @items-transform=${this.onItemsTransform}
-          @item-transform-end=${this.onItemTransformEnd}
-          @gesture-cancel=${this.onGestureCancel}
-          @primitive-field-change=${this.onPrimitiveFieldChange}
-          @snap-toggle=${this.toggleSnap}
-          @align-target-change=${this.onAlignTargetChange}
-        ></ods-canvas>
-        <ods-inspector
-          .hass=${this.hass}
-          .dashboard=${e}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .preview=${this.preview}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selection}
-          .enteredGroupId=${this.enteredGroupId}
-          .renameRequestId=${this.renameRequestId}
-          .collapsed=${this.rightCollapsed}
-          .width=${this.inspectorWidth}
-          @inspector-collapse=${this.onInspectorCollapse}
-          @inspector-resize=${this.onInspectorResize}
-          @layers-reorder=${this.onLayersReorder}
-          @item-number-change=${this.onItemNumberChange}
-          @display-number-change=${this.onDisplayNumberChange}
-          @display-background-change=${this.onDisplayBackgroundChange}
-          @widget-options-change=${this.onWidgetOptionsChange}
-          @widget-picks-change=${this.onWidgetPicksChange}
-          @widgets-reload=${this.reloadWidgets}
-          @primitive-change=${this.onPrimitiveChange}
-          @primitive-field-change=${this.onPrimitiveFieldChange}
-          @primitive-fields-reset=${this.onPrimitiveFieldsReset}
-          @align-in-parent=${this.onAlignInParent}
-          @container-background-change=${this.onContainerBackgroundChange}
-          @expression-change=${this.onExpressionChange}
-        ></ods-inspector>
+        ${this.renderLibrary(!1)} ${this.renderCanvas(e)}
+        ${this.renderInspector(e)}
       </div>
-      ${this.renderDeleteDialog()} ${this.renderImportDialog()}
-      ${this.renderMenu()} ${this.renderShortcutsDialog()}
+      ${this.renderDialogs()}
+    `;
+	}
+	renderBasicLeft(e) {
+		return F`
+      <div class="basic-left">
+        <ods-basic-steps
+          .step=${this.basicStep}
+          @basic-step-change=${this.onBasicStepChange}
+        ></ods-basic-steps>
+        ${this.basicStep === "layout" ? F`
+                <ods-layout-panel
+                  .layout=${e.layout}
+                  .limits=${this.layoutLimits}
+                  .padding=${e.display.padding}
+                  @grid-change=${this.onGridChange}
+                  @display-number-change=${this.onDisplayNumberChange}
+                ></ods-layout-panel>
+              ` : this.renderLibrary(!0)}
+      </div>
+    `;
+	}
+	renderBasicDesign(e) {
+		return F`
+      <div
+        class="layout"
+        style=${this.layoutStyle()}
+        @item-select=${this.onItemSelect}
+        @selection-change=${this.onSelectionChange}
+        @command=${this.onCommand}
+      >
+        ${this.renderBasicLeft(e)} ${this.renderCanvas(e)}
+        ${this.renderInspector(e)}
+      </div>
+      ${this.renderDialogs()}
     `;
 	}
 	renderError() {
@@ -18632,6 +19882,9 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		return this.notice ? F`
       <ha-alert alert-type="success" class="notice">${this.notice}</ha-alert>
     ` : I;
+	}
+	renderEditorBody(e) {
+		return e.mode === "basic" ? this.renderBasicDesign(e) : this.renderDesign(e);
 	}
 	renderEditor(e) {
 		return F`
@@ -18657,7 +19910,7 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
         ${this.renderError()} ${this.renderNotice()}
         ${this.view === "code" ? F`
                 <ods-code-view .preview=${this.preview}></ods-code-view>
-              ` : this.renderDesign(e)}
+              ` : this.renderEditorBody(e)}
       </div>
     `;
 	}
@@ -18672,6 +19925,6 @@ var _h = (e, t) => Ot(e.items, t).map((e) => e.id), vh = "opendisplay_studio.cli
 		return this.view === "dashboards" || !e ? this.renderGallery() : this.renderEditor(e);
 	}
 };
-Y([z({ attribute: !1 })], $.prototype, "hass", void 0), Y([B()], $.prototype, "dashboards", void 0), Y([B()], $.prototype, "view", void 0), Y([B()], $.prototype, "widgets", void 0), Y([B()], $.prototype, "widgetErrors", void 0), Y([B()], $.prototype, "notice", void 0), Y([B()], $.prototype, "sending", void 0), Y([B()], $.prototype, "importing", void 0), Y([B()], $.prototype, "primitives", void 0), Y([B()], $.prototype, "current", void 0), Y([B()], $.prototype, "selection", void 0), Y([B()], $.prototype, "enteredGroupId", void 0), Y([B()], $.prototype, "menu", void 0), Y([B()], $.prototype, "shortcutsOpen", void 0), Y([B()], $.prototype, "renameRequestId", void 0), Y([B()], $.prototype, "preview", void 0), Y([B()], $.prototype, "loading", void 0), Y([B()], $.prototype, "saving", void 0), Y([B()], $.prototype, "dirty", void 0), Y([B()], $.prototype, "error", void 0), Y([B()], $.prototype, "draggingCatalog", void 0), Y([B()], $.prototype, "undoCount", void 0), Y([B()], $.prototype, "redoCount", void 0), Y([B()], $.prototype, "pendingDeleteIds", void 0), Y([B()], $.prototype, "leftCollapsed", void 0), Y([B()], $.prototype, "rightCollapsed", void 0), Y([B()], $.prototype, "inspectorWidth", void 0), Y([B()], $.prototype, "snapEnabled", void 0), Y([B()], $.prototype, "alignTo", void 0), Y([B()], $.prototype, "viewport", void 0), Y([B()], $.prototype, "newDashboardOpen", void 0), Y([B()], $.prototype, "newDashboard", void 0), Y([B()], $.prototype, "newDashboardSource", void 0), Y([B()], $.prototype, "newDashboardDeviceId", void 0), Y([B()], $.prototype, "displayDevices", void 0), Y([B()], $.prototype, "dashboardDialog", void 0), Y([B()], $.prototype, "dashboardDraft", void 0), Y([bl("ods-canvas")], $.prototype, "canvas", void 0), $ = Y([R("ods-app")], $);
+Y([z({ attribute: !1 })], $.prototype, "hass", void 0), Y([B()], $.prototype, "dashboards", void 0), Y([B()], $.prototype, "view", void 0), Y([B()], $.prototype, "widgets", void 0), Y([B()], $.prototype, "widgetErrors", void 0), Y([B()], $.prototype, "notice", void 0), Y([B()], $.prototype, "sending", void 0), Y([B()], $.prototype, "importing", void 0), Y([B()], $.prototype, "primitives", void 0), Y([B()], $.prototype, "current", void 0), Y([B()], $.prototype, "selection", void 0), Y([B()], $.prototype, "enteredGroupId", void 0), Y([B()], $.prototype, "menu", void 0), Y([B()], $.prototype, "shortcutsOpen", void 0), Y([B()], $.prototype, "renameRequestId", void 0), Y([B()], $.prototype, "preview", void 0), Y([B()], $.prototype, "loading", void 0), Y([B()], $.prototype, "saving", void 0), Y([B()], $.prototype, "dirty", void 0), Y([B()], $.prototype, "error", void 0), Y([B()], $.prototype, "draggingCatalog", void 0), Y([B()], $.prototype, "undoCount", void 0), Y([B()], $.prototype, "redoCount", void 0), Y([B()], $.prototype, "pendingDeleteIds", void 0), Y([B()], $.prototype, "leftCollapsed", void 0), Y([B()], $.prototype, "rightCollapsed", void 0), Y([B()], $.prototype, "inspectorWidth", void 0), Y([B()], $.prototype, "snapEnabled", void 0), Y([B()], $.prototype, "alignTo", void 0), Y([B()], $.prototype, "viewport", void 0), Y([B()], $.prototype, "newDashboardOpen", void 0), Y([B()], $.prototype, "newDashboard", void 0), Y([B()], $.prototype, "newDashboardSource", void 0), Y([B()], $.prototype, "newDashboardDeviceId", void 0), Y([B()], $.prototype, "displayDevices", void 0), Y([B()], $.prototype, "dashboardDialog", void 0), Y([B()], $.prototype, "dashboardDraft", void 0), Y([B()], $.prototype, "layoutLimits", void 0), Y([B()], $.prototype, "layoutFrames", void 0), Y([B()], $.prototype, "basicStep", void 0), Y([B()], $.prototype, "selectedRegionId", void 0), Y([Sl("ods-canvas")], $.prototype, "canvas", void 0), $ = Y([R("ods-app")], $);
 //#endregion
 export { $ as OdsApp };

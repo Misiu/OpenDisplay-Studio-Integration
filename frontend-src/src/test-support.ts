@@ -72,6 +72,7 @@ export const dashboardWith = (
   id: "d1",
   schemaVersion: 1,
   name: "Test",
+  mode: "advanced",
   status: "draft",
   language: "en",
   display: {
