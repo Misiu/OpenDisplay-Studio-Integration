@@ -171,7 +171,7 @@ test("the list of dashboards", async ({ page }) => {
   await page.reload();
   await page.getByText("Night clock").waitFor();
 
-  await picture(page, "basic-gallery");
+  await picture(page, "gallery");
 });
 
 test("the basic editor, step by step", async ({ page }) => {

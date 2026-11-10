@@ -53,7 +53,7 @@ All your dashboards live in one list, with their size, colours and state
 device with one click.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/gallery.webp" alt="The list of dashboards" width="760">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/gallery.webp" alt="The list of dashboards: each is drawn as its display and marked Basic or Advanced" width="900">
 </p>
 
 ## Two editors: Basic and Advanced
@@ -111,10 +111,6 @@ of cells, so a tall one, a square one and a row of single cells can share a scre
 
 <p align="center">
   <img src="docs/images/basic-many-regions.webp" alt="A grid of six columns and four rows cut into ten regions of different sizes" width="900">
-</p>
-
-<p align="center">
-  <img src="docs/images/basic-gallery.webp" alt="The list of dashboards, each marked Basic or Advanced" width="900">
 </p>
 
 A Basic dashboard is rendered by the same `odl-renderer` as an Advanced one, and its image
