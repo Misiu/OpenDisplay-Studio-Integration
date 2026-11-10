@@ -39,7 +39,7 @@ const menu = (): Array<ContextMenuEntry & { id: DashboardAction }> => [
   {
     id: "settings",
     label: strings.gallery.menu.settings,
-    icon: "mdi:monitor-cog",
+    icon: "mdi:cog-outline",
   },
   {
     id: "delete",

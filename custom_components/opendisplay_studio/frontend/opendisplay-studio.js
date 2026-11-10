@@ -14149,7 +14149,7 @@ var Ph = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches, Fh
 	{
 		id: "settings",
 		label: t.gallery.menu.settings,
-		icon: "mdi:monitor-cog"
+		icon: "mdi:cog-outline"
 	},
 	{
 		id: "delete",
