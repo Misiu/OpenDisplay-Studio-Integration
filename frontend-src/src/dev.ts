@@ -146,7 +146,7 @@ if (!customElements.get("ha-icon")) {
               "mdi:plus-circle": "⊕",
               "mdi:dots-horizontal": "⋯",
               "mdi:pencil-outline": "✎",
-              "mdi:monitor-cog": "⚙",
+              "mdi:cog-outline": "⚙",
               "mdi:delete-outline": "×",
               "mdi:monitor-edit": "▣",
               "mdi:monitor": "▣",
