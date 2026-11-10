@@ -39,7 +39,8 @@ def preview_margin(display: dict[str, Any]) -> int:
 
     Elements may lie partly outside the display; seeing them makes moving them back
     easy. A margin of two fifths of the shorter side, at most 256 px, keeps the picture
-    small enough to render quickly.
+    small enough to render quickly. The picture for a display is drawn with the same
+    margin and then cut to the display, see `async_render_dashboard`.
     """
     shorter_side: int = min(display["width"], display["height"])
     return min(PREVIEW_MARGIN_LIMIT, round(shorter_side * 0.4))
@@ -59,16 +60,22 @@ async def async_render_dashboard(
     from the Media Source or sent to a device, is turned by the dashboard's rotation
     so it has the display's own width and height. With `with_margin` the picture also
     shows a margin around the display, where elements that hang out of it are drawn.
+
+    Either way the dashboard is drawn once, on the picture with its margin, and the
+    margin is cut off afterwards when it is not wanted. The renderer draws an element
+    that hangs out of the picture only as far as the picture goes, and a turned text is
+    turned after it is drawn, so drawing the display on its own would give another
+    picture than the editor shows. The display receives exactly what the editor shows.
     """
     started = monotonic()
     data = hass.data[DOMAIN]
     compiled = await async_compile_dashboard(hass, dashboard, data.widgets)
     display = dashboard["display"]
-    margin = preview_margin(display) if with_margin else 0
-    elements = compiled.elements
-    if margin:
-        explicit = expand_debug_grids(elements, display["width"], display["height"])
-        elements = translate_elements(explicit, margin, margin)
+    margin = preview_margin(display)
+    explicit = expand_debug_grids(
+        compiled.elements, display["width"], display["height"]
+    )
+    elements = translate_elements(explicit, margin, margin)
     accent_color = accent_color_for_palette(display["palette"])
     pivots = (
         await async_find_pivots(
@@ -79,7 +86,7 @@ async def async_render_dashboard(
             margin=margin,
             accent_color=accent_color,
         )
-        if margin
+        if with_margin
         else {}
     )
     picture = await data.renderer.async_render(
@@ -91,6 +98,7 @@ async def async_render_dashboard(
         accent_color=accent_color,
         rotation=display["rotation"] if for_device else 0,
         margin=margin,
+        show_margin=with_margin,
     )
     pipeline_ms = round((monotonic() - started) * 1000, 2)
     LOGGER.info(
@@ -108,4 +116,5 @@ async def async_render_dashboard(
         pipeline_ms,
         len(picture.png),
     )
-    return RenderedDashboard(compiled, picture, pipeline_ms, margin, pivots)
+    shown_margin = margin if with_margin else 0
+    return RenderedDashboard(compiled, picture, pipeline_ms, shown_margin, pivots)
