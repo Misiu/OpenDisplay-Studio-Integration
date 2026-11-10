@@ -13,13 +13,15 @@ def _split(total: int, weights: Sequence[int], gap: int) -> list[tuple[int, int]
     available = max(count, total - gap * (count - 1))
     weight_sum = sum(weights)
     spans: list[tuple[int, int]] = []
-    offset = 0
     used_weight = 0
-    for weight in weights:
+    start = 0
+    for index, weight in enumerate(weights):
         used_weight += weight
+        # The shares are cut from what is left after the gaps, so the last one ends
+        # exactly where `total` does.
         end = round(available * used_weight / weight_sum)
-        spans.append((offset, max(1, end - offset)))
-        offset = end + gap
+        spans.append((start + gap * index, max(1, end - start)))
+        start = end
     return spans
 
 
