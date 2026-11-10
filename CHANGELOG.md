@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+## 0.3.0
+
+- Add the Basic editor. When you create a dashboard you choose the editor: Advanced is the
+  full editor you know and stays the default, Basic cuts the screen into regions and puts
+  one widget in each, with nothing to drag or align. A dashboard keeps the editor it was
+  made in. In Basic you set the grid (columns, rows, the gap and the outer padding),
+  click one cell and another to make a region of the cells between them, and double-click
+  a region to remove it. A region can be any rectangle of cells, from one cell to the whole
+  grid, and there is no limit to how many. Regions are lettered in the order you made them.
+  On the Widgets tab you drag a widget into a region, or click one to fill the selected
+  region, and its properties are on the right. Only empty regions are outlined, and a click
+  beside the regions lets go of the selection, so you see the picture as it will be
+  rendered.
+- Mark each dashboard in the list as Basic or Advanced.
+- Rebuild the New dashboard window: pick where the display comes from (a device, a
+  predefined display or a custom size), then the display and the name, and see the display
+  drawn in the proportions of its resolution. Two arrows turn it a quarter at a time, with a
+  small lean back and a settle at the end, and the canvas turns with it.
+- Draw each dashboard in the list as its display: in the proportions of its resolution,
+  turned as it is set up, with the colors of its palette and its resolution at the bottom,
+  and cards no taller than they need to be.
+- Add a setting to Display settings, "Media Source picture as designed". Off, as before,
+  the picture the Media Source gives is turned for the display. On, it keeps the
+  orientation you see in the designer, which suits a preview or a card; to show it with
+  `opendisplay.upload_image` give the rotation of the dashboard as `rotation`, which the
+  text under the switch names. What the editor sends to a device is always turned for it.
+- Fix a text that starts outside the display and is turned: the Media Source and the
+  picture sent to a device lost its first letters while the editor showed it whole. The
+  display now receives the same pixels the editor shows, at every rotation.
+- Fix the cells of a grid in widgets, which stopped short of the edge of their box by the
+  width of the gaps; the weather widget moved by a few pixels.
+- Give Display settings a cog in the menu of a dashboard.
+
 ## 0.2.0
 
 - Add a Settings view, opened from the list of dashboards, with the fonts, the widgets and
