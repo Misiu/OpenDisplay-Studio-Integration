@@ -13,6 +13,7 @@ from uuid import uuid4
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
+from .basic_layout import apply_layout, validate_layout
 from .const import SCHEMA_VERSION, STORAGE_KEY, STORAGE_VERSION
 from .items import validate_items
 from .palette import PALETTE_COLORS
@@ -33,6 +34,8 @@ MAX_DASHBOARDS = 100
 MAX_NAME_LENGTH = 100
 LANGUAGE_PATTERN = re.compile(r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 PALETTES = frozenset(PALETTE_COLORS)
+# Advanced: a free canvas. Basic: a grid of regions with a widget in each.
+MODES = frozenset({"advanced", "basic"})
 
 
 def validate_dashboard(
@@ -64,10 +67,15 @@ def validate_dashboard(
     status = value.get("status", "draft")
     if status not in {"draft", "ready"}:
         raise DashboardValidationError("status must be draft or ready")
+    # A dashboard stored before the modes existed is an advanced one.
+    mode = value.get("mode", "advanced")
+    if mode not in MODES:
+        raise DashboardValidationError("mode must be advanced or basic")
     normalized: Dashboard = {
         "schemaVersion": SCHEMA_VERSION,
         "name": string(value.get("name"), "name", MAX_NAME_LENGTH),
         "status": status,
+        "mode": mode,
         "language": language,
         "display": {
             "profileId": display.get("profileId")
@@ -86,10 +94,23 @@ def validate_dashboard(
         },
         "items": items,
     }
+    _apply_mode(normalized, value)
     for key in ("id", "createdAt", "updatedAt"):
         if key in value:
             normalized[key] = value[key]
     return normalized
+
+
+def _apply_mode(normalized: Dashboard, value: dict[str, Any]) -> None:
+    """Check what only a basic dashboard has, and put its widgets in their regions."""
+    if normalized["mode"] == "advanced":
+        if "layout" in value:
+            raise DashboardValidationError("layout belongs to a basic dashboard")
+        if any("region" in item for item in normalized["items"]):
+            raise DashboardValidationError("region belongs to a basic dashboard")
+        return
+    normalized["layout"] = validate_layout(value.get("layout"))
+    apply_layout(normalized["items"], normalized["layout"], normalized["display"])
 
 
 class DashboardStore:

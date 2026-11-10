@@ -327,7 +327,7 @@ test("duplicates a dashboard as Draft and edits its display settings", async ({
     .click();
   await expect(dialog).toHaveCount(0);
   await expect(duplicate).toContainText("640 × 384");
-  await expect(duplicate).toContainText("Spectra 6");
+  await expect(duplicate.getByRole("img", { name: /Spectra 6/ })).toBeVisible();
 
   const update = await page.evaluate(() =>
     window.__ODS_E2E__
@@ -483,9 +483,7 @@ test.describe("starting a dashboard from a display", () => {
       "Hallway display · 800 × 480",
       "Kitchen e-paper · 296 × 128",
     ]);
-    const summary = dialog.getByRole("group", {
-      name: "Dashboard size and colors",
-    });
+    const summary = dialog.getByRole("region", { name: "Display preview" });
     await expect(summary).toContainText("800 × 480 px");
     await expect(summary).toContainText("Black / white / red");
 
@@ -539,7 +537,7 @@ test.describe("starting a dashboard from a display", () => {
     await displays.selectOption("eink-spectra6-13-3");
 
     await expect(
-      dialog.getByRole("group", { name: "Dashboard size and colors" })
+      dialog.getByRole("region", { name: "Display preview" })
     ).toContainText("1200 × 1600 px");
     await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Big");
     await dialog.getByRole("button", { name: "Create dashboard" }).click();
@@ -640,5 +638,82 @@ test.describe("the display settings of a dashboard", () => {
     await expect(
       page.getByRole("button", { name: "Delete dashboard", exact: true })
     ).toHaveCount(0);
+  });
+});
+
+test.describe("the display preview of the new dashboard dialog", () => {
+  const openCustomDialog = async (page: Page) => {
+    await page
+      .getByRole("button", { name: "New dashboard", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog", { name: "New dashboard" });
+    await dialog.getByRole("radio", { name: /Custom size/ }).click();
+    return dialog;
+  };
+
+  const display = (dialog: Locator) =>
+    dialog.locator("ods-display-preview svg g").first();
+
+  test("turns the display a quarter at a time, which swaps its canvas", async ({
+    page,
+  }) => {
+    const dialog = await openCustomDialog(page);
+    const preview = dialog.getByRole("region", { name: "Display preview" });
+    await expect(preview).toContainText("800 × 480 px · 0°");
+
+    await dialog.getByRole("button", { name: "Turn 90° to the right" }).click();
+
+    await expect(preview).toContainText("480 × 800 px · 90°");
+    await dialog.getByRole("button", { name: "Turn 90° to the left" }).click();
+    await dialog.getByRole("button", { name: "Turn 90° to the left" }).click();
+    await expect(preview).toContainText("480 × 800 px · 270°");
+  });
+
+  test("the display leans back, swings round and settles at the new angle", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    const dialog = await openCustomDialog(page);
+    await expect(display(dialog)).toHaveAttribute("transform", /rotate\(0\)/);
+
+    await dialog.getByRole("button", { name: "Turn 90° to the right" }).click();
+
+    await expect(display(dialog)).not.toHaveAttribute(
+      "transform",
+      /rotate\(90\)/
+    );
+    await expect(display(dialog)).toHaveAttribute("transform", /rotate\(90\)/);
+  });
+
+  test("a turned display is created turned, with the canvas it makes", async ({
+    page,
+  }) => {
+    const dialog = await openCustomDialog(page);
+    await dialog.getByRole("textbox", { name: "Dashboard name" }).fill("Tall");
+    await dialog.getByRole("button", { name: "Turn 90° to the right" }).click();
+
+    await dialog.getByRole("button", { name: "Create dashboard" }).click();
+
+    await expect(page.locator(".workspace-meta")).toContainText("480 × 800 px");
+    const created = await page.evaluate(
+      () =>
+        window.__ODS_E2E__
+          .calls()
+          .findLast(
+            (call) => call.type === "opendisplay_studio/create_dashboard"
+          )?.dashboard as { display: { rotation: number } } | undefined
+    );
+    expect(created?.display.rotation).toBe(90);
+  });
+
+  test("a basic dashboard has no padding or snapping to set here", async ({
+    page,
+  }) => {
+    const dialog = await openCustomDialog(page);
+    await expect(dialog.getByText("Advanced display options")).toBeVisible();
+
+    await dialog.getByRole("radio", { name: /Basic/ }).click();
+
+    await expect(dialog.getByText("Advanced display options")).toHaveCount(0);
   });
 });

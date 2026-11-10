@@ -157,6 +157,9 @@ def _validate_widget(
             "padding": integer(layout.get("padding", 0), "layout.padding", 0, 128)
         },
     }
+    if "region" in value:
+        # The region of a basic dashboard the widget fills; its frame follows from it.
+        item["region"] = string(value["region"], "item.region", 64)
     _with_expressions(
         item, _expressions(value, ITEM_EXPRESSIONS, single=_single(relative=relative))
     )

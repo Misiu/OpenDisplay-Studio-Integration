@@ -6,7 +6,9 @@ import type {
   FontInfo,
   HomeAssistant,
   IconCatalog,
+  GridLayout,
   ImportPlan,
+  LayoutFrames,
   ReloadWidgetsResponse,
 } from "./types";
 
@@ -16,6 +18,20 @@ export const bootstrap = (hass: HomeAssistant): Promise<BootstrapResponse> =>
   hass.callWS<BootstrapResponse>({
     type: "opendisplay_studio/bootstrap",
     language: hass.language,
+  });
+
+/** Where the cells and regions of a layout are on a display, laid out by the backend. */
+export const layoutFrames = (
+  hass: HomeAssistant,
+  display: { width: number; height: number; padding: number },
+  layout: GridLayout
+): Promise<LayoutFrames> =>
+  hass.callWS<LayoutFrames>({
+    type: "opendisplay_studio/layout_frames",
+    width: display.width,
+    height: display.height,
+    padding: display.padding,
+    layout,
   });
 
 /** Loads the widget packages again, without restarting Home Assistant. */

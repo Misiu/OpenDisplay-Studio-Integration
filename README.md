@@ -41,11 +41,11 @@ display can fetch.
 ## Start from the display you own
 
 Create a dashboard from a display Home Assistant already knows, from a list of
-common panels, or at any custom size. Rotation is part of the dashboard, so a
-portrait display just works.
+common panels, or at any custom size. Rotation is part of the dashboard: turn the
+display in the preview and the canvas turns with it, so a portrait display just works.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/new-dashboard.webp" alt="The new dashboard dialog, starting from a device" width="760">
+  <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/new-dashboard.webp" alt="The new dashboard dialog: a device, a name and a preview of the display that the arrows turn" width="560">
 </p>
 
 All your dashboards live in one list, with their size, colours and state
@@ -55,6 +55,70 @@ device with one click.
 <p align="center">
   <img src="https://raw.githubusercontent.com/Misiu/OpenDisplay-Studio-Integration/main/docs/images/gallery.webp" alt="The list of dashboards" width="760">
 </p>
+
+## Two editors: Basic and Advanced
+
+You choose the editor when you create a dashboard, and the dashboard keeps it.
+**Advanced** is the full editor described below: place and arrange every element
+freely. **Basic** cuts the screen into regions and puts one widget in each; there is
+nothing to align, so a screen is made in a few clicks. Advanced is the default, and
+the list of dashboards marks each one as Basic or Advanced. A dashboard is never
+converted from one to the other.
+
+<p align="center">
+  <img src="docs/images/basic-new-dashboard.webp" alt="The new dashboard dialog with the Basic editor chosen" width="400">
+</p>
+
+**1. Set the grid.** On the *Layout* tab pick the number of columns and rows, and the gap
+between the cells.
+
+<p align="center">
+  <img src="docs/images/basic-grid.webp" alt="A grid of three columns and two rows" width="900">
+</p>
+
+**2. Make the regions.** Click one cell, then another: the cells between them become one
+region. A region that would be cut in two is refused. Double-click a region to remove it; its cells are free again. Regions are lettered A, B, C … in the order you made them.
+
+<p align="center">
+  <img src="docs/images/basic-join.webp" alt="Choosing the second cell of a region" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/images/basic-regions.webp" alt="Two joined regions, one of them selected" width="900">
+</p>
+
+**3. Fill them with widgets.** On the *Widgets* tab drag a widget into a region, or select
+a region and click a widget. Selecting a widget shows its properties on the right; with no
+tree and no alignment tools there is more room for them.
+
+<p align="center">
+  <img src="docs/images/basic-widgets-empty.webp" alt="The Widgets tab with four empty regions" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/images/basic-widgets.webp" alt="Four widgets in four regions, the weather widget selected" width="900">
+</p>
+
+Only empty regions are drawn with a border. Click beside the regions to let go of the
+selection and you see the picture as it will be rendered.
+
+<p align="center">
+  <img src="docs/images/basic-result.webp" alt="The four widgets with nothing selected, as they will be rendered" width="900">
+</p>
+
+There is no limit to the layout but the size of the grid: a region may be any rectangle
+of cells, so a tall one, a square one and a row of single cells can share a screen.
+
+<p align="center">
+  <img src="docs/images/basic-many-regions.webp" alt="A grid of six columns and four rows cut into ten regions of different sizes" width="900">
+</p>
+
+<p align="center">
+  <img src="docs/images/basic-gallery.webp" alt="The list of dashboards, each marked Basic or Advanced" width="900">
+</p>
+
+A Basic dashboard is rendered by the same `odl-renderer` as an Advanced one, and its image
+address works the same way.
 
 ## Shapes you can shape
 

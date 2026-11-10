@@ -165,6 +165,9 @@ export const polish: StringsOverride = {
     deviceDetails: "Rozmiar i kolory dashboardu",
     colors: "Kolory",
     create: "Utwórz dashboard",
+    previewLabel: "Podgląd wyświetlacza",
+    turnLeft: "Obróć o 90° w lewo",
+    turnRight: "Obróć o 90° w prawo",
     creating: "Tworzenie…",
   },
 
@@ -594,5 +597,45 @@ export const polish: StringsOverride = {
     seven_color: "Siedem kolorów · Spectra 6 i pomarańczowy",
     grayscale4: "Skala szarości · 4 poziomy",
     grayscale16: "Skala szarości · 16 poziomów",
+  },
+
+  basic: {
+    modeTitle: "Edytor",
+    basic: "Podstawowy",
+    basicHint: "Siatka regionów, w każdym widżet.",
+    advanced: "Zaawansowany",
+    advancedHint: "Każdy element ustawiasz swobodnie.",
+    badgeBasic: "Podstawowy",
+    badgeAdvanced: "Zaawansowany",
+    stepsLabel: "Kroki edytora",
+    stepLayout: "Układ",
+    stepWidgets: "Widżety",
+    widgetsHeading: "Widżety",
+    layoutTitle: "Układ",
+    layoutHeading: "Regiony",
+    gridHeading: "Siatka",
+    columns: "Kolumny",
+    rows: "Wiersze",
+    gap: "Odstęp",
+    regionsHeading: "Regiony",
+    regionsHint:
+      "Kliknij jedną komórkę, potem drugą, aby połączyć komórki między nimi w region. Kliknij region dwukrotnie, aby go usunąć.",
+    joinStarted: "Kliknij drugą komórkę, aby zakończyć region.",
+    joinInvalid: "To przecięłoby region na pół.",
+    cancelJoin: "Anuluj",
+    regionCount: (count: number): string =>
+      `${count} ${plural(count, "region", "regiony", "regionów")}`,
+    cell: (row: number, column: number): string =>
+      `Komórka w wierszu ${row} i kolumnie ${column}`,
+    regionSize: (columns: number, rows: number): string =>
+      `region ${columns}×${rows}`,
+    region: (name: string): string => `Region ${name}`,
+    emptyRegion: "Pusty region",
+    emptyRegionHint: "Wybierz widżet z listy.",
+    noEmptyRegion: "Każdy region ma już widżet.",
+    layoutStepHint:
+      "Najpierw narysuj regiony, potem wypełnij je na karcie Widżety.",
+    widgetsStepHint:
+      "Przeciągnij widżet do regionu albo kliknij go, aby wypełnić zaznaczony region.",
   },
 };

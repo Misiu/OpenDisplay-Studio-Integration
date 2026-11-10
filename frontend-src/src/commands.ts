@@ -70,6 +70,8 @@ export interface CommandContext {
   canPaste?: boolean;
   /** Whether the dashboard has unsaved changes. */
   dirty?: boolean;
+  /** Whether the dashboard is edited by regions, which leaves out most editing commands. */
+  basic?: boolean;
 }
 
 /** The effects a command can have; the shell provides them. */
@@ -240,7 +242,7 @@ const distributeCommands = (): Command[] =>
     })
   );
 
-export const COMMANDS: Command[] = [
+const EDITOR_COMMANDS: Command[] = [
   {
     id: "undo",
     group: "history",
@@ -512,6 +514,33 @@ export const COMMANDS: Command[] = [
     run: (_context, actions) => actions.showShortcuts(),
   },
 ];
+
+/**
+ * What a basic dashboard still allows. The rest moves, copies or regroups elements, and
+ * in a basic dashboard a widget goes where its region is and nowhere else.
+ */
+const BASIC_COMMAND_IDS: ReadonlySet<CommandId> = new Set<CommandId>([
+  "undo",
+  "redo",
+  "delete-item",
+  "deselect",
+  "save",
+  "toggle-code",
+  "zoom-in",
+  "zoom-out",
+  "zoom-reset",
+  "show-shortcuts",
+]);
+
+const forDashboardMode = (command: Command): Command => {
+  if (BASIC_COMMAND_IDS.has(command.id)) return command;
+  return {
+    ...command,
+    isEnabled: (context) => !context.basic && command.isEnabled(context),
+  };
+};
+
+export const COMMANDS: Command[] = EDITOR_COMMANDS.map(forDashboardMode);
 
 /** Whether a string is the id of a registered command. */
 export const isCommandId = (id: string): id is CommandId =>

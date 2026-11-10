@@ -9,6 +9,7 @@ from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceNotFound
 
+from .basic_layout import LAYOUT_LIMITS
 from .compiler import DashboardCompileError
 from .const import DOMAIN, INTEGRATION_VERSION, LOGGER, RENDER_HTTP_PATH
 from .dashboard_files import DashboardFileError, export_file
@@ -20,6 +21,7 @@ from .icons import ICON_CODEPOINTS, SORTED_ICON_NAMES
 from .palette import PALETTE_COLORS
 from .primitives import DEFAULT_PRIMITIVES
 from .rendering import OdlRenderError, OdlRenderService
+from .websocket_basic import async_register_basic_commands
 from .websocket_fonts import async_describe_fonts, async_register_font_commands
 from .widget_reload import async_reload_widgets
 from .widgets import WidgetRegistry
@@ -69,6 +71,7 @@ async def websocket_bootstrap(
             "widgetErrors": [error.as_dict() for error in _widgets(hass).errors],
             "primitives": DEFAULT_PRIMITIVES.localized(msg["language"]),
             "fonts": await async_describe_fonts(hass),
+            "layoutLimits": LAYOUT_LIMITS,
         },
     )
 
@@ -350,6 +353,7 @@ def websocket_prepare_import(
 
 def async_register_commands(hass: HomeAssistant) -> None:
     async_register_font_commands(hass)
+    async_register_basic_commands(hass)
     websocket_api.async_register_command(hass, websocket_export_dashboard)
     websocket_api.async_register_command(hass, websocket_prepare_import)
     websocket_api.async_register_command(hass, websocket_list_icons)

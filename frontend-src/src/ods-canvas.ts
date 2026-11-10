@@ -10,7 +10,7 @@ import {
   type CommandId,
 } from "./commands";
 import { isAdditiveClick, isMacPlatform, isTypingTarget } from "./dom";
-import { emit, type OdsEvent } from "./events";
+import { emit, type BasicStep, type OdsEvent } from "./events";
 import { snapToGrid, workingArea } from "./geometry";
 import {
   boxBetween,
@@ -68,6 +68,7 @@ import type {
   PreviewState,
   Dashboard,
   ItemBounds,
+  LayoutFrames,
   PrimitiveDefinition,
   PrimitiveItem,
   StudioItem,
@@ -83,6 +84,7 @@ import {
   zoomStep,
   type Viewport,
 } from "./viewport";
+import "./ods-region-layer";
 import "./ods-zoom-bar";
 
 const GESTURE_THRESHOLD = 3;
@@ -139,6 +141,9 @@ export class OdsCanvas extends LitElement {
         background: var(--primary-background-color, #f4f6f8);
         color: var(--studio-text);
         overflow: hidden;
+      }
+      .workspace.basic {
+        grid-template-rows: 42px minmax(0, 1fr);
       }
       .history-controls {
         flex: none;
@@ -655,6 +660,11 @@ export class OdsCanvas extends LitElement {
   @property({ type: Boolean }) public acceptingDrop = false;
   @property({ type: Boolean }) public canUndo = false;
   @property({ type: Boolean }) public canRedo = false;
+  /** Where the cells and regions of a basic dashboard are; the backend lays them out. */
+  @property({ attribute: false }) public layoutFrames?: LayoutFrames;
+  /** The tab of the basic editor, which decides what the regions on the canvas do. */
+  @property() public basicStep: BasicStep = "layout";
+  @property() public selectedRegionId = "";
 
   /** Pan and zoom live in the shell so they survive a trip to the code view. */
   @property({ attribute: false }) public viewport: Viewport = DEFAULT_VIEWPORT;
@@ -712,6 +722,11 @@ export class OdsCanvas extends LitElement {
       x: ((clientX - rect.left) / rect.width) * width,
       y: ((clientY - rect.top) / rect.height) * height,
     };
+  }
+
+  /** A basic dashboard is edited by regions: nothing on the canvas is moved or resized. */
+  private get isBasic(): boolean {
+    return this.dashboard.mode === "basic";
   }
 
   private setViewport(viewport: Viewport): void {
@@ -789,7 +804,10 @@ export class OdsCanvas extends LitElement {
 
   /** A drag that moves the view, wherever the pointer is. */
   private onStagePointerDown(event: PointerEvent): void {
-    if (!this.startsViewDrag(event, true)) return;
+    if (!this.startsViewDrag(event, true)) {
+      this.releaseRegion(event);
+      return;
+    }
     event.preventDefault();
     let last = event;
     this.stopGesture?.();
@@ -806,6 +824,16 @@ export class OdsCanvas extends LitElement {
         last = move;
       },
     });
+  }
+
+  /** Pressing beside the regions lets go of the selected one, as it does for elements. */
+  private releaseRegion(event: PointerEvent): void {
+    if (!this.isBasic || event.button !== 0) return;
+    const target = event.target;
+    const onRegions =
+      target instanceof Element &&
+      target.closest("ods-region-layer, ods-zoom-bar");
+    if (!onRegions) emit(this, "region-select", { regionId: "" });
   }
 
   private toggleGrid(): void {
@@ -1183,6 +1211,7 @@ export class OdsCanvas extends LitElement {
   /** Drag out a box on empty canvas to select what it touches; a plain click deselects. */
   private onCanvasPointerDown(event: PointerEvent): void {
     if (this.startsViewDrag(event, true)) return;
+    if (this.isBasic) return;
     const start = this.clampedPointAt(event.clientX, event.clientY);
     if (!start) return;
     const additive = event.shiftKey;
@@ -1229,6 +1258,7 @@ export class OdsCanvas extends LitElement {
 
   private onCanvasContextMenu(event: MouseEvent): void {
     event.preventDefault();
+    if (this.isBasic) return;
     emit(this, "context-menu", {
       source: "empty",
       clientX: event.clientX,
@@ -1842,59 +1872,99 @@ export class OdsCanvas extends LitElement {
     `;
   }
 
-  private renderToolbar(): TemplateResult {
-    const dashboard = this.dashboard;
-    const { width, height, padding, snapSize } = dashboard.display;
-    const snapClasses = classMap({
-      "tool-toggle": true,
-      active: this.snapEnabled,
-    });
-    const panClasses = classMap({
+  private renderPanToggle(): TemplateResult {
+    const classes = classMap({
       "tool-toggle": true,
       active: this.panMode,
     });
-    const gridClasses = classMap({
+    return html`
+      <button
+        class=${classes}
+        aria-pressed=${this.panMode}
+        title=${strings.canvas.panTitle}
+        @click=${this.togglePan}
+      >
+        <ha-icon icon="mdi:pan"></ha-icon>
+        <span>${strings.canvas.pan}</span>
+      </button>
+    `;
+  }
+
+  private renderGridToggle(): TemplateResult {
+    const classes = classMap({
       "tool-toggle": true,
       active: this.gridVisible,
     });
+    return html`
+      <button
+        class=${classes}
+        aria-pressed=${this.gridVisible}
+        title=${strings.canvas.gridTitle}
+        @click=${this.toggleGrid}
+      >
+        <ha-icon icon="mdi:grid"></ha-icon>
+        <span>${strings.canvas.grid}</span>
+      </button>
+    `;
+  }
+
+  private renderSnapToggle(): TemplateResult {
+    const classes = classMap({
+      "tool-toggle": true,
+      active: this.snapEnabled,
+    });
+    return html`
+      <button
+        class=${classes}
+        aria-pressed=${this.snapEnabled}
+        @click=${this.toggleSnap}
+      >
+        <ha-icon icon="mdi:magnet"></ha-icon>
+        <span>${strings.canvas.snap(this.dashboard.display.snapSize)}</span>
+      </button>
+    `;
+  }
+
+  private renderHistoryControls(): TemplateResult {
+    return html`
+      <div class="history-controls">
+        ${this.renderCommandButton("undo", this.historyContext)}
+        ${this.renderCommandButton("redo", this.historyContext)}
+      </div>
+    `;
+  }
+
+  private renderZoomReadout(): TemplateResult {
+    return html`
+      <span class="zoom-readout">${Math.round(this.viewport.zoom * 100)}%</span>
+    `;
+  }
+
+  /** Free placement: layers, pan, the snap grid and snapping. */
+  private renderToolbar(): TemplateResult {
+    const dashboard = this.dashboard;
+    const { width, height, padding } = dashboard.display;
     return html`
       <div class="workspace-meta">
         <span>${strings.common.sizeInPixels(width, height)}</span>
         <span>${strings.canvas.layers(countItems(dashboard.items))}</span>
         <span>${strings.canvas.padding(padding)}</span>
-        <div class="history-controls">
-          ${this.renderCommandButton("undo", this.historyContext)}
-          ${this.renderCommandButton("redo", this.historyContext)}
-        </div>
-        <button
-          class=${panClasses}
-          aria-pressed=${this.panMode}
-          title=${strings.canvas.panTitle}
-          @click=${this.togglePan}
-        >
-          <ha-icon icon="mdi:pan"></ha-icon>
-          <span>${strings.canvas.pan}</span>
-        </button>
-        <button
-          class=${gridClasses}
-          aria-pressed=${this.gridVisible}
-          title=${strings.canvas.gridTitle}
-          @click=${this.toggleGrid}
-        >
-          <ha-icon icon="mdi:grid"></ha-icon>
-          <span>${strings.canvas.grid}</span>
-        </button>
-        <button
-          class=${snapClasses}
-          aria-pressed=${this.snapEnabled}
-          @click=${this.toggleSnap}
-        >
-          <ha-icon icon="mdi:magnet"></ha-icon>
-          <span>${strings.canvas.snap(snapSize)}</span>
-        </button>
-        <span class="zoom-readout">
-          ${Math.round(this.viewport.zoom * 100)}%
-        </span>
+        ${this.renderHistoryControls()} ${this.renderPanToggle()}
+        ${this.renderGridToggle()} ${this.renderSnapToggle()}
+        ${this.renderZoomReadout()}
+      </div>
+    `;
+  }
+
+  /** Regions: the size, undo and redo, pan and zoom; there is nothing to snap to. */
+  private renderBasicToolbar(): TemplateResult {
+    const { width, height, padding } = this.dashboard.display;
+    return html`
+      <div class="workspace-meta">
+        <span>${strings.common.sizeInPixels(width, height)}</span>
+        <span>${strings.canvas.padding(padding)}</span>
+        ${this.renderHistoryControls()} ${this.renderPanToggle()}
+        ${this.renderZoomReadout()}
       </div>
     `;
   }
@@ -1938,9 +2008,40 @@ export class OdsCanvas extends LitElement {
     `;
   }
 
+  private renderRegions(): TemplateResult {
+    return html`
+      <ods-region-layer
+        .dashboard=${this.dashboard}
+        .frames=${this.layoutFrames}
+        .step=${this.basicStep}
+        .selectedRegionId=${this.selectedRegionId}
+      ></ods-region-layer>
+    `;
+  }
+
+  /** The elements of an advanced dashboard, with their handles and guides. */
+  private renderItems(): TemplateResult {
+    const dashboard = this.dashboard;
+    const workingAreaStyle = styleMap({
+      ...percentBox(workingArea(dashboard), dashboard.display),
+      "--snap-size": `${dashboard.display.snapSize * this.viewport.zoom}px`,
+    });
+    return html`
+      <div
+        class="working-area ${this.gridVisible ? "" : "no-grid"}"
+        aria-hidden="true"
+        style=${workingAreaStyle}
+      ></div>
+      ${withOffsets(dashboard.items).map((placed) => this.renderPlaced(placed))}
+      ${this.renderSelectionBox()} ${this.renderMarquee()}
+      ${this.guides.map((guide) => this.renderGuide(guide))}
+      ${this.spacing.map((mark) => this.renderSpacing(mark))}
+    `;
+  }
+
   private renderStage(): TemplateResult {
     const dashboard = this.dashboard;
-    const { width, height, snapSize } = dashboard.display;
+    const { width, height } = dashboard.display;
     const { zoom, panX, panY } = this.viewport;
     const viewportStyle = styleMap({
       transform: `translate(${panX}px, ${panY}px) scale(${zoom})`,
@@ -1950,10 +2051,6 @@ export class OdsCanvas extends LitElement {
       height: `${height}px`,
       // The overlay is drawn inside the zoomed canvas; this brings its sizes back to the screen.
       "--ui": String(1 / zoom),
-    });
-    const workingAreaStyle = styleMap({
-      ...percentBox(workingArea(dashboard), dashboard.display),
-      "--snap-size": `${snapSize * zoom}px`,
     });
     const stageClasses = classMap({
       "canvas-stage": true,
@@ -1976,17 +2073,7 @@ export class OdsCanvas extends LitElement {
             @contextmenu=${this.onCanvasContextMenu}
           >
             ${this.renderPreview()}
-            <div
-              class="working-area ${this.gridVisible ? "" : "no-grid"}"
-              aria-hidden="true"
-              style=${workingAreaStyle}
-            ></div>
-            ${withOffsets(dashboard.items).map((placed) =>
-              this.renderPlaced(placed)
-            )}
-            ${this.renderSelectionBox()} ${this.renderMarquee()}
-            ${this.guides.map((guide) => this.renderGuide(guide))}
-            ${this.spacing.map((mark) => this.renderSpacing(mark))}
+            ${this.isBasic ? this.renderRegions() : this.renderItems()}
           </div>
         </div>
         <ods-zoom-bar
@@ -2002,8 +2089,10 @@ export class OdsCanvas extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <main class="workspace">
-        ${this.renderToolbar()} ${this.renderArrangeBar()} ${this.renderStage()}
+      <main class="workspace ${this.isBasic ? "basic" : ""}">
+        ${this.isBasic ? this.renderBasicToolbar() : this.renderToolbar()}
+        ${this.isBasic ? nothing : this.renderArrangeBar()}
+        ${this.renderStage()}
       </main>
     `;
   }

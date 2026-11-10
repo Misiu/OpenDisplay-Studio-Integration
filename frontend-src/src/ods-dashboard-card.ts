@@ -16,8 +16,13 @@ import { emit, type DashboardAction, type OdsEvent } from "./events";
 import type { ContextMenuEntry } from "./ods-context-menu";
 import { strings } from "./strings";
 import { baseStyles, chromeStyles, tileStyles } from "./studio-styles";
+import type { Size } from "./display-shape";
 import type { Dashboard } from "./types";
 import "./ods-context-menu";
+import "./ods-display-preview";
+
+/** The field the display is drawn in: the picture area of a card, less its padding. */
+const DISPLAY_BOX: Size = { width: 240, height: 92 };
 
 /** The actions of a card, read when it is drawn so they speak the language of the panel. */
 const menu = (): Array<ContextMenuEntry & { id: DashboardAction }> => [
@@ -81,7 +86,7 @@ export class OdsDashboardCard extends LitElement {
         display: grid;
         place-items: center;
         overflow: hidden;
-        padding: 23px;
+        padding: 35px 23px 23px;
         border-radius: 12px 12px 0 0;
         background: color-mix(
           in srgb,
@@ -89,54 +94,6 @@ export class OdsDashboardCard extends LitElement {
           var(--studio-surface)
         );
         pointer-events: none;
-      }
-      .dashboard-miniature {
-        position: relative;
-        width: min(145px, 70%);
-        max-height: 96px;
-        overflow: hidden;
-        border: 2px solid
-          color-mix(in srgb, var(--dashboard-accent) 22%, var(--studio-border));
-        border-radius: 9px;
-        box-shadow: 0 7px 18px rgba(0, 0, 0, 0.12);
-      }
-      .dashboard-miniature > span {
-        position: absolute;
-        display: block;
-        border-radius: 99px;
-      }
-      .miniature-title {
-        left: 12%;
-        top: 25%;
-        width: 25%;
-        height: 4%;
-        min-height: 3px;
-        background: color-mix(in srgb, var(--studio-muted) 50%, transparent);
-      }
-      .miniature-accent {
-        right: 12%;
-        top: 25%;
-        width: 5px;
-        height: 5px;
-        background: var(--dashboard-accent);
-      }
-      .miniature-line {
-        left: 12%;
-        bottom: 26%;
-        width: 48%;
-        height: 4%;
-        min-height: 3px;
-        background: color-mix(in srgb, var(--studio-muted) 28%, transparent);
-      }
-      .miniature-line.long {
-        bottom: 39%;
-        width: 72%;
-        height: 13%;
-        background: color-mix(
-          in srgb,
-          var(--dashboard-accent) 18%,
-          var(--studio-surface)
-        );
       }
       .dashboard-resolution {
         position: absolute;
@@ -186,22 +143,26 @@ export class OdsDashboardCard extends LitElement {
         font-weight: 700;
         pointer-events: auto;
       }
-      .dashboard-card-meta {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        color: var(--studio-muted);
-        font-size: 10px;
-      }
-      .dashboard-card-meta > span + span::before {
-        content: "·";
-        margin-right: 7px;
-      }
       .dashboard-card-copy small {
         color: var(--studio-muted);
         font-size: 10px;
       }
+      .mode-badge {
+        position: absolute;
+        top: var(--ha-space-2, 8px);
+        inset-inline-start: var(--ha-space-2, 8px);
+        padding: 1px 7px;
+        border: 1px solid var(--studio-border);
+        border-radius: 999px;
+        background: var(--studio-surface);
+        color: var(--studio-accent);
+        font-size: 10px;
+        font-weight: 600;
+      }
       .palette-dots {
+        position: absolute;
+        inset-inline-start: 11px;
+        bottom: var(--ha-space-2, 8px);
         display: inline-flex;
         align-items: center;
         gap: 2px;
@@ -328,22 +289,19 @@ export class OdsDashboardCard extends LitElement {
 
   private renderMiniature(): TemplateResult {
     const { display } = this.dashboard;
-    const style = styleMap({
-      aspectRatio: `${display.width} / ${display.height}`,
-      background: display.background,
-      "--dashboard-accent": dashboardAccent(display.palette),
-    });
     return html`
       <div class="dashboard-card-preview">
-        <div class="dashboard-miniature" style=${style}>
-          <span class="miniature-title"></span>
-          <span class="miniature-accent"></span>
-          <span class="miniature-line long"></span>
-          <span class="miniature-line"></span>
-        </div>
-        <span class="dashboard-resolution">
-          ${strings.common.size(display.width, display.height)}
-        </span>
+        <span class="mode-badge">${this.modeLabel()}</span>
+        <ods-display-preview
+          .width=${display.width}
+          .height=${display.height}
+          .rotation=${display.rotation}
+          .background=${display.background}
+          .accent=${dashboardAccent(display.palette)}
+          .box=${DISPLAY_BOX}
+        ></ods-display-preview>
+        ${this.renderPaletteDots()}
+        <span class="dashboard-resolution">${this.resolutionLabel()}</span>
       </div>
     `;
   }
@@ -375,22 +333,34 @@ export class OdsDashboardCard extends LitElement {
     `;
   }
 
-  private renderMeta(): TemplateResult {
-    const { display } = this.dashboard;
+  /** The resolution of the canvas, and the turn when the display is not upright. */
+  private resolutionLabel(): string {
+    const { width, height, rotation } = this.dashboard.display;
+    const size = strings.common.size(width, height);
+    return rotation === 0 ? size : `${size} · ${rotation}°`;
+  }
+
+  private modeLabel(): string {
+    return this.dashboard.mode === "basic"
+      ? strings.basic.badgeBasic
+      : strings.basic.badgeAdvanced;
+  }
+
+  /** The colors of the display, level with its resolution in the picture's corner. */
+  private renderPaletteDots(): TemplateResult {
+    const { palette } = this.dashboard.display;
     return html`
-      <span class="dashboard-card-meta">
-        <span>${strings.common.size(display.width, display.height)}</span>
-        <span
-          class="palette-dots"
-          aria-label=${PALETTE_LABELS[display.palette]}
-        >
-          ${PALETTE_COLORS[display.palette].map(
-            (color) => html`
-              <i style=${styleMap({ background: color })}></i>
-            `
-          )}
-        </span>
-        <span>${PALETTE_LABELS[display.palette]}</span>
+      <span
+        class="palette-dots"
+        role="img"
+        aria-label=${PALETTE_LABELS[palette]}
+        title=${PALETTE_LABELS[palette]}
+      >
+        ${PALETTE_COLORS[palette].map(
+          (color) => html`
+            <i style=${styleMap({ background: color })}></i>
+          `
+        )}
       </span>
     `;
   }
@@ -420,7 +390,7 @@ export class OdsDashboardCard extends LitElement {
       <article class=${classes} data-dashboard-id=${dashboard.id}>
         ${this.renderMiniature()}
         <div class="dashboard-card-copy">
-          ${this.renderTitle()} ${this.renderMeta()}
+          ${this.renderTitle()}
           <small>
             ${strings.gallery.updated(dashboardDate(dashboard, this.language))}
           </small>

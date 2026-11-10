@@ -10,6 +10,7 @@ import robotoThin from "@fontsource/roboto/files/roboto-latin-100-normal.woff2?u
 import robotoBlack from "@fontsource/roboto/files/roboto-latin-900-normal.woff2?url";
 import robotoMonoBold from "@fontsource/roboto-mono/files/roboto-mono-latin-700-normal.woff2?url";
 import robotoMono from "@fontsource/roboto-mono/files/roboto-mono-latin-400-normal.woff2?url";
+import { mockLayoutFrames, withRegionFrames } from "./dev-layout";
 import { createId } from "./ids";
 import { PALETTE_COLORS, PALETTE_IDS } from "./palettes";
 import { loadPrimitiveDefinitions } from "./primitive-definitions";
@@ -30,6 +31,8 @@ import type {
   Primitive,
   PrimitiveItem,
   StudioItem,
+  WidgetItem,
+  GridLayout,
 } from "./types";
 
 const primitiveDefinitions = loadPrimitiveDefinitions();
@@ -570,6 +573,7 @@ const demoDashboard: Dashboard = {
   id: "demo",
   schemaVersion: 1,
   name: "Kitchen display",
+  mode: "advanced",
   status: "draft",
   language: "en",
   display: {
@@ -608,6 +612,7 @@ const hallwayDashboard: Dashboard = {
   id: "hallway",
   schemaVersion: 1,
   name: "Hallway overview",
+  mode: "advanced",
   status: "ready",
   language: "en",
   display: {
@@ -739,6 +744,7 @@ const officeDashboard: Dashboard = {
   id: "office",
   schemaVersion: 1,
   name: "Office status",
+  mode: "advanced",
   status: "draft",
   language: "en",
   display: {
@@ -771,13 +777,38 @@ interface PromoHooks {
   bounds?: Record<string, Box>;
   /** Where the renderer turned each rotated primitive about. */
   pivots?: Record<string, { x: number; y: number }>;
+  /** A widget as the renderer drew it, by widget type, to show in a basic dashboard's region. */
+  widgetPictures?: Record<string, string>;
 }
 
 const promo = window.__ODS_PROMO__;
 
+const widgetPlacement = (item: WidgetItem): string => {
+  const { x, y, width, height } = item.frame;
+  const box = `x="${x}" y="${y}" width="${width}" height="${height}"`;
+  const picture = promo?.widgetPictures?.[item.widget.type];
+  if (picture) return `<image href="${picture}" ${box}/>`;
+  const label = `x="${x + width / 2}" y="${y + height / 2}" text-anchor="middle"`;
+  return [
+    `<rect ${box} rx="3" fill="white" stroke="black"/>`,
+    `<text ${label} font-family="Roboto" font-size="18">${item.widget.type}</text>`,
+  ].join("");
+};
+
+/** A basic dashboard: the background, and a widget in each region that has one. */
+const basicPreview = (dashboard: Dashboard): string => {
+  const { width, height, background } = dashboard.display;
+  const widgets = withRegionFrames(dashboard).items.flatMap((item) =>
+    item.kind === "widget" ? [widgetPlacement(item)] : []
+  );
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${background}"/>${widgets.join("")}</svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+};
+
 const preview = (dashboard: Dashboard): string => {
   const promoImage = promo?.images?.[dashboard.id];
   if (promoImage) return promoImage;
+  if (dashboard.mode === "basic") return basicPreview(dashboard);
   const { width, height } = dashboard.display;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${dashboard.display.background}"/><rect x="8" y="8" width="388" height="149" rx="3" fill="white" stroke="black"/><circle cx="42" cy="94" r="10" fill="black"/><rect x="38" y="45" width="8" height="50" rx="4" fill="black"/><text x="225" y="52" text-anchor="middle" font-family="Roboto" font-size="22">${dashboard.items.length ? "Kitchen" : ""}</text><text x="225" y="116" text-anchor="middle" font-family="Roboto" font-size="58">21.4 °C</text></svg>`;
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
@@ -952,7 +983,7 @@ const preparedImport = (message: Record<string, unknown>): unknown => {
 
 const itemBounds = (dashboard: Dashboard): Record<string, Box> => {
   const result: Record<string, Box> = {};
-  collectBounds(dashboard.items, { x: 0, y: 0 }, result);
+  collectBounds(withRegionFrames(dashboard).items, { x: 0, y: 0 }, result);
   return result;
 };
 
@@ -1140,6 +1171,9 @@ const deleteMockFont = (message: Record<string, unknown>): Promise<unknown> => {
   return Promise.resolve({ fonts: describeFonts() });
 };
 
+/** What the backend tells the panel a grid may be; the same numbers as `basic_layout.py`. */
+const LAYOUT_LIMITS = { minLines: 1, maxLines: 12, defaultGap: 8, maxGap: 64 };
+
 /** `?lang=pl` shows the panel in another language, to look at a translation. */
 const language =
   new URLSearchParams(window.location.search).get("lang") ?? "en";
@@ -1182,7 +1216,18 @@ const hass: HomeAssistant = {
         widgetErrors: widgetErrors(),
         primitives: primitiveDefinitions,
         fonts: describeFonts(),
+        layoutLimits: LAYOUT_LIMITS,
       } as T;
+    }
+    if (message.type === "opendisplay_studio/layout_frames") {
+      const { width, height, padding, layout } = message as unknown as {
+        width: number;
+        height: number;
+        padding: number;
+        layout: GridLayout;
+      };
+      const display = { ...demoDashboard.display, width, height, padding };
+      return mockLayoutFrames({ ...demoDashboard, display, layout }) as T;
     }
     if (message.type === "opendisplay_studio/list_fonts") {
       return { fonts: describeFonts() } as T;

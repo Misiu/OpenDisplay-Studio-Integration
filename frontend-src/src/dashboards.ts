@@ -20,6 +20,15 @@ export type DashboardSource = "device" | "preset" | "custom";
 
 export const ROTATIONS: Rotation[] = [0, 90, 180, 270];
 
+/** The rotation a quarter turn to the right (1) or to the left (-1) leads to. */
+export const turnedRotation = (
+  rotation: Rotation,
+  direction: 1 | -1
+): Rotation => {
+  const index = ROTATIONS.indexOf(rotation);
+  return ROTATIONS[(index + direction + ROTATIONS.length) % ROTATIONS.length];
+};
+
 export const isRotation = (value: number): value is Rotation =>
   ROTATIONS.some((rotation) => rotation === value);
 
@@ -74,6 +83,7 @@ export const freshDashboard = (
     id: "",
     schemaVersion: 1,
     name: "",
+    mode: "advanced",
     status: "draft",
     language: language || "en",
     display: {
@@ -280,7 +290,7 @@ const pixelField = (name: string, label: string): StudioFormSchema => ({
   },
 });
 
-const sizeFields = (): StudioFormSchema[] => [
+export const sizeFields = (): StudioFormSchema[] => [
   {
     name: "dimensions",
     type: "grid",
@@ -292,7 +302,7 @@ const sizeFields = (): StudioFormSchema[] => [
   },
 ];
 
-const paletteFields = (palettes: PaletteId[]): StudioFormSchema[] => [
+export const paletteFields = (palettes: PaletteId[]): StudioFormSchema[] => [
   {
     name: "palette",
     label: strings.fields.palette,
@@ -343,7 +353,7 @@ const rotationFields = (): StudioFormSchema[] => [
   },
 ];
 
-const advancedFields = (): StudioFormSchema[] => [
+export const advancedFields = (): StudioFormSchema[] => [
   {
     name: "advanced",
     type: "expandable",
@@ -369,16 +379,20 @@ const advancedFields = (): StudioFormSchema[] => [
   },
 ];
 
-/** The `ha-form` schema shared by the create and display-settings dialogs. */
-export const dashboardFormSchema = (
-  display: DisplayFields = ALL_DISPLAY_FIELDS
-): StudioFormSchema[] => [
+export const nameFields = (): StudioFormSchema[] => [
   {
     name: "name",
     label: strings.fields.name,
     required: true,
     selector: { text: {} },
   },
+];
+
+/** The `ha-form` schema shared by the create and display-settings dialogs. */
+export const dashboardFormSchema = (
+  display: DisplayFields = ALL_DISPLAY_FIELDS
+): StudioFormSchema[] => [
+  ...nameFields(),
   ...(display.size ? sizeFields() : []),
   ...(display.palettes.length > 1 ? paletteFields(display.palettes) : []),
   ...(display.backgrounds.length > 0

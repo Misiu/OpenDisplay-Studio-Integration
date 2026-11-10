@@ -33,6 +33,7 @@ Tick a step's box in the same change that completes it.
 | 9 | Widget catalog (Sensor card, Agenda, Weather, …) | 8 |
 | 10 | Finishing | all |
 | 11 | Import and export of dashboards | 1, 8 |
+| 12 | Basic editor (a grid of regions, a widget in each) | 8, 9 |
 
 Phases 3 and 5 may run in parallel once phase 2 has landed the inspector shell.
 Phase 8 may start in parallel with phases 4–7.
@@ -947,6 +948,52 @@ and out of backups. Deliberately simple: export writes a file, import reads a fi
 
 ---
 
+## Phase 12 — Basic editor
+
+A second editor beside the full one. A dashboard is created in one of two **modes** and
+keeps it: `advanced` (everything above, the default, and what a stored dashboard without a
+`mode` is) or `basic`. There is no conversion in either direction. A basic dashboard is a
+grid cut into **regions**, with one widget in each; nothing is dragged, resized or aligned.
+It renders through the same pipeline as an advanced one, and everything that reaches a
+display is still ODL drawn by `odl-renderer`.
+
+- [x] **12.1 Model and validation.** `mode` (`basic` | `advanced`) and, for a basic
+  dashboard, `layout: { columns, rows, gap, regions }`; a widget item carries `region`. A
+  region is a rectangle of cells (`row`, `column`, `rowSpan`, `columnSpan`, any size up to
+  the whole grid), and the regions cover every cell exactly once. The backend derives each
+  widget's `frame` from its region (`basic_layout.py`, through the SDK's `grid()`), so the
+  layout is the one place that says where a widget is; `schemaVersion` stays 1 and the new
+  fields are optional. An advanced dashboard may not have a `layout` or a `region`; a basic
+  one holds widgets only, at most one to a region. `bootstrap` sends the limits of a grid
+  (`layoutLimits`) and `opendisplay_studio/layout_frames` returns where the cells and
+  regions of a layout are on a display, so the panel never lays a grid out itself.
+- [x] **12.2 Choosing the editor.** The new-dashboard dialog starts with the editor
+  (Advanced by default), then where the display comes from (a device, a predefined display
+  or a custom size), the display and the name, a preview of the display with arrows that
+  turn it, and the advanced display options (advanced mode only). The list of dashboards
+  marks each card Basic or Advanced and opens it in its own editor.
+- [x] **12.3 Display preview.** One drawing of a display (`ods-display-preview`) for the
+  cards and the dialog: the proportions of the resolution, the housing turned as the display
+  is set up, its light and button where they are on the device. In the dialog a change of
+  rotation is animated: a lean back, a swing past and a settle (`rotation-motion.ts`).
+- [x] **12.4 Layout tab.** The left panel has the grid (columns, rows, gap, outer padding).
+  One click on a cell and one on another make a region of the cells between them; a region
+  that would cut another in two is refused. A double click removes a region. Regions are
+  lettered A, B, C … in the order they were made, with their size in cells. Resizing the
+  grid keeps the regions that still fit.
+- [x] **12.5 Widgets tab.** The left panel is the library with widgets only. A widget goes
+  into a region by dragging, or into the selected one (or the first empty one) by a click.
+  Properties are on the right; there is no structure tree and no arrange bar, and the
+  canvas keeps its zoom bar. Only an empty region is drawn with a border; a click beside
+  the regions lets go of the selection, so what is left is the rendered picture.
+- [x] **12.6 Tests.** Backend: validation (any rectangles, a region as wide as the grid,
+  gaps in the tiling refused), frames of a layout, compile and render of a basic dashboard.
+  Frontend unit: region operations and lettering, placing a widget, hit testing, display
+  shape and rotation motion. E2E: choosing the editor, the grid, joining and removing
+  regions, filling them, saving, the gallery marks, selection and borders, the preview.
+
+---
+
 ## Deviations from LVGL (deliberate)
 
 | LVGL behaviour | Ours | Why |
@@ -965,3 +1012,4 @@ and out of backups. Deliberately simple: export writes a file, import reads a fi
 | Fixed 5 px grid | Grid step is the dashboard `snapSize`; all other thresholds as measured | Displays differ in resolution; user already sets snap size |
 | — (not an LVGL matter) | Document `schemaVersion` stays 1 and shape changes ship without migrations until the first public release of the dashboard model | Pre-release; the model changes shape every phase (flat list → tree → containers) |
 | One field holds either a literal or an expression | Item `expressions` map beside the literals | Literals keep their shape (typed TS/Python, `ha-form`), switching the `{}` toggle off restores the value without loss |
+| — (not an LVGL matter) | A dashboard has a `mode`; a basic one is a grid of regions with a widget in each, edited in its own editor | A simpler way to make a screen for those who do not need free placement; no conversion between the editors |

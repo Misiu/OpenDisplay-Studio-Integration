@@ -82,13 +82,16 @@ export const tileStyles = css`
   .dashboard-card,
   .dashboard-add-card {
     min-width: 0;
-    min-height: 236px;
     padding: 0;
     border: 1px solid var(--studio-border);
     border-radius: 13px;
     text-align: start;
     background: var(--studio-surface);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+  /* A card is as tall as its picture and its two lines; the add card matches it. */
+  .dashboard-add-card {
+    min-height: 200px;
   }
   .dashboard-card:hover,
   .dashboard-card:focus-within,

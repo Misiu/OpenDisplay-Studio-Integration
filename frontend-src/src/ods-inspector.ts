@@ -557,6 +557,17 @@ export class OdsInspector extends LitElement {
     `;
   }
 
+  /** Padding and snapping, for a dashboard whose elements are placed by hand. */
+  private renderWorkingArea(): TemplateResult {
+    return html`
+      <div class="field-grid">
+        ${this.renderDisplayField(strings.fields.padding, "padding", 0, 1024)}
+        ${this.renderDisplayField(strings.fields.snapSize, "snapSize", 1, 256)}
+      </div>
+      <p class="field-help">${strings.inspector.workingAreaHelp}</p>
+    `;
+  }
+
   private renderDashboardInspector(): TemplateResult {
     return html`
       ${this.renderHeader(
@@ -568,11 +579,7 @@ export class OdsInspector extends LitElement {
         <summary>${strings.inspector.appearance}</summary>
         <div class="section-body">
           ${this.renderDashboardBackground()}
-          <div class="field-grid">
-            ${this.renderDisplayField(strings.fields.padding, "padding", 0, 1024)}
-            ${this.renderDisplayField(strings.fields.snapSize, "snapSize", 1, 256)}
-          </div>
-          <p class="field-help">${strings.inspector.workingAreaHelp}</p>
+          ${this.isBasic ? nothing : this.renderWorkingArea()}
         </div>
       </details>
       ${this.renderMetrics()}
@@ -1114,7 +1121,8 @@ export class OdsInspector extends LitElement {
   private renderItemSections(item: StudioItem): TemplateResult {
     if (item.kind === "widget") {
       return html`
-        ${this.renderLayoutSection(item)} ${this.renderWidgetSettings(item)}
+        ${this.isBasic ? nothing : this.renderLayoutSection(item)}
+        ${this.renderWidgetSettings(item)}
       `;
     }
     if (item.kind === "container") {
@@ -1231,6 +1239,26 @@ export class OdsInspector extends LitElement {
     return this.renderDashboardInspector();
   }
 
+  /** A basic dashboard has no tree: its widgets are told apart by their regions. */
+  private get isBasic(): boolean {
+    return this.dashboard.mode === "basic";
+  }
+
+  private renderStructure(): TemplateResult | typeof nothing {
+    if (this.isBasic) return nothing;
+    return html`
+      <ods-structure
+        .items=${this.dashboard.items}
+        .widgets=${this.widgets}
+        .primitives=${this.primitives}
+        .selectedItemId=${this.selectedItemId}
+        .selectedItemIds=${this.selectedItemIds}
+        .enteredGroupId=${this.enteredGroupId}
+        .renameRequestId=${this.renameRequestId}
+      ></ods-structure>
+    `;
+  }
+
   protected render(): TemplateResult {
     if (this.collapsed) {
       return this.renderRail();
@@ -1245,15 +1273,7 @@ export class OdsInspector extends LitElement {
           aria-label=${strings.inspector.resize}
           @pointerdown=${this.startResize}
         ></div>
-        <ods-structure
-          .items=${this.dashboard.items}
-          .widgets=${this.widgets}
-          .primitives=${this.primitives}
-          .selectedItemId=${this.selectedItemId}
-          .selectedItemIds=${this.selectedItemIds}
-          .enteredGroupId=${this.enteredGroupId}
-          .renameRequestId=${this.renameRequestId}
-        ></ods-structure>
+        ${this.renderStructure()}
         <section class="properties">${this.renderProperties(item)}</section>
       </aside>
     `;
